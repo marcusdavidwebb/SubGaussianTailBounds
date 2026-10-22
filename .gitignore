@@ -1,0 +1,33 @@
+# Generated outputs; keep the readable supplementary PDF.
+/build/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex
+*.synctex.gz
+*.synctex.gz(busy)
+*.toc
+*.lof
+*.lot
+*.dvi
+*.xdv
+*.ps
+__pycache__/
+*.py[cod]
+
+# Dependencies, caches and compiled Lean outputs stay external.
+.lake/
+*.olean
+*.ilean
+*.o
+
+# Operating-system/editor metadata.
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "id": "baseline-general",
+  "kind": "baseline",
+  "date": "2026-10-20",
+  "contributors": [
+    "Marcus Webb"
+  ],
+  "scope": "general",
+  "constants": {
+    "alpha": "96/25",
+    "beta": "79/50",
+    "gamma": "47/20",
+    "delta": "3/2"
+  },
+  "improves": null,
+  "comparison": null,
+  "proof": "supplementary.tex",
+  "verification": "lean/VERIFICATION_REPORT.md",
+  "lean_module": "SingularValueBounds.KL.Theorem",
+  "lean_theorem": "SingularValueBounds.KL.singular_value_tails_general_of_certificates",
+  "certificates": {
+    "generalLower": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_lower_interface.py",
+        "lean/check_lower_plateau_cost.py"
+      ]
+    },
+    "endpointLowerTable": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_endpoint_interface.py"
+      ]
+    },
+    "endpointLowerFar": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_endpoint_interface.py"
+      ]
+    },
+    "majorant": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_polynomial_interface.py"
+      ]
+    },
+    "normDeterminant": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_polynomial_interface.py"
+      ]
+    },
+    "rate": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_polynomial_interface.py"
+      ]
+    },
+    "generalMeanCells": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_general_mean_cells.py"
+      ]
+    },
+    "generalMeanEntropy": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_general_mean_entropy.py"
+      ]
+    },
+    "endpointMean": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_upper_mean_interface.py"
+      ]
+    },
+    "endpointLogratio": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_upper_mgf_interface.py"
+      ]
+    },
+    "generalSecond": {
+      "status": "reused",
+      "checkers": [
+        "lean/check_general_second_interface.py"
+      ]
+    }
+  },
+  "extra_certificates": null
+}
