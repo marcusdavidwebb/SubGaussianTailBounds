@@ -1,8 +1,16 @@
 # CI policy and trust boundaries
 
-The default-branch ruleset must require **CI required**, with GitHub Actions as
-the expected source, up-to-date branches, and maintainer/codeowner review.
-Files alone cannot enable those repository settings.
+Default-branch protection must require **CI required**, with GitHub Actions as
+the expected source, up-to-date branches and pull requests, including for the
+maintainer. All contributor PRs require Marcus Webb's approving codeowner
+review. As sole maintainer he may approve his own work by merging through an
+account-specific review bypass, because GitHub rejects literal self-approval.
+Use that bypass only for his own PRs; GitHub does not restrict it by authorship.
+The review-only **Maintainer approval** ruleset is separate from mandatory CI
+branch protection. Its exception does not waive any CI or mathematical evidence
+requirement.
+See the [maintainer guide](LAUNCH_CHECKLIST.md#github-settings). Files alone
+cannot enable those repository settings.
 
 ## Trusted workflow and candidate execution
 
@@ -26,8 +34,28 @@ as success.
 This separation is essential: do not give candidate-code jobs write permissions
 or secrets, persist checkout credentials, or share their caches with trusted
 execution. Workflow/gate changes need codeowner review before becoming trusted
-base policy. Initial GitHub-hosted execution still needs to be observed after
-the repository is created.
+base policy. Inspect the
+[hosted workflow runs](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/workflows/ci.yml)
+for the exact commit under review. A queued, cancelled or failed run is not
+successful validation; historical local runs do not establish hosted success.
+
+## Find results and artifacts
+
+Open **Actions → Verification**, select a run and check its commit and branch.
+All four component jobs must succeed, followed by **Report required status**.
+The required commit status is **CI required**, not the final job's display name.
+The README badge shows workflow status on `main`, not proof of a release or
+verification of another commit.
+
+On the run page, **Artifacts** contains `exact-certificates-<run_id>`,
+`lean-verification-<run_id>` and `supplement-<run_id>` when their upload steps
+have produced files. These contain the certificate log, Lean log/generated
+targets, and PDF/LaTeX log respectively. Artifacts can also be uploaded after
+failure; inspect the job conclusions before relying on them. Downloading
+artifacts requires signing in to GitHub, and artifacts expire.
+
+Repository settings are maintained separately from these source files; see
+the [maintainer guide](LAUNCH_CHECKLIST.md#github-settings).
 
 ## Complete evidence and maintenance
 

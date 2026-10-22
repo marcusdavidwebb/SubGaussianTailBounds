@@ -117,18 +117,51 @@ baseline checker correspondence retains its documented hybrid trust boundary.
 From this repository's root, with its pinned external Lean setup configured:
 
 ```sh
-export PYTHONDONTWRITEBYTECODE=1
-python3 scripts/check_contributions.py \
-  --generate-lean /tmp/SubGaussianContributionTargets.lean
-SVB_EXTRA_LEAN=/tmp/SubGaussianContributionTargets.lean ./lean/check_hybrid.sh
-python3 -m unittest discover -s tests -v
+./lean/check_hybrid.sh
 ```
 
-For a PR, CI runs the validator from the **trusted base revision**, compares
-the candidate to `--base-ref`, and compiles the generated file. Passing the
-Python preflight alone does not establish the constants. CI rejects a PR
-without a complete new record by default; the separate exact-commit
-maintenance authorization described in `../CONTRIBUTING.md` cannot waive
-an improvement's mathematical evidence. Publication metadata, framework
-maintenance and ordinary prose corrections still receive the full hybrid
-checks.
+This is the canonical current-tree check. It validates all records, generates
+the claimed theorem targets in the external workspace, compiles and audits
+them, and runs all certificate checkers. It sets `SVB_EXTRA_LEAN` itself; no
+separate target-generation command is needed.
+
+For a quick registry-only preflight using Python, run:
+
+```sh
+python3 scripts/check_contributions.py --root .
+```
+
+The validator and CI authorization regression tests also run in CI:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v
+```
+
+### Before an improvement PR
+
+Compare the working tree against the intended PR base to check immutable
+history, new records and the permitted changes. If `origin/main` is your
+up-to-date target branch:
+
+```sh
+python3 scripts/check_contributions.py --root . --base-ref origin/main
+```
+
+For a fork or a different target branch, replace `origin/main` with the actual
+upstream branch reference or exact base commit SHA available in your local
+repository. This command does not fetch or update the reference. Run the full
+hybrid check above as well: a successful Python comparison does not compile
+the generated theorem targets or establish the constants.
+
+These commands use your local validator and working tree. CI instead runs the
+validator from the **trusted base revision**, checks the exact PR head merged
+with the event's base revision, and compiles the generated targets. Local
+preflight success does not replace those checks or maintainer review.
+
+A maintenance PR without a new improvement record will fail the improvement
+comparison by default. Follow the separate
+[exact-head maintenance authorization process](../CONTRIBUTING.md#checks-and-review);
+a local flag or a contributor's declaration cannot grant authorization.
+Publication metadata, framework maintenance and ordinary prose corrections
+still receive the full hybrid checks. Maintenance authorization cannot waive
+an improvement's mathematical evidence.

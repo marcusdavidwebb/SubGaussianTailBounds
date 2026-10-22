@@ -4,6 +4,21 @@ This project welcomes better constants, corrections, literature pointers, and
 work on written proofs, exact certificates and Lean formalisation. Marcus Webb
 is the initial maintainer. The accompanying paper is in preparation.
 
+## Choose a contribution route
+
+- **Questions, ideas or problems:** [open an issue](https://github.com/marcusdavidwebb/SubGaussianTailBounds/issues/new/choose).
+  Preliminary arguments, setup questions and documentation suggestions are welcome.
+- **Better constants:** use the complete improvement package below and the
+  [technical contribution guide](contributions/README.md).
+- **Documentation, metadata or other maintenance:** explain the change and its
+  checks in a PR. A new constants record is not required for genuine maintenance,
+  but an authorized maintainer must approve this route for the exact PR head as
+  described under [Checks and review](#checks-and-review). All regression checks
+  still run. Selecting this route does not authorize an exception.
+
+Discuss mathematical corrections or changes to the proof/checker framework in an
+issue before preparing a PR, so that the required evidence and review route are clear.
+
 ## Discuss an idea
 
 Use an issue for questions, numerical exploration or an argument not yet fully
@@ -46,18 +61,31 @@ general-$K$ and $K=1$ scopes, unchanged entries and any tradeoff.
 
 ## Checks and review
 
+Marcus Webb is the sole maintainer and approves all contributor PRs. His own
+PRs use a maintainer-only review bypass: GitHub does not accept self-approval,
+so his decision to merge records that approval. Every PR, including his own,
+must still pass the complete required CI checks. The review bypass does not
+authorize maintenance or waive any mathematical evidence requirement.
+
 From the repository root, with [the pinned setup](lean/README.md):
 
 ```sh
-python3 scripts/check_contributions.py --root .
 ./lean/check_hybrid.sh
 ./scripts/build_supplement.sh
 ```
 
-For an improvement branch, include the base revision and generate/compile the
-contribution target as described in [contributions/README.md](contributions/README.md).
-The PR workflow performs those comparisons and generated target checks.
-Unchanged baseline checks passing do not verify new constants.
+The hybrid command validates the current contribution registry, generates and
+compiles its claimed theorem targets, and runs the Lean and certificate checks.
+For a quick registry preflight using Python alone, run
+`python3 scripts/check_contributions.py --root .`; this does not verify the
+analytic proof or establish that a PR is complete.
+
+Before submitting an improvement branch, also compare it with the intended base
+revision using the [PR comparison instructions](contributions/README.md#before-an-improvement-pr).
+These local checks use your working tree and local validator. The trusted PR
+workflow performs its own comparisons and generated target checks against the
+exact base and head revisions. Unchanged baseline checks passing do not verify
+new constants.
 
 The required jobs are **Contribution completeness**, **Exact certificates**,
 **Lean verification** and **Supplement build**, aggregated by **CI required**.

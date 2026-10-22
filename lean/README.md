@@ -30,25 +30,60 @@ finite certificate bundle.
 
 ## Verify
 
-From the public repository root:
+Choose the route that matches your environment:
+
+| What you want to do | Requirements | Start here |
+|---|---|---|
+| Check the finite certificates locally | Python 3.11 or later and Bash; no third-party Python packages | [Python-only checks](#python-only-checks) |
+| Build Lean and run the complete hybrid checks locally | An existing Lean 4.19.0 Elan toolchain and the exact locked dependencies | [Local hybrid verification](#local-hybrid-verification) |
+| Inspect or run the complete checks without a local Lean installation | GitHub Actions | [Verification on GitHub](#verification-on-github) |
+
+Clone the repository using the [root quickstart](../README.md#quickstart),
+then run the commands below from its root. In the original paper working tree,
+prefix the wrapper commands with `./supplementary/` instead of `./`. Each
+wrapper also works when called from another directory.
+
+### Python-only checks
+
+Check that `python3` is version 3.11 or later, then run:
 
 ```sh
-./lean/check_certificates.sh   # Python only: original checker and eleven interfaces
-./lean/check.sh                # Lean build and complete axiom/import audit
-./lean/check_hybrid.sh         # Registry, claimed theorem targets, Lean and certificates
+python3 --version
+./lean/check_certificates.sh
 ```
 
-In the paper working tree, prefix those commands with `./supplementary/`
-instead of `./`. Each script resolves its own location and also works when
-called from another directory. Python 3.11 or later is required; CI selects
-Python 3.14. All certificate checks reject optimized Python execution.
-The checkers use only the Python standard library.
+The checkers use only the Python standard library. Keep assertions enabled:
+do not use `python -O` or set `PYTHONOPTIMIZE`. CI selects Python 3.14. A
+successful run exits with status 0 and ends with:
 
-For Lean, first make the existing pinned Elan toolchain and dependency tree
-available as described below. The launchers inspect them and report missing
+```text
+PASS: original exact-arithmetic checker and all eleven finite interfaces.
+```
+
+This checks the finite arithmetic. It does not compile or audit the Lean proof.
+
+### Local hybrid verification
+
+First follow [Pinned environment and storage](#pinned-environment-and-storage)
+to select your existing toolchain and dependencies. The launchers report missing
 requirements; ordinary verification does not install, clone, upgrade, or
-fetch anything. `./lean/setup.sh` prints the configured external workspace.
-Run the wrappers rather than invoking Lake inside this source folder.
+fetch anything. Then run:
+
+```sh
+./lean/check_hybrid.sh
+```
+
+A successful run exits with status 0 and ends with:
+
+```text
+PASS: contribution registry, claimed Lean theorem targets, analytic proof, and all external exact-arithmetic checks.
+```
+
+For the Lean build and complete axiom/import audit alone, use
+`./lean/check.sh`. Its audit reports a `PASS:` line with the audited target and
+visited-constant counts, followed by `standard axioms only; checkpoint and
+complete KL imports retained.` Run these wrappers rather than invoking Lake
+inside this source folder.
 
 The hybrid command first validates every contribution record, including any
 additional exact rational certificate data. It generates the claimed theorem
@@ -136,13 +171,35 @@ configuration caches are placed in the source checkout or OneDrive.
 | `MATHLIB_CACHE_DIR` | Existing external Mathlib download cache; defaults to `~/Library/Caches/mathlib` on macOS and `~/.cache/mathlib` elsewhere |
 | `SVB_EXTRA_LEAN` | Optional absolute generated contribution-audit file, checked after the main Lean audit |
 
-For example, given an existing compatible installation:
+Before invoking Lean, inspect the installed toolchains:
 
 ```sh
-SVB_WORK_DIR="$HOME/Lean/SubGaussianTailBounds/my-checkout" \
-SVB_PACKAGES_DIR="$HOME/Lean/existing-project/.lake/packages" \
-./lean/check.sh
+if [ -f "$HOME/.elan/env" ]; then
+  . "$HOME/.elan/env"
+fi
+"$HOME/.elan/bin/elan" toolchain list
 ```
+
+The list must contain `leanprover/lean4:v4.19.0`. If your existing Elan is
+elsewhere, use that executable for the inventory and set `SVB_ELAN_BIN` to its
+absolute path. Check the dependency revisions against
+[lake-manifest.json](lake-manifest.json); the launcher also checks every exact
+commit and rejects tracked dependency changes before building.
+
+For example, given an existing compatible dependency directory, replace the
+example package path below with its actual absolute location. Choose a fresh
+external workspace for this source checkout:
+
+```sh
+export SVB_WORK_DIR="$HOME/Lean/SubGaussianTailBounds/my-checkout"
+export SVB_PACKAGES_DIR="$HOME/Lean/existing-project/.lake/packages"
+./lean/setup.sh
+./lean/check_hybrid.sh
+```
+
+`setup.sh` validates the existing installation, writes resolved configuration
+in the external workspace and prints its absolute path. To see the selected
+workspace without configuring it, use `./lean/setup.sh --print-work-dir`.
 
 Otherwise the default workspace is
 `~/Lean/SubGaussianTailBounds/<source-path-digest>/`. That digest prevents
@@ -160,25 +217,60 @@ portable templates never become live unresolved Lake configuration. The
 central toolchain link continues selecting the same version. There is no
 second editable copy of the proof sources.
 
-Load `~/.elan/env` if needed. The launcher checks the installed toolchain
-inventory before invoking Lean and uses `elan run` without its installation
-flag. Missing installations or incompatible dependencies are diagnostics,
-not requests to reinstall anything.
+The launcher checks the installed toolchain inventory before invoking Lean
+and uses `elan run` without its installation flag. If a requirement is missing,
+check the reported path, revision and permissions. A different installed Lean
+or Mathlib version is not a substitute for the pinned one. If you do not have
+the required installation, use the hosted route below; `setup.sh --ci` is not
+a local installation command.
 
-## Continuous integration
+## Verification on GitHub
+
+Readers can inspect the complete checks without installing Lean:
+
+1. Open the [Verification workflow](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/workflows/ci.yml)
+   and select a run for the commit or pull request you want to inspect.
+2. Check the conclusion of **Contribution completeness**, **Exact certificates**,
+   **Lean verification** and **Supplement build**, and the final **Report required
+   status** job. An artifact alone does not establish that a run passed.
+3. Open each job to inspect its steps and logs. In the run summary's
+   **Artifacts** section, download `exact-certificates-<run-id>` for the Python
+   log, `lean-verification-<run-id>` for the Lean log and generated theorem
+   targets, or `supplement-<run-id>` for the built PDF and LaTeX log.
+
+Artifact downloads require signing in to GitHub, and artifacts are subject to
+retention limits. See GitHub's [artifact download instructions](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/download-workflow-artifacts).
+
+To run checks on your own changes without local Lean, fork the repository,
+push your branch to your fork, and enable Actions there if GitHub prompts you.
+In your fork, open **Actions → Verification → Run workflow**, choose your
+branch and start the run. The workflow must be present on the fork's default
+branch; running it requires write access to that fork. See GitHub's
+[manual workflow instructions](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow).
+
+A manual run checks the selected tree. When you open a pull request here, the
+upstream workflow additionally applies the trusted base-revision comparison
+and contribution requirements described in [CONTRIBUTING.md](../CONTRIBUTING.md)
+and [the CI policy](../docs/CI.md). Maintenance PRs still require the documented
+maintainer authorization. A passing run in a fork does not replace those PR
+checks.
+
+### Hosted environment
 
 `./lean/setup.sh --ci` is an explicit bootstrap restricted to disposable
 GitHub-hosted Linux runners (`GITHUB_ACTIONS=true`,
 `RUNNER_ENVIRONMENT=github-hosted`). The workflow provides a pinned existing
 Elan executable; this step installs the exact Lean toolchain if needed,
 fetches only the locked dependency commits into its external workspace, and
-retrieves Mathlib's compiled cache. It never runs as part of ordinary local
+restores the pinned ProofWidgets release tag after checking that it resolves
+to the locked commit, then retrieves Mathlib's compiled cache. It never runs as
+part of ordinary local
 verification. CI then uses the same certificate and Lean audit commands as
 contributors. The Python certificate checks remain external to Lean's
 kernel; CI does not change that trust boundary.
 
-The public repository is intended for
-<https://github.com/marcusdavidwebb/SubGaussianTailBounds>. Preparing these
-files does not assert that it has been created or released. The paper is in
-preparation. Historical verification dates and manifests describe their
-recorded source snapshots; they are not automatically refreshed by setup.
+The repository is hosted at
+[marcusdavidwebb/SubGaussianTailBounds](https://github.com/marcusdavidwebb/SubGaussianTailBounds).
+The accompanying paper remains in preparation. Historical verification dates
+and manifests describe their recorded source snapshots; a new local or hosted
+run does not revise those historical records.
