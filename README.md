@@ -1,17 +1,28 @@
 # SubGaussianTailBounds
 
+[![Verification](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/workflows/ci.yml)
+
 Supplementary materials for **Sharp tail bounds for the extreme singular
 values of sub-Gaussian matrices**, by Marcus Webb and Morgan Lynch-Davies.
 The paper is **in preparation**; no public version is currently available.
-The intended repository is
-[marcusdavidwebb/SubGaussianTailBounds](https://github.com/marcusdavidwebb/SubGaussianTailBounds).
-This preparation does not assert that the repository or a release exists yet.
 
-This collection contains the detailed supplementary proof, exact arithmetic
+This repository contains the detailed supplementary proof, exact arithmetic
 certificates and Lean sources, and provides a permanent record of substantial
 contributions to improvements in the constants $\alpha,\beta,\gamma,\delta$.
 
+| Start here | |
+|---|---|
+| **Read the supplement** | [View PDF](supplementary.pdf) · [Download PDF](https://github.com/marcusdavidwebb/SubGaussianTailBounds/raw/refs/heads/main/supplementary.pdf) · [LaTeX source](supplementary.tex) |
+| **Understand the bounds** | [Theorem, hypotheses and exact constants](CONSTANTS.md) |
+| **Reproduce the checks** | [Python quickstart](#quickstart) · [Lean setup](lean/README.md#verify) · [Hosted verification](lean/README.md#verification-on-github) |
+| **Contribute** | [Contribution guide](CONTRIBUTING.md) · [Ask a question or report a problem](https://github.com/marcusdavidwebb/SubGaussianTailBounds/issues/new/choose) |
+
 ## Current results
+
+The pair $(\alpha,\beta)$ controls the offset and tail-dependent correction
+for the smallest singular value; $(\gamma,\delta)$ does the same for the
+largest singular value. Smaller values give tighter bounds under the same
+hypotheses. $K$ is the sub-Gaussian parameter in the stated MGF normalization.
 
 | Regime | α | β | γ | δ |
 |---|---:|---:|---:|---:|
@@ -28,27 +39,44 @@ kernel proof of the numerical certificate bundle. See the
 [verification report](lean/VERIFICATION_REPORT.md) and
 [provenance and limitations](docs/PROVENANCE.md).
 
-## Read and reproduce
+## Quickstart
 
-- [Supplementary PDF](supplementary.pdf) and [LaTeX source](supplementary.tex).
-- [Lean setup, proof map and verification instructions](lean/README.md).
-- [Exact arithmetic checker](check_main_constants.py).
-- [Document build and source snapshots](docs/BUILDING.md).
-- [Repository preparation validation](docs/REPOSITORY_VALIDATION.md).
+To check the numerical certificates, use Git and **Python 3.11 or later**.
+The checkers use only the Python standard library; Lean is not needed for
+this step. Leave Python assertions enabled (no `-O` or `PYTHONOPTIMIZE`).
 
-From this repository's root, after configuring the pinned Lean environment:
+```sh
+git clone https://github.com/marcusdavidwebb/SubGaussianTailBounds.git
+cd SubGaussianTailBounds
+python3 --version
+./lean/check_certificates.sh
+```
+
+Successful execution ends with:
+
+```text
+PASS: original exact-arithmetic checker and all eleven finite interfaces.
+```
+
+For the full hybrid verification, configure the
+[pinned external Lean environment](lean/README.md#pinned-environment-and-storage),
+then run:
 
 ```sh
 ./lean/check_hybrid.sh
 ```
 
-For external exact arithmetic checks alone:
+Without an existing Lean installation, follow the
+[hosted verification guide](lean/README.md#verification-on-github).
+The [Actions page](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/workflows/ci.yml)
+shows current runs and their downloadable logs, generated theorem targets and
+built PDF. A pending or failed run is not successful verification. The badge
+above tracks `main`; historical local results are recorded separately in the
+[verification report](lean/VERIFICATION_REPORT.md) and
+[repository preparation record](docs/REPOSITORY_VALIDATION.md).
 
-```sh
-./lean/check_certificates.sh
-```
-
-Build the supplementary document with an existing LaTeX installation:
+Build the supplementary document with an existing LaTeX installation
+as described in the [document build guide](docs/BUILDING.md):
 
 ```sh
 ./scripts/build_supplement.sh
@@ -61,7 +89,9 @@ checkout. Local verification does not silently install or update dependencies.
 ## Contribute
 
 Start with [CONTRIBUTING.md](CONTRIBUTING.md). Ideas, numerical searches and
-questions can be discussed in issues. A pull request claiming better constants
+questions can be discussed in [issues](https://github.com/marcusdavidwebb/SubGaussianTailBounds/issues/new/choose).
+Documentation and maintenance fixes have their own route in the guide.
+A pull request claiming better constants
 must include the readable proof, Lean result for the claimed constants,
 applicable exact certificates/checker correspondence, and history updates.
 **A PDF or natural-language proof alone cannot pass the improvement gate.**
@@ -82,12 +112,20 @@ roles and limitations of the tools are preserved in Section S2 and the
 
 Use [CITATION.cff](CITATION.cff) for this collection. Cite the paper as
 **in preparation**, by Marcus Webb and Morgan Lynch-Davies, until an actual
-public version is supplied. No DOI, public paper URL, release tag or release
-date has been assigned here.
+public version is supplied. Identify the exact repository commit or
+[release](https://github.com/marcusdavidwebb/SubGaussianTailBounds/releases)
+you used, together with relevant contribution IDs. For example, replace the
+bracketed value in this citation with `git rev-parse HEAD` from your checkout:
+
+> Webb, Marcus. *SubGaussianTailBounds: supplementary materials and hybrid
+> verification*. GitHub, commit [full commit SHA].
+> https://github.com/marcusdavidwebb/SubGaussianTailBounds
+
+Repository releases and publication of the accompanying paper are separate.
+No DOI or public paper URL has been assigned here.
 
 The project's original code, proofs and documentation are licensed under the
 [MIT License](LICENSE). Third-party material retains its own terms; see
-[LICENSING.md](LICENSING.md). The
-[copy and launch checklist](docs/LAUNCH_CHECKLIST.md) covers publication,
-licensing and required GitHub settings; copying the files alone cannot enable
-branch protection or mandatory checks.
+[LICENSING.md](LICENSING.md). Maintainers can find repository settings,
+verification and release procedures in the
+[maintainer guide](docs/LAUNCH_CHECKLIST.md).

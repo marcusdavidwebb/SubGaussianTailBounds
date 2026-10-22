@@ -1,5 +1,11 @@
 # Repository preparation validation — 21 October 2026
 
+> Historical record: this describes the preparation before the repository was
+> uploaded. The repository now exists on GitHub. Statements below about its
+> creation, licensing and pending hosted checks describe their recorded dates.
+> For current hosted results, see [Actions](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/workflows/ci.yml);
+> for ongoing operations, see the [maintainer guide](LAUNCH_CHECKLIST.md).
+
 This records validation of the portable repository preparation. It does not
 replace the historical verification observed on 20 October 2026 or assert that
 the GitHub repository, a public paper version, or a release exists.

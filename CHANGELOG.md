@@ -1,8 +1,30 @@
 # Changelog
 
-## Prepared for an initial public repository
+## Unreleased
 
-This is an unreleased preparation, not a numbered release.
+- Share the supplement job between complete CI and a manual document-only
+  workflow, so testing TeX changes does not repeat Lean and certificate work
+  or overwrite the complete-verification status.
+- Prefer Ubuntu's main HTTPS archive for hosted LaTeX installation, with
+  bounded download retries/timeouts and noninteractive package setup, to
+  avoid exhausting the supplement job's budget on a slow package mirror.
+- Update the GitHub landing page with reading, verification and contribution
+  routes, a live verification badge and a Python quickstart.
+- Document existing-repository use, hosted Lean verification, maintenance PRs
+  and local pre-PR comparisons; add a question and setup-help issue form.
+- Separate ongoing maintainer/release procedures from the historical export
+  and validation records. Preserve mathematical sources, dependency pins,
+  contribution history and all verification gates.
+- Preserve the pinned ProofWidgets release tag during hosted provisioning so
+  Lake can locate its release archive; reject a tag that does not match the
+  locked commit. Ordinary local verification still downloads nothing.
+- Document required maintainer approval and the sole maintainer's review-only
+  override for his own PRs, with mandatory CI applying to every PR.
+
+## Initial repository setup — 22 October 2026
+
+The repository is hosted on GitHub. This entry records its setup, not a
+numbered release or publication of the accompanying paper.
 
 - Adopt the MIT License for the supplementary repository on 22 October 2026,
   including its original code, proofs and documentation.

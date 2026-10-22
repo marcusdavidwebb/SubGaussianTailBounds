@@ -45,8 +45,10 @@ Preserve Section S2's account of preceding human mathematical work, model
 identity, tool roles and Marcus Webb's responsibility. Keep historical
 validation dates, manifests and timings distinct from new portability/CI runs.
 
-The paper is in preparation with no public version. Its intended GitHub URL is
-supplied, but no public release identifier exists yet. The maintainer has selected
+The repository is hosted at https://github.com/marcusdavidwebb/SubGaussianTailBounds.
+The paper is in preparation with no public version. Repository releases are
+separate from paper publication; record release identifiers only when they exist.
+The maintainer has selected
 the MIT License for the project's original code, proofs and documentation;
 preserve [LICENSE](LICENSE) and the scope described in
 [LICENSING.md](LICENSING.md). Third-party material retains its own terms and

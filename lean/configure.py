@@ -179,14 +179,34 @@ def provision_ci(elan: str, toolchain: str, packages: Path, lock: dict) -> None:
     packages.mkdir(parents=True, exist_ok=True)
     for package in lock["packages"]:
         path = packages / package["name"]
-        if (path / ".git").exists():
-            continue
-        if path.exists() and any(path.iterdir()):
-            fail(f"Nonempty CI dependency path has no Git metadata: {path}")
-        command(["git", "init", "--quiet", str(path)])
-        command(["git", "-C", str(path), "remote", "add", "origin", package["url"]])
-        command(["git", "-C", str(path), "fetch", "--quiet", "--depth=1", "origin", package["rev"]])
-        command(["git", "-C", str(path), "checkout", "--quiet", "--detach", "FETCH_HEAD"])
+        if not (path / ".git").exists():
+            if path.exists() and any(path.iterdir()):
+                fail(f"Nonempty CI dependency path has no Git metadata: {path}")
+            command(["git", "init", "--quiet", str(path)])
+            command(["git", "-C", str(path), "remote", "add", "origin", package["url"]])
+            command(["git", "-C", str(path), "fetch", "--quiet", "--depth=1", "origin", package["rev"]])
+            command(["git", "-C", str(path), "checkout", "--quiet", "--detach", "FETCH_HEAD"])
+        if package["name"] == "proofwidgets":
+            # Lake resolves the release archive via an exact local tag at HEAD.
+            # A shallow fetch of the locked commit alone need not retain that tag.
+            tag = package.get("inputRev")
+            if tag != "v0.0.57":
+                fail("Expected the preserved ProofWidgets release tag v0.0.57.")
+            tag_ref = f"refs/tags/{tag}"
+            tag_status = subprocess.run(
+                ["git", "-C", str(path), "show-ref", "--verify", "--quiet", tag_ref],
+                check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            )
+            if tag_status.returncode == 1:
+                command(["git", "-C", str(path), "fetch", "--quiet", "--no-tags", "--depth=1",
+                         "origin", f"{tag_ref}:{tag_ref}"])
+            elif tag_status.returncode:
+                fail(f"Cannot inspect ProofWidgets release tag: {tag_status.stderr.strip()}")
+            tagged = command(["git", "-C", str(path), "rev-parse", f"{tag_ref}^{{commit}}"],
+                             capture=True)
+            if tagged != package["rev"]:
+                fail(f"ProofWidgets release tag {tag} does not match the locked revision: "
+                     f"expected {package['rev']}, got {tagged}.")
 
 
 def main() -> None:

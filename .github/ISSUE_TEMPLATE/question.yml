@@ -1,0 +1,23 @@
+name: Ask a question or suggest a usability improvement
+description: Get help with setup or navigation, or suggest clearer documentation.
+title: "[Question] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Questions and documentation suggestions are welcome. The
+        [README](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/main/README.md)
+        and [verification guide](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/main/lean/README.md)
+        are useful starting points.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question or suggestion
+      description: What are you trying to understand or do? Which page or instruction could be clearer?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: For setup questions, include your operating system, command and relevant output. Otherwise, share any useful links or examples.
