@@ -1,0 +1,29 @@
+name: Discuss a constants improvement
+description: Discuss an idea before preparing a complete verified pull request.
+title: "[Constants] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Preliminary arguments and numerical evidence are welcome in issues.
+        Merging an improvement requires the full proof, Lean, certificate and
+        contribution-history package described in CONTRIBUTING.md.
+  - type: textarea
+    id: claim
+    attributes:
+      label: Proposed values and range
+      description: Give the complete lower/upper pair or quartet and the hypotheses.
+    validations:
+      required: true
+  - type: textarea
+    id: argument
+    attributes:
+      label: Argument and evidence
+      description: Identify the strengthened step, proof, computations and citations.
+    validations:
+      required: true
+  - type: textarea
+    id: credit
+    attributes:
+      label: Attribution and assistance
+      description: Credit prior work, contributors, and any AI assistance.

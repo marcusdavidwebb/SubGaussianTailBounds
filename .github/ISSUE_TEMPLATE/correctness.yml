@@ -1,0 +1,22 @@
+name: Report a correctness or verification problem
+description: Report a mathematical gap, certificate mismatch, or reproduction failure.
+title: "[Correctness] "
+body:
+  - type: textarea
+    id: location
+    attributes:
+      label: Affected result or file
+      description: Give a commit identifier and precise theorem, equation, or checker.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and reproduction
+      description: Explain the gap or provide the command, environment and relevant output.
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Suggested correction
