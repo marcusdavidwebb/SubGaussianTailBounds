@@ -57,6 +57,30 @@ artifacts requires signing in to GitHub, and artifacts expire.
 Repository settings are maintained separately from these source files; see
 the [maintainer guide](LAUNCH_CHECKLIST.md#github-settings).
 
+## Test document changes without a second full run
+
+The automatic **Verification** workflow remains the complete PR check. Its
+**Supplement build / Build PDF** job calls
+[supplement.yml](../.github/workflows/supplement.yml), which contains the single
+definition of the document build.
+
+To test document sources or changes to the TeX job separately, open **Actions →
+Supplement build → Run workflow**, select the branch and start that workflow.
+It runs only the existing package installation, PDF build and document log
+checks, and uploads the PDF/log artifact. It does not build Lean, run the
+certificate suite or post **CI required**. A successful document-only run
+therefore cannot replace or overwrite complete PR verification.
+When dispatched manually, it tests the selected branch tree without merging
+a PR base; the automatic PR run still tests the exact head/base merge.
+
+This workflow must first be present on the default branch before GitHub can
+dispatch it on another branch. The full **Verification → Run workflow** option
+remains available when a complete manual run is intended; do not launch it
+alongside an automatic PR run merely to test TeX changes. The standalone
+document workflow has no push or PR trigger, so it adds no automatic duplicate
+run. When called from PR verification, it retains the trusted caller's workflow
+revision and event context, including the exact PR head/base merge.
+
 ## Complete evidence and maintenance
 
 An improvement needs an editable proof, registered exact constants, a compiled

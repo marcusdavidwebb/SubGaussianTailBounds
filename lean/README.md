@@ -255,6 +255,12 @@ and [the CI policy](../docs/CI.md). Maintenance PRs still require the documented
 maintainer authorization. A passing run in a fork does not replace those PR
 checks.
 
+For changes limited to the document or TeX workflow, use the separate
+**Actions → Supplement build → Run workflow** test instead of starting another
+complete **Verification** run alongside an existing PR run. It builds only the
+PDF; it never reports full verification or replaces PR checks. See the
+[document-only workflow guide](../docs/CI.md#test-document-changes-without-a-second-full-run).
+
 ### Hosted environment
 
 `./lean/setup.sh --ci` is an explicit bootstrap restricted to disposable

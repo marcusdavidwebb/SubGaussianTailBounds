@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Share the supplement job between complete CI and a manual document-only
+  workflow, so testing TeX changes does not repeat Lean and certificate work
+  or overwrite the complete-verification status.
 - Prefer Ubuntu's main HTTPS archive for hosted LaTeX installation, with
   bounded download retries/timeouts and noninteractive package setup, to
   avoid exhausting the supplement job's budget on a slow package mirror.

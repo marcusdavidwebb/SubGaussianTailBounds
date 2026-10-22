@@ -39,6 +39,12 @@ Package installation and PDF compilation are separate steps in the job log,
 so a download timeout can be distinguished from a document error. The same
 document build and citation/reference/box checks run after installation.
 
+For a hosted document-only test, use **Actions → Supplement build → Run
+workflow** and select your branch. This uses the same shared PDF job as full
+verification, without another Lean or certificate run. See the
+[CI instructions](CI.md#test-document-changes-without-a-second-full-run) for
+availability and the distinction from required PR checks.
+
 The root `references.bib` snapshots the parent paper's shared bibliography.
 `docs/main-labels.tex` contains the five referenced main-paper label numbers.
 Standalone references are unlinked because the in-preparation paper/PDF are
