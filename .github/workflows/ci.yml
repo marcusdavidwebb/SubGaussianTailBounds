@@ -246,9 +246,21 @@ jobs:
               merge --no-commit --no-ff "$BASE_REF"
           fi
       - name: Install LaTeX build tools
+        shell: bash
         run: |
-          sudo apt-get update
-          sudo apt-get install --no-install-recommends -y \
+          # Prefer Ubuntu's main HTTPS archive: the Azure mirror can stall
+          # long enough to exhaust this job before compilation even starts.
+          printf '%s\tpriority:%s\n' \
+            'https://archive.ubuntu.com/ubuntu/' 1 \
+            'https://azure.archive.ubuntu.com/ubuntu/' 2 \
+            'https://security.ubuntu.com/ubuntu/' 3 \
+            | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+          apt_options=(-o Acquire::Retries=3
+                       -o Acquire::http::Timeout=30
+                       -o Acquire::https::Timeout=30)
+          sudo apt-get "${apt_options[@]}" update
+          sudo env DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" \
+            install --no-install-recommends -y \
             latexmk texlive-latex-extra texlive-fonts-recommended lmodern
       - name: Build the standalone supplement
         working-directory: candidate

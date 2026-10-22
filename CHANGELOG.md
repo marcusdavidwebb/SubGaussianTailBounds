@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Prefer Ubuntu's main HTTPS archive for hosted LaTeX installation, with
+  bounded download retries/timeouts and noninteractive package setup, to
+  avoid exhausting the supplement job's budget on a slow package mirror.
 - Update the GitHub landing page with reading, verification and contribution
   routes, a live verification badge and a Python quickstart.
 - Document existing-repository use, hosted Lean verification, maintenance PRs

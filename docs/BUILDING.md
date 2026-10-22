@@ -32,6 +32,13 @@ Without a local LaTeX installation, read the checked-in
 [supplementary PDF](../supplementary.pdf), or download the PDF and build log
 from a successful [GitHub verification run](../lean/README.md#verification-on-github).
 
+The hosted job installs the required LaTeX packages on its disposable Ubuntu
+runner. It prefers Ubuntu's main HTTPS archive over the Azure mirror, with
+bounded download timeouts and retries; installation is noninteractive.
+Package installation and PDF compilation are separate steps in the job log,
+so a download timeout can be distinguished from a document error. The same
+document build and citation/reference/box checks run after installation.
+
 The root `references.bib` snapshots the parent paper's shared bibliography.
 `docs/main-labels.tex` contains the five referenced main-paper label numbers.
 Standalone references are unlinked because the in-preparation paper/PDF are
