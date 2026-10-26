@@ -1,25 +1,27 @@
-name: Discuss a constants improvement
-description: Discuss an idea before preparing a complete verified pull request.
-title: "[Constants] "
+name: Discuss a Lean formalization contribution
+description: Discuss a stronger quartet or an alternative proof at the current constants.
+title: "[Lean] "
 body:
   - type: markdown
     attributes:
       value: |
-        Preliminary arguments and numerical evidence are welcome in issues.
-        Merging an improvement requires the full proof, Lean, certificate and
-        contribution-history package described in CONTRIBUTING.md.
+        Contributions require complete Lean proofs of either canonical result,
+        with no component exceeding its currently accepted value. Equal-constant
+        replacements are eligible for review. Preserve the other regime and
+        prove all baseline and trusted-current comparisons. No separate prose
+        proof or external numerical certificate is required.
   - type: textarea
     id: claim
     attributes:
       label: Proposed values and range
-      description: Give the complete lower/upper pair or quartet and the hypotheses.
+      description: Identify the regime and complete exact quartet under the unchanged canonical hypotheses.
     validations:
       required: true
   - type: textarea
     id: argument
     attributes:
-      label: Argument and evidence
-      description: Identify the strengthened step, proof, computations and citations.
+      label: Lean declarations and explanation
+      description: Identify the proposed formalization, comparison proofs, reuse and relevant sources.
     validations:
       required: true
   - type: textarea

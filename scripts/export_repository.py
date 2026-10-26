@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Copy repository sources, hidden GitHub files and reading PDF to a clean directory."""
+"""Export Lean sources and repository files, including the historical supplement."""
 from __future__ import annotations
 
 import argparse
 import fnmatch
 from pathlib import Path
 import shutil
+import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parent.parent
 EXCLUDE = (
@@ -33,6 +35,8 @@ def main() -> None:
     destination = args.destination.expanduser().resolve()
     if destination.exists() or destination.is_relative_to(ROOT):
         raise SystemExit("Destination must be a new directory outside the source folder.")
+    subprocess.run([sys.executable, str(ROOT / "scripts/check_canonical_statement.py"),
+                    "--root", str(ROOT)], check=True)
     shutil.copytree(ROOT, destination, ignore=ignore, copy_function=shutil.copy2)
     print(f"Prepared {destination} (including .github/ and .gitignore).")
 

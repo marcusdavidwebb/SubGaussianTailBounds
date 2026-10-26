@@ -1,10 +1,12 @@
 """CI release-tag regression tests using tiny local Git repositories only."""
 import copy
 import importlib.util
+import json
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+import tomllib
 from unittest.mock import patch
 
 
@@ -107,6 +109,28 @@ class CIReleaseTagTests(unittest.TestCase):
         with self.assertRaisesRegex(SystemExit, "does not match the locked revision"):
             self.provision()
         self.assert_pinned_checkout()
+
+
+class CanonicalBuildConfigurationTests(unittest.TestCase):
+    def test_root_statement_and_proofs_resolve_to_distinct_actual_sources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            work = Path(directory) / "work"
+            packages = Path(directory) / "packages"
+            lock = json.loads((SOURCE / "lean/lake-manifest.json").read_text())
+            original_lock = copy.deepcopy(lock)
+            original_statement = (SOURCE / "MainTheoremStatement.lean").read_bytes()
+            configure.configure(work, packages, lock, "leanprover/lean4:v4.19.0")
+            config = tomllib.loads((work / "lakefile.toml").read_text())
+            libraries = {library["name"]: library for library in config["lean_lib"]}
+            self.assertEqual(libraries["MainTheoremStatement"]["srcDir"], str(SOURCE))
+            self.assertEqual(libraries["SingularValueBounds"]["srcDir"], str(SOURCE / "lean"))
+            self.assertIn("MainTheoremStatement", config["defaultTargets"])
+            self.assertEqual(config["buildDir"], str((work / ".lake/build").resolve()))
+            self.assertEqual(config["packagesDir"], str(packages))
+            self.assertEqual(json.loads((work / "lake-manifest.json").read_text())["packages"],
+                             original_lock["packages"])
+            self.assertEqual(lock, original_lock)
+            self.assertEqual((SOURCE / "MainTheoremStatement.lean").read_bytes(), original_statement)
 
 
 if __name__ == "__main__":

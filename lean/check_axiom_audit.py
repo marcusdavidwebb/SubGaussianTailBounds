@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Check the complete compiled theorem inventory and its transitive axiom union.
+"""Validate the current theorem inventory and complete project import coverage.
 
-Lean's own collector performs the dependency traversal in Audit.lean. This
-runner checks its report, retains the earlier audit checkpoint, and makes
-sure every KL source is imported by the library. It proves no Lean theorem.
+This report parser establishes no mathematical truth. The canonical verifier
+independently replays all accepted theorem dependencies through Lean's kernel.
+Superseded implementation declarations are not frozen as acceptance targets.
 """
 from pathlib import Path
+import argparse
 import re
 import sys
 
@@ -27,33 +28,38 @@ def verify(report: str, source_dir: Path) -> tuple[int, int]:
     used = {x.strip() for x in axioms[0].split(",") if x.strip()}
     if not used <= allowed:
         raise ValueError(f"Unexpected logical axioms: {sorted(used - allowed)}")
-    checkpoint = set((source_dir / "audit_checkpoint.txt").read_text().splitlines())
-    if not checkpoint <= set(targets):
-        raise ValueError("The audit has lost targets from the earlier checkpoint.")
-    final_targets = {
-        "SingularValueBounds.KL.singular_value_tails_general_of_certificates",
-        "SingularValueBounds.KL.singular_value_tails_one_of_certificates",
-        "SingularValueBounds.KL.theorem_explicit_constants_of_certificates",
-    }
+    final_targets = set()
+    for regime in ("general", "unit"):
+        for suffix in ("", "_baseline", "_recorded"):
+            final_targets.add(f"SubGaussian.Current.{regime}{suffix}")
+        for ceiling in ("baseline", "current"):
+            for field in ("alpha", "beta", "gamma", "delta"):
+                final_targets.add(f"SubGaussian.Current.{regime}_{ceiling}_{field}")
     if not final_targets <= set(targets):
         raise ValueError("A final current-theorem declaration is absent from the audit.")
-    kl = source_dir / "SingularValueBounds" / "KL"
     sources = {".".join(p.relative_to(source_dir).with_suffix("").parts)
-               for p in kl.rglob("*.lean")}
-    imports = set(re.findall(r"^import (SingularValueBounds\.KL\.\S+)$",
+               for p in (source_dir / "SingularValueBounds").rglob("*.lean")}
+    imports = set(re.findall(r"^import (SingularValueBounds\.\S+)$",
                              (source_dir / "SingularValueBounds.lean").read_text(), re.MULTILINE))
     if sources != imports:
-        raise ValueError(f"KL import coverage differs from sources: {sorted(sources ^ imports)}")
+        raise ValueError(f"Project import coverage differs from sources: {sorted(sources ^ imports)}")
+    loaded = re.findall(r"^AUDIT_MODULE (SingularValueBounds\.\S+)$", report, re.MULTILINE)
+    if len(loaded) != len(set(loaded)) or set(loaded) != sources:
+        raise ValueError(f"Compiled module coverage differs from sources: {sorted(set(loaded) ^ sources)}")
     return count, visited
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source-dir", type=Path, default=Path(__file__).resolve().parent,
+                        help="Candidate Lean source directory whose import coverage is checked")
+    args = parser.parse_args()
     try:
-        count, visited = verify(sys.stdin.read(), Path(__file__).resolve().parent)
+        count, visited = verify(sys.stdin.read(), args.source_dir)
     except ValueError as exc:
         raise SystemExit(f"Axiom audit failed: {exc}") from exc
     print(f"PASS: {count} audited targets, {visited} visited constants; standard axioms only; "
-          "checkpoint and complete KL imports retained.")
+          "all 22 current declarations and complete project imports retained.")
 
 
 if __name__ == "__main__":

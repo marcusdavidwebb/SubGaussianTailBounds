@@ -1,7 +1,6 @@
 name: Supplement build
 
 on:
-  workflow_call:
   workflow_dispatch:
 
 permissions:
@@ -11,8 +10,8 @@ env:
   PYTHONDONTWRITEBYTECODE: '1'
   PYTHONOPTIMIZE: ''
 
-# Called by complete CI, or dispatched alone to test document changes.
-# This workflow never reports the complete-verification commit status.
+# Optional manual rebuild of the historical supplement.
+# It is not called by canonical Lean CI and never reports its required status.
 jobs:
   build:
     name: Build PDF

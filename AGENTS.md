@@ -4,22 +4,52 @@ Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md),
 [CONSTANTS.md](CONSTANTS.md) and [lean/README.md](lean/README.md) before changing
 the proof or verification setup.
 
+## Immutable canonical statement
+
+- `MainTheoremStatement.lean` is the single authoritative statement. Preserve
+  its exact root location, name and bytes, including imports, comments,
+  definitions and universe parameters. Do not edit, delete, rename, relocate,
+  replace or shadow it. There is no exception for formatting, compatibility,
+  proof development or maintenance; future instruction files must repeat
+  this prohibition without granting an exception.
+- Put proofs and adapters in other modules that import the actual root file.
+  Report mathematical or compatibility problems precisely without changing
+  the canonical source or weakening the required theorem.
+- The observed SHA-256 is
+  `eb24daadaf9c0aaac3bea45128a08b81ba5492183bcbb6eb03b62c3245c2701c`.
+  Compare bytes before and after work. A digest detects drift; it is not a
+  mathematical proof. The README copy must match the full annotated source.
+- Inventory repository-local AI instructions, including hidden/editor files,
+  when introducing or changing instructions. The current inventory is in
+  [docs/MIGRATION.md](docs/MIGRATION.md).
+
 ## Mathematical claims
 
 - Preserve baseline quartets, hypotheses, MGF normalization, non-strict tail
   events and endpoints. Do not silently change the theorem.
-- Improvement PRs require the complete registered readable proof, compiled
-  Lean target, applicable exact certificates/checker mapping and history.
-  A PDF or natural-language proof alone cannot pass the improvement gate.
-- Never weaken an audit, omit a checker, add unsupported theorem assumptions,
-  substitute the baseline for a new target or change CI to admit incomplete work.
-- Maintenance authorization belongs to the trusted maintainer workflow;
-  contributors cannot exempt their own claims.
+- The target is one maintained formalization with complete universe-polymorphic
+  Lean proofs of both canonical baseline propositions. Contributions may
+  replace either regime at componentwise no larger constants than both its
+  baseline and trusted current accepted quartet. Equality in all entries is
+  allowed, subject to Marcus Webb's acceptance decision. No current component
+  may increase; preserve the other regime and every accepted improvement.
+- Contributions consist of Lean sources, checked comparison proofs, concise
+  explanation and attribution, and Markdown history. Do not maintain or accept
+  separate natural-language proofs, PDF proofs or Python certificate packages
+  as the new contribution route. `supplementary.tex` and its PDF are temporary
+  historical exceptions, not documents to update with future Lean changes.
+- Never weaken canonical type, kernel or axiom verification, add unsupported
+  theorem assumptions, substitute the baseline for a new target, or change CI
+  to admit incomplete work. Conditional helper theorems are not accepted results.
+- No contributor or maintenance route can exempt mathematical claims from
+  complete verification. Verification-policy changes require trusted review;
+  candidate workflow edits cannot change the policy already running on the base.
 - Read [docs/RESEARCH_PROTOCOL.md](docs/RESEARCH_PROTOCOL.md) before substantive
   mathematics. Keep correctness, attribution and novelty separate and preserve
   unresolved assessments until evidence resolves them.
-- Preserve substantial credit and superseded records in
-  [CONTRIBUTIONS.md](CONTRIBUTIONS.md). Do not invent publication metadata.
+- Preserve substantial credit and superseded work in
+  [CONTRIBUTIONS.md](CONTRIBUTIONS.md), with one initial contribution credited
+  to Marcus Webb covering both regimes. Do not invent publication metadata.
 
 ## Verification and storage
 
@@ -28,11 +58,15 @@ the proof or verification setup.
   upgrade or replace dependencies during routine verification.
 - Keep toolchains, dependencies, caches and compiled outputs outside this
   source checkout; keep editable proofs and small configuration here.
-- Use `./lean/check_hybrid.sh` after proof/certificate changes, and the generated
-  contribution obligations required by the PR workflow for claimed improvements.
-  Keep Python assertions enabled.
-- Preserve the hybrid trust boundary: Python supplies no Lean proof terms;
-  source hashes are drift guards rather than semantic proofs.
+- Run `./lean/verify.sh` after proof or verification changes, and
+  `python3 scripts/check_canonical_statement.py` after canonical-facing
+  documentation or setup changes. Retired Python mathematical checkers must not
+  return as an acceptance dependency. Administrative Python establishes no
+  mathematical truth; all concrete finite proof obligations are checked in Lean.
+- Source hashes are drift guards, not semantic proofs. Preserve independent
+  trusted auditing of candidate declarations and the standard axiom allowlist.
+  Report actual checks and remaining gaps honestly; never call an interrupted
+  build or audit a successful verification.
 - Build LaTeX with `./scripts/build_supplement.sh`; check citations, references,
   box warnings and changed pages. In the original paper checkout, retain the
   documented main-then-supplement build.

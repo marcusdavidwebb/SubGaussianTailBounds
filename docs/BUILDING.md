@@ -1,5 +1,11 @@
 # Building and source snapshots
 
+This guide concerns the [historical supplement](HISTORICAL_SUPPLEMENT.md),
+pending its later deletion. Do not update it to follow future Lean changes.
+For current formalization setup and proof status, use
+[lean/README.md](../lean/README.md) and [MIGRATION.md](MIGRATION.md). A successful
+LaTeX build does not establish the complete canonical Lean targets.
+
 ## Standalone repository
 
 From a checkout of
@@ -30,7 +36,7 @@ Inspect changed pages after layout changes.
 
 Without a local LaTeX installation, read the checked-in
 [supplementary PDF](../supplementary.pdf), or download the PDF and build log
-from a successful [GitHub verification run](../lean/README.md#verification-on-github).
+from a successful [manual Supplement build run](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/workflows/supplement.yml).
 
 The hosted job installs the required LaTeX packages on its disposable Ubuntu
 runner. It prefers Ubuntu's main HTTPS archive over the Azure mirror, with
@@ -40,10 +46,8 @@ so a download timeout can be distinguished from a document error. The same
 document build and citation/reference/box checks run after installation.
 
 For a hosted document-only test, use **Actions → Supplement build → Run
-workflow** and select your branch. This uses the same shared PDF job as full
-verification, without another Lean or certificate run. See the
-[CI instructions](CI.md#test-document-changes-without-a-second-full-run) for
-availability and the distinction from required PR checks.
+workflow** and select your branch. This optional historical-document job is separate from current Lean verification
+and is not a required contribution check. See [CI policy](CI.md).
 
 The root `references.bib` snapshots the parent paper's shared bibliography.
 `docs/main-labels.tex` contains the five referenced main-paper label numbers.
@@ -74,32 +78,9 @@ script reads its built auxiliary file and bibliography; it installs/downloads
 nothing. Review the diff and rebuild affected documents. Do not invent labels
 when the source paper is unavailable.
 
-## Lean and exact arithmetic
+## Current Lean verification
 
-For finite arithmetic checks, Python 3.11 or later and Bash are sufficient;
-the checkers use only the Python standard library. From the repository root:
-
-```sh
-./lean/check_certificates.sh
-```
-
-For the complete hybrid checks, first configure an
-[existing pinned Lean environment](../lean/README.md#pinned-environment-and-storage),
-then run:
-
-```sh
-./lean/check_hybrid.sh
-```
-
-The hybrid wrapper validates the contribution registry, generates and checks
-its claimed theorem targets, builds and audits Lean, and runs the original
-and eleven interface checkers. For only the Lean build and audit, use
-`./lean/check.sh`. See [the verification guide](../lean/README.md#verify) for
-expected success messages and [GitHub Actions](../lean/README.md#verification-on-github)
-for verification without local Lean. Local wrappers preserve pinned versions
-and do not download dependencies. Keep Python assertions enabled.
-
-Pull requests also require comparison with their base revision and any
-applicable maintainer authorization. Follow
-[contributions/README.md](../contributions/README.md) for those checks;
-verifying the current registry alone does not enforce PR completeness.
+For the maintained formalization, use the [pinned external Lean setup](../lean/README.md)
+and run `./lean/verify.sh`. The historical supplement and its PDF build do not
+participate in canonical theorem acceptance. Retired Python mathematical
+checkers are described only in historical records and Git history.

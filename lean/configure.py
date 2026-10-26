@@ -159,6 +159,7 @@ def configure(work: Path, packages: Path, lock: dict, toolchain: str) -> None:
         "@SVB_BUILD_DIR@": str(build),
         "@SVB_PACKAGES_DIR@": str(packages),
         "@SVB_SOURCE_DIR@": str(SOURCE),
+        "@SVB_ROOT_DIR@": str(PUBLIC_ROOT),
     }.items():
         token = json.dumps(key)
         if template.count(token) != 1:

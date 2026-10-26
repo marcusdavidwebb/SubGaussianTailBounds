@@ -1,70 +1,53 @@
-# Admissible constants
+# Constants and replacement policy
 
-These records use Theorem S1.1 in [the supplementary materials](supplementary.pdf).
-The accompanying paper, *Sharp tail bounds for the extreme singular values of
-sub-Gaussian matrices*, by Marcus Webb and Morgan Lynch-Davies, is in preparation
-and has no public version yet.
+The [README theorem statement](README.md#theorem-statement) gives the exact
+hypotheses, normalization and tail inequalities. The authoritative formal
+definitions are in the immutable root
+[MainTheoremStatement.lean](MainTheoremStatement.lean).
 
-## Normalization and hypotheses
+| Regime | Exact initial quartet $(\alpha,\beta,\gamma,\delta)$ | Decimal presentation |
+|---|---|---|
+| Every $K\ge1$ | $(96/25,79/50,47/20,3/2)$ | $(3.84,1.58,2.35,1.5)$ |
+| $K=1$ | $(33/25,28/25,58/25,\sqrt2)$ | $(1.32,1.12,2.32,\sqrt2)$ |
 
-Let $S\in\mathbb R^{m\times n}$, $m\ge n\ge1$, have independent,
-centred isotropic rows $X_i^T$:
-$\mathbb E X_i=0$ and $\mathbb E X_iX_i^T=I_n$.
-For a common $K\ge1$, require
+No improved quartet has been accepted. These initial comparison ceilings are
+also permanent baseline proof targets. The general quartet applies at $K=1$;
+the separate unit target has sharper constants. Decimal literals represent
+exact Lean real numbers, not floating-point approximations.
 
-$$
-\mathbb E\exp(\lambda\langle X_i,v\rangle)
-\le\exp(K^2\lambda^2\|v\|_2^2/2)
-\quad(\lambda\in\mathbb R,\ v\in\mathbb R^n).
-$$
+Both baseline quartets are proved in Lean by
+[`Canonical.general_baseline`](lean/SingularValueBounds/Canonical/General.lean)
+and [`Canonical.unit_baseline`](lean/SingularValueBounds/Canonical/Unit.lean).
+The public current results, baseline corollaries and comparison proofs are in
+[Canonical/Results.lean](lean/SingularValueBounds/Canonical/Results.lean).
+[AcceptedConstants.lean](lean/SingularValueBounds/Canonical/AcceptedConstants.lean)
+records the jointly proved quartets; Lean checks their equality with the result's
+constants. A trusted base supplies the independent comparison ceiling.
 
-Rows may have different distributions; coordinates within a row may be
-dependent. All logarithms are natural. Put $L=\log(eK)$. For every $t\ge0$,
+The historical records `baseline-general` and `baseline-one` refer to the two
+regimes of one initial contribution. Their hybrid verification on 20 October
+2026 was conditional Lean plus external Python arithmetic. The complete Lean
+proofs and subsequent checks are separate evidence in [MIGRATION.md](docs/MIGRATION.md),
+not a change to [the historical report](lean/VERIFICATION_REPORT.md).
 
-$$
-\mathbb P\{\sigma_{\min}(S)\le\sqrt m-K\sqrt n
- -\alpha KL-\beta K\sqrt L\,t\}\le e^{-t^2/2},
-$$
-$$
-\mathbb P\{\sigma_{\max}(S)\ge\sqrt m+K\sqrt n
- +\gamma KL+\delta K\sqrt L\,t\}\le e^{-t^2/2}.
-$$
+## Updating a quartet
 
-Use all $n$ singular values, including zeros. The events are non-strict.
-Preserve $n=1$, $t=0$, rank deficiency and nonpositive lower thresholds.
+A replacement must prove one whole quartet and all four inequalities against
+both its original baseline and its regime's current accepted quartet. No
+component may increase. Equality in all four entries is allowed, subject to
+the maintainer's decision on the proposed replacement. General and unit
+quartets are tracked separately; a contribution may address one regime.
 
-## Baseline results
+After an accepted change from `(3.84, 1.58, 2.35, 1.5)` to
+`(3.70, 1.58, 2.35, 1.5)`, a proposal at `(3.75, 1.55, 2.35, 1.5)` must be
+rejected: it loses the accepted first-component improvement. This example
+asserts no mathematical improvement. Never combine the best coordinates of
+separate results without proving their joint claim.
 
-| Record | Regime | Exact quartet $(\alpha,\beta,\gamma,\delta)$ | Evidence |
-|---|---|---|---|
-| [baseline-general](contributions/records/baseline-general.json) | Every $K\ge1$ | $(96/25,79/50,47/20,3/2)$ | Hybrid Lean/Python |
-| [baseline-one](contributions/records/baseline-one.json) | $K=1$ | $(33/25,28/25,58/25,\sqrt2)$ | Hybrid Lean/Python |
-
-The general quartet also applies at $K=1$. The decimal displays are
-`(3.84, 1.58, 2.35, 1.5)` and `(1.32, 1.12, 2.32, sqrt(2))`.
-These baseline records remain permanently. Their local verification, observed
-on 20 October 2026, is documented in
-[VERIFICATION_REPORT.md](lean/VERIFICATION_REPORT.md); it has no public release
-identifier yet.
-
-Lean proves the analytic theorem conditional on `FinalCertificateConditions`.
-External exact Python arithmetic checks its finite conditions; it supplies no
-Lean proof terms. Source hashes detect drift and do not establish semantic
-correspondence by themselves. Verification does not establish novelty or priority.
-
-## Reporting an improvement
-
-State the entire resulting quartet and regime, identifying changed entries and
-reused proofs. Preserve the hypotheses, leading terms, failure probability and
-range of $t$. A different normalization or restricted theorem needs an
-explicitly identified statement rather than a silent replacement of these bounds.
-
-A smaller $\alpha$ with a larger $\beta$, or a smaller $\gamma$ with a
-larger $\delta$, may be a useful tradeoff. Keep both admissible pairs and
-describe their use. Do not combine the smallest coordinates from different
-pairs unless their simultaneous validity is proved. The registered Lean result
-and certificate evidence must justify the entire claimed quartet.
-
-New accepted results will be added here with a contribution ID, proof and
-verification links. Proposals and numerical evidence belong in issues until
-the full [contribution requirements](CONTRIBUTING.md) are met.
+The trusted accepted theorem determines the comparison ceiling; changing this
+table or a candidate's metadata does not change it. Update the current quartet
+only when the corresponding verified replacement is accepted, and retain the
+original baseline results as Lean corollaries. Recompare when the target
+branch advances during review. The
+[contribution contract](CONTRIBUTING.md) gives the required Lean evidence;
+[CONTRIBUTIONS.md](CONTRIBUTIONS.md) records credit and supersession.

@@ -91,7 +91,8 @@ Aggregate successful log SHA-256:
 `f1f031e88d8cf4967938eb66ffae85f17b659cb321c61853ed2f8eeff7b92ab5`.
 The log was retained locally at `/tmp/supplementary-cleanup-hybrid.log`; this
 temporary path is not a published archive. The checked source inventory is
-recorded in [verification_manifest.json](verification_manifest.json).
+recorded in the original `lean/verification_manifest.json`, retained in Git
+history after retirement of the Python certificate pipeline.
 
 After this verification, Section S2 of the supplement was expanded on
 20 October 2026 to explain the formalisation and its trust boundary. The entire

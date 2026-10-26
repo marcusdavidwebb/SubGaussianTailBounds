@@ -2,24 +2,26 @@
 
 ## Unreleased
 
-- Share the supplement job between complete CI and a manual document-only
-  workflow, so testing TeX changes does not repeat Lean and certificate work
-  or overwrite the complete-verification status.
-- Prefer Ubuntu's main HTTPS archive for hosted LaTeX installation, with
-  bounded download retries/timeouts and noninteractive package setup, to
-  avoid exhausting the supplement job's budget on a slow package mirror.
-- Update the GitHub landing page with reading, verification and contribution
-  routes, a live verification badge and a Python quickstart.
-- Document existing-repository use, hosted Lean verification, maintenance PRs
-  and local pre-PR comparisons; add a question and setup-help issue form.
-- Separate ongoing maintainer/release procedures from the historical export
-  and validation records. Preserve mathematical sources, dependency pins,
-  contribution history and all verification gates.
-- Preserve the pinned ProofWidgets release tag during hosted provisioning so
-  Lake can locate its release archive; reject a tag that does not match the
-  locked commit. Ordinary local verification still downloads nothing.
-- Document required maintainer approval and the sole maintainer's review-only
-  override for his own PRs, with mandatory CI applying to every PR.
+- Complete both immutable canonical baseline propositions in Lean, at arbitrary
+  sample-space universe, including all finite numerical conditions. Add the
+  canonical adapters, componentwise monotonicity and public result interface.
+- Replace Python mathematical certification and the legacy contribution registry
+  with complete Lean verification. Keep one evolving formalization and one
+  Markdown contribution history, preserving substantial credit and historical
+  validation records.
+- Accept either-regime replacements, including unchanged constants, with no
+  component increase against either the original baseline or trusted current
+  quartet. Record stable exact Lean constants and check their equality with the
+  proved quartet.
+- Protect the actual root statement and its full README presentation. Separate
+  untrusted candidate compilation from trusted kernel replay, exact-type checks,
+  axiom audits and privileged status reporting. Add rejection regressions for
+  forged artifacts, forbidden axioms, incomplete claims and ceiling regressions.
+- Bound module build/replay parallelism and keep all dependencies and outputs in
+  external pinned workspaces. Preserve local no-download behavior and the locked
+  hosted provisioning, including the pinned ProofWidgets release tag.
+- Retain the supplement as a temporary historical document. Its manual build is
+  separate from canonical verification and cannot replace the required status.
 
 ## Initial repository setup — 22 October 2026
 
@@ -39,4 +41,4 @@ numbered release or publication of the accompanying paper.
 
 The baseline verification observed on 20 October 2026 and its earlier history
 remain in [VERIFICATION_REPORT.md](lean/VERIFICATION_REPORT.md) and
-[verification_manifest.json](lean/verification_manifest.json).
+the original `lean/verification_manifest.json` in Git history.

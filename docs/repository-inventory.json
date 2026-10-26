@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "recorded_on": "2026-10-21",
-  "scope": "Portable public repository source and reading-PDF inventory; hashes are drift guards, not proof exports.",
+  "scope": "Historical portable source and reading-PDF snapshot recorded on 2026-10-21, before canonical restructuring. Removed paths resolve in Git history. Hashes are historical drift guards, not current proof exports.",
   "self_excluded": "docs/repository-inventory.json",
   "original_verification_record": "lean/verification_manifest.json",
   "historical_lean_sources_unchanged": 181,

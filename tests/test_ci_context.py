@@ -1,39 +1,43 @@
-"""Authorization must not follow a contributor's labels or a later commit."""
+"""Every contribution must compare against the current trusted base."""
 import importlib.util
-import json
 from pathlib import Path
-import tempfile
 import unittest
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/ci_context.py"
 SPEC = importlib.util.spec_from_file_location("ci_context", SCRIPT)
-CONTEXT = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(CONTEXT)
+context = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(context)
 
 
-class MaintenanceAuthorizationTests(unittest.TestCase):
-    def test_only_trusted_human_and_exact_commit(self):
-        head = "a" * 40
-        comment = {"body": f"/ci-maintenance {head}", "user": {"login": "maintainer", "type": "User"}}
-        self.assertTrue(CONTEXT.maintenance_comment([comment], {"maintainer"}, head))
-        self.assertFalse(CONTEXT.maintenance_comment([comment], {"someone-else"}, head))
-        self.assertFalse(CONTEXT.maintenance_comment([comment], {"maintainer"}, "b" * 40))
-        comment["user"]["type"] = "Bot"
-        self.assertFalse(CONTEXT.maintenance_comment([comment], {"maintainer"}, head))
+class FreshnessTests(unittest.TestCase):
+    def event(self):
+        return {"number": 7, "repository": {"full_name": "owner/repo"},
+                "pull_request": {"head": {"sha": "a" * 40}, "base": {"sha": "b" * 40}}}
 
-    def test_stale_pr_fails_closed(self):
-        event = {"number": 7, "repository": {"full_name": "owner/repo"},
-                 "pull_request": {"head": {"sha": "a" * 40}, "base": {"sha": "b" * 40}}}
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            (root / ".github").mkdir()
-            (root / ".github/maintainers.json").write_text(json.dumps({"maintenance_approvers": ["owner"]}))
-            with self.assertRaisesRegex(ValueError, "stale"):
-                CONTEXT.resolve(event, root, lambda path: ({"head": {"sha": "c" * 40}}, None))
+    def test_current_head_and_base(self):
+        event = self.event()
+        result = context.resolve(event, lambda path: (event["pull_request"], None))
+        self.assertEqual(result, {"base_ref": "b" * 40, "head_sha": "a" * 40})
+        self.assertNotIn("maintenance", result)
 
-    def test_main_run_does_not_get_maintenance_exemption(self):
-        self.assertEqual(CONTEXT.resolve({}, Path("/unused")),
-                         {"base_ref": "", "maintenance": False, "head_sha": ""})
+    def test_stale_head_fails(self):
+        live = {"head": {"sha": "c" * 40}, "base": {"sha": "b" * 40}}
+        with self.assertRaisesRegex(ValueError, "stale"):
+            context.resolve(self.event(), lambda path: (live, None))
+
+    def test_advanced_base_requires_fresh_comparison(self):
+        live = {"head": {"sha": "a" * 40}, "base": {"sha": "c" * 40}}
+        with self.assertRaisesRegex(ValueError, "target branch advanced"):
+            context.resolve(self.event(), lambda path: (live, None))
+
+    def test_push_has_no_maintenance_exemption(self):
+        self.assertEqual(context.resolve({}), {"base_ref": "", "head_sha": ""})
+
+    def test_invalid_context_is_not_sent_to_api(self):
+        event = self.event()
+        event["repository"]["full_name"] = "owner/repo/../../../other"
+        with self.assertRaisesRegex(ValueError, "Invalid GitHub"):
+            context.resolve(event, lambda path: self.fail("Unexpected API call"))
 
 
 if __name__ == "__main__":

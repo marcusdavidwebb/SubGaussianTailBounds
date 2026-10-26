@@ -2,18 +2,20 @@ cff-version: 1.2.0
 message: >-
   Cite the accompanying paper as in preparation, by Marcus Webb and Morgan
   Lynch-Davies, until a public version is available. When using this collection,
-  also identify the actual commit or release used and relevant contribution IDs.
+  also identify the actual commit or release used and relevant contribution history.
 type: software
 license: MIT
-title: "SubGaussianTailBounds: supplementary materials and hybrid verification"
+title: "SubGaussianTailBounds: Lean formalization of singular-value tail bounds"
 authors:
   - family-names: Webb
     given-names: Marcus
 repository-code: "https://github.com/marcusdavidwebb/SubGaussianTailBounds"
 abstract: >-
-  Supplementary proof, exact rational arithmetic certificates and conditional
-  Lean analytic verification for Sharp tail bounds for the extreme singular
-  values of sub-Gaussian matrices, by Marcus Webb and Morgan Lynch-Davies.
+  Complete Lean formalizations of two explicit sub-Gaussian singular-value
+  tail bounds, including their finite numerical inequalities. The accompanying
+  paper is Sharp tail bounds
+  for the extreme singular values of sub-Gaussian matrices, by Marcus Webb and
+  Morgan Lynch-Davies.
   The paper is in preparation and no public version is currently available.
   Marcus Webb is the sole author of the supplementary document, which discloses
   its AI generation and human responsibility. Identify the repository commit or

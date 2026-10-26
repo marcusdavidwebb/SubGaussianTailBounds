@@ -1,6 +1,6 @@
 # Licensing
 
-The original contents of this supplementary repository are licensed under the
+The original contents of this Lean formalization repository are licensed under the
 [MIT License](LICENSE), selected by the maintainer on 22 October 2026. This
 includes the Lean/Python/shell code, mathematical prose, documentation, LaTeX
 sources and supplementary PDF, unless an individual file states otherwise.

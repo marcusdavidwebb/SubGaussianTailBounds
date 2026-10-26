@@ -1,40 +1,55 @@
-# Substantial contributions
+# Contribution history
 
-This ledger preserves substantial mathematical, certificate and formalisation
-credit independently of Git merge style. It does not establish priority,
-novelty or future paper authorship. Keep old entries when work is superseded or
-corrected, and add explicit links to the later assessment.
+This is the single readable history of substantial contributions. It preserves
+credit when an implementation is replaced, without asserting priority, novelty
+or future paper authorship. Historical conditional results are not complete
+proofs of the canonical propositions.
 
-## Baseline supplementary proof and hybrid verification
+## Initial contribution — Marcus Webb
 
-- **Responsibility and credit:** Marcus Webb is the sole author of the
-  supplementary document and takes full responsibility. Its entire proof and
-  exposition were AI-generated without direct input from him. The accompanying
-  paper is by Marcus Webb and Morgan Lynch-Davies, whose extensive preceding
-  mathematical work yielded weaker bounds. Section S2 preserves this account
-  and the roles of the models, Lean and Python.
-- **Results:** [baseline-general](contributions/records/baseline-general.json),
-  `(96/25,79/50,47/20,3/2)` for every $K\ge1$, and
-  [baseline-one](contributions/records/baseline-one.json),
-  `(33/25,28/25,58/25,sqrt(2))` at $K=1$.
-- **Evidence:** [written proof](supplementary.tex),
-  [Lean result](lean/SingularValueBounds/KL/Theorem.lean),
-  [original checker](check_main_constants.py), interface runners,
-  [proof/certificate map](lean/FORMALISATION_PLAN.md) and
+- **Contributor and responsibility:** Marcus Webb is credited with the initial
+  repository contribution covering both regimes. He is the sole author of the
+  historical supplementary document and takes full responsibility for it.
+  Its entire proof and exposition were AI-generated without direct input from
+  him. The preceding human mathematical work and tool roles are recorded below
+  and in [PROVENANCE.md](docs/PROVENANCE.md).
+- **Results:** the initial general quartet `(96/25,79/50,47/20,3/2)` for every
+  `K ≥ 1`, and unit quartet `(33/25,28/25,58/25,Real.sqrt 2)` for `K = 1`.
+  The legacy identifiers `baseline-general` and `baseline-one` refer to these
+  two regimes of this one contribution, not separate contributions.
+- **Historical evidence:** [the supplement](supplementary.tex),
+  [conditional Lean results](lean/SingularValueBounds/KL/Theorem.lean), the
+  original exact Python checker and eleven interface runners in Git history, the
+  [formalisation record](lean/FORMALISATION_PLAN.md) and
   [verification report](lean/VERIFICATION_REPORT.md).
-- **Status:** completed hybrid verification observed on 20 October 2026, after
-  retirement of the standalone earlier theorem. Lean checks the analytic
-  implication; Python checks the finite conditions outside Lean. This is not
-  an unconditional kernel proof of those conditions.
+- **Verification status:** hybrid verification observed on **20 October 2026**,
+  after retirement of the earlier standalone theorem. Lean checked the
+  analytic implication; Python checked finite conditions outside Lean. Neither
+  complete canonical baseline Lean proof was supplied by that historical run.
+  On **23 October 2026**, the migration supplied the complete general theorem
+  `SingularValueBounds.Canonical.general_baseline`. On **25 October 2026**,
+  `SingularValueBounds.Canonical.unit_baseline` and the complete public interface
+  supplied the second baseline, with all eleven finite-condition families proved
+  in Lean. Python mathematical checkers and their registry were retired after
+  replacement. See [the current verification record](docs/MIGRATION.md); this
+  evidence is not backdated to the hybrid run.
+- **Attribution:** the accompanying in-preparation paper is by Marcus Webb and
+  Morgan Lynch-Davies, whose extensive preceding mathematical work yielded
+  weaker bounds. Section S2 identifies Codex as GPT-6; the recorded
+  formalisation also involved parallel GPT-6.1 Sol Ultra workers and a
+  coordinator. Models generated candidate mathematics, code and exposition;
+  Lean checked proof terms and Python performed external exact arithmetic.
+  Tool roles and this contextual attribution are not additional accepted
+  repository contributions.
 - **History:** source inventories, assisted timings, cleanup and validation
-  scope remain in the original verification records. There is no public PR,
-  commit or release identifier yet; this ledger does not invent earlier public
-  Git history.
+  scope remain in the original records. The initial record supplied no public
+  PR, commit or release identifier; none is invented here. The current
+  [migration map](docs/MIGRATION.md) distinguishes subsequent preparation from
+  the historical result. Unresolved attribution and novelty assessments remain
+  in [PROVENANCE.md](docs/PROVENANCE.md).
 
-## Later substantial contributions
-
-At preparation time, no later contribution had been accepted.
-Append later entries below without editing earlier ledger text. Include each
-ID, contributors, date, exact result/regime,
-predecessor or supersession, evidence, review decision and actual public links.
-Follow [CONTRIBUTING.md](CONTRIBUTING.md).
+No later substantial contribution has been accepted. Add future accepted
+entries identifying the contributor, affected regime, jointly proved quartet
+or implementation change, explanation and attribution, supersession, and
+actual commit/PR links when available. Preserve earlier substantive credit;
+follow [CONTRIBUTING.md](CONTRIBUTING.md).

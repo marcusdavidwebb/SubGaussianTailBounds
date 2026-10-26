@@ -59,7 +59,7 @@ installed, upgraded, or replaced locally.
 - The bibliography snapshot matches the shared parent bibliography exactly;
   the five paper-label numbers come from the actual built manuscript.
 
-Local logs remained outside the source repository. The current source inventory
+Local logs remained outside the source repository. The historical source inventory
 is [repository-inventory.json](repository-inventory.json); its hashes are drift
 guards, not mathematical proofs or compiler-generated certificate exports.
 
