@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.MeasureTheory.Function.L1Space.Integrable
 
 /-! # Elementary bounds and integrability for the lower shift -/
 

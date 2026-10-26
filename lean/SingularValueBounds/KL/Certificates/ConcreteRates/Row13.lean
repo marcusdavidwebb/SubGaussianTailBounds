@@ -1,14 +1,53 @@
 import SingularValueBounds.KL.Upper.CertificateData
-import SingularValueBounds.KL.Certificates.BernsteinIdentity
+import SingularValueBounds.KL.Certificates.AffineCoefficientIdentity
 
 /-! Exact upper-rate polynomial leaf certificates.
-The explicit rational coefficient vectors are verified by polynomial equality;
-all Bernstein coefficient signs are reduced by Lean's kernel. -/
+The unshifted polynomial identity is shared across leaves. Each affine transform
+and every Bernstein coefficient sign is checked by Lean's kernel. -/
 open Polynomial
 open scoped BigOperators
 namespace SingularValueBounds.KL.Certificates
 set_option maxRecDepth 10000
 set_option maxHeartbeats 2000000
+
+/-- The unshifted coefficient vector is shared by every subdivision leaf. -/
+private def rateBase13 : Fin 28 → ℚ := ![(1279296875/16),
+    (25841796875/32),
+    (184216015625/64),
+    (1809176171875/384),
+    (-87073515625/384),
+    (-15451141215625/768),
+    (-81478298118125/1536),
+    (-234673003412125/3072),
+    (-650844603333875/12288),
+    (3202355804254375/73728),
+    (29794659054074941/147456),
+    (6050913357528142051/16220160),
+    (20037054887702758517/40550400),
+    (5600373275134511091/10649600),
+    (412789403357401215619/878592000),
+    (72991145572016786911/202752000),
+    (4850706254577887489/20275200),
+    (319403372837247991/2304000),
+    (8078837502323149/115200),
+    (1483383435287329/48000),
+    (70786791412297/6000),
+    (1159587537869/300),
+    (401730066991/375),
+    (3686563904/15),
+    (16923596488/375),
+    (784034144/125),
+    (14833792/25),
+    (3651072/125)]
+
+private theorem ratePolynomial_identity13 : ratePolynomial (7/2) (131/5000) = Polynomial.ofFn 28 rateBase13 := by
+  rw [Polynomial.ofFn_eq_sum_monomial]
+  apply Polynomial.funext
+  intro x
+  norm_num [rateBase13, ratePolynomial, Finset.sum_range_succ, Polynomial.eval_add,
+    Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C,
+    Polynomial.eval_X, Fin.sum_univ_succ, Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+  ring
 
 private theorem rate_13_leaf_0 :
     IntervalCertificate (ratePolynomial (7/2) (131/5000)) (0/1) (5/16) 27
@@ -45,20 +84,16 @@ private theorem rate_13_leaf_0 :
       (425040721893310546875/633825300114114700748351602688)]
   have hpoly : (ratePolynomial (7/2) (131/5000)).comp
       (affine (0/1) ((5/16)-(0/1))) = Polynomial.ofFn 28 coefficients := by
-    rw [Polynomial.ofFn_eq_sum_monomial]
-    apply Polynomial.funext
-    intro x
-    norm_num [coefficients, ratePolynomial, Finset.sum_range_succ, affine, Polynomial.eval_comp,
-      Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_pow,
-      Polynomial.eval_C, Polynomial.eval_X, Fin.sum_univ_succ, Polynomial.eval_finset_sum,
-      Polynomial.eval_monomial]
-    ring
+    rw [ratePolynomial_identity13]
+    apply ofFn_comp_affine_eq 27
+    simp only [Nat.choose_eq_fast_choose]
+    decide +kernel
   rw [hpoly]
   constructor
   · apply polynomial_bernstein_identity
     exact Nat.le_of_lt_succ (Polynomial.ofFn_natDegree_lt (by norm_num) coefficients)
   · simp_rw [bernsteinCoefficients_ofFn]
-    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
+    simp only [Nat.choose_eq_fast_choose]
     decide +kernel
 
 private theorem rate_13_leaf_1 :
@@ -96,20 +131,16 @@ private theorem rate_13_leaf_1 :
       (425040721893310546875/85070591730234615865843651857942052864)]
   have hpoly : (ratePolynomial (7/2) (131/5000)).comp
       (affine (5/16) ((15/32)-(5/16))) = Polynomial.ofFn 28 coefficients := by
-    rw [Polynomial.ofFn_eq_sum_monomial]
-    apply Polynomial.funext
-    intro x
-    norm_num [coefficients, ratePolynomial, Finset.sum_range_succ, affine, Polynomial.eval_comp,
-      Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_pow,
-      Polynomial.eval_C, Polynomial.eval_X, Fin.sum_univ_succ, Polynomial.eval_finset_sum,
-      Polynomial.eval_monomial]
-    ring
+    rw [ratePolynomial_identity13]
+    apply ofFn_comp_affine_eq 27
+    simp only [Nat.choose_eq_fast_choose]
+    decide +kernel
   rw [hpoly]
   constructor
   · apply polynomial_bernstein_identity
     exact Nat.le_of_lt_succ (Polynomial.ofFn_natDegree_lt (by norm_num) coefficients)
   · simp_rw [bernsteinCoefficients_ofFn]
-    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
+    simp only [Nat.choose_eq_fast_choose]
     decide +kernel
 
 private theorem rate_13_leaf_2 :
@@ -147,20 +178,16 @@ private theorem rate_13_leaf_2 :
       (425040721893310546875/85070591730234615865843651857942052864)]
   have hpoly : (ratePolynomial (7/2) (131/5000)).comp
       (affine (15/32) ((5/8)-(15/32))) = Polynomial.ofFn 28 coefficients := by
-    rw [Polynomial.ofFn_eq_sum_monomial]
-    apply Polynomial.funext
-    intro x
-    norm_num [coefficients, ratePolynomial, Finset.sum_range_succ, affine, Polynomial.eval_comp,
-      Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_pow,
-      Polynomial.eval_C, Polynomial.eval_X, Fin.sum_univ_succ, Polynomial.eval_finset_sum,
-      Polynomial.eval_monomial]
-    ring
+    rw [ratePolynomial_identity13]
+    apply ofFn_comp_affine_eq 27
+    simp only [Nat.choose_eq_fast_choose]
+    decide +kernel
   rw [hpoly]
   constructor
   · apply polynomial_bernstein_identity
     exact Nat.le_of_lt_succ (Polynomial.ofFn_natDegree_lt (by norm_num) coefficients)
   · simp_rw [bernsteinCoefficients_ofFn]
-    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
+    simp only [Nat.choose_eq_fast_choose]
     decide +kernel
 
 private theorem rate_13_leaf_3 :
@@ -198,20 +225,16 @@ private theorem rate_13_leaf_3 :
       (425040721893310546875/4722366482869645213696)]
   have hpoly : (ratePolynomial (7/2) (131/5000)).comp
       (affine (5/8) ((5/4)-(5/8))) = Polynomial.ofFn 28 coefficients := by
-    rw [Polynomial.ofFn_eq_sum_monomial]
-    apply Polynomial.funext
-    intro x
-    norm_num [coefficients, ratePolynomial, Finset.sum_range_succ, affine, Polynomial.eval_comp,
-      Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_pow,
-      Polynomial.eval_C, Polynomial.eval_X, Fin.sum_univ_succ, Polynomial.eval_finset_sum,
-      Polynomial.eval_monomial]
-    ring
+    rw [ratePolynomial_identity13]
+    apply ofFn_comp_affine_eq 27
+    simp only [Nat.choose_eq_fast_choose]
+    decide +kernel
   rw [hpoly]
   constructor
   · apply polynomial_bernstein_identity
     exact Nat.le_of_lt_succ (Polynomial.ofFn_natDegree_lt (by norm_num) coefficients)
   · simp_rw [bernsteinCoefficients_ofFn]
-    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
+    simp only [Nat.choose_eq_fast_choose]
     decide +kernel
 
 private theorem rate_13_leaf_4 :
@@ -249,20 +272,16 @@ private theorem rate_13_leaf_4 :
       (425040721893310546875/35184372088832)]
   have hpoly : (ratePolynomial (7/2) (131/5000)).comp
       (affine (5/4) ((5/2)-(5/4))) = Polynomial.ofFn 28 coefficients := by
-    rw [Polynomial.ofFn_eq_sum_monomial]
-    apply Polynomial.funext
-    intro x
-    norm_num [coefficients, ratePolynomial, Finset.sum_range_succ, affine, Polynomial.eval_comp,
-      Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_pow,
-      Polynomial.eval_C, Polynomial.eval_X, Fin.sum_univ_succ, Polynomial.eval_finset_sum,
-      Polynomial.eval_monomial]
-    ring
+    rw [ratePolynomial_identity13]
+    apply ofFn_comp_affine_eq 27
+    simp only [Nat.choose_eq_fast_choose]
+    decide +kernel
   rw [hpoly]
   constructor
   · apply polynomial_bernstein_identity
     exact Nat.le_of_lt_succ (Polynomial.ofFn_natDegree_lt (by norm_num) coefficients)
   · simp_rw [bernsteinCoefficients_ofFn]
-    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
+    simp only [Nat.choose_eq_fast_choose]
     decide +kernel
 
 theorem concrete_rate_row_13 :

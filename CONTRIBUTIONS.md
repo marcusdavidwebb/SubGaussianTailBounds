@@ -47,6 +47,16 @@ proofs of the canonical propositions.
   [migration map](docs/MIGRATION.md) distinguishes subsequent preparation from
   the historical result. Unresolved attribution and novelty assessments remain
   in [PROVENANCE.md](docs/PROVENANCE.md).
+- **Efficiency revision — 26 October 2026:** the ongoing migration in
+  [PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2)
+  factors repeated polynomial expansions through existing proved coefficient
+  identities, reuses verified integer evaluations for small-range entropy nodes,
+  narrows implementation imports, and checks axioms alongside independent module
+  kernel replay. This preserves both canonical statements,
+  their quartets and all verification obligations. The work was implemented
+  with Codex assistance; it makes no new mathematical or novelty claim.
+  Measurements and completed validation are recorded separately in
+  [MIGRATION.md](docs/MIGRATION.md).
 
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet

@@ -1,3 +1,5 @@
+import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
+import Mathlib.Topology.Instances.Matrix
 import SingularValueBounds.Core.Matrix
 
 /-! # Measurable real matrices and their inverse -/

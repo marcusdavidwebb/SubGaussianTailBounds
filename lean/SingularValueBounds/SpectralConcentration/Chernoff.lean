@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.Probability.Moments.Basic
 
 /-!
 # Exact Chernoff optimization for the spectral exponential bounds

@@ -1,4 +1,5 @@
-import Mathlib
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.LinearAlgebra.Matrix.PosDef
 
 /-! # Shared real matrix and rank-one algebra -/
 

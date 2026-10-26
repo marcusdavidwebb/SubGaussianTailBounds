@@ -1,3 +1,4 @@
+import Mathlib.Data.Real.Pi.Bounds
 import SingularValueBounds.KL.Lower.CellAnalysis
 import Mathlib.Analysis.SpecialFunctions.Integrals
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds

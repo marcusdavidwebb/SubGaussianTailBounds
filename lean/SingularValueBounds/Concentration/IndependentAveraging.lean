@@ -1,4 +1,5 @@
-import Mathlib
+import Mathlib.MeasureTheory.Integral.Prod
+import Mathlib.Probability.Independence.Basic
 /-! # Averaging an independent new row by Fubini -/
 
 open MeasureTheory ProbabilityTheory

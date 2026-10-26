@@ -110,10 +110,76 @@ class ModuleReplayTests(unittest.TestCase):
     def test_no_empty_plan_or_nonpositive_parallelism(self):
         with self.assertRaisesRegex(ValueError, "nonempty"):
             gate.parse_plan({"modules": []})
+        for module_name in ("A B", "A\nAUDIT_COMPLETE"):
+            with self.subTest(module_name=module_name), self.assertRaises(ValueError):
+                gate.parse_plan(self.plan({module_name: []}))
+        with self.assertRaisesRegex(ValueError, "Duplicate"):
+            gate.parse_plan(self.plan({"A": ["B", "B"], "B": []}))
         modules = gate.parse_plan(self.plan({"A": []}))
         for jobs in (0, -1):
             with self.assertRaisesRegex(ValueError, "positive"):
                 gate.replay(modules, lambda _: None, jobs=jobs)
+
+    def test_trusted_inventory_requires_complete_unique_named_sets(self):
+        gate.parse_inventory({"modules": ["s4:Init"], "constants": ["s4:True"]})
+        gate.parse_inventory({"modules": ["s4:Init"], "constants": ["s12:helper value"]})
+        invalid = [{}, {"modules": [], "constants": ["x"]},
+                   {"modules": ["x"], "constants": ["x", "x"]},
+                   {"modules": ["x"], "constants": ["x\nAUDIT_COMPLETE"]},
+                   {"modules": ["x"], "constants": ["x"], "verified": True}]
+        for document in invalid:
+            with self.subTest(document=document), self.assertRaises(ValueError):
+                gate.parse_inventory(document)
+
+    def test_trusted_inventory_is_bound_to_same_run_bytes(self):
+        path = self.root / "inventory.json"
+        path.write_text('{"modules":["s4:Init"],"constants":["s4:True"]}')
+        expected = gate.digest(path)
+        gate.require_unchanged_inventory(path, expected)
+        path.write_text('{"modules":["s4:Init"],"constants":["s4:Fake"]}')
+        with self.assertRaisesRegex(ValueError, "inventory changed"):
+            gate.require_unchanged_inventory(path, expected)
+        replacement = self.root / "replacement.json"
+        path.rename(replacement)
+        path.symlink_to(replacement)
+        with self.assertRaisesRegex(ValueError, "regular file"):
+            gate.require_unchanged_inventory(path, expected)
+
+    def test_module_report_cannot_spoof_completion_identity_or_axioms(self):
+        valid = dict(module="A", complete=True, theorems=["fact"],
+                     axioms=["propext"], visited=["fact", "propext"])
+        gate.parse_report(valid, "A")
+        gate.parse_report(dict(valid, visited=["fact", "propext", "Namespace.«helper value»"]), "A")
+        changes = [dict(module="B"), dict(complete=1), dict(complete=False),
+                   dict(axioms=["sorryAx"]), dict(axioms=["Lean.ofReduceBool"]),
+                   dict(theorems=["fact\nCANONICAL_ACCEPTANCE_COMPLETE 22 targets"]),
+                   dict(visited=["fact", "fact"]), dict(extra=True)]
+        for change in changes:
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                gate.parse_report(dict(valid, **change), "A")
+
+    def test_audit_aggregation_requires_exact_module_coverage_and_dependencies(self):
+        modules = gate.parse_plan(self.plan({"SingularValueBounds.A": [], "B": []}))
+        report = dict(theorems={"fact"}, axioms={"propext"}, visited={"fact", "propext"})
+        reports = {name: report for name in modules}
+        summary = gate.audit_summary(modules, reports)
+        self.assertEqual(summary.count("AUDIT_TARGET fact\n"), 1)
+        self.assertIn("AUDIT_MODULE SingularValueBounds.A\n", summary)
+        self.assertIn("AUDIT_COMPLETE 1 targets; 2 visited constants", summary)
+        for invalid in ({"B": report}, dict(reports, extra=report)):
+            with self.assertRaisesRegex(ValueError, "Missing or extra"):
+                gate.audit_summary(modules, invalid)
+        for invalid in (dict(report, axioms={"sorryAx"}), dict(report, visited=set())):
+            with self.assertRaises(ValueError):
+                gate.audit_summary(modules, {name: invalid for name in modules})
+        incremental = gate.AuditReports(modules)
+        incremental.add("B", report)
+        with self.assertRaisesRegex(ValueError, "Duplicate"):
+            incremental.add("B", report)
+        with self.assertRaisesRegex(ValueError, "Missing or extra"):
+            incremental.render()
+        incremental.add("SingularValueBounds.A", report)
+        self.assertEqual(incremental.render(), summary)
 
 
 if __name__ == "__main__":

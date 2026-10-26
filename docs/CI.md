@@ -102,10 +102,30 @@ evidence. A safe declaration referring to such a stub is rejected, including
 when the stub came from a verified ancestor. No unsafe exception expands the
 accepted axiom list.
 
+The trusted worker derives a fresh inventory of pinned module and declaration
+names in a separate process. Structural name encoding distinguishes string and
+numeric name components. The scheduler validates and hashes the inventory;
+the planner uses the full declaration inventory to reject every protected-name
+collision. Workers receive only its small module-name inventory and derive the
+pinned declarations they actually import from those modules' constant records.
+Candidate origin flags and auxiliary name metadata cannot establish that trust.
+Neither inventory contains verification receipts, and neither is reused between
+runs. The planner reuses module data already loaded by Lean instead of reading
+the compiled library a second time.
+
+Each module also audits every fresh safe, nonpartial declaration, including
+ordinary definitions and private theorems. Dependency traversal follows fresh
+and pinned declarations completely. It stops at a project ancestor only after
+that ancestor has passed replay and the same axiom audit, with its artifact
+hashes unchanged. The scheduler combines reports from every module in this
+run, rejects missing, extra or duplicate reports, and checks the complete source
+and theorem inventories. This is induction over the checked dependency graph,
+not reliance on candidate declaration-origin or checked flags.
+
 After the module graph passes, the auditor checks actual compiled types against
 independently elaborated templates using `Kernel.isDefEqGuarded` and exact
-universe-parameter counts. Transitive axioms are checked for all accepted
-obligations and all fresh safe/nonpartial library declarations. The only
+universe-parameter counts. The module audits cover transitive axioms of all
+accepted obligations and all fresh safe/nonpartial library declarations. The only
 permitted axioms are `propext`, `Classical.choice` and `Quot.sound`. The theorem
 inventory includes private declarations and other namespaces. New logical
 axioms are rejected even if unused. The trusted parser requires all 22 maintained
@@ -131,7 +151,10 @@ Synthetic successful fixtures test gate mechanics, not the tail theorems.
 modes produce data artifacts, not success. Its private audit continuation follows
 successful module replay; invoking that continuation alone is not verification.
 `lean/check.sh` retains optional whole-library replay for diagnostics. The common
-gate avoids replaying the same large proof terms twice.
+gate avoids repeating the whole-library diagnostic or replay. Standalone
+acceptance-auditor invocation retains its complete replay and axiom audit; the
+small final continuation is available only inside the trusted scheduler's
+successful same-run verification path.
 
 ## Trusted workflow and candidate execution
 
@@ -197,11 +220,19 @@ override the old base workflow. The canonical source remains immutable.
 
 ## Resources, logs and repository settings
 
-Cold builds and independent replay can take hours. Some finite polynomial modules
-use about 5 GB per process in local measurements; early replay fixtures used
-about 8 GiB even before loading the complete project. These are observations,
-not upper bounds. Build and replay use bounded
-dependency scheduling. `SVB_BUILD_JOBS` and `SVB_REPLAY_JOBS` control local
+Cold builds and independent replay can take hours. The 26 October measurements
+in [MIGRATION.md](MIGRATION.md#efficiency-revision--26-october-2026) distinguish
+compiled artifact size from process memory: revised acceptance fixtures peaked
+at 6.96 GiB, large polynomial compilations were sampled near 7.8 GiB, and
+general entropy compilations exceeded 9 GiB per process. During complete replay,
+the moment-cell worker was sampled at 21.12 GiB and the endpoint-prefactor
+worker at 11.59 GiB.
+These are local observations, not upper bounds or hosted-run measurements.
+GitHub's [standard private Linux runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+advertise 8 GB RAM. The revision therefore does not establish that the complete
+build and audit fit those runners; process RSS also excludes other job overhead.
+Build and replay use bounded dependency scheduling.
+`SVB_BUILD_JOBS` and `SVB_REPLAY_JOBS` control local
 parallelism. CI repository variables `LEAN_BUILD_JOBS` and `LEAN_REPLAY_JOBS`
 select trusted concurrency, defaulting to one. Set `LEAN_RUNNER` to a suitably
 sized **GitHub-hosted Linux** runner label when needed. Dependency installation
@@ -209,7 +240,8 @@ rejects self-hosted runners. Build and audit have 360-minute limits; a timeout
 fails the gate. A cold serial run may exceed that limit, so rollout requires
 appropriately sized hosted runners, memory-aware concurrency and an actual
 hosted validation run. The default Ubuntu runner's capacity and runtime have
-not been established by local tests.
+not been established by local tests. CI logs runner memory and disk availability,
+each build target's start and completion, and aggregate build/audit resource use.
 
 Open **Actions → Verification** and inspect the exact commit and job conclusions.
 Artifacts include `canonical-proof-modules-<run_id>`,

@@ -1,10 +1,13 @@
 import Lean
 import Lean.Replay
+import Lean.Util.CollectAxioms
 
 /-! Trusted module-DAG kernel replay worker.
 Only the scheduler may promote an imported project module to a verified seed.
 The scheduler checks byte identity and waits for all its dependencies. No source,
 native plugin, extension or initializer from a candidate executes in this process.
+Inventory-taking commands are private scheduler steps: the complete gate derives
+that inventory independently on every run and checks its bytes throughout.
 -/
 open Lean
 
@@ -17,6 +20,57 @@ private def roots : Array Import :=
 
 private def load (imports : Array Import) : IO Environment :=
   importModules imports {} (loadExts := false)
+
+-- A structural encoding, not Name.toString: quoted string components and
+-- numeric components must never alias a different protected declaration.
+private def nameKey : Name → String
+  | .anonymous => ""
+  | .str parentName value => nameKey parentName ++ "s" ++ toString value.utf8ByteSize ++ ":" ++ value
+  | .num parentName value => nameKey parentName ++ "n" ++ toString value ++ ";"
+
+private structure Inventory where
+  modules : Std.HashSet String := {}
+  constants : Std.HashSet String := {}
+
+private def inventory (env : Environment) : Inventory := {
+  modules := env.allImportedModuleNames.foldl (fun acc name => acc.insert (nameKey name)) {}
+  constants := env.constants.fold (fun acc name _ => acc.insert (nameKey name)) {}
+}
+
+private def exportInventory : IO Unit := do
+  let trustedNames := inventory (← load baseImports)
+  IO.println <| (Json.mkObj [
+    ("modules", toJson trustedNames.modules.toArray),
+    ("constants", toJson trustedNames.constants.toArray)]).compress
+
+private def readInventory (path : System.FilePath) : IO Inventory := do
+  let document ← IO.ofExcept <| Json.parse (← IO.FS.readFile path)
+  let modules ← IO.ofExcept <| document.getObjValAs? (Array String) "modules"
+  let constants ← IO.ofExcept <| document.getObjValAs? (Array String) "constants"
+  unless !modules.isEmpty && !constants.isEmpty do
+    throw <| IO.userError "Empty trusted declaration inventory"
+  return { modules := modules.foldl (fun acc name => acc.insert name) {}
+           constants := constants.foldl (fun acc name => acc.insert name) {} }
+
+private def readModuleInventory (path : System.FilePath) : IO Inventory := do
+  let document ← IO.ofExcept <| Json.parse (← IO.FS.readFile path)
+  let modules ← IO.ofExcept <| document.getObjValAs? (Array String) "modules"
+  unless !modules.isEmpty do
+    throw <| IO.userError "Empty trusted module inventory"
+  return { modules := modules.foldl (fun acc name => acc.insert name) {} }
+
+-- The full independently generated inventory protects every pinned declaration
+-- during planning. Workers need only the pinned declarations actually imported
+-- by this module. Derive their names from real constant records, not candidate
+-- origin flags or extraConstNames. The region-backed Name objects stay alive in
+-- the seed environment throughout replay and auditing.
+private def pinnedSeedNames (env : Environment) (trustedNames : Inventory) : Std.HashSet Name := Id.run do
+  let mut names : Std.HashSet Name := {}
+  for idx in [:env.allImportedModuleNames.size] do
+    if trustedNames.modules.contains (nameKey env.allImportedModuleNames[idx]!) then
+      for info in env.header.moduleData[idx]!.constants do
+        names := names.insert info.name
+  return names
 
 private def moduleData (name : Name) : IO (System.FilePath × ModuleData) := do
   let path ← findOLean name
@@ -34,20 +88,25 @@ private def identicalTheorem (left right : ConstantInfo) : Bool :=
       Expr.equal a.type b.type && Expr.equal a.value b.value
   | _, _ => false
 
-private def plan : IO Unit := do
-  let trusted ← load baseImports
+private def plan (trustedNames : Inventory) : IO Unit := do
   let imported ← load roots
   let names := imported.allImportedModuleNames.filter fun name =>
-    !trusted.allImportedModuleNames.contains name
+    !trustedNames.modules.contains (nameKey name)
   let mut modules : Array Json := #[]
   let mut seen : Std.HashMap Name ConstantInfo := {}
-  for name in names do
-    let (path, data) ← moduleData name
+  for idx in [:imported.allImportedModuleNames.size] do
+    let name := imported.allImportedModuleNames[idx]!
+    unless names.contains name do
+      continue
+    let path ← findOLean name
+    -- These records and their backing compacted regions are already retained
+    -- by the imported environment. Reading every file again doubles loading.
+    let data := imported.header.moduleData[idx]!
     unless data.constNames == data.constants.map ConstantInfo.name do
       throw <| IO.userError s!"Inconsistent declaration names in module {name}"
     let mut localNames : NameSet := {}
     for info in data.constants do
-      if trusted.contains info.name || localNames.contains info.name then
+      if trustedNames.constants.contains (nameKey info.name) || localNames.contains info.name then
         throw <| IO.userError s!"Module {name} redeclares imported constant {info.name}"
       localNames := localNames.insert info.name
       if let some prior := seen[info.name]? then
@@ -64,16 +123,48 @@ private def plan : IO Unit := do
       ("dependencies", Json.arr dependencies)]
   IO.println <| (Json.mkObj [("modules", Json.arr modules)]).compress
 
-private def checkModule (name : Name) : IO Unit := do
+-- Project ancestors have already passed kernel replay and this same audit in
+-- the scheduler. Their hashes are fixed. Traverse fresh and pinned declarations
+-- completely, stopping only at those verified ancestor declarations. This is
+-- induction over the module DAG, not trust in candidate checked/origin flags.
+private partial def collectBounded (env : Environment) (pinned : Std.HashSet Name)
+    (fresh : Std.HashMap Name ConstantInfo) (name : Name) :
+    StateT CollectAxioms.State IO Unit := do
+  unless (← get).visited.contains name do
+    modify fun state => { state with visited := state.visited.insert name }
+    let some info := fresh[name]? <|> env.checked.get.find? name |
+      throw <| IO.userError s!"Missing logical dependency: {name}"
+    if info.isUnsafe || info.isPartial then
+      throw <| IO.userError s!"Logical declaration depends on unsafe/partial {name}"
+    if !fresh.contains name && !pinned.contains name then
+      return
+    match info with
+    | .axiomInfo _ => modify fun state => { state with axioms := state.axioms.push name }
+    | .quotInfo _ => pure ()
+    | .inductInfo value =>
+      value.type.getUsedConstants.forM (collectBounded env pinned fresh)
+      value.ctors.forM (collectBounded env pinned fresh)
+    | _ => info.getUsedConstantsAsSet.toList.forM (collectBounded env pinned fresh)
+
+private def checkModule (name : Name) (trustedNames : Inventory) (report : Bool) : IO Unit := do
   let (_, data) ← moduleData name
   -- The trusted scheduler has already replayed every project import of this
   -- module and verified the hashes of its complete ancestor closure.
-  let seed ← load (baseImports ++ data.imports)
+  -- Only actual imports are needed by the kernel. The independent inventory
+  -- still protects every pinned constant, without loading all Mathlib into
+  -- workers for modules whose logical dependencies use a smaller subset.
+  let seed ← load data.imports
+  let pinned := pinnedSeedNames seed trustedNames
   unless data.constNames == data.constants.map ConstantInfo.name do
     throw <| IO.userError s!"Inconsistent declaration names in module {name}"
   let mut fresh : Std.HashMap Name ConstantInfo := {}
   let mut localNames : NameSet := {}
   for info in data.constants do
+    -- Standalone check retains its full collision inventory. The scheduler's
+    -- check-audit follows the full global collision plan, and only needs this
+    -- compact actual-seed membership for logical dependency auditing.
+    if pinned.contains info.name || trustedNames.constants.contains (nameKey info.name) then
+      throw <| IO.userError s!"Module {name} redeclares imported constant {info.name}"
     if localNames.contains info.name then
       throw <| IO.userError s!"Module {name} redeclares imported constant {info.name}"
     localNames := localNames.insert info.name
@@ -96,12 +187,35 @@ private def checkModule (name : Name) : IO Unit := do
         if let some used := fresh[dependency]? <|> seed.find? dependency then
           if used.isUnsafe || used.isPartial then
             throw <| IO.userError s!"Logical declaration {declaration} depends on unsafe/partial {dependency}"
+  let logicalRoots := fresh.toList.filterMap fun (name, info) =>
+    if !info.isUnsafe && !info.isPartial then some name else none
+  -- Audit the exact submitted expressions before kernel evaluation. In
+  -- particular native-oracle axioms are rejected before any reduction can
+  -- request their interpreter implementation. Every accepted expression is
+  -- subsequently replayed by the independent kernel.
+  let (_, audit) ← (logicalRoots.forM (collectBounded seed pinned fresh)).run {}
+  let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
+  for axiomName in audit.axioms do
+    unless allowed.contains axiomName do
+      throw <| IO.userError s!"Forbidden axiom in module {name}: {axiomName}"
   let _ ← seed.replay fresh
-  IO.println s!"MODULE_KERNEL_REPLAY_COMPLETE {name}"
+  if report then
+    let theorems := data.constants.filterMap fun info =>
+      if info.isTheorem then some info.name.toString else none
+    IO.println <| (Json.mkObj [
+      ("module", toJson name.toString), ("complete", Json.bool true),
+      ("theorems", toJson theorems),
+      ("axioms", toJson (audit.axioms.map Name.toString)),
+      ("visited", toJson (audit.visited.toList.map Name.toString))]).compress
+  else
+    IO.println s!"MODULE_KERNEL_REPLAY_COMPLETE {name}"
 
 def main (args : List String) : IO Unit := do
   initSearchPath (← findSysroot)
   match args with
-  | ["plan"] => plan
-  | ["check", name] => checkModule name.toName
-  | _ => throw <| IO.userError "Usage: ModuleReplay.lean plan | check MODULE"
+  | ["inventory"] => exportInventory
+  | ["plan"] => plan (inventory (← load baseImports))
+  | ["plan", path] => plan (← readInventory path)
+  | ["check", name] => checkModule name.toName (inventory (← load baseImports)) false
+  | ["check-audit", name, path] => checkModule name.toName (← readModuleInventory path) true
+  | _ => throw <| IO.userError "Usage: ModuleReplay.lean inventory | plan [INVENTORY] | check MODULE | check-audit MODULE INVENTORY"

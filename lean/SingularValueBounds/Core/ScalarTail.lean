@@ -1,4 +1,5 @@
-import Mathlib
+import Mathlib.Analysis.SpecialFunctions.Gaussian.GaussianIntegral
+import Mathlib.Analysis.SpecialFunctions.Pow.Integral
 
 /-! # Moment bounds from an exponential tail -/
 

@@ -9,9 +9,8 @@ if [[ ! -f "$source_dir/SingularValueBounds/Canonical/Results.lean" ]]; then
   printf '%s\n' 'Missing complete canonical proof interface: Canonical/Results.lean.' >&2
   exit 1
 fi
-# Report every current supporting theorem and complete source coverage here.
-# The acceptance command then independently replays every maintained module
-# and checks the exact canonical results and comparisons. Avoid a second replay.
-SVB_AUDIT_MODE=diagnostic "$source_dir/check.sh"
+# The acceptance command builds every maintained module, independently replays
+# it, audits every safe declaration and checks complete source coverage and all
+# exact canonical results. Do not repeat a full-library diagnostic beforehand.
 "$source_dir/check_acceptance.sh"
 printf '%s\n' 'PASS: complete canonical Lean targets, comparisons, and axiom audits.'

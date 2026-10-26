@@ -1,3 +1,5 @@
+import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.Tactic.NormNum.NatFactorial
 import SingularValueBounds.Core.ScalarTail
 import SingularValueBounds.Core.Constants
 

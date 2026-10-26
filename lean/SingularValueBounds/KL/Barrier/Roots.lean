@@ -1,3 +1,4 @@
+import Mathlib.Topology.Compactness.PseudometrizableLindelof
 import SingularValueBounds.Spectral.Continuity
 import SingularValueBounds.Shifts.UpperMatrixUpdate
 

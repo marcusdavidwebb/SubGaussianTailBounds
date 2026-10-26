@@ -63,9 +63,20 @@ class ModuleReplayIntegrationTests(unittest.TestCase):
                               "--", *args])
 
     def plan(self):
-        result = self.worker("plan")
+        result = self.worker("plan", str(self.inventory()))
         self.assertEqual(result.returncode, 0, result.stdout)
         return gate.parse_plan(json.loads(result.stdout))
+
+    def inventory(self):
+        result = self.worker("inventory")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        inventory = json.loads(result.stdout)
+        gate.parse_inventory(inventory)
+        path = self.root / "TrustedInventory.json"
+        path.write_text(result.stdout)
+        self.module_inventory = self.root / "TrustedModules.json"
+        self.module_inventory.write_text(json.dumps({"modules": inventory["modules"]}))
+        return path
 
     def test_valid_dependency_chain_replays_once_in_order(self):
         self.compile("ReplayBase", "import Init\ndef replayValue : Nat := 3\n")
@@ -75,14 +86,20 @@ class ModuleReplayIntegrationTests(unittest.TestCase):
 
         def check(module):
             self.assertTrue(module.dependencies <= set(completed))
-            result = self.worker("check", module.name)
+            result = self.worker("check-audit", module.name, str(self.module_inventory))
             self.assertEqual(result.returncode, 0, result.stdout)
-            self.assertEqual(result.stdout.strip(), f"MODULE_KERNEL_REPLAY_COMPLETE {module.name}")
+            gate.parse_report(json.loads(result.stdout), module.name)
             completed.append(module.name)
 
-        gate.replay(modules, check, jobs=2, progress=lambda _: None)
+        gate.replay(modules, check, jobs=1, progress=lambda _: None)
         self.assertEqual(set(completed), set(modules))
         self.assertLess(completed.index("ReplayBase"), completed.index("ReplayChild"))
+        # Keep direct standalone compatibility coverage small: this module
+        # imports only Init. Hosted fixtures never run duplicate full-Mathlib
+        # environments concurrently; concurrency itself has Python DAG tests.
+        standalone = self.worker("check", "ReplayBase")
+        self.assertEqual(standalone.returncode, 0, standalone.stdout)
+        self.assertEqual(standalone.stdout.strip(), "MODULE_KERNEL_REPLAY_COMPLETE ReplayBase")
 
     def test_forged_theorem_is_rejected_before_descendants(self):
         self.compile("ReplayForged", """import Mathlib
@@ -103,12 +120,12 @@ run_cmd do
 
         def check(module):
             attempted.append(module.name)
-            result = self.worker("check", module.name)
+            result = self.worker("check-audit", module.name, str(self.module_inventory))
             if result.returncode:
                 raise ValueError(result.stdout)
 
         with self.assertRaisesRegex(ValueError, "type mismatch"):
-            gate.replay(modules, check, jobs=2, progress=lambda _: None)
+            gate.replay(modules, check, jobs=1, progress=lambda _: None)
         self.assertNotIn("CanonicalAcceptance", attempted)
         self.assertNotIn("SingularValueBounds", attempted)
 
@@ -130,16 +147,19 @@ run_cmd do
 """)
         self.roots("ReplayUnsafeChild")
         self.plan()
-        parent = self.worker("check", "ReplayUnsafe")
+        parent = self.worker("check-audit", "ReplayUnsafe", str(self.module_inventory))
         self.assertEqual(parent.returncode, 0, parent.stdout)
-        child = self.worker("check", "ReplayUnsafeChild")
+        child = self.worker("check-audit", "ReplayUnsafeChild", str(self.module_inventory))
         self.assertNotEqual(child.returncode, 0, child.stdout)
         self.assertIn("depends on unsafe/partial replayUnsafeFalse", child.stdout)
 
     def test_candidate_cannot_redeclare_a_trusted_constant(self):
         self.compile("ReplayCollision", "import Init\ndef protectedNumber : Nat := 100\n")
         self.roots("ReplayCollision")
-        result = self.worker("plan")
+        # protectedNumber is absent from this candidate's actual import
+        # closure. The independent full-name planner must still reject it
+        # before compact-inventory workers can be scheduled.
+        result = self.worker("plan", str(self.inventory()))
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertIn("redeclares imported constant protectedNumber", result.stdout)
 
@@ -161,10 +181,10 @@ run_cmd do
         modules = self.plan()
 
         def check(module):
-            result = self.worker("check", module.name)
+            result = self.worker("check-audit", module.name, str(self.module_inventory))
             self.assertEqual(result.returncode, 0, result.stdout)
 
-        gate.replay(modules, check, jobs=2, progress=lambda _: None)
+        gate.replay(modules, check, jobs=1, progress=lambda _: None)
 
     def test_duplicate_theorems_with_different_proof_type_or_universe_are_rejected(self):
         self.compile("ReplayLeft", "import Init\ntheorem replayCollision : True := True.intro\n")
@@ -184,6 +204,7 @@ run_cmd do
   | .error _ => throwError "failed to construct universe collision fixture"
 """,
         }
+        inventory = self.inventory()
         for kind, declaration in variants.items():
             with self.subTest(kind=kind):
                 self.compile("ReplayRight", "import Lean\n" + declaration + "\n")
@@ -191,7 +212,7 @@ run_cmd do
                 # roots so the independent loader/planner sees both artifacts.
                 self.compile("SingularValueBounds", "import ReplayLeft\n")
                 self.compile("CanonicalAcceptance", "import ReplayRight\n")
-                result = self.worker("plan")
+                result = self.worker("plan", str(inventory))
                 self.assertNotEqual(result.returncode, 0, result.stdout)
                 # Lean's data loader already rejects some type/universe
                 # conflicts; our planner additionally checks proof identity.
@@ -203,9 +224,58 @@ run_cmd do
         self.compile("CanonicalAcceptanceExpected", source)
         self.compile("ReplayCollision", source)
         self.roots("ReplayCollision")
-        result = self.worker("plan")
+        result = self.worker("plan", str(self.inventory()))
         self.assertNotEqual(result.returncode, 0, result.stdout)
         self.assertIn("redeclares imported constant protectedFact", result.stdout)
+
+    def test_bounded_audits_cover_private_theorems_definitions_and_verified_ancestors(self):
+        self.compile("ReplayBase", """import Init
+private theorem privateFact : True := True.intro
+theorem exportedFact : True := privateFact
+def «helper value» : Nat := 7
+def ordinaryDefinition : Nat := «helper value»
+""")
+        self.compile("ReplayChild", "import ReplayBase\ntheorem childFact : True := exportedFact\n")
+        self.roots("ReplayChild")
+        inventory = self.inventory()
+        result = self.worker("plan", str(inventory))
+        self.assertEqual(result.returncode, 0, result.stdout)
+        modules = gate.parse_plan(json.loads(result.stdout))
+        reports = {}
+
+        def check(module):
+            result = self.worker("check-audit", module.name, str(self.module_inventory))
+            self.assertEqual(result.returncode, 0, result.stdout)
+            reports[module.name] = gate.parse_report(json.loads(result.stdout), module.name)
+
+        gate.replay(modules, check, jobs=1, progress=lambda _: None)
+        summary = gate.audit_summary(modules, reports)
+        self.assertIn("AUDIT_TARGET _private.", summary)
+        self.assertIn("ordinaryDefinition", reports["ReplayBase"]["visited"])
+        self.assertTrue(any("helper value" in name for name in reports["ReplayBase"]["visited"]))
+        self.assertIn("exportedFact", reports["ReplayChild"]["visited"])
+
+    def test_native_oracle_in_unused_ancestor_definition_rejects_before_child(self):
+        self.compile("ReplayOracle", """import Mathlib.Tactic
+def hiddenOracle : (1 : Nat) = 1 := by native_decide
+""")
+        self.compile("ReplayChild", "import ReplayOracle\ntheorem harmlessChild : True := True.intro\n")
+        self.roots("ReplayChild")
+        inventory = self.inventory()
+        result = self.worker("plan", str(inventory))
+        self.assertEqual(result.returncode, 0, result.stdout)
+        modules = gate.parse_plan(json.loads(result.stdout))
+        attempted = []
+
+        def check(module):
+            attempted.append(module.name)
+            result = self.worker("check-audit", module.name, str(self.module_inventory))
+            if result.returncode:
+                raise ValueError(result.stdout)
+
+        with self.assertRaisesRegex(ValueError, "Forbidden axiom"):
+            gate.replay(modules, check, jobs=1, progress=lambda _: None)
+        self.assertNotIn("ReplayChild", attempted)
 
 
 if __name__ == "__main__":

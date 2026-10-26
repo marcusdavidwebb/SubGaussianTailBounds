@@ -9,6 +9,7 @@ import importlib.util
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -272,7 +273,9 @@ theorem valid : True := True.intro
         self.compile("AcceptanceRecordedConstants", recorded)
         self.compile("CanonicalCandidateConstants", gate.trusted_constants_source(
             recorded, "CanonicalAcceptanceCI.CandidateSnapshot"))
-        self.compile("AcceptanceFixtures", """import Mathlib
+        self.compile("AcceptanceFixtures", """import Mathlib.Data.Real.Sqrt
+import Mathlib.Tactic.Positivity
+import Mathlib.Tactic.NormNum
 namespace AcceptanceFixtures
 universe u
 def General (a b c d : ℝ) : Prop := ∀ (_ : Type u), 0 < a ∧ 0 < b ∧ 0 < c ∧ 0 < d
@@ -325,6 +328,29 @@ end AcceptanceFixtures
                 general_current_comparison=trusted))
             self.assertIn("CANONICAL_OBLIGATIONS_ELABORATED 22 targets", output)
             self.run_external_audit()
+
+    def test_synthetic_scheduler_combines_full_module_audit_and_exact_targets(self):
+        self.compile("CanonicalAcceptance", self.synthetic_case())
+        self.compile("SingularValueBounds", "import AcceptanceResults\n")
+        auditor = self.root / "CanonicalAcceptanceAudit.lean"
+        auditor.write_text(gate.external_audit_source(include_library=False))
+        worker = self.root / "CanonicalModuleReplay.lean"
+        worker.write_bytes((SOURCE / "lean/Acceptance/ModuleReplay.lean").read_bytes())
+        result = subprocess.run([
+            sys.executable, str(SOURCE / "scripts/replay_lean_modules.py"),
+            "--elan", self.elan, "--toolchain", self.toolchain,
+            "--worker", str(worker), "--auditor", str(auditor), "--jobs", "1"
+        ], cwd=self.root, text=True,
+            env=dict(os.environ, LEAN_PATH=str(self.root) + ":" + self.lean_path),
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=300)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(result.stdout.count("CANONICAL_ACCEPTANCE_COMPLETE 22 targets"), 1)
+        self.assertEqual(result.stdout.count("AUDIT_COMPLETE "), 1)
+        self.assertIn("AUDIT_TARGET SubGaussian.Current.general\n", result.stdout)
+        self.assertIn("AUDIT_TARGET SubGaussian.Current.unit\n", result.stdout)
+        self.assertIn("CANONICAL_MODULE_REPLAY_COMPLETE ", result.stdout)
+        self.assertFalse(list(self.root.glob(".trusted-inventory-*.json")))
+        self.assertFalse(list(self.root.glob(".trusted-modules-*.json")))
 
     def run_external_audit(self, *, success=True, error=None):
         (self.root / "CanonicalAcceptanceAudit.lean").write_text(
@@ -406,7 +432,7 @@ run_cmd do
 
     def test_unused_native_oracle_in_a_definition_is_rejected(self):
         source = self.synthetic_case()
-        self.compile("UnusedNative", """import Mathlib
+        self.compile("UnusedNative", """import Lean
 def unusedNativeWitness : (1 : Nat) + 1 = 2 := by native_decide
 """)
         self.compile("CanonicalAcceptance", source.replace(

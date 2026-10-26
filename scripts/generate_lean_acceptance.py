@@ -179,54 +179,57 @@ def main (args : List String) : IO Unit := do
   let imported ← importModules #[""" + (
         "{ module := `SingularValueBounds }, " if include_library else "") + """{ module := `CanonicalAcceptance }""" + (
         ", { module := `CanonicalCandidateConstants }" if independent_snapshot else "") + """] {} (loadExts := false)
-  let trusted ← importModules #[{ module := `Mathlib }, { module := `CanonicalAcceptanceExpected }]
-    {} (loadExts := false)
-  let fresh := imported.constants.fold (fun acc name info =>
-    if trusted.contains name then acc else acc.insert name info)
-    ({} : Std.HashMap Name ConstantInfo)
-  for (name, info) in fresh.toList do
-    if info.isAxiom && !info.isUnsafe then
-      throw <| IO.userError s!"Forbidden axiom declared by canonical implementation: {name}"
-  -- Whole-source diagnostics remain independent of candidate commands. They
-  -- report every project theorem, including private/helper declarations.
-  let diagnosticTargets := fresh.toList.filterMap fun (name, info) =>
-    if info.isTheorem then some name else none
-  let diagnosticRoots := fresh.toList.filterMap fun (name, info) =>
-    if !info.isUnsafe && !info.isPartial then some name else none
-  let (_, diagnostic) := (((diagnosticRoots.forM CollectAxioms.collect).run imported).run {})
-  let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
-  for name in diagnostic.axioms do
-    unless allowed.contains name do
-      throw <| IO.userError s!"Forbidden axiom in project theorem dependencies: {name}"
-  for name in diagnosticTargets do
-    IO.println s!"AUDIT_TARGET {name}"
-  for name in imported.allImportedModuleNames do
-    if (`SingularValueBounds).isPrefixOf name && name != `SingularValueBounds then
-      IO.println s!"AUDIT_MODULE {name}"
-  IO.println s!"AUDIT_AXIOMS {diagnostic.axioms.toList}"
-  IO.println s!"AUDIT_COMPLETE {diagnosticTargets.length} targets; {diagnostic.visited.size} visited constants"
-  -- Replay every declaration reachable from the actual accepted types/proofs.
-  -- This omits unrelated implementation branches, never a logical dependency.
-  -- The global scan above still rejects even an unused new logical axiom.
-  let mut closure : Std.HashMap Name ConstantInfo := {}
-  let mut pending := specs.map fun (suffix, _, _) =>
-    ("CanonicalAcceptanceCI.checked_" ++ suffix).toName
-  pending := pending ++ (specs.filterMap fun (suffix, _, _) =>
-    if publicTypeRequired suffix then some (("SubGaussian.Current." ++ suffix).toName) else none)
-  pending := pending ++ specs.flatMap (fun (_, _, arguments) => arguments.map String.toName)
-  while !pending.isEmpty do
-    let name := pending.head!
-    pending := pending.tail!
-    if !closure.contains name then
-      if let some info := fresh[name]? then
-        closure := closure.insert name info
-        pending := info.getUsedConstantsAsSet.toList ++ pending
-        if let .inductInfo inductiveInfo := info then
-          pending := inductiveInfo.all ++ pending
-  -- Imported .olean flags are not evidence: the trusted kernel rechecks these.
-  -- The scheduler's private continuation follows verified module-DAG replay.
-  -- Standalone invocation always replays the entire logical target closure.
+  -- The continuation follows the scheduler's complete per-module kernel and
+  -- axiom audits. Only the standalone mode needs a second trusted environment,
+  -- whole-library dependency scan and a proof-closure map.
   let env ← if args.isEmpty then do
+      let trusted ← importModules #[{ module := `Mathlib }, { module := `CanonicalAcceptanceExpected }]
+        {} (loadExts := false)
+      let fresh := imported.constants.fold (fun acc name info =>
+        if trusted.contains name then acc else acc.insert name info)
+        ({} : Std.HashMap Name ConstantInfo)
+      for (name, info) in fresh.toList do
+        if info.isAxiom && !info.isUnsafe then
+          throw <| IO.userError s!"Forbidden axiom declared by canonical implementation: {name}"
+      -- Whole-source diagnostics remain independent of candidate commands. They
+      -- report every project theorem, including private/helper declarations.
+      let diagnosticTargets := fresh.toList.filterMap fun (name, info) =>
+        if info.isTheorem then some name else none
+      let diagnosticRoots := fresh.toList.filterMap fun (name, info) =>
+        if !info.isUnsafe && !info.isPartial then some name else none
+      let (_, diagnostic) := (((diagnosticRoots.forM CollectAxioms.collect).run imported).run {})
+      let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
+      for name in diagnostic.axioms do
+        unless allowed.contains name do
+          throw <| IO.userError s!"Forbidden axiom in project theorem dependencies: {name}"
+      for name in diagnosticTargets do
+        IO.println s!"AUDIT_TARGET {name}"
+      for name in imported.allImportedModuleNames do
+        if (`SingularValueBounds).isPrefixOf name && name != `SingularValueBounds then
+          IO.println s!"AUDIT_MODULE {name}"
+      IO.println s!"AUDIT_AXIOMS {diagnostic.axioms.toList}"
+      IO.println s!"AUDIT_COMPLETE {diagnosticTargets.length} targets; {diagnostic.visited.size} visited constants"
+      -- Replay every declaration reachable from the actual accepted types/proofs.
+      -- This omits unrelated implementation branches, never a logical dependency.
+      -- The global scan above still rejects even an unused new logical axiom.
+      let mut closure : Std.HashMap Name ConstantInfo := {}
+      let mut pending := specs.map fun (suffix, _, _) =>
+        ("CanonicalAcceptanceCI.checked_" ++ suffix).toName
+      pending := pending ++ (specs.filterMap fun (suffix, _, _) =>
+        if publicTypeRequired suffix then some (("SubGaussian.Current." ++ suffix).toName) else none)
+      pending := pending ++ specs.flatMap (fun (_, _, arguments) => arguments.map String.toName)
+      while !pending.isEmpty do
+        let name := pending.head!
+        pending := pending.tail!
+        if !closure.contains name then
+          if let some info := fresh[name]? then
+            closure := closure.insert name info
+            pending := info.getUsedConstantsAsSet.toList ++ pending
+            if let .inductInfo inductiveInfo := info then
+              pending := inductiveInfo.all ++ pending
+      -- Imported .olean flags are not evidence: the trusted kernel rechecks these.
+      -- The scheduler's private continuation follows verified module-DAG replay.
+      -- Standalone invocation always replays the entire logical target closure.
       IO.eprintln s!"Replaying {closure.size} declarations in the complete acceptance dependency closure"
       trusted.replay closure
     else pure imported
@@ -250,10 +253,12 @@ def main (args : List String) : IO Unit := do
       unless (env.checked.get.find? name).isSome do
         throw <| IO.userError s!"Acceptance target is not kernel checked: {name}"
       targets := name :: targets
-  let (_, state) := (((targets.forM CollectAxioms.collect).run env).run {})
-  for name in state.axioms do
-    unless allowed.contains name do
-      throw <| IO.userError s!"Forbidden axiom in canonical acceptance dependencies: {name}"
+  if args.isEmpty then
+    let (_, state) := (((targets.forM CollectAxioms.collect).run env).run {})
+    let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
+    for name in state.axioms do
+      unless allowed.contains name do
+        throw <| IO.userError s!"Forbidden axiom in canonical acceptance dependencies: {name}"
   IO.println "CANONICAL_ACCEPTANCE_COMPLETE 22 targets"
 """
 

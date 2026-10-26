@@ -1,3 +1,4 @@
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Series
 import SingularValueBounds.QuadraticForms.Basic
 
 /-!

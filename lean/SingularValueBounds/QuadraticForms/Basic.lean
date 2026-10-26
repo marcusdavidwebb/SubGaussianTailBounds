@@ -1,3 +1,5 @@
+import Mathlib.Probability.Moments.SubGaussian
+import Mathlib.MeasureTheory.Function.L2Space
 import SingularValueBounds.Core.Assumptions
 import SingularValueBounds.Core.Matrix
 import SingularValueBounds.QuadraticForms.Estimates

@@ -13,6 +13,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import time
 
 
 def validate_graph(graph: dict[str, set[str]]) -> None:
@@ -115,13 +116,15 @@ def main() -> None:
 
     def compile_module(name: str) -> None:
         log_path = log_dir / (name + ".log")
+        started = time.monotonic()
+        print(f"LEAN_BUILD_START {name}", flush=True)
         with log_path.open("w") as stream:
             completed = subprocess.run(command + ["build", name], cwd=work,
                                        stdout=stream, stderr=subprocess.STDOUT)
         if completed.returncode:
             print(log_path.read_text()[-12000:], flush=True)
             raise RuntimeError(f"Lean build failed: {name}; full log: {log_path}")
-        print(f"LEAN_BUILD {name}", flush=True)
+        print(f"LEAN_BUILD {name} ({time.monotonic() - started:.1f}s)", flush=True)
 
     build_order(graph, compile_module, args.jobs)
     print(f"LEAN_BUILD_COMPLETE {len(graph)} modules; at most {args.jobs} simultaneous module builds")

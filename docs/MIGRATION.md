@@ -43,7 +43,7 @@ The two canonical proofs use the corresponding regime-specific components.
 
 | Field | Concrete Lean coverage |
 |---|---|
-| `generalLower` | 681 moment cells, three plateau scalar families and both plateau-cost intervals. |
+| `generalLower` | 681 indexed moment cells and their separate endpoint, three plateau scalar families and both plateau-cost intervals. |
 | `endpointLowerTable` | All eight boxes. |
 | `endpointLowerFar` | All five intervals. |
 | `majorant` | Six exact factorizations and all 165 boxes. The largest row's 70 independent leaves are split into ten build/replay blocks. |
@@ -96,8 +96,11 @@ present. Future instruction files must preserve the same prohibition.
 The preceding trusted gate required strict improvement, allowed certain
 tradeoffs, froze baseline implementation paths, and required the old registry
 and prose/certificate package. Candidate workflow edits do not alter that policy
-already installed on a target branch. This local change prepares its reviewed
-replacement; it does not claim the hosted transition has been activated.
+already installed on a target branch. The maintainer has selected the new gate
+as the intended policy; the retired checks do not determine its mathematical
+requirements. The transition is under review in
+[PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2).
+This does not claim that the default-branch transition has been activated.
 
 The new policy isolates candidate compilation, independently compiles the stable
 next-constants snapshot, and loads only compiled module data into a fresh trusted
@@ -108,12 +111,117 @@ Only `propext`, `Classical.choice` and `Quot.sound` are allowed. Separate privil
 jobs report status and recheck the current base/head; candidate jobs receive no
 write credentials or secrets. See [CI.md](CI.md).
 
-Hosted runner sizing, runtime and branch-protection rollout remain maintainer
-configuration and validation steps. No hosted run, PR publication, merge or remote
-configuration change is asserted here. Local builds reused Lean 4.19.0, Mathlib
+Hosted runner sizing, runtime and branch-protection rollout remain validation
+and configuration steps. No successful hosted run, merge or remote configuration
+change is asserted here. Local builds reused Lean 4.19.0, Mathlib
 `c44e0c8ee63ca166450922a373c7409c5d26b00b` and the existing pinned central packages;
 no dependency or toolchain was installed, upgraded or replaced. All generated
 configuration, caches and compiled outputs stayed outside the source checkout.
+
+## Efficiency revision — 26 October 2026
+
+The revision reduces memory use without changing the canonical statements,
+baseline quartets or dependency pins. Shared polynomial identities and separable
+coefficient checks replace expanded algebra proofs in the majorant and rate
+certificates. All **248 original leaf statements and their original coefficient
+vectors** remain byte-for-byte identical. The mathematical implementation now
+uses explicit Mathlib imports. The dependency environment induced by those
+imports falls from **7,944 to 4,260 imported modules**, and from **1,171,624 to
+771,620 declarations**, including their Lean/Std and other transitive dependencies.
+The import-only changes preserve their proof bodies.
+
+Measured compiled proof sizes after rebuilding the affected families are:
+
+| Compiled artifacts | Before | After | Reduction |
+|---|---:|---:|---:|
+| Complete majorant family, including aggregates | 2,373,155,920 bytes | 45,982,984 bytes | 98.06% |
+| Fifteen rate rows | 591,326,912 bytes | 68,889,320 bytes | 88.35% |
+
+These are artifact sizes, not peak process memory. The small general-mean
+certificate also reuses 121 exact node values, verified through the existing
+integer exponential/logarithm algorithms. Its ten public theorem statements
+remain unchanged. The original compilation was sampled above **13.4 GiB RSS**;
+the complete revised-module pilot measured **3.82 GiB peak RSS**, with an artifact
+increase from 350,152 to 741,008 bytes. Its 40.57-second pilot and the original
+363.2-second build ran under different concurrent loads and are not a controlled
+speed comparison.
+
+The verifier derives one independent protected-name inventory, reuses already
+loaded module data in its planner, and loads only actual imports in workers.
+The full inventory remains responsible for global collision checks. Workers use
+a small module-name inventory and genuine pinned constant records. Each module
+audits every fresh safe, nonpartial declaration before independent kernel replay;
+the scheduler combines complete same-run reports. The final continuation checks
+exact types and universes without repeating the full-library axiom traversal.
+Standalone auditing retains its complete checks. The common gate and CI build
+also avoid a duplicate whole-library diagnostic. See [CI.md](CI.md) for the
+unchanged trust requirements and the compositional audit argument.
+
+The independently generated full inventory was 84,081,714 bytes; the worker
+module inventory was 385,759 bytes. A representative `Core.Constants` worker's
+measured peak fell from **2.85 to 2.52 GiB** with identical report sets. Inventory
+generation itself measured **4.81 GiB peak RSS**. These scoped measurements do
+not establish a complete hosted run or an upper bound for every worker.
+
+After the complete rebuild, the exact **490-module** replay plan contained
+**1,727,305,024 compiled artifact bytes (1.61 GiB)**. Fresh resource probes
+measured **4.80 GiB** for independent inventory generation, **4.07 GiB** for
+planning and **3.65 GiB** for the final type-checking continuation. The earlier
+final-auditor probe measured 14.50 GiB. These measurements reflect both the
+smaller proof artifacts and verifier changes; they are not an isolated benchmark
+of either change. A continuation probe measures resources only and cannot
+substitute for the full scheduler's kernel replay and axiom audit.
+
+Sampling active workers during the complete replay revealed remaining numerical
+proof bottlenecks: **21.12 GiB RSS** for `ConcreteMomentCells` and **11.59 GiB**
+for `ConcreteEndpointPrefactors`. These are point-in-time observations, not
+lifetime maxima. They make the whole-job limitation explicit: smaller planner
+and final-checker phases do not establish that all compilation or replay fits
+an 8 GB hosted runner. Further options below identify these finite tables as
+priority candidates for batching.
+
+All **111 unique regression tests** passed against this revision: 75
+administrative tests and 36 actual Lean fixtures (18 acceptance, nine module
+replay, eight stable-snapshot and one source-freshness case). The administrative
+discovery's 36 intentional skips are accounted for by those separate Lean runs.
+The final acceptance suite took 571.54 seconds and measured **6.96 GiB maximum
+child RSS**; the module-replay suite took 558.89 seconds and measured **4.92 GiB**.
+Synthetic fixture imports were narrowed, and actual Lean worker concurrency in
+those fixtures is one. Lightweight scheduler tests retain concurrent-DAG
+coverage. Propositions and hostile cases are unchanged; private declarations,
+unused native-oracle definitions and quoted helper names are covered.
+
+### Complete validation of the efficiency revision
+
+After rebuilding the affected dependency chains, the full common verification
+command passed with exit code **0**:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 SVB_BUILD_JOBS=28 SVB_REPLAY_JOBS=32 ./lean/verify.sh
+```
+
+The run started at **11:48:36 UTC** and finished at **12:35:36 UTC** on
+26 October 2026, taking **2,819.35 seconds (46 minutes 59.35 seconds)**.
+Lake checked all **489 module source traces** without requiring recompilation;
+all **490 compiled modules** then passed fresh independent kernel replay. Exact
+types, universes and comparisons passed for all **22 acceptance targets**. The
+axiom audit covered **53,214 targets and 112,553 visited constants**, permitting
+only `propext`, `Classical.choice` and `Quot.sound`. Recorded source hashes were
+unchanged throughout the run.
+
+The measured maximum child-process RSS was **23,617,683,456 bytes (22.00 GiB)**;
+this is not the sum of simultaneous workers. Total child CPU time was about
+**21.66 hours**. These measurements confirm that further work is needed for a
+small hosted runner, despite the smaller audit infrastructure and proof
+artifacts. This was a warm build followed by complete fresh verification, not a
+cold build. The different replay concurrency and audit coverage also prevent a
+controlled runtime comparison with 25 October.
+
+The complete log, validation result, source hashes and supporting measurements
+are retained outside the checkout in the project workspace under
+`validation/20261026T114836Z-efficiency/`. They are evidence of this run, not
+cached authorization to skip any later verification step. The historical
+validation below remains a separate record.
 
 ## Completion validation — 25 October 2026
 
@@ -223,3 +331,77 @@ Completing kernel replay and validating hosted runtime were still outstanding.
 At that time, `./lean/verify.sh` exited unsuccessfully as intended because the
 complete unit result and combined `Canonical/Results.lean` acceptance entry point
 were absent. No PR was created or published.
+
+## Further efficiency options
+
+These are proposals, not implemented changes or promises of total runtime savings.
+Any implementation must preserve the current canonical verification gate, exact
+dependency pins, complete source coverage and independent kernel replay.
+
+- **Batch ready build targets.** Pinned Lake 4.19 supports multiple targets in
+  one invocation, sharing workspace setup and dependency traversal. It has no
+  CLI limit on simultaneous module builds; `-j2` limits each Lean compiler's
+  threads. Small batches of dependency-ready targets could retain an outer
+  concurrency bound while reducing repeated Lake work. Large batches can leave
+  capacity idle until their slowest target finishes.
+- **Fetch only needed CI dependency caches.** The pinned Mathlib cache tool
+  accepts explicit module roots and their import closures. Disposable snapshot
+  jobs could fetch the accepted-constants imports; build jobs could fetch the
+  proof imports if full-Mathlib regression fixtures run separately. The trusted
+  audit still needs full Mathlib for its protected-name inventory. Cache reuse
+  must preserve exact pins and the separation from candidate-produced artifacts.
+- **Cancel builds promptly after failure.** The current build scheduler waits
+  for already-running subprocesses when one target fails. Tracking and stopping
+  only its own remaining compiler processes could avoid wasted work while
+  preserving failure logs and every acceptance requirement.
+- **Prebuild the trusted replay executable.** A native executable built solely
+  from the trusted verifier could avoid repeated source elaboration at worker
+  startup. It would still load candidate modules only as data and perform the
+  same kernel, axiom and exact-type checks. Startup and memory benefits need
+  measurement before adoption.
+- **Share general entropy evaluations.** Reusing evaluations at the **731
+  distinct slopes** would reduce **320,771 evaluations to 88,451**, approximately
+  **72% fewer in that subcalculation only**. This operation-count reduction is
+  not a measured reduction in total verification time.
+- **Separate reusable helpers from numerical certificates.** There are **99
+  direct importers** of `ConcreteGeneralMeanSmall`, many using its helper lemmas.
+  Moving those helpers to a small shared module could avoid unnecessary rebuilds
+  after edits confined to its numerical certificate. This is primarily an
+  incremental-build improvement; its total time benefit has not been measured.
+- **Investigate the staged general-polynomial proof.** A one-cell pilot reduced
+  peak memory from **3.60 to 2.71 GiB** and its compiled artifact from **361,592
+  to 241,088 bytes**, but elapsed time increased from **17.97 to 20.67 seconds**.
+  The full block has not been validated; these measurements do not establish a
+  production improvement.
+- **Split general polynomial blocks into smaller modules.** A ten-cell pilot
+  with unchanged declarations and proof bodies passed in **151.19 seconds**, at
+  **4.275 GiB peak RSS**. Existing seventy-cell modules were sampled at **7–7.8
+  GiB** during compilation. All 1,330 proof pairs can be moved independently
+  without rewriting their mathematics. Ten-cell chunks would add 133 modules
+  and their startup overhead. The pilot does not establish a maximum over all
+  chunks; the nineteen original blocks remain unchanged in this revision.
+- **Split general entropy blocks.** The remaining seventy-row compilations
+  exceeded **9 GiB RSS per process** locally. Smaller independent modules are
+  another candidate for reducing compiler peaks. Source inspection confirms
+  that seven ten-row children per block can retain every public declaration and
+  proof body unchanged, adding 133 modules. Their memory use and added
+  import/startup costs have not yet been measured. Heavier endpoint entropy rows
+  were also sampled near 7.7 GiB and merit the same investigation.
+- **Batch the remaining large finite tables.** The 681 indexed moment cells
+  and their separate endpoint have no cross-cell dependencies. Bounded groups
+  could replace the current whole-table decisions, and exact cached logarithm
+  and exponential values could serve several certificate fields. Plateau-cost
+  and plateau-scalar leaves are also independent once their shared identities
+  are exposed through small interfaces. Their high-degree coefficient/sign
+  checks may need finer groups; none of these resource benefits is measured.
+  The moment-cell replay's observed 21.12 GiB and the endpoint-prefactor replay's
+  11.59 GiB make those two modules the highest-priority remaining RAM targets.
+  The prefactor domain decision covers 50 independent shape rows with 23
+  logarithm inputs each; bounded row groups could retain the public aggregate.
+  There are 1,130 distinct inputs among those 1,150 pairs, so batching has
+  clearer scope than cross-cell value sharing in that particular table.
+- **Shard CI across isolated jobs.** Compilation or replay could be distributed
+  while retaining complete coverage, immutable artifact identities and same-run
+  dependency and artifact-hash checks. Replay shards must establish that their
+  ancestors passed verification; compilation success alone cannot authorize
+  trusted reuse. Transfer costs and duplicated setup may offset parallelism.

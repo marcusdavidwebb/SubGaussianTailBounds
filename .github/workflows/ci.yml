@@ -148,12 +148,15 @@ jobs:
         run: bash trusted/scripts/install_ci_lean.sh
       - name: Provision exact locked dependencies in the isolated build job
         run: candidate/lean/setup.sh --ci
-      - name: Compile the maintained library and support diagnostics
-        run: SVB_AUDIT_MODE=diagnostic candidate/lean/check.sh
-      - name: Build the exact generated acceptance obligations
+      # This command builds the maintained library as well as the obligations.
+      # The isolated audit below checks complete source coverage and axioms;
+      # repeating that full-library diagnostic here doubles its loading work.
+      - name: Build the maintained library and exact acceptance obligations
         run: |
           set -o pipefail
-          bash trusted/lean/check_acceptance.sh build 2>&1 | tee "$RUNNER_TEMP/build.log"
+          free -h
+          df -h "$RUNNER_TEMP"
+          /usr/bin/time -v bash trusted/lean/check_acceptance.sh build 2>&1 | tee "$RUNNER_TEMP/build.log"
       - name: Test canonical gate rejection fixtures with the installed Lean
         env:
           SVB_LEAN_TEST_WORK_DIR: ${{ runner.temp }}/candidate-work
@@ -294,7 +297,9 @@ jobs:
       - name: Replay and check all exact canonical obligations without executing candidate code
         run: |
           set -o pipefail
-          bash trusted/lean/check_acceptance.sh audit 2>&1 | tee "$RUNNER_TEMP/canonical-audit.log"
+          free -h
+          df -h "$RUNNER_TEMP"
+          /usr/bin/time -v bash trusted/lean/check_acceptance.sh audit 2>&1 | tee "$RUNNER_TEMP/canonical-audit.log"
       - name: Preserve the authoritative audit log and trusted generated obligations
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -19,14 +19,15 @@ sample-space universe `u`, their baseline corollaries, exact componentwise
 comparisons with the original baselines and trusted accepted quartets, and
 equalities tying the recorded constants to those proved. A missing or conditional
 result cannot pass. The [public interface](../docs/CI.md#lean-interface) has
-22 stable declarations in `SubGaussian.Current`.
+22 stable theorem declarations in `SubGaussian.Current`.
 
 The command checks the actual root source and the full README copy, builds the
-maintained sources, checks complete source/import coverage, and reports all
-current project theorem dependencies. An independent verifier then checks the
-exact canonical types and replays every maintained module through Lean's kernel,
-in dependency order. Only `propext`, `Classical.choice` and `Quot.sound` are
-allowed. The supporting whole-library diagnostic does not replace that replay.
+maintained sources, and independently replays every maintained module through
+Lean's kernel in dependency order. Each module's safe declarations receive an
+axiom audit in that same process. The verifier combines the reports only after
+all modules pass with unchanged artifacts, checks complete source/import
+coverage, and checks the exact canonical types. Only `propext`,
+`Classical.choice` and `Quot.sound` are allowed.
 Python performs administration only; numerical inequalities are Lean obligations.
 
 Local self-comparison is a preflight. To compare a proposed change with an
@@ -40,8 +41,8 @@ The [validation record](../docs/MIGRATION.md) distinguishes measured local runs
 from hosted performance; local caching is not evidence of a cold hosted run.
 
 For development, `./lean/check.sh` builds and independently replays the entire
-supporting library. The complete command avoids duplicating this expensive
-replay by using the whole-library diagnostic plus canonical module replay.
+supporting library in one process. The complete command uses the module-based
+verifier and avoids an additional whole-library diagnostic or replay.
 `python3 scripts/check_canonical_statement.py` is a fast source-integrity check,
 not mathematical verification.
 
