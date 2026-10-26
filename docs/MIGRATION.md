@@ -332,6 +332,70 @@ outside the checkout under
 `~/Lean/SubGaussianTailBounds/0ad011255e709e4d/validation/20261026T160413Z-proof-simplification/`.
 The earlier validation records remain separate historical evidence.
 
+## Further finite-proof simplification — 26 October 2026
+
+The follow-up keeps the same mathematical statements, grid data, coverage trees,
+rounding definitions and numerical margins. It changes three existing proof
+modules and leaves the verifier and dependency pins unchanged.
+
+- `ConcreteGeneralSecondBounds` reuses the proved integer exponential recurrence
+  and eleven private blocks of at most 32 cells. All **334 × 3 upper margins**
+  remain required. The final block covers 14 actual cells; quotient and remainder
+  lemmas recover every original index without using padding as a substitute.
+- `ConcreteEndpointMeanGeometry` proves the box-domain conditions uniformly from
+  the grid definitions, replacing **2,520 indexed checks**, and proves the small
+  total bound uniformly instead of checking 50 values. The remaining joint-grid
+  cutoff and selected-majorant lookup checks use twelve bounded clauses; the
+  small one-dimensional grid checks are retained. All nine original public
+  propositions are unchanged.
+- `ConcreteGeneralMeanGeometry` checks the same **2,016 clipped-tree witnesses**
+  in twelve blocks and the same **1,330 row domains** in 42 blocks. The original
+  decidability procedures, partition proof and three public propositions are
+  unchanged. The last domain block has 18 real entries and 14 guarded padding
+  entries.
+
+Matched direct compilations used the same pinned `lake env lean -j2` command on
+saved original and revised sources, with already-built dependencies:
+
+| Module | Original peak RSS | Revised peak RSS | Original/revised user CPU seconds |
+|---|---:|---:|---:|
+| Second-moment upper bounds | 14.11 GiB | 3.19 GiB | 78.67 / 26.27 |
+| Endpoint geometry | 7.07 GiB | 3.41 GiB | 62.43 / 31.28 |
+| General geometry | 8.05 GiB | 5.39 GiB | 49.75 / 45.08 |
+
+These are individual process peaks, not aggregate machine-memory bounds.
+Explicit private proofs increase source and artifact size in exchange for
+smaller checking tasks. Compact replays passed at **3.71 GiB** for second-moment
+upper bounds,
+**3.77 GiB** for endpoint geometry and **4.54 GiB** for general geometry, with
+only the three standard axioms. These probes do not replace the full gate.
+
+A separate rounded-logarithm recurrence prototype proved exact but did not show
+sufficient resource savings: one general-row sample changed from 3.78 to
+3.78 GiB and an endpoint sample from 4.99 to 4.90 GiB, with slightly larger
+artifacts. It was not added to the maintained sources. No new mathematical
+result or novelty is claimed.
+
+Complete `./lean/verify.sh` passed on **26 October 2026**, from **17:13:59 to
+18:16:52 UTC** (3,773.12 seconds): **496 build targets**, **497 fresh
+module replays**, and all **22 canonical targets**. The audit checked
+**78,871 targets and 138,245 visited constants**, with only `propext`,
+`Classical.choice` and `Quot.sound`. All **522 source/setup hashes** remained
+unchanged. The **75 administrative tests** also passed; the 36 separate actual
+Lean verifier fixtures were not rerun for these proof-only changes.
+
+The maximum child-process RSS was **8,662,745,088 bytes (8.07 GiB)** and total
+child CPU time was **27.22 hours**, with 28 build and 32 replay workers.
+This is not aggregate concurrent memory. Dependent numerical modules were rebuilt,
+but this was not a cold build of every source and dependency. Unchanged endpoint
+entropy compilation was sampled above **8 GiB**; fitting the complete job on an
+8 GiB hosted runner remains unestablished. The unchanged general entropy modules
+also retain their earlier cold-compilation resource concerns.
+
+Logs, source hashes, artifact identities and supporting measurements are retained
+outside the checkout under
+`~/Lean/SubGaussianTailBounds/0ad011255e709e4d/validation/20261026T171359Z-continued-proof-simplification/`.
+
 ## Completion validation — 25 October 2026
 
 Both canonical theorem assemblies and the public `Canonical.Results` interface
@@ -472,13 +536,6 @@ dependency pins, complete source coverage and independent kernel replay.
   distinct slopes** would reduce **320,771 evaluations to 88,451**, approximately
   **72% fewer in that subcalculation only**. This operation-count reduction is
   not a measured reduction in total verification time.
-- **Simplify the separate second-moment bounds table.**
-  `ConcreteGeneralSecondBounds.secondCellUpperQ_lt` still checks all **334 × 3**
-  upper margins in one finite decision. During this revision's full replay,
-  that unchanged module was sampled at **14.97 GiB RSS**. The proved integer
-  exponential recurrences and bounded private theorem pattern could be reused
-  here, preserving every margin. This is separate from the revised
-  `ConcreteGeneralSecondCells` module; its resource benefit has not been measured.
 - **Separate reusable helpers from numerical certificates.** There are **99
   direct importers** of `ConcreteGeneralMeanSmall`, many using its helper lemmas.
   Moving those helpers to a small shared module could avoid unnecessary rebuilds

@@ -227,7 +227,7 @@ at 6.96 GiB, large polynomial compilations were sampled near 7.8 GiB, and
 general entropy compilations exceeded 9 GiB per process. During complete replay,
 the moment-cell worker was sampled at 21.12 GiB and the endpoint-prefactor
 worker at 11.59 GiB. Those are prior-revision baselines; see the subsequent
-[proof simplification measurements](MIGRATION.md#proof-simplification--26-october-2026)
+[latest proof simplification measurements](MIGRATION.md#further-finite-proof-simplification--26-october-2026)
 for the revised proofs and remaining resource limits.
 These are local observations, not upper bounds or hosted-run measurements.
 GitHub's [standard private Linux runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)

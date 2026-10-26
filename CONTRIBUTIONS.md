@@ -65,8 +65,11 @@ proofs of the canonical propositions.
   enclosures, and removes unnecessary endpoint polynomial degree padding.
   Exact integer recurrences and denominator-cleared polynomial identities reduce repeated
   rational arithmetic. Bounded private theorem blocks keep the remaining finite
-  decisions small. The canonical theorem, all numerical margins and truncation
-  orders remain unchanged. This reuses the existing Taylor, rounding and
+  decisions small. A subsequent pass applies these methods to the separate
+  second-moment upper margins and geometry certificates, replacing routine grid
+  enumeration with uniform inequalities where possible. The canonical theorem,
+  all numerical margins and truncation orders remain unchanged. This reuses
+  the existing Taylor, rounding and
   Bernstein arguments, with Codex assistance; it asserts no new mathematical
   result or novelty. The separate measurements and verification status
   are recorded in [MIGRATION.md](docs/MIGRATION.md).
