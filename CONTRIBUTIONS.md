@@ -58,6 +58,19 @@ proofs of the canonical propositions.
   Measurements and completed validation are recorded separately in
   [MIGRATION.md](docs/MIGRATION.md).
 
+- **Proof simplification — 26 October 2026:** a further revision in the same
+  [PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2)
+  replaces the 1,150 small endpoint-prefactor evaluations with a uniform bound,
+  derives routine moment and second-moment certificate fields from existing
+  enclosures, and removes unnecessary endpoint polynomial degree padding.
+  Exact integer recurrences and denominator-cleared polynomial identities reduce repeated
+  rational arithmetic. Bounded private theorem blocks keep the remaining finite
+  decisions small. The canonical theorem, all numerical margins and truncation
+  orders remain unchanged. This reuses the existing Taylor, rounding and
+  Bernstein arguments, with Codex assistance; it asserts no new mathematical
+  result or novelty. The separate measurements and verification status
+  are recorded in [MIGRATION.md](docs/MIGRATION.md).
+
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet
 or implementation change, explanation and attribution, supersession, and

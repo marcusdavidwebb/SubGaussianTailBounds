@@ -65,7 +65,7 @@ namespace SingularValueBounds.KL.Certificates
 
 theorem endpointMean_polynomialTests (ki : Fin 60) (ai : Fin 42) :
     endpointMeanActive ki ai →
-      BoxCertificate (endpointMeanTestQ ki ai) 8 16 (endpointMeanBox ki ai) := by
+      ∃ n m, BoxCertificate (endpointMeanTestQ ki ai) n m (endpointMeanBox ki ai) := by
   fin_cases ki
   · exact endpointMeanPolynomial_row00 ai
   · exact endpointMeanPolynomial_row01 ai

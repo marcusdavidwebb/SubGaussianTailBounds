@@ -102,7 +102,8 @@ theorem endpoint_mean_polynomial_cost (h : EndpointMeanCertificateConditions)
   let a := upperComparisonShapeMean R hR
   let k := spectralRatio R hR
   let i := endpointMeanMajorantIndex (endpointMeanChoice ki ai)
-  have hPoly := (h.polynomialTests ki ai hact).nonneg hbox
+  obtain ⟨n, m, hCertificate⟩ := h.polynomialTests ki ai hact
+  have hPoly := hCertificate.nonneg hbox
   rw [endpointMeanTest_eval] at hPoly
   have hDomain := h.chosenDomain ki ai hact
   by_cases hn : endpointMeanChoice ki ai=3

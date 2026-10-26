@@ -177,8 +177,8 @@ proof bottlenecks: **21.12 GiB RSS** for `ConcreteMomentCells` and **11.59 GiB**
 for `ConcreteEndpointPrefactors`. These are point-in-time observations, not
 lifetime maxima. They make the whole-job limitation explicit: smaller planner
 and final-checker phases do not establish that all compilation or replay fits
-an 8 GB hosted runner. Further options below identify these finite tables as
-priority candidates for batching.
+an 8 GB hosted runner. These tables were addressed in the subsequent
+[proof simplification](#proof-simplification--26-october-2026) recorded below.
 
 All **111 unique regression tests** passed against this revision: 75
 administrative tests and 36 actual Lean fixtures (18 acceptance, nine module
@@ -222,6 +222,115 @@ are retained outside the checkout in the project workspace under
 `validation/20261026T114836Z-efficiency/`. They are evidence of this run, not
 cached authorization to skip any later verification step. The historical
 validation below remains a separate record.
+
+## Proof simplification — 26 October 2026
+
+This subsequent revision changes the finite proof construction, with the canonical
+statements, quartets, approximation definitions, truncation orders and required
+margins unchanged. It uses the existing Taylor enclosures, rounding inequalities
+and Bernstein reconstruction; it makes no new theorem or novelty claim.
+
+- `UniformEndpointPrefactors` proves a coarse uniform bound for the actual rounded
+  logarithm and both outer rounding operations. The bound supplies all **1,150**
+  small endpoint-prefactor conditions without individual numerical evaluations.
+- `MomentCellSideConditions` derives eight of each moment certificate's eleven
+  fields from its grid and existing analytic enclosures. Only the domain, shape
+  and entropy margins require cell-specific arithmetic. All **681 indexed cells**
+  and the separate endpoint remain proved.
+- `GeneralSecondSideConditions` similarly derives six grid, domain and exponential
+  sign fields for all **334 second-moment cells**. The fourth-moment exclusions
+  and all **1,002 moment margins** remain required.
+- The **837 endpoint polynomial boxes** use smaller proved degree bounds: **787** use
+  `(6,15)` and **50** use `(4,1)`, replacing the uniform `(8,16)` padding. The
+  internal certificate records sufficient degree bounds; its consumer still uses
+  the same polynomial nonnegativity theorem. Box choices and rectangles are
+  unchanged.
+- `IntegerCoefficientStages` and its degree-eight specialization convert rational
+  affine and Bernstein transforms
+  into exact integer identities with positive common denominators. It supplies
+  the 787 larger endpoint boxes and **1,286 general polynomial certificates**;
+  the 50 small endpoint and 44 small general norm certificates retain simpler
+  rational checks. The general certificates include 1,054 degree-`(6,15)` and
+  232 degree-`(8,15)` boxes. Degree-six, degree-eight and degree-fifteen Bernstein
+  weight identities are shared. Every coefficient identity and final sign remains kernel checked.
+- `IntegerMomentEvaluation` evaluates exponential, logarithm and moment sums by
+  exact integer recurrences. `ExactMomentEvaluation` proves the finite-sum
+  identities used to establish equivalence with the original rational formulas,
+  including their original remainder expressions. No floating-point arithmetic
+  or external proof oracle supplies a mathematical fact.
+
+The remaining moment and second-moment decisions are split into **22** and
+**11 private theorem blocks**, each covering at most 32 cells within the existing
+source modules. Quotient and remainder lemmas prove complete coverage; the final
+partial blocks exclude only padding entries. Separate theorem declarations bound
+Lean's temporary checking caches. The unchanged replay gate checks every new
+private theorem as well as every public result.
+
+Fresh module builds against already-built pinned dependencies measured:
+
+| Module | Original peak child RSS | Revised peak child RSS | Reduction |
+|---|---:|---:|---:|
+| `ConcreteMomentCells` | 22,751,117,312 bytes (21.19 GiB) | 4,096,638,976 bytes (3.82 GiB) | 82.0% |
+| `ConcreteGeneralSecondCells` | 19,526,959,104 bytes (18.19 GiB) | 3,426,566,144 bytes (3.19 GiB) | 82.5% |
+
+Baselines invoked `lake env lean -j2` on saved original sources; revised builds
+used `lake build` with the same two compiler threads. The original and revised
+moment builds used **402.89** and **93.68 user CPU seconds** respectively. They ran under different concurrent loads; their
+454.11- and 233.43-second wall times are not an isolated speed comparison. A
+uniform-prefactor module build measured **2.36 GiB** peak with its helper already
+built; there is no matched original module-build measurement for that family.
+These are scoped compilation measurements, not a full-job memory bound. The
+combined savings include both generic proofs and changed evaluation/checking
+structure; they cannot be attributed to integer arithmetic alone. Some compiled
+artifacts grow because explicit reusable proofs replace expensive reductions.
+The endpoint polynomial source shrinks from **14,684,449 to 10,973,427 bytes**.
+The general polynomial source grows from **9,417,168 to 18,922,104 bytes** because
+four explicit integer stages replace a single rational table; combined row/block
+source size grows **24.0%**, excluding shared helpers. These tables discharge
+smaller, shared algebraic obligations.
+
+All sixty rebuilt endpoint polynomial row artifacts total **173,165,712 bytes**,
+down from **203,821,824 bytes** (15.04%). Their largest measured compilation
+child RSS is **3,609,968,640 bytes (3.36 GiB)**. The shared endpoint coefficient
+identity artifact shrinks from **32,170,360 to 20,624,408 bytes** after removing
+unused padded coefficients and identities. These artifact totals exclude shared
+helper modules and are separate from process-memory measurements. All nineteen
+general polynomial modules compiled too, with a maximum child RSS of
+**6,114,164,736 bytes (5.69 GiB)**. Their artifacts total **196,685,024 bytes**,
+down from **210,087,448 bytes** in the preceding full replay plan (6.38%).
+
+Fresh target kernel-and-axiom replays using the compact worker path measured
+**4,279,812,096 bytes (3.99 GiB)** for moment cells and **3,891,740,672 bytes
+(3.62 GiB)** for second-moment cells. Both passed with only the three standard
+axioms. Their protected module inventory was derived afresh beforehand; that
+separate inventory phase measured **4.81 GiB**. Standalone checks that construct
+the full inventory inside the same process instead measured **8.17** and
+**7.82 GiB**. These target probes do not replace the full scheduler's ancestor,
+coverage, artifact-hash and exact-type obligations.
+
+The same verification scripts, CI workflow, protected statement and dependency
+pins are retained. The **75 administrative regression tests** passed again;
+the 36 actual Lean verifier fixtures were last run for the preceding efficiency
+revision, and are not counted as rerun here.
+
+Complete `./lean/verify.sh` validation passed on **26 October 2026**, from
+**16:04:13 to 17:02:03 UTC** (3,470.24 seconds). The run checked all **496 build
+targets**, freshly replayed **497 modules**, and accepted all **22 canonical
+targets**. The axiom audit covered **78,699 targets and 138,068 visited constants**,
+with only `propext`, `Classical.choice` and `Quot.sound`. All **522 recorded source
+and setup hashes** remained unchanged. Build and replay concurrency were 28 and
+32 respectively; stale affected modules were rebuilt, so this is neither a cold
+whole-project build nor a warm-build timing comparison.
+
+Maximum child-process RSS was **16,068,165,632 bytes (14.97 GiB)**, excluding the
+sum of simultaneous workers. Total child CPU time was **24.62 hours**. The
+unchanged `ConcreteGeneralSecondBounds` worker reached that peak in replay;
+unchanged endpoint entropy compilations were sampled near **7.94 GiB**. Thus this
+revision does not establish that complete verification fits an 8 GB runner.
+The log, source hashes, resource record and supporting measurements are retained
+outside the checkout under
+`~/Lean/SubGaussianTailBounds/0ad011255e709e4d/validation/20261026T160413Z-proof-simplification/`.
+The earlier validation records remain separate historical evidence.
 
 ## Completion validation — 25 October 2026
 
@@ -363,23 +472,24 @@ dependency pins, complete source coverage and independent kernel replay.
   distinct slopes** would reduce **320,771 evaluations to 88,451**, approximately
   **72% fewer in that subcalculation only**. This operation-count reduction is
   not a measured reduction in total verification time.
+- **Simplify the separate second-moment bounds table.**
+  `ConcreteGeneralSecondBounds.secondCellUpperQ_lt` still checks all **334 × 3**
+  upper margins in one finite decision. During this revision's full replay,
+  that unchanged module was sampled at **14.97 GiB RSS**. The proved integer
+  exponential recurrences and bounded private theorem pattern could be reused
+  here, preserving every margin. This is separate from the revised
+  `ConcreteGeneralSecondCells` module; its resource benefit has not been measured.
 - **Separate reusable helpers from numerical certificates.** There are **99
   direct importers** of `ConcreteGeneralMeanSmall`, many using its helper lemmas.
   Moving those helpers to a small shared module could avoid unnecessary rebuilds
   after edits confined to its numerical certificate. This is primarily an
   incremental-build improvement; its total time benefit has not been measured.
-- **Investigate the staged general-polynomial proof.** A one-cell pilot reduced
-  peak memory from **3.60 to 2.71 GiB** and its compiled artifact from **361,592
-  to 241,088 bytes**, but elapsed time increased from **17.97 to 20.67 seconds**.
-  The full block has not been validated; these measurements do not establish a
-  production improvement.
-- **Split general polynomial blocks into smaller modules.** A ten-cell pilot
-  with unchanged declarations and proof bodies passed in **151.19 seconds**, at
-  **4.275 GiB peak RSS**. Existing seventy-cell modules were sampled at **7–7.8
-  GiB** during compilation. All 1,330 proof pairs can be moved independently
-  without rewriting their mathematics. Ten-cell chunks would add 133 modules
-  and their startup overhead. The pilot does not establish a maximum over all
-  chunks; the nineteen original blocks remain unchanged in this revision.
+- **Reassess general polynomial block sizes after the integer revision.** The
+  earlier ten-cell rational pilot measured 4.275 GiB, compared with 7–7.8 GiB
+  samples from seventy-cell modules. The proof simplification above now uses
+  integer stages and shared Bernstein weights in the nineteen existing modules.
+  A further split should be justified by measurements of that revised proof,
+  rather than the superseded rational implementation.
 - **Split general entropy blocks.** The remaining seventy-row compilations
   exceeded **9 GiB RSS per process** locally. Smaller independent modules are
   another candidate for reducing compiler peaks. Source inspection confirms
@@ -387,19 +497,12 @@ dependency pins, complete source coverage and independent kernel replay.
   proof body unchanged, adding 133 modules. Their memory use and added
   import/startup costs have not yet been measured. Heavier endpoint entropy rows
   were also sampled near 7.7 GiB and merit the same investigation.
-- **Batch the remaining large finite tables.** The 681 indexed moment cells
-  and their separate endpoint have no cross-cell dependencies. Bounded groups
-  could replace the current whole-table decisions, and exact cached logarithm
-  and exponential values could serve several certificate fields. Plateau-cost
-  and plateau-scalar leaves are also independent once their shared identities
-  are exposed through small interfaces. Their high-degree coefficient/sign
-  checks may need finer groups; none of these resource benefits is measured.
-  The moment-cell replay's observed 21.12 GiB and the endpoint-prefactor replay's
-  11.59 GiB make those two modules the highest-priority remaining RAM targets.
-  The prefactor domain decision covers 50 independent shape rows with 23
-  logarithm inputs each; bounded row groups could retain the public aggregate.
-  There are 1,130 distinct inputs among those 1,150 pairs, so batching has
-  clearer scope than cross-cell value sharing in that particular table.
+- **Simplify or batch plateau certificates.** Moment and second-moment cells
+  now use bounded private theorem blocks, and the endpoint-prefactor grid now
+  follows from a uniform inequality. Plateau-cost and plateau-scalar leaves
+  remain independent once their shared identities are exposed. Their
+  high-degree coefficient/sign checks may benefit from similar factoring or
+  smaller declarations; those benefits have not been measured.
 - **Shard CI across isolated jobs.** Compilation or replay could be distributed
   while retaining complete coverage, immutable artifact identities and same-run
   dependency and artifact-hash checks. Replay shards must establish that their

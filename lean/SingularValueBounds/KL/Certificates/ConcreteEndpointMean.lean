@@ -15,7 +15,7 @@ theorem endpointMeanCertificateConditions_of_finite_bounds
     (hcorners : ∀ ki : Fin 60, ∀ ai : Fin 42, endpointMeanActive ki ai →
       ∀ h : Fin 4, endpointMeanNumericCorner ki ai h ≤ endpointMeanCorner ki ai h)
     (hpolynomials : ∀ ki : Fin 60, ∀ ai : Fin 42, endpointMeanActive ki ai →
-      BoxCertificate (endpointMeanTestQ ki ai) 8 16 (endpointMeanBox ki ai)) :
+      ∃ n m, BoxCertificate (endpointMeanTestQ ki ai) n m (endpointMeanBox ki ai)) :
     EndpointMeanCertificateConditions := {
   gridLogs := endpointMean_gridLogs
   decays := fun qi _ => endpointDecayConditions qi

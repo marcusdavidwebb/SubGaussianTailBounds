@@ -123,6 +123,19 @@ startups on warm builds and does not skip any subsequent kernel replay.
 The replay scheduler independently checks dependencies and artifact hashes; an
 imported module becomes a trusted replay seed only after it passes in that run.
 
+The finite proofs share uniform bounds and exact evaluation lemmas under
+`KL/Certificates/`: `UniformEndpointPrefactors`, `MomentCellSideConditions`,
+`GeneralSecondSideConditions`, `IntegerMomentEvaluation`,
+`IntegerCoefficientStages` and `IntegerCoefficientStages8`.
+`ExactMomentEvaluation` supplies the sum identities
+used to prove the integer recurrences. These are ordinary kernel-checked Lean
+proofs. The original rational specifications, truncations and required margins
+remain the definitions being certified. Moment and second-moment decisions use
+private blocks of at most 32 cells within their existing modules. Endpoint
+polynomials use smaller proved degree bounds, and shared Bernstein weights are proved
+once. See [the measurements](../docs/MIGRATION.md) for the scope and limits of
+observed memory reductions.
+
 For an explicit workspace and compatible installed packages:
 
 ```sh

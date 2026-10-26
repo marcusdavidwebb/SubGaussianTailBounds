@@ -220,13 +220,15 @@ override the old base workflow. The canonical source remains immutable.
 
 ## Resources, logs and repository settings
 
-Cold builds and independent replay can take hours. The 26 October measurements
+Cold builds and independent replay can take hours. The earlier 26 October measurements
 in [MIGRATION.md](MIGRATION.md#efficiency-revision--26-october-2026) distinguish
 compiled artifact size from process memory: revised acceptance fixtures peaked
 at 6.96 GiB, large polynomial compilations were sampled near 7.8 GiB, and
 general entropy compilations exceeded 9 GiB per process. During complete replay,
 the moment-cell worker was sampled at 21.12 GiB and the endpoint-prefactor
-worker at 11.59 GiB.
+worker at 11.59 GiB. Those are prior-revision baselines; see the subsequent
+[proof simplification measurements](MIGRATION.md#proof-simplification--26-october-2026)
+for the revised proofs and remaining resource limits.
 These are local observations, not upper bounds or hosted-run measurements.
 GitHub's [standard private Linux runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
 advertise 8 GB RAM. The revision therefore does not establish that the complete
