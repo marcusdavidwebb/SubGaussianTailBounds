@@ -118,6 +118,183 @@ change is asserted here. Local builds reused Lean 4.19.0, Mathlib
 no dependency or toolchain was installed, upgraded or replaced. All generated
 configuration, caches and compiled outputs stayed outside the source checkout.
 
+## Further proof evaluation simplification — 27 October 2026
+
+This revision starts from `313a88d` and preserves the canonical statement,
+constants, polynomial coefficients, finite inequalities and rounding algorithms.
+It reuses standard polynomial uniqueness and the existing proved integer
+recurrences. It claims no new mathematical result or novelty. Dependencies and
+verification policy are unchanged.
+
+The plateau proofs now establish their large polynomial identities from degree
+bounds and exact evaluations: 101 integer points for the degree-100 cost
+polynomials and 100 points for the degree-99 scalar numerators. The scalar proof
+then cancels the same nonzero factor `X²`. Integer affine and Bernstein transforms
+certify the original interval coefficients and signs. All **28 existing theorem
+headers**, including the five public statements, and **29 rational coefficient
+vectors** remain text-identical. The five modules and both aggregate modules
+compiled; the new helper and all five modules passed fresh compact kernel
+replay with only `propext`, `Classical.choice` and `Quot.sound`.
+
+Matched direct compilations used the same pinned Lean compiler, `-j2`, saved
+sources and already-built dependencies:
+
+| Representative module | Original/revised user CPU seconds | Original/revised peak RSS | Original/revised `.olean` bytes |
+|---|---:|---:|---:|
+| Plateau cost 0 | 105.89 / 33.46 | 6.21 / 3.48 GiB | 139,824,680 / 1,187,368 |
+| Plateau scalar row 0 | 152.38 / 75.76 | 5.57 / 3.75 GiB | 66,745,272 / 1,167,568 |
+
+Matched compact replay measurements were **67.64 / 28.59 CPU seconds** and
+**6.37 / 4.26 GiB** for cost 0, and **122.04 / 68.63 CPU seconds** and
+**5.75 / 4.24 GiB** for scalar row 0. The revised direct pilots include their
+helper declarations locally; the maintained implementation shares one helper.
+The five maintained source files plus that helper grow by **32,726 bytes
+(4.78%)**. Their compiled artifacts shrink from **423,276,016 to 4,368,192 bytes (98.97%)**,
+including the new shared helper. The original total comes from the preceding
+complete run's artifact manifest; its five source hashes match `313a88d`.
+
+The general polynomial modules now set `Elab.async false`, serializing proof
+elaboration while retaining the same kernel checks. Removing that single added
+line reproduces every byte of each of the nineteen original blocks. In the
+matched complete 70-cell Block15 pilot, peak RSS fell from **5.52 to 3.62 GiB**,
+user CPU time from **373.18 to 314.84 seconds**, and elapsed time from **324.87 to
+318.84 seconds**. This is a polynomial block, not an entropy block.
+
+All **19 general polynomial blocks** compiled in a six-worker queue, taking
+**1,261.36 seconds elapsed** and **6,792.51 summed user CPU seconds**. Individual
+maximum child RSS ranged from **3.16 to 3.76 GiB**. Source hashes remained stable
+during those builds; the final artifacts total **192,945,648 bytes**. This family
+was fully drained before whole-project verification.
+
+Endpoint corner bounds now follow uniformly from the spectral grid and 43
+scalar endpoints. The endpoint joint-prefactor domain checks and the general
+prefactor domains use exact whole-function integer logarithm rewrites. These
+preserve the original reduction fuel, 18 logarithm terms, remainder, base-two
+constants and rounding steps. The measured compilation comparisons are:
+
+| Module | Original/revised user CPU seconds | Original/revised peak RSS |
+|---|---:|---:|
+| Endpoint mean corner bounds | 31.89 / 2.06 | 5.69 / 2.41 GiB |
+| Joint prefactor domains | 465.21 / 152.93 | 5.87 / 3.06 GiB |
+| General prefactor domains | 121.54 / 42.37 | 4.13 / 2.86 GiB |
+
+General entropy proofs share exact exponential nodes for 440 repeated slopes;
+291 singleton slopes retain direct evaluation. Each shared table proves equality
+to the original rounded exponential at all 121 grid nodes. Balanced integer
+lookups and noncomputable proof-only tables avoid unnecessary lookup and
+executable-code work. The existing 10,650 theorem headers and 160,930 stored error
+integers are preserved.
+
+All **19 general entropy blocks**, **28 shared-table modules** and the lookup
+helper compiled. The original complete 70-row Block00 used **1,115.98 user CPU
+seconds and 12.73 GiB peak RSS**. The final sequential production Block00 used
+**573.54 CPU seconds and 5.506 GiB**; charging all 48 first-use sequences and the
+new helper gives **723.99 CPU seconds**, a **35.1% reduction**. The earlier
+asynchronous shared pilot used less CPU but retained much more memory, so the
+sequential form was selected. The other production row commands peaked below
+4.10 GiB; the conservative maximum for the complete family remains 5.506 GiB.
+The original and asynchronous scratch pilots used direct Lean with `-j1`;
+the final production command used Lake's pinned `-j2` configuration and the
+separately verified helper/import changes. The final comparison therefore
+measures that implementation combination, not an isolated scheduling experiment.
+
+The general entropy artifacts shrink from **365,232,424 to 209,800,592 bytes
+(42.6%)**, including every new table and helper. Explicit lookup tables and
+smaller proof declarations increase source from **6,680,995 to 12,505,545 bytes
+(87.2%)**. The production Block00 also passed independent compact kernel replay:
+**473.33 user CPU seconds**, **4.282 GiB peak RSS**, and 1,118 theorem declarations
+checked, with only the three standard axioms. All family builds and probes
+finished before the complete verification run.
+
+Endpoint entropy proofs split corner evaluations into small lemmas and reuse
+**1,532 of 3,348** evaluations from adjacent boxes. Exact rate-inclusion and
+value-equality proofs justify each reuse; the eleven interior boxes without the
+required inclusion retain direct checks. All **837 box and 60 row public
+statements**, and all **5,859 numerical data definitions**, remain identical.
+The rounded-logarithm helpers were extracted from `ConcreteGeneralMeanSmall`;
+32 endpoint log modules and five small-range entropy blocks now import that
+small helper directly, avoiding an
+unrelated general-certificate dependency. The obsolete rational evaluator is
+superseded by the exact shared integer rewrite.
+
+A matched complete endpoint Row28 compilation fell from **491.56 to 337.85 user
+CPU seconds** and **8.094 to 3.799 GiB peak RSS**. That revised scratch pilot
+includes its shared helper declarations locally. The maintained production row,
+which imports the helper, separately passed at **361.01 CPU seconds and
+3.814 GiB** under concurrent family builds.
+
+All **60 endpoint entropy rows** compiled, including the eleven rate-extension
+exceptions. The 12-worker family build took **19 minutes 4 seconds**, with
+**13,196.28 summed user CPU seconds** and **3.814 GiB maximum child RSS**.
+The smaller explicit proofs increase these rows' source from **15,151,373 to
+17,232,298 bytes** and their compiled artifacts from **99,158,200 to
+117,659,760 bytes (18.7%)**. The two shared helpers add **194,472 artifact bytes**.
+This is a measured memory/CPU saving with a storage cost, not an artifact-size
+reduction. The simpler corner-only pilot had a larger artifact expansion and
+was not adopted.
+
+All 32 log modules, five small-range blocks, both helpers and the endpoint
+entropy aggregate also compiled. The production Row28 passed independent
+compact kernel replay: **335.23 user CPU seconds**, **4.463 GiB peak RSS**, and
+413 theorem declarations checked, with only the three standard axioms. All
+endpoint workers finished before the complete verification run.
+
+All RSS figures are **individual maximum child-process values**, not aggregate
+machine memory. Concurrent workload prevents treating these wall times as an
+isolated throughput comparison or a cold whole-project timing. Compact module
+probes do not replace complete source coverage, same-run artifact checks,
+independent replay and exact canonical acceptance. Local measurements alone do
+not establish that the complete gate fits a particular hosted runner.
+
+The superseded `FastRoundedLog` source and its umbrella import were removed after
+the integer replacement built. The canonical integrity guard and all 75
+administrative tests passed (111 tests discovered; the 36 Lean fixtures were
+intentionally skipped and are not claimed as rerun).
+
+The preceding new-policy [hosted run at `313a88d`](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/runs/40376509656)
+passed preflight and the constants snapshot, then lost contact with its runner
+during candidate compilation. GitHub's annotation lists CPU/memory starvation
+and network interference as possible causes; it does not establish an
+out-of-memory failure or a rejected Lean proof. Independent auditing did not run.
+
+A read-only check on 27 October found no repository Actions variable overrides.
+The maintained workflow specifies defaults of one build worker, one replay
+worker and an `ubuntu-24.04` runner. The parallel local measurements do not
+establish cold serial hosted runtime or memory capacity. No runner settings,
+timeouts or verification requirements were changed in this proof revision.
+
+The unchanged complete command passed with exit code **0** on **27 October
+2026, 14:56:45–15:30:57 UTC**:
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONOPTIMIZE= SVB_BUILD_JOBS=28 SVB_REPLAY_JOBS=32 ./lean/verify.sh
+```
+
+The run checked **527 build targets**, freshly replayed **all 528 modules**,
+and accepted **all 22 canonical targets**. Its final axiom audit covered
+**75,610 targets and 135,921 visited constants**, with only `propext`,
+`Classical.choice` and `Quot.sound`. All **553 recorded proof/setup/source
+hashes** remained unchanged throughout verification. The canonical source and
+full README presentation still match the fixed digest.
+
+Elapsed time was **2,051.85 seconds**; accumulated child CPU time
+(user plus system) was **14.10 hours**. Maximum child-process RSS was
+**6,805,012,480 bytes (6.338 GiB)**. This is not aggregate concurrent
+memory. Most numerical modules were built during development; the final command
+checked their traces and rebuilt affected dependants before fresh complete
+replay. It is not a cold whole-project timing or a hosted-run measurement.
+
+Active project/acceptance artifacts, including all new helpers, total
+**1,117,065,312 bytes across 528 modules**, compared with
+**1,677,737,528 bytes across 497 modules** in the preceding
+complete run: **33.42% fewer bytes**. This measures active `.olean` files,
+not total disk use, caches or archived validation records.
+
+The log, source hashes, individual measurements, preserved benchmark sources and
+artifact identities are retained outside the checkout under
+`~/Lean/SubGaussianTailBounds/0ad011255e709e4d/validation/20261027T145645Z-entropy-plateau-simplification/`.
+
+
 ## Efficiency revision — 26 October 2026
 
 The revision reduces memory use without changing the canonical statements,
@@ -507,61 +684,60 @@ were absent. No PR was created or published.
 
 ## Further efficiency options
 
-These are proposals, not implemented changes or promises of total runtime savings.
-Any implementation must preserve the current canonical verification gate, exact
-dependency pins, complete source coverage and independent kernel replay.
+These are unimplemented proposals, not promises of total runtime savings.
+They apply to the maintained complete Lean gate and must preserve exact pins,
+source coverage, trusted isolation, independent kernel replay, axiom auditing
+and canonical type checks. General decay caching and plateau simplification
+are implemented above and are no longer future recommendations.
 
-- **Batch ready build targets.** Pinned Lake 4.19 supports multiple targets in
-  one invocation, sharing workspace setup and dependency traversal. It has no
-  CLI limit on simultaneous module builds; `-j2` limits each Lean compiler's
-  threads. Small batches of dependency-ready targets could retain an outer
-  concurrency bound while reducing repeated Lake work. Large batches can leave
-  capacity idle until their slowest target finishes.
-- **Fetch only needed CI dependency caches.** The pinned Mathlib cache tool
-  accepts explicit module roots and their import closures. Disposable snapshot
-  jobs could fetch the accepted-constants imports; build jobs could fetch the
-  proof imports if full-Mathlib regression fixtures run separately. The trusted
-  audit still needs full Mathlib for its protected-name inventory. Cache reuse
-  must preserve exact pins and the separation from candidate-produced artifacts.
-- **Cancel builds promptly after failure.** The current build scheduler waits
-  for already-running subprocesses when one target fails. Tracking and stopping
-  only its own remaining compiler processes could avoid wasted work while
-  preserving failure logs and every acceptance requirement.
-- **Prebuild the trusted replay executable.** A native executable built solely
-  from the trusted verifier could avoid repeated source elaboration at worker
-  startup. It would still load candidate modules only as data and perform the
-  same kernel, axiom and exact-type checks. Startup and memory benefits need
-  measurement before adoption.
-- **Share general entropy evaluations.** Reusing evaluations at the **731
-  distinct slopes** would reduce **320,771 evaluations to 88,451**, approximately
-  **72% fewer in that subcalculation only**. This operation-count reduction is
-  not a measured reduction in total verification time.
-- **Separate reusable helpers from numerical certificates.** There are **99
-  direct importers** of `ConcreteGeneralMeanSmall`, many using its helper lemmas.
-  Moving those helpers to a small shared module could avoid unnecessary rebuilds
-  after edits confined to its numerical certificate. This is primarily an
-  incremental-build improvement; its total time benefit has not been measured.
-- **Reassess general polynomial block sizes after the integer revision.** The
-  earlier ten-cell rational pilot measured 4.275 GiB, compared with 7–7.8 GiB
-  samples from seventy-cell modules. The proof simplification above now uses
-  integer stages and shared Bernstein weights in the nineteen existing modules.
-  A further split should be justified by measurements of that revised proof,
-  rather than the superseded rational implementation.
-- **Split general entropy blocks.** The remaining seventy-row compilations
-  exceeded **9 GiB RSS per process** locally. Smaller independent modules are
-  another candidate for reducing compiler peaks. Source inspection confirms
-  that seven ten-row children per block can retain every public declaration and
-  proof body unchanged, adding 133 modules. Their memory use and added
-  import/startup costs have not yet been measured. Heavier endpoint entropy rows
-  were also sampled near 7.7 GiB and merit the same investigation.
-- **Simplify or batch plateau certificates.** Moment and second-moment cells
-  now use bounded private theorem blocks, and the endpoint-prefactor grid now
-  follows from a uniform inequality. Plateau-cost and plateau-scalar leaves
-  remain independent once their shared identities are exposed. Their
-  high-degree coefficient/sign checks may benefit from similar factoring or
-  smaller declarations; those benefits have not been measured.
+A source-import review found that `Canonical.Results` reaches **522 of 525**
+maintained modules, including every numerical family and canonical maintenance
+interface. The three outside that closure total only **977,496 artifact bytes**:
+`ProfileIntegralRegularity`, `EndpointEntropySum` and the documented public
+`ConcreteFinal` bundle. Whole-module pruning therefore offers little demonstrated
+storage benefit, and reachability alone does not authorize retiring public APIs
+or imply RAM/runtime savings.
+
+- **Share repeated general critical-log evaluations.** Two independent exact
+  recounts find 159,600 occurrences but 31,185 distinct rational arguments:
+  15,101 arguments repeat and 16,084 occur once. A checked shared table could
+  avoid 128,415 repeat reductions (80.46% of this subcalculation). These are
+  operation counts, not measured runtime savings; benchmark table size and
+  proof/import overhead first.
+- **Share endpoint logarithms across the scalar parameter.** The remaining
+  direct corner proofs contain 121,148 distinct-rate-per-corner inputs but only
+  3,880 exact logarithm arguments. Their exponential prefactors would still need
+  checking. Benchmark checked tables and their import costs before adoption.
+- **Factor the endpoint corner-transfer proof.** The 766 eligible adjacent boxes
+  each have two similar transfer arguments. A generic lemma and one shared
+  rate-inclusion witness per box could reduce duplication and the current
+  endpoint artifact growth. This has not been benchmarked.
+- **Measure the remaining large workers before changing module boundaries.**
+  Use the new complete run to identify any residual compiler or replay peak.
+  Smaller independent declarations or modules may help those specific cases,
+  but older rational-proof and entropy measurements do not describe the revised
+  implementation. Account for additional imports, startup and audit work.
+- **Batch dependency-ready build targets.** Pinned Lake 4.19 accepts several
+  targets in one invocation, sharing setup and dependency traversal. It has no
+  CLI cap on simultaneous module builds; `-j2` limits compiler threads instead.
+  Keep bounded outer batches and measure idle time behind slow targets.
+- **Fetch only needed disposable CI caches.** Snapshot and compilation jobs
+  could fetch the locked import closures they actually need. Trusted auditing
+  still requires full Mathlib for its independent protected-name inventory.
+  Candidate-produced artifacts must not become trusted dependency caches.
+- **Prebuild the trusted replay executable.** Compiling the trusted verifier
+  once could reduce repeated worker startup. Candidate modules must still be
+  loaded only as data and receive the same kernel, axiom and type checks.
+  Measure startup, memory and total-run effects before adoption.
+- **Cancel remaining build processes promptly after failure.** The scheduler
+  could stop only its own active subprocesses when a required target fails,
+  preserving failure logs and the failed result. This saves failed-run work,
+  not successful-run mathematical checking.
+- **Continue separating generic helpers from concrete certificates where
+  imports justify it.** The shared logarithm evaluator already moves the
+  logarithm-fuel helpers. Further extraction should follow actual remaining
+  dependencies; its principal benefit is avoiding unrelated rebuilds.
 - **Shard CI across isolated jobs.** Compilation or replay could be distributed
-  while retaining complete coverage, immutable artifact identities and same-run
-  dependency and artifact-hash checks. Replay shards must establish that their
-  ancestors passed verification; compilation success alone cannot authorize
-  trusted reuse. Transfer costs and duplicated setup may offset parallelism.
+  with complete coverage and immutable artifact identities. Replay shards must
+  establish that all imported project ancestors passed verification in the same
+  run. Include transfer costs and duplicated trusted setup in any speed claim.

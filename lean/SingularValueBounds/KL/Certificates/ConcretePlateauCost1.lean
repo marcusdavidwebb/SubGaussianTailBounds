@@ -1,5 +1,4 @@
-import SingularValueBounds.KL.Lower.PlateauCostData
-import SingularValueBounds.KL.Certificates.AffineCoefficientIdentity
+import SingularValueBounds.KL.Certificates.PlateauPolynomialIdentity
 
 /-! Concrete plateau-cost polynomial identities and coefficient signs.
 The rational vectors are data: the identities and all signs are kernel checked. -/
@@ -294,29 +293,35 @@ private theorem plateauCost_1_2 :
       (-296537338381730251428122913/2106064683008000000000000000000000000000000),
       (8014522658965682471030349/40307458048000000000000000000000000000000),
       (0/1)]
+  let aa : Fin 101 → ℤ := fun k => (raw k).num * ((279172462018963681556612786191228704129024000000000000000000000000000000 : ℤ) / (raw k).den)
+  let bb : Fin 101 → ℤ := fun k => (coefficients k).num * ((628640497960354391836543045718123576709935658119517437952000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 : ℤ) / (coefficients k).den)
+  have ha : ∀ k, raw k = (aa k : ℚ) / (279172462018963681556612786191228704129024000000000000000000000000000000 : ℤ) := by decide +kernel
+  have hb : ∀ k, coefficients k = (bb k : ℚ) / (628640497960354391836543045718123576709935658119517437952000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 : ℤ) := by decide +kernel
   have hraw : (plateauCostMargin 1) = Polynomial.ofFn 101 raw := by
-    rw [Polynomial.ofFn_eq_sum_monomial]
-    apply Polynomial.funext
-    intro x
-    norm_num [raw, plateauCostMargin, plateauCostD, plateauCostE,
+    apply polynomial_eq_of_integer_grid _ _ 100 (plateauCostMargin_degree 1)
+      (Nat.le_of_lt_succ (Polynomial.ofFn_natDegree_lt (by decide) raw))
+    simp only [ofFn_eval_nat_of_integer 100 raw aa 279172462018963681556612786191228704129024000000000000000000000000000000 ha]
+    simp only [plateauCostMargin, Polynomial.eval_sub, Polynomial.eval_mul,
+      Polynomial.eval_C, polynomialExpTaylor_eval_rat, plateauCostD, plateauCostE,
       plateauCostA, plateauCostV, plateauCostU, plateauCostW, plateauCostC,
-      polynomialExpTaylor, Finset.sum_range_succ, affine, Polynomial.eval_comp,
-      Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_pow,
-      Polynomial.eval_neg, Polynomial.eval_C, Polynomial.eval_X, Fin.sum_univ_succ,
-      Polynomial.eval_finset_sum, Polynomial.eval_monomial]
-    ring
+      Polynomial.eval_add, Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_one,
+      Polynomial.eval_neg, ite_true, ite_false,
+      if_neg (show (1 : Fin 2) ≠ 0 by decide)]
+    simp only [NumericalCertificateConditions.expTaylorQ_eq_integer]
+    decide +kernel
   have hpoly : (plateauCostMargin 1).comp (affine (147/200) ((1/1)-(147/200))) =
       Polynomial.ofFn 101 coefficients := by
     rw [hraw]
-    apply ofFn_comp_affine_eq 100
-    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
-    decide +kernel
+    convert ofFn_comp_affine_eq_of_integer 100 raw coefficients aa bb
+      279172462018963681556612786191228704129024000000000000000000000000000000 628640497960354391836543045718123576709935658119517437952000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 147 53 200 (by decide) (by decide) (by decide) ha hb (by
+        simp only [affineIntegerWeight, Nat.choose_eq_fast_choose]
+        decide +kernel) using 1 <;> norm_num
   rw [hpoly]
   constructor
   · apply polynomial_bernstein_identity
     exact Nat.le_of_lt_succ (Polynomial.ofFn_natDegree_lt (by norm_num) coefficients)
-  · simp_rw [bernsteinCoefficients_ofFn]
-    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
+  · apply bernsteinCoefficients_nonneg_of_integer 100 coefficients bb 628640497960354391836543045718123576709935658119517437952000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 (by decide) hb
+    simp only [bernsteinIntegerWeight, Nat.choose_eq_fast_choose]
     decide +kernel
 
 theorem plateauCost_range_1 :

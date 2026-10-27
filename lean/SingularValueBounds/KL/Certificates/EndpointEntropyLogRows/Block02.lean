@@ -1,5 +1,5 @@
 import SingularValueBounds.KL.Certificates.EndpointEntropyLogData
-import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanSmall
+import SingularValueBounds.KL.Certificates.IntegerRoundedLogEvaluation
 import SingularValueBounds.KL.Certificates.RoundedLogTwo
 
 /-! Kernel checks for endpoint logarithm grid nodes 513 through 768. -/

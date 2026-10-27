@@ -136,6 +136,15 @@ polynomials use smaller proved degree bounds, and shared Bernstein weights are p
 once. See [the measurements](../docs/MIGRATION.md) for the scope and limits of
 observed memory reductions.
 
+The entropy proofs also share repeated decay evaluations and adjacent endpoint
+corner bounds. `IntegerRoundedLogEvaluation` and `EndpointPrefactorEvaluation`
+prove exact equalities with the original rounded algorithms, so numerical proofs
+can use integer arithmetic without changing any rounding step.
+`PlateauPolynomialIdentity` replaces expanded high-degree identities with proved
+degree bounds and enough exact evaluations to establish polynomial equality.
+The larger numerical modules elaborate declarations sequentially to limit retained
+proof contexts. This changes scheduling, not kernel checking or the axiom policy.
+
 For an explicit workspace and compatible installed packages:
 
 ```sh

@@ -5,6 +5,7 @@ import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanGeometry
 open Polynomial
 open scoped BigOperators
 namespace SingularValueBounds.KL.Certificates
+set_option Elab.async false
 set_option maxHeartbeats 0
 set_option maxRecDepth 10000
 

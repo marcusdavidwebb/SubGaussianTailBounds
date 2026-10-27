@@ -74,6 +74,19 @@ proofs of the canonical propositions.
   result or novelty. The separate measurements and verification status
   are recorded in [MIGRATION.md](docs/MIGRATION.md).
 
+- **Further proof simplification — 27 October 2026:** the same
+  [PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2)
+  shares repeated general entropy decay evaluations and adjacent endpoint
+  corner proofs, replaces expanded plateau polynomial identities with exact
+  degree-and-evaluation arguments, and uses shared integer logarithm evaluators.
+  Uniform inequalities replace another routine corner enumeration, and
+  sequential elaboration reduces memory retained within large proof modules.
+  The original coefficients, rounding steps, margins, canonical statements and
+  verification policy are preserved. This is an implementation revision with
+  Codex assistance, using existing mathematical methods; it makes no novelty
+  claim. Measurements and verification status are recorded separately in
+  [MIGRATION.md](docs/MIGRATION.md).
+
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet
 or implementation change, explanation and attribution, supersession, and

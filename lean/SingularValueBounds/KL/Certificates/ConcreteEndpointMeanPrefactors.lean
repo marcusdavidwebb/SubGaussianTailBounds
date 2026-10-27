@@ -6,12 +6,43 @@ namespace SingularValueBounds.KL.Certificates
 set_option maxRecDepth 100000
 set_option maxHeartbeats 0
 
+private theorem endpointMean_aPoint_bounds (i : Fin 43) :
+    0 ≤ endpointMeanAPoint i ∧ endpointMeanAPoint i ≤ 1 := by
+  revert i
+  decide +kernel
+
+/-- Corner bounds follow uniformly from the spectral grid and 43 scalar endpoints. -/
 theorem endpointMean_cornerBounds (ki : Fin 60) (ai : Fin 42) (h : Fin 4) :
     0 < endpointMeanCornerK ki ai h ∧
     endpointMeanCornerK ki ai h ≤ (endpointMeanBox ki ai).top ∧
     0 ≤ endpointMeanCornerA ki ai h ∧ endpointMeanCornerA ki ai h ≤ 1 := by
-  revert ki ai h
-  decide +kernel
+  have hlo := endpointMean_aPoint_bounds ⟨ai.val, by omega⟩
+  have hhi := endpointMean_aPoint_bounds ⟨ai.val+1, by omega⟩
+  have hki : (ki.val : ℚ) ≤ 59 := by exact_mod_cast (show ki.val ≤ 59 by omega)
+  have hk0 : (0 : ℚ) < (ki.val+20 : ℚ)/80 := by positivity
+  have hk1 : (ki.val+20 : ℚ)/80 ≤ 1 := by linarith
+  have hc : ((ki.val+20 : ℚ)/80)^3 ≤ 1 := by
+    simpa using pow_le_pow_left₀ hk0.le hk1 3
+  have ha : 0 ≤ max (endpointMeanAPoint ⟨ai.val, by omega⟩)
+      (((ki.val+20 : ℚ)/80)^3) ∧
+      max (endpointMeanAPoint ⟨ai.val, by omega⟩) (((ki.val+20 : ℚ)/80)^3) ≤ 1 :=
+    ⟨hlo.1.trans (le_max_left _ _), max_le hlo.2 hc⟩
+  have hA : 0 ≤ endpointMeanCornerA ki ai h ∧ endpointMeanCornerA ki ai h ≤ 1 := by
+    unfold endpointMeanCornerA
+    split_ifs
+    · simpa only [endpointMeanBox] using ha
+    · simpa only [endpointMeanBox] using hhi
+  have hK : 0 < endpointMeanCornerK ki ai h ∧
+      endpointMeanCornerK ki ai h ≤ (endpointMeanBox ki ai).top := by
+    unfold endpointMeanCornerK
+    split_ifs
+    · dsimp [endpointMeanBox]
+      constructor
+      · exact hk0
+      · linarith
+    · dsimp [endpointMeanBox]
+      exact ⟨by positivity, le_rfl⟩
+  exact ⟨hK.1, hK.2, hA⟩
 
 theorem endpointMean_cornerIndex (ki : Fin 60) (ai : Fin 42) (h : Fin 4) :
     ∃ n : Fin 61, endpointMeanCornerK ki ai h = ((n.val+20 : ℚ)/80) := by

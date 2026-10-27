@@ -1,5 +1,5 @@
 import SingularValueBounds.KL.Certificates.EndpointMeanEntropyAssembly
-import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanSmall
+import SingularValueBounds.KL.Certificates.IntegerRoundedLogEvaluation
 import SingularValueBounds.KL.Certificates.RoundedLogTwo
 
 /-! Exact integer entropy certificates, independently checked by Lean's kernel. -/
