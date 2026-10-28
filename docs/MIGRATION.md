@@ -824,3 +824,11 @@ shell syntax, changed documentation links and `git diff --check` also passed.
 All logs and planning/probe evidence are retained outside the source checkout in
 `~/Lean/SubGaussianTailBounds/0ad011255e709e4d/validation/20261028T001959Z-ci-stages/`.
 These local checks do not assert that the new hosted run has completed.
+
+GitHub rejected the first dispatch of the staged workflow before creating a run:
+`runner.temp` is unavailable in job-level `env`, even though the YAML parses.
+Workspace paths now enter `GITHUB_ENV` from setup steps, matching the original
+workflow's approach. All **10 workflow boundary tests** passed after this
+correction, including executing the build/audit path-selection shell code and
+rejecting runner-context expressions in job-level environments. The proof
+sources and verifier logic were unchanged by this workflow-expression fix.

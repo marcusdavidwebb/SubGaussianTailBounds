@@ -42,13 +42,18 @@ jobs:
       SVB_SHARD: ${{ inputs.shard }}
       SVB_SOURCE_ROOT: ${{ github.workspace }}/candidate
       SVB_TRUSTED_ROOT: ${{ github.workspace }}/trusted
-      SVB_WORK_DIR: ${{ runner.temp }}/${{ inputs.mode == 'build' && 'candidate-work' || 'trusted-audit-work' }}
-      SVB_PROOF_ARTIFACT_DIR: ${{ runner.temp }}/download-proof
-      SVB_SNAPSHOT_ARTIFACT_DIR: ${{ runner.temp }}/download-snapshot
       SVB_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       SVB_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
       SVB_POLICY_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
     steps:
+      - name: Select external shard workspaces
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [[ "$MODE" == build ]]; then work_name=candidate-work; else work_name=trusted-audit-work; fi
+          printf 'SVB_WORK_DIR=%s/%s\n' "$RUNNER_TEMP" "$work_name" >> "$GITHUB_ENV"
+          printf 'SVB_PROOF_ARTIFACT_DIR=%s/download-proof\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'SVB_SNAPSHOT_ARTIFACT_DIR=%s/download-snapshot\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - name: Check out exact candidate
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:

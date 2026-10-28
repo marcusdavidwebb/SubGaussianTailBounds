@@ -137,11 +137,12 @@ jobs:
       PYTHONDONTWRITEBYTECODE: '1'
       PYTHONOPTIMIZE: ''
       SVB_STAGE: ${{ inputs.stage }}
-      SVB_WORK_DIR: ${{ runner.temp }}/trusted-audit-work
       SVB_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       SVB_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
       SVB_POLICY_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
     steps:
+      - name: Select the external stage workspace
+        run: printf 'SVB_WORK_DIR=%s/trusted-audit-work\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           path: trusted

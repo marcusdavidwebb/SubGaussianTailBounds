@@ -39,6 +39,27 @@ class WorkflowBoundaryTests(unittest.TestCase):
             self.assertIn("  workflow_call:\n", self.workflows[name])
         self.assertIn("cancel-in-progress: true", header)
 
+    def test_runner_paths_are_selected_in_steps_not_job_environment(self):
+        # GitHub validates job env before a runner exists. YAML parsers alone
+        # cannot catch this expression-context error (dispatch returns HTTP 422).
+        for jobs in self.job_sets.values():
+            for job in jobs.values():
+                for match in re.finditer(r"(?m)^    env:\n((?:      .*\n)*)", job):
+                    self.assertNotIn("runner.", match.group(1))
+        shard = self.workflows["lean-shard.yml"]
+        selection = shard.split("      - name: Select external shard workspaces\n", 1)[1]
+        body = selection.split("        run: |\n", 1)[1].split("      - name:", 1)[0]
+        command = textwrap.dedent(body)
+        with tempfile.TemporaryDirectory() as directory:
+            for mode, work_name in (("build", "candidate-work"), ("audit", "trusted-audit-work")):
+                output = Path(directory) / (mode + ".env")
+                env = dict(os.environ, MODE=mode, RUNNER_TEMP=directory, GITHUB_ENV=str(output))
+                subprocess.run(["bash", "-euo", "pipefail", "-c", command], env=env, check=True)
+                self.assertEqual(dict(line.split("=", 1) for line in output.read_text().splitlines()), {
+                    "SVB_WORK_DIR": directory + "/" + work_name,
+                    "SVB_PROOF_ARTIFACT_DIR": directory + "/download-proof",
+                    "SVB_SNAPSHOT_ARTIFACT_DIR": directory + "/download-snapshot"})
+
     def test_only_isolated_status_writers_receive_write_permission(self):
         for workflow, jobs in self.job_sets.items():
             for name, job in jobs.items():
