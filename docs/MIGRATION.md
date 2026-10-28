@@ -741,3 +741,86 @@ or imply RAM/runtime savings.
   with complete coverage and immutable artifact identities. Replay shards must
   establish that all imported project ancestors passed verification in the same
   run. Include transfer costs and duplicated trusted setup in any speed claim.
+
+## Hosted CI timeout and staged verification — 28 October 2026
+
+The new-policy [run 40532161924](https://github.com/marcusdavidwebb/SubGaussianTailBounds/actions/runs/40532161924)
+at `44787105a898a45cb98fb7c3c3812f8d72502204` did not finish. GitHub's job
+annotation explicitly reports that candidate compilation exceeded **six hours**.
+The build log shows **311 of 527 modules completed**, followed by general entropy
+Block10 still running at cancellation. Blocks00–09 each completed in
+**768–813 seconds**. The runner reported **7.8 GiB RAM** and **3 GiB swap**;
+only one build worker was configured. No Lean proof error was reported before
+the timeout. Preflight and standalone constants compilation succeeded; the
+independent kernel audit was skipped. This is a failed verification run, not
+mathematical acceptance, and the failure has no demonstrated connection to the
+retired base workflow's checks.
+
+The maintainer selected splitting work across standard runners. Compilation
+and independent replay now each have eight dependency stages, with up to eight
+one-worker shards per stage. A deterministic planner partitions depth bands,
+keeps dependent modules within a band together, and balances components using
+source or compiled artifact sizes. These sizes guide scheduling only. All
+modules must occur exactly once, all earlier dependencies must have completed,
+and same-stage dependencies cannot cross shards. The final compilation checks
+all Lake source traces and builds the exact acceptance obligations.
+
+Audit stages use independent pinned environments and only data-only candidate
+modules. A checkpoint binds the exact run and attempt, head/base/policy revision,
+complete compiled graph and hashes, completed modules and accumulated axiom and
+declaration reports. Each stage requires all eight exact producer artifact IDs;
+no candidate artifact or name-selected receipt can establish prior replay.
+Active shards derive fresh inventories and plans and check artifact identity
+before and after replay. The final fresh audit requires all modules before
+checking the exact 22 canonical obligations and full source/axiom coverage.
+The ordinary local gate still performs complete fresh replay without checkpoints.
+Use **Re-run all jobs** after a hosted failure: mixing attempts is rejected.
+
+Administrative regressions cover omitted or repeated modules, backward and
+cross-shard dependencies, wrong attempts/revisions, modified artifacts, incomplete
+checkpoints and missing/duplicate shard reports. A real installed-Lean build
+fixture restores only preceding-stage artifacts into empty build directories
+for all 64 shard invocations; Lake confirms all earlier targets remain current,
+including their source traces. Actual kernel fixtures accept valid parent/child
+continuations and reject a forged child after its legitimate parent passed.
+These synthetic fixtures test gate mechanics; they do not prove the tail bounds.
+
+The canonical statement, both proof implementations, quartets, Lean 4.19.0 and
+locked Mathlib/dependencies are unchanged. Checkpoint transfer adds storage,
+setup and network overhead. Applying the actual compiled-module partition to the previous local replay
+log gives a largest shard of **35.3 minutes** of recorded module durations.
+This projection excludes fresh setup and transfer work and is not a measurement
+or runtime bound for the revised hosted workflow. A complete successful hosted run is still required.
+
+The complete local `./lean/verify.sh` rerun on **28 October 2026** passed in
+**1,674.25 seconds**. Lake confirmed all **527 source traces** current; the gate
+then freshly replayed **528 modules** and accepted all **22 canonical targets**.
+The audit covered **75,610 targets / 135,921 visited constants**, with only
+`propext`, `Classical.choice` and `Quot.sound`. This was a warm compilation check
+plus complete fresh replay, using 28 build and 32 replay workers while separate
+fixtures and a resource probe also ran. It is not a cold hosted performance
+measurement. The final staged-audit implementation separately passed both real
+Lean continuation/rejection fixtures; its obsolete interrupted development run
+is not counted as validation.
+
+A separate optional resource probe compiled the unchanged trusted replay worker
+as a native executable, using the existing Lean installation. Parsed reports
+matched for three valid modules, and the fresh pinned inventories matched.
+General entropy Block00 used **4.341 / 2.999 GiB** peak RSS in interpreted/native
+runs; endpoint Row28 used **4.528 / 3.222 GiB**. These are approximately **31%** and
+**29%** reductions for those processes. Concurrent verification affects timing
+comparisons. Native execution is **not included in this repair**: these positive
+probes do not replace a complete native canonical run and adversarial fixtures.
+It remains a further memory-saving option to validate separately.
+
+The full regression suite passed **146 tests**, including all **39 installed-Lean
+fixtures**, in **2,027.85 seconds**. The two staged-audit fixtures were additionally
+rerun successfully after the final inventory-memory adjustment. The new
+`audit-prepare` shell path was exercised in a separate external workspace using
+the full project artifacts and existing pinned dependencies; it staged the data
+and planned all 528 modules successfully, without claiming completed replay.
+Canonical integrity, contribution preflight, workflow boundary tests, YAML and
+shell syntax, changed documentation links and `git diff --check` also passed.
+All logs and planning/probe evidence are retained outside the source checkout in
+`~/Lean/SubGaussianTailBounds/0ad011255e709e4d/validation/20261028T001959Z-ci-stages/`.
+These local checks do not assert that the new hosted run has completed.

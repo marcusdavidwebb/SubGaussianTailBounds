@@ -87,6 +87,16 @@ proofs of the canonical propositions.
   claim. Measurements and verification status are recorded separately in
   [MIGRATION.md](docs/MIGRATION.md).
 
+- **Hosted CI scheduling — 28 October 2026:** the same PR splits cold
+  compilation and independent kernel replay into dependency stages across
+  standard runners after the hosted build reached GitHub's six-hour job limit.
+  Trusted same-attempt checkpoints retain ancestor-first replay and exact
+  artifact identity; every module, canonical type, universe and axiom check is
+  still required. The Lean proofs, canonical source, quartets and dependency
+  pins are unchanged. This infrastructure revision was implemented with Codex
+  assistance and makes no mathematical or novelty claim. See
+  [the failure and validation record](docs/MIGRATION.md).
+
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet
 or implementation change, explanation and attribution, supersession, and

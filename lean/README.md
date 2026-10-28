@@ -123,6 +123,13 @@ startups on warm builds and does not skip any subsequent kernel replay.
 The replay scheduler independently checks dependencies and artifact hashes; an
 imported module becomes a trusted replay seed only after it passes in that run.
 
+Hosted CI partitions both cold compilation and independent replay across
+standard runners, with one heavy worker per runner. It preserves dependency
+order and checks all modules before accepting the canonical results. Same-run
+checkpoints are bound to the exact workflow attempt and immutable producer
+artifact IDs; after failure use **Re-run all jobs**. This does not change the
+full fresh local verification command. See [the CI stages](../docs/CI.md).
+
 The finite proofs share uniform bounds and exact evaluation lemmas under
 `KL/Certificates/`: `UniformEndpointPrefactors`, `MomentCellSideConditions`,
 `GeneralSecondSideConditions`, `IntegerMomentEvaluation`,

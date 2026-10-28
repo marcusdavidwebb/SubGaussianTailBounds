@@ -7,11 +7,11 @@ runner_root="$(cd "$runner_dir/.." && pwd -P)"
 source_root="$(cd "${SVB_SOURCE_ROOT:-$runner_root}" && pwd -P)"
 trusted_root="$(cd "${SVB_TRUSTED_ROOT:-$runner_root}" && pwd -P)"
 mode="${1:-all}"
-case "$mode" in all|build|snapshot|audit) ;; *) printf 'Usage: %s [all|build|snapshot|audit]\n' "$0" >&2; exit 2;; esac
+case "$mode" in all|build|snapshot|audit|audit-prepare) ;; *) printf 'Usage: %s [all|build|snapshot|audit|audit-prepare]\n' "$0" >&2; exit 2;; esac
 # This trusted preflight runs before any candidate setup or Lean source.
 python3 "$trusted_root/scripts/generate_lean_acceptance.py" \
   --root "$source_root" --trusted-root "$trusted_root" --check-inputs-only
-if [[ "$mode" == audit || "$mode" == snapshot ]]; then
+if [[ "$mode" == audit || "$mode" == audit-prepare || "$mode" == snapshot ]]; then
   setup_root="$trusted_root"
 else
   setup_root="$source_root"
@@ -63,7 +63,7 @@ protected_files=(CanonicalTrustedConstants.olean CanonicalAcceptanceExpected.ole
   CanonicalModuleReplay.lean CanonicalModuleReplay.olean
   "$work_dir/.lake/build/lib/lean/MainTheoremStatement.olean")
 policy_before="$(shasum -a 256 "${protected_files[@]}")"
-if [[ "$mode" == audit ]]; then
+if [[ "$mode" == audit || "$mode" == audit-prepare ]]; then
   # A fresh job imports only .olean data. No candidate native library, extension,
   # expected-type template, Mathlib shadow or canonical-module shadow is admitted.
   python3 "$trusted_root/scripts/canonical_artifacts.py" stage --kind proof \
@@ -95,6 +95,10 @@ if [[ "$mode" == build ]]; then
     --build "$work_dir/.lake/build/lib/lean" --acceptance "$acceptance_dir" \
     --output "${SVB_ARTIFACT_DIR:?Set SVB_ARTIFACT_DIR for proof export}"
   printf '%s\n' 'Candidate compilation finished; independent canonical verification is still required.'
+  exit 0
+fi
+if [[ "$mode" == audit-prepare ]]; then
+  printf '%s\n' 'Prepared isolated trusted auditor and data-only modules; no verification claim.'
   exit 0
 fi
 # This source imports only trusted Lean code. Candidate modules are loaded as

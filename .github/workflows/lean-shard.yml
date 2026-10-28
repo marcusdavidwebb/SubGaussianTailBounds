@@ -1,0 +1,155 @@
+name: Isolated Lean shard
+on:
+  workflow_call:
+    inputs:
+      mode:
+        type: string
+        required: true
+      stage:
+        type: number
+        required: true
+      checkpoint_id:
+        type: string
+        required: true
+      payload_id:
+        type: string
+        default: ''
+      proof_id:
+        type: string
+        default: ''
+      snapshot_id:
+        type: string
+        default: ''
+      shard:
+        type: number
+        required: true
+    outputs:
+      artifact_id:
+        value: ${{ jobs.run.outputs.artifact_id }}
+permissions: {}
+jobs:
+  run:
+    runs-on: ${{ vars.LEAN_RUNNER || 'ubuntu-24.04' }}
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    outputs:
+      artifact_id: ${{ steps.fragment.outputs.artifact-id }}
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONOPTIMIZE: ''
+      SVB_STAGE: ${{ inputs.stage }}
+      SVB_SHARD: ${{ inputs.shard }}
+      SVB_SOURCE_ROOT: ${{ github.workspace }}/candidate
+      SVB_TRUSTED_ROOT: ${{ github.workspace }}/trusted
+      SVB_WORK_DIR: ${{ runner.temp }}/${{ inputs.mode == 'build' && 'candidate-work' || 'trusted-audit-work' }}
+      SVB_PROOF_ARTIFACT_DIR: ${{ runner.temp }}/download-proof
+      SVB_SNAPSHOT_ARTIFACT_DIR: ${{ runner.temp }}/download-snapshot
+      SVB_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      SVB_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+      SVB_POLICY_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+    steps:
+      - name: Check out exact candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Merge the exact base
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ -n "$BASE_REF" ]]; then
+            git -C candidate -c user.name='Verification CI' -c user.email='ci@users.noreply.github.com' merge --no-commit --no-ff "$BASE_REF"
+          fi
+      - name: Check out trusted policy
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: trusted
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.14.0'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ inputs.checkpoint_id }}
+          path: ${{ runner.temp }}/checkpoint
+          merge-multiple: true
+      - name: Determine whether this shard has work
+        id: assigned
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          with open(os.environ['RUNNER_TEMP'] + '/checkpoint/checkpoint.json') as stream:
+              checkpoint = json.load(stream)
+          key = {'build': 'plan', 'audit': 'partition'}[os.environ['MODE']]
+          modules = checkpoint[key]['stages'][int(os.environ['SVB_STAGE'])]['shards'][int(os.environ['SVB_SHARD'])]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:
+              stream.write('active=' + str(bool(modules)).lower() + '\n')
+          print('Assigned modules:', len(modules))
+          PY
+      - name: Check source provenance with trusted policy
+        run: python3 trusted/scripts/generate_lean_acceptance.py --root "$SVB_SOURCE_ROOT" --trusted-root "$SVB_TRUSTED_ROOT" --check-inputs-only
+      - name: Install pinned Elan on the disposable runner
+        if: steps.assigned.outputs.active == 'true'
+        run: bash trusted/scripts/install_ci_lean.sh
+      - name: Provision the exact locked dependencies
+        if: steps.assigned.outputs.active == 'true'
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [[ "$MODE" == build ]]; then candidate/lean/setup.sh --ci; else trusted/lean/setup.sh --ci; fi
+      - name: Restore preceding compilation data
+        if: inputs.mode == 'build' && inputs.payload_id != '' && steps.assigned.outputs.active == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ inputs.payload_id }}
+          path: ${{ runner.temp }}/candidate-work/.lake/build
+          merge-multiple: true
+      - name: Download exact candidate module data
+        if: inputs.mode == 'audit' && steps.assigned.outputs.active == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ inputs.proof_id }}
+          path: ${{ runner.temp }}/download-proof
+          merge-multiple: true
+      - name: Download exact independent snapshot data
+        if: inputs.mode == 'audit' && steps.assigned.outputs.active == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          artifact-ids: ${{ inputs.snapshot_id }}
+          path: ${{ runner.temp }}/download-snapshot
+          merge-multiple: true
+      - name: Prepare independent trusted replay
+        if: inputs.mode == 'audit' && steps.assigned.outputs.active == 'true'
+        run: bash trusted/lean/check_acceptance.sh audit-prepare
+      - name: Complete every assigned module with one worker
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          set -o pipefail
+          free -h
+          df -h "$RUNNER_TEMP"
+          /usr/bin/time -v bash trusted/scripts/ci_lean.sh "$MODE" shard 2>&1 | tee "$RUNNER_TEMP/shard.log"
+      - name: Export ${{ inputs.mode }}-shard-${{ inputs.stage }}-${{ inputs.shard }}
+        id: fragment
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ inputs.mode }}-shard-${{ inputs.stage }}-${{ inputs.shard }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/output
+          if-no-files-found: error
+          retention-days: 3
+      - name: Preserve diagnostics even after failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: ${{ inputs.mode }}-log-${{ inputs.stage }}-${{ inputs.shard }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/shard.log
+            ${{ env.SVB_WORK_DIR }}/module-build-logs
+          if-no-files-found: ignore
+          retention-days: 3
