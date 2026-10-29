@@ -1,13 +1,13 @@
-"""Preserve the privilege/data boundaries of the canonical workflow."""
-from pathlib import Path
+"""CI checks administration; complete Lean verification is a local maintainer step."""
+import contextlib
+import io
 import json
 import os
+from pathlib import Path
 import re
-import subprocess
-import sys
-import tempfile
 import textwrap
 import unittest
+from unittest.mock import patch
 
 SOURCE = Path(__file__).resolve().parents[1]
 
@@ -15,160 +15,141 @@ SOURCE = Path(__file__).resolve().parents[1]
 class WorkflowBoundaryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.workflows = {name: (SOURCE / ".github/workflows" / name).read_text()
-                         for name in ("ci.yml", "lean-stage.yml", "lean-shard.yml")}
-        cls.source = cls.workflows["ci.yml"]
-        cls.job_sets = {}
-        for name, source in cls.workflows.items():
-            # Anchor to the actual jobs mapping, not similarly indented events
-            # or workflow_call inputs. A missing jobs key must fail this test.
-            body = re.split(r"^jobs:\s*$", source, flags=re.MULTILINE)
-            if len(body) != 2:
-                raise AssertionError(f"Missing or duplicate jobs mapping in {name}")
-            matches = list(re.finditer(r"^  ([a-z_][a-z_0-9]*):\s*$", body[1], re.MULTILINE))
-            cls.job_sets[name] = {match.group(1): body[1][match.end():matches[index + 1].start()
-                if index + 1 < len(matches) else len(body[1])]
-                for index, match in enumerate(matches)}
-        cls.jobs = cls.job_sets["ci.yml"]
+        cls.source = (SOURCE / ".github/workflows/ci.yml").read_text()
+        # Anchor to actual jobs, not similarly indented events or settings.
+        body = re.split(r"^jobs:\s*$", cls.source, flags=re.MULTILINE)
+        if len(body) != 2:
+            raise AssertionError("Missing or duplicate jobs mapping in ci.yml")
+        matches = list(re.finditer(r"^  ([a-z_][a-z_0-9]*):\s*$", body[1], re.MULTILINE))
+        cls.jobs = {match.group(1): body[1][match.end():matches[index + 1].start()
+                    if index + 1 < len(matches) else len(body[1])]
+                    for index, match in enumerate(matches)}
 
-    def test_main_has_real_events_and_reusable_workflows_have_explicit_inputs(self):
+    def test_only_administrative_jobs_remain_with_real_events(self):
+        self.assertEqual(set(self.jobs), {"announce", "preflight", "required"})
         header = self.source.split("\njobs:\n", 1)[0]
         for trigger in ("pull_request_target", "push", "workflow_dispatch"):
             self.assertRegex(header, rf"(?m)^  {trigger}:\s*$")
-        for name in ("lean-stage.yml", "lean-shard.yml"):
-            self.assertIn("  workflow_call:\n", self.workflows[name])
         self.assertIn("cancel-in-progress: true", header)
+        self.assertNotIn("workflow_call:", self.source)
+        self.assertNotIn("uses: ./.github/workflows/", self.source)
+        for name in ("lean-stage.yml", "lean-shard.yml"):
+            self.assertFalse((SOURCE / ".github/workflows" / name).exists(), name)
 
-    def test_runner_paths_are_selected_in_steps_not_job_environment(self):
-        # GitHub validates job env before a runner exists. YAML parsers alone
-        # cannot catch this expression-context error (dispatch returns HTTP 422).
-        for jobs in self.job_sets.values():
-            for job in jobs.values():
-                for match in re.finditer(r"(?m)^    env:\n((?:      .*\n)*)", job):
-                    self.assertNotIn("runner.", match.group(1))
-        shard = self.workflows["lean-shard.yml"]
-        selection = shard.split("      - name: Select external shard workspaces\n", 1)[1]
-        body = selection.split("        run: |\n", 1)[1].split("      - name:", 1)[0]
-        command = textwrap.dedent(body)
-        with tempfile.TemporaryDirectory() as directory:
-            for mode, work_name in (("build", "candidate-work"), ("audit", "trusted-audit-work")):
-                output = Path(directory) / (mode + ".env")
-                env = dict(os.environ, MODE=mode, RUNNER_TEMP=directory, GITHUB_ENV=str(output))
-                subprocess.run(["bash", "-euo", "pipefail", "-c", command], env=env, check=True)
-                self.assertEqual(dict(line.split("=", 1) for line in output.read_text().splitlines()), {
-                    "SVB_WORK_DIR": directory + "/" + work_name,
-                    "SVB_PROOF_ARTIFACT_DIR": directory + "/download-proof",
-                    "SVB_SNAPSHOT_ARTIFACT_DIR": directory + "/download-snapshot"})
+    def test_ci_never_installs_builds_or_audits_lean(self):
+        for command in ("install_ci_lean.sh", "/lean/setup.sh", "check_acceptance.sh",
+                        "/lean/verify.sh", "/lean/check.sh", "ci_lean.sh", "ci_lean_audit.py",
+                        "build_lean_modules.py", "replay_lean_modules.py", "lake build",
+                        "lean --run", "elan toolchain"):
+            self.assertNotIn(command, self.source)
+        self.assertNotIn("actions/upload-artifact@", self.source)
+        self.assertNotIn("actions/download-artifact@", self.source)
+        self.assertNotIn("SVB_BUILD_JOBS", self.source)
+        self.assertNotIn("SVB_REPLAY_JOBS", self.source)
+        # Installed-Lean fixtures require this opt-in variable. CI deliberately
+        # leaves it empty even if a surrounding environment defines it.
+        step = self.jobs["preflight"].split("      - name: Test trusted administrative rejection cases\n", 1)[1]
+        self.assertIn("SVB_LEAN_TEST_WORK_DIR: ''", step)
+        self.assertIn("python3 -m unittest discover -s trusted/tests -v", step)
 
     def test_only_isolated_status_writers_receive_write_permission(self):
-        for workflow, jobs in self.job_sets.items():
-            for name, job in jobs.items():
-                if workflow == "ci.yml" and name in {"announce", "required"}:
-                    self.assertIn("statuses: write", job)
-                    self.assertNotIn("actions/checkout@", job)
-                    self.assertNotIn("candidate/", job)
-                else:
-                    self.assertNotRegex(job, r"\bwrite\b(?=\s*\n)")
-        for source in self.workflows.values():
-            self.assertIn("permissions: {}", source)
-            self.assertNotIn("secrets.", source)
-            self.assertNotIn("actions/cache", source)
+        for name, job in self.jobs.items():
+            if name in {"announce", "required"}:
+                self.assertIn("statuses: write", job)
+                self.assertNotIn("actions/checkout@", job)
+                self.assertNotIn("candidate/", job)
+            else:
+                self.assertNotRegex(job, r"\bwrite\b(?=\s*\n)")
+        self.assertIn("permissions: {}", self.source)
+        self.assertNotIn("secrets.", self.source)
+        self.assertNotIn("actions/cache", self.source)
 
-    def test_auditor_executes_only_trusted_policy_and_downloads_exact_job_ids(self):
-        audit = self.jobs["audit"]
-        self.assertIn("trusted/lean/check_acceptance.sh audit-prepare", audit)
-        self.assertIn("trusted/scripts/ci_lean.sh audit final", audit)
-        self.assertNotIn("candidate/lean/", audit)
-        self.assertIn("artifact-ids: ${{ needs.build.outputs.artifact_id }}", audit)
-        self.assertIn("artifact-ids: ${{ needs.snapshot.outputs.artifact_id }}", audit)
-        self.assertIn("artifact-ids: ${{ needs.audit_stage_h.outputs.checkpoint_id }}", audit)
-        for source in self.workflows.values():
-            # Every download selects immutable output IDs from this same run;
-            # names/patterns or a different run cannot authenticate receipts.
-            downloads = source.count("uses: actions/download-artifact@")
-            self.assertEqual(downloads, source.count("artifact-ids:"))
-            self.assertNotIn("artifact-name:", source)
-            self.assertNotIn("pattern:", source)
-            self.assertNotIn("run-id:", source)
+    def test_preflight_uses_trusted_policy_on_exact_candidate_and_base(self):
+        preflight = self.jobs["preflight"]
+        self.assertIn("ref: ${{ github.event.pull_request.head.sha || github.sha }}", preflight)
+        self.assertIn("ref: ${{ github.event.pull_request.base.sha || github.sha }}", preflight)
+        self.assertIn('merge --no-commit --no-ff "$BASE_REF"', preflight)
+        self.assertIn("python3 trusted/scripts/ci_context.py", preflight)
+        self.assertIn("python3 trusted/scripts/check_contributions.py", preflight)
+        self.assertIn('--root "$GITHUB_WORKSPACE/candidate" --trusted-root "$GITHUB_WORKSPACE/trusted"', preflight)
+        self.assertNotIn("python3 candidate/", preflight)
+        self.assertNotIn("-s candidate/tests", preflight)
+        self.assertEqual(self.source.count("uses: actions/checkout@"),
+                         self.source.count("persist-credentials: false"))
 
-    def test_snapshot_is_separate_from_candidate_proof_execution(self):
-        snapshot = self.jobs["snapshot"]
-        self.assertIn("trusted/lean/check_acceptance.sh snapshot", snapshot)
-        self.assertNotIn("candidate/lean/", snapshot)
-        self.assertNotIn("needs: [announce, preflight, build", snapshot)
-        self.assertIn("artifact_id: ${{ steps.constants.outputs.artifact-id }}", snapshot)
-
-    def test_required_status_requires_every_gate_and_post_run_freshness(self):
+    def test_reporter_requires_all_administrative_jobs_and_rechecks_freshness(self):
         required = self.jobs["required"]
+        self.assertIn("if: always()", required)
         needs = re.search(r"needs: \[([^\]]+)\]", required).group(1)
         self.assertEqual({name.strip() for name in needs.split(",")},
                          set(self.jobs) - {"required"})
         self.assertIn("job['result'] != 'success'", required)
         self.assertIn("live['head']['sha'] != sha or live['base']['sha'] != base", required)
-        self.assertIn("'failure' if failed else 'success'", required)
+        self.assertNotIn("supplement", required)
 
-    def test_every_stage_requires_all_eight_exact_shards_before_advancing(self):
-        stage = self.job_sets["lean-stage.yml"]
-        shard_names = {f"shard_{index}" for index in range(8)}
-        self.assertEqual(set(stage), shard_names | {"combine"})
-        combine = stage["combine"]
-        needs = re.search(r"needs: \[([^\]]+)\]", combine).group(1)
-        self.assertEqual({name.strip() for name in needs.split(",")}, shard_names)
-        self.assertNotIn("if: always()", combine)
-        for index in range(8):
-            self.assertIn(f"shard: {index}\n", stage[f"shard_{index}"])
-            self.assertIn(f"artifact-ids: ${{{{ needs.shard_{index}.outputs.artifact_id }}}}", combine)
-            self.assertIn(f"path: ${{{{ runner.temp }}}}/fragments/{index}\n", combine)
-        for mode in ("build", "audit"):
-            for index, letter in enumerate("abcdefgh"):
-                job = self.jobs[f"{mode}_stage_{letter}"]
-                previous = f"{mode}_plan" if index == 0 else f"{mode}_stage_{'abcdefgh'[index - 1]}"
-                self.assertIn(f"mode: {mode}\n", job)
-                self.assertIn(f"stage: {index}\n", job)
-                self.assertIn(f"needs: [{previous}", job)
-                self.assertIn(f"checkpoint_id: ${{{{ needs.{previous}.outputs.checkpoint_id }}}}", job)
-                self.assertIn("uses: ./.github/workflows/lean-stage.yml", job)
-                if mode == "audit":
-                    self.assertIn("proof_id: ${{ needs.build.outputs.artifact_id }}", job)
-                    self.assertIn("snapshot_id: ${{ needs.snapshot.outputs.artifact_id }}", job)
+    def reporter(self, *, preflight="success", announce="success", head=None, base=None):
+        """Execute the actual inline reporter with all HTTP calls mocked."""
+        required = self.jobs["required"]
+        code = textwrap.dedent(required.split("python3 - <<'PY'\n", 1)[1].rsplit("          PY", 1)[0])
+        target, expected_base = "a" * 40, "b" * 40
+        posted = []
 
-    def test_assignment_discriminates_build_and_audit_checkpoint_schemas(self):
-        source = self.workflows["lean-shard.yml"]
-        step = source.split("      - name: Determine whether this shard has work\n", 1)[1]
-        step = step.split("      - name:", 1)[0]
-        self.assertIn("MODE: ${{ inputs.mode }}", step)
-        code = textwrap.dedent(step.split("python3 - <<'PY'\n", 1)[1].rsplit("          PY", 1)[0])
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            (root / "checkpoint").mkdir()
-            for mode, key in (("build", "plan"), ("audit", "partition")):
-                for modules in ([], ["Proof.Module"]):
-                    with self.subTest(mode=mode, active=bool(modules)):
-                        (root / "checkpoint/checkpoint.json").write_text(json.dumps({key: {
-                            "stages": [{"shards": [modules]}]}}))
-                        output = root / "output"
-                        output.write_text("")
-                        env = dict(os.environ, MODE=mode, RUNNER_TEMP=str(root),
-                                   SVB_STAGE="0", SVB_SHARD="0", GITHUB_OUTPUT=str(output))
-                        subprocess.run([sys.executable, "-c", code], env=env, check=True,
-                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                        self.assertEqual(output.read_text(), f"active={str(bool(modules)).lower()}\n")
+        class Reply(io.BytesIO):
+            status = 201
 
-    def test_artifact_names_do_not_collide_when_rerunning_all_jobs(self):
-        for name, source in self.workflows.items():
-            uploads = source.split("uses: actions/upload-artifact@")[1:]
-            for upload in uploads:
-                artifact_name = re.search(r"^\s+name: (.+)$", upload, re.MULTILINE).group(1)
-                with self.subTest(workflow=name, artifact=artifact_name):
-                    self.assertIn("${{ github.run_id }}", artifact_name)
-                    self.assertIn("${{ github.run_attempt }}", artifact_name)
+        def urlopen(request, timeout):
+            self.assertEqual(timeout, 30)
+            if request.get_method() == "GET":
+                self.assertEqual(request.full_url, "https://api.github.com/repos/example/project/pulls/2")
+                return Reply(json.dumps({"head": {"sha": head or target},
+                                         "base": {"sha": base or expected_base}}).encode())
+            self.assertEqual(request.get_method(), "POST")
+            self.assertEqual(request.full_url, f"https://api.github.com/repos/example/project/statuses/{target}")
+            posted.append(json.loads(request.data))
+            return Reply(b"{}")
 
-    def test_every_checkout_discards_credentials_and_supplement_is_optional(self):
-        for source in self.workflows.values():
-            self.assertEqual(source.count("uses: actions/checkout@"),
-                             source.count("persist-credentials: false"))
-        self.assertNotIn("supplement", self.jobs["required"])
-        self.assertNotIn("maintenance", self.source.lower())
+        env = dict(JOB_RESULTS=json.dumps({"announce": {"result": announce},
+                                           "preflight": {"result": preflight}}),
+                   GH_TOKEN="fixture-token", TARGET_SHA=target, EXPECTED_BASE_SHA=expected_base,
+                   PR_NUMBER="2", GITHUB_REPOSITORY="example/project", GITHUB_SERVER_URL="https://github.com",
+                   GITHUB_RUN_ID="123")
+        output, failure = io.StringIO(), None
+        with patch.dict(os.environ, env, clear=True), patch("urllib.request.urlopen", urlopen), \
+                contextlib.redirect_stdout(output):
+            try:
+                exec(compile(code, "ci-required-status", "exec"), {})
+            except SystemExit as error:
+                failure = error.code
+        self.assertEqual(len(posted), 1)
+        self.assertEqual(posted[0]["context"], "CI required")
+        return posted[0], output.getvalue(), failure
+
+    def test_green_status_explicitly_requires_separate_local_lean_verification(self):
+        payload, output, failure = self.reporter()
+        self.assertIsNone(failure)
+        self.assertEqual(payload["state"], "success")
+        self.assertEqual(payload["description"], "Administrative checks passed; run Lean locally")
+        self.assertIn("Complete local Lean verification is required before merge.", output)
+        self.assertIn("Administrative repository checks are running", self.jobs["announce"])
+        for misleading in ("All verification jobs passed", "Complete canonical Lean verification is running",
+                           "PASS: complete canonical Lean targets", "trusted kernel audit."):
+            self.assertNotIn(misleading, self.source)
+
+    def test_failed_cancelled_or_skipped_administrative_job_never_reports_success(self):
+        for result in ("failure", "cancelled", "skipped"):
+            for job in ("preflight", "announce"):
+                with self.subTest(job=job, result=result):
+                    payload, _, failure = self.reporter(**{job: result})
+                    self.assertIsNotNone(failure)
+                    self.assertEqual(payload["state"], "failure")
+
+    def test_stale_head_or_base_never_reports_success(self):
+        for changed in ({"head": "c" * 40}, {"base": "c" * 40}):
+            with self.subTest(changed=changed):
+                payload, _, failure = self.reporter(**changed)
+                self.assertIsNotNone(failure)
+                self.assertEqual(payload["state"], "failure")
+                self.assertIn("stale_revision", failure)
 
 
 if __name__ == "__main__":

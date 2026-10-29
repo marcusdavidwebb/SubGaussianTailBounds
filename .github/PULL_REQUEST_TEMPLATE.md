@@ -14,13 +14,17 @@ quartet. Marcus Webb decides whether to accept every eligible PR.
 - [ ] `CONTRIBUTIONS.md` records the explanation and attribution.
 - [ ] `./lean/verify.sh` passes, including the complete theorem and axiom audits.
 
+The maintainer reruns the complete Lean check locally before merging. CI checks
+repository integrity only; its green status is not Lean verification evidence.
+
 Give declaration names and actual verification results. Do not submit a
 separate prose proof, PDF proof, or Python certificate package. State incomplete
 checks explicitly rather than checking boxes for unfinished mathematics.
 
 ## Trusted policy and review
 
-Every PR uses the same complete Lean gate; maintenance comments cannot exempt a
-claim. Candidate workflow edits do not alter the trusted base's policy. Identify
-any build-policy migration requiring separate review. See the
+Every PR requires the same complete local Lean check, including comparison with
+the accepted base; maintenance comments cannot exempt a claim. Record the checked
+head/base revisions and result. Identify any build-policy migration requiring
+separate review. See the
 [Lean interface](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/main/docs/CI.md#lean-interface).

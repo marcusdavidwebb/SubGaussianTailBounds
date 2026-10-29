@@ -30,15 +30,26 @@ coverage, and checks the exact canonical types. Only `propext`,
 `Classical.choice` and `Quot.sound` are allowed.
 Python performs administration only; numerical inequalities are Lean obligations.
 
-Local self-comparison is a preflight. To compare a proposed change with an
-existing accepted checkout, set `SVB_TRUSTED_ROOT` to that checkout's absolute
-path. Hosted CI separates candidate compilation from a fresh authoritative
-audit; see [CI policy](../docs/CI.md). Candidate code executed locally has the
-permissions of the local user, so the local command is not a hostile-code sandbox.
+Local self-comparison is a preflight. Before merging a PR, the maintainer checks
+out its branch and runs the complete command locally against an existing
+checkout of the current accepted base:
+
+```sh
+SVB_TRUSTED_ROOT="/absolute/path/to/accepted-checkout" ./lean/verify.sh
+```
+
+Record both commit IDs and the completed verification log. Repeat the check if
+the PR or accepted base changes. See the
+[manual procedure](../docs/CI.md#manual-verification-before-merge), including
+initial framework adoption. Candidate code executed locally has the permissions
+of the local user, so the local command is not a hostile-code sandbox.
+
+GitHub CI performs administrative checks only. It does not run Lean, and a green
+`CI required` status does not establish mathematical verification.
 
 Cold builds and independent replay involve large exact rational computations.
-The [validation record](../docs/MIGRATION.md) distinguishes measured local runs
-from hosted performance; local caching is not evidence of a cold hosted run.
+The [validation record](../docs/MIGRATION.md) records measured local runs and
+the earlier hosted attempts separately.
 
 For development, `./lean/check.sh` builds and independently replays the entire
 supporting library in one process. The complete command uses the module-based
@@ -123,13 +134,6 @@ startups on warm builds and does not skip any subsequent kernel replay.
 The replay scheduler independently checks dependencies and artifact hashes; an
 imported module becomes a trusted replay seed only after it passes in that run.
 
-Hosted CI partitions both cold compilation and independent replay across
-standard runners, with one heavy worker per runner. It preserves dependency
-order and checks all modules before accepting the canonical results. Same-run
-checkpoints are bound to the exact workflow attempt and immutable producer
-artifact IDs; after failure use **Re-run all jobs**. This does not change the
-full fresh local verification command. See [the CI stages](../docs/CI.md).
-
 The finite proofs share uniform bounds and exact evaluation lemmas under
 `KL/Certificates/`: `UniformEndpointPrefactors`, `MomentCellSideConditions`,
 `GeneralSecondSideConditions`, `IntegerMomentEvaluation`,
@@ -173,15 +177,11 @@ cache or compiled output in this source tree or in OneDrive.
 
 ## CI and historical records
 
-The [CI policy](../docs/CI.md) uses trusted base policy, isolated candidate
-compilation and auditing, and separate privileged status reporting. Candidate
-workflow edits do not change the policy already installed on the target branch.
-Installing the new route is a reviewed trusted-policy transition; a local green
-run does not establish that hosted rollout has occurred.
-
-`./lean/setup.sh --ci` is restricted to disposable GitHub-hosted Linux runners.
-It provisions their pinned dependencies, including the locked ProofWidgets
-release tag. It is not a local installation command.
+The [CI policy](../docs/CI.md) keeps trusted source/contribution checks and
+separate status reporting on GitHub. The maintainer performs the complete
+mathematical verification locally before merging. Candidate workflow edits do
+not change the policy already installed on the target branch. Changes to the
+verification policy require explicit maintainer review.
 
 The [historical verification report](VERIFICATION_REPORT.md) and
 [formalization record](FORMALISATION_PLAN.md) preserve earlier dates, timings and

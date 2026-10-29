@@ -93,6 +93,11 @@ present. Future instruction files must preserve the same prohibition.
 
 ## Trusted-policy transition
 
+The hosted workflow described in this section is historical. On 29 October
+2026 the maintainer selected administrative-only CI and complete local Lean
+verification before each merge; see the later manual-verification entry and
+the current procedure in [CI.md](CI.md).
+
 The preceding trusted gate required strict improvement, allowed certain
 tradeoffs, froze baseline implementation paths, and required the old registry
 and prose/certificate package. Candidate workflow edits do not alter that policy
@@ -832,3 +837,38 @@ workflow's approach. All **10 workflow boundary tests** passed after this
 correction, including executing the build/audit path-selection shell code and
 rejecting runner-context expressions in job-level environments. The proof
 sources and verifier logic were unchanged by this workflow-expression fix.
+
+## Manual Lean verification — 29 October 2026
+
+At Marcus Webb's explicit request, CI now runs only source-integrity,
+contribution-history, revision-freshness and administrative regression checks.
+The Lean compilation, constants-snapshot compilation, staged kernel replay and
+final canonical-audit jobs have been removed, together with their reusable
+workflows. No hosted job installs or executes Lean. The retained `CI required`
+status explicitly reports administrative checks and does not certify proofs.
+The optional historical supplement workflow remains separate.
+
+Before merging each PR, the maintainer pulls the proposed branch and runs
+`./lean/verify.sh` locally. The complete verifier is unchanged: both canonical
+results, all comparisons, source coverage, independent kernel replay and the
+standard axiom allowlist remain required. `SVB_TRUSTED_ROOT` selects a separate
+accepted checkout for comparisons; self-comparison is only a preflight.
+Record the checked head/base revisions and successful local result before
+merging, and repeat the check if either changes. See [CI.md](CI.md).
+
+This policy change does not alter Lean sources, constants, toolchains or
+dependency pins. The root canonical SHA-256 remains
+`eb24daadaf9c0aaac3bea45128a08b81ba5492183bcbb6eb03b62c3245c2701c`.
+The repository instruction inventory was repeated, including hidden and ignored
+editor paths: only `AGENTS.md` and `restructure_prompt.md` were found. `AGENTS.md`
+now records the manual check; its absolute canonical-source prohibition remains
+unchanged. Earlier hosted designs and measurements above are historical records,
+not the current CI acceptance procedure.
+
+The administrative regression run discovered 145 tests: 106 passed and the 39
+installed-Lean fixtures were explicitly skipped, matching the new CI scope.
+Eight workflow-boundary tests include executing the status reporter with mocked
+HTTP responses: failed, cancelled or skipped prerequisites and stale revisions
+cannot produce a green status. YAML parsing, canonical source/README integrity,
+contribution preflight, documentation links and whitespace checks also passed.
+These are administrative checks, not new mathematical verification evidence.

@@ -11,7 +11,7 @@ env:
   PYTHONOPTIMIZE: ''
 
 # Optional manual rebuild of the historical supplement.
-# It is not called by canonical Lean CI and never reports its required status.
+# It is separate from repository checks and never reports their required status.
 jobs:
   build:
     name: Build PDF

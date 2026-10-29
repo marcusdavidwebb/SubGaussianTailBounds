@@ -97,6 +97,13 @@ proofs of the canonical propositions.
   assistance and makes no mathematical or novelty claim. See
   [the failure and validation record](docs/MIGRATION.md).
 
+- **Manual Lean verification — 29 October 2026:** at Marcus Webb's request,
+  the same PR removes automated Lean compilation and auditing from CI. He will
+  run the unchanged complete `./lean/verify.sh` locally before merging each PR.
+  CI retains administrative repository checks and makes no proof-success claim.
+  This workflow and documentation revision has Codex assistance; it changes no
+  theorem, constant or proof. See [the policy and validation record](docs/MIGRATION.md).
+
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet
 or implementation change, explanation and attribution, supersession, and

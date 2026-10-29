@@ -38,8 +38,9 @@ For example, after accepting general constants `(3.70, 1.58, 2.35, 1.5)`, a
 proposal at `(3.70, 1.55, 2.35, 1.5)` meets the numerical policy. A proposal at
 `(3.75, 1.55, 2.35, 1.5)` fails because it increases the first component. These
 examples assert no mathematical improvement. Editing recorded ceilings or
-selecting an older predecessor cannot authorize a regression. CI compares
-against the current target branch and requires a fresh run if that base advances.
+selecting an older predecessor cannot authorize a regression. The maintainer's
+local Lean verification compares against the current accepted target branch and
+must be repeated if the candidate or accepted base changes.
 
 ## Edit the maintained proof
 
@@ -117,13 +118,25 @@ allowed. `sorry`, `admit`, new axioms, native-oracle facts and assumed numerical
 certificates are ineligible. Source hashes and administrative Python never
 establish a mathematical claim. See [current validation](docs/MIGRATION.md).
 
-A local self-comparison is a preflight. For a comparison with an existing
-accepted checkout, set `SVB_TRUSTED_ROOT` to its absolute path. CI uses policy
-from the trusted base, compiles candidate code without secrets or write
-credentials, and checks the resulting declarations in a fresh isolated job.
-Changing candidate workflow files does not change the workflow already running
-from the base. Initial installation of this new gate requires a reviewed
-trusted-policy transition; see [CI policy](docs/CI.md).
+A local self-comparison is a preflight. Before merging, Marcus Webb checks out
+the PR branch and runs the complete Lean verification locally, using a separate
+existing checkout of the current accepted base for comparison:
+
+```sh
+SVB_TRUSTED_ROOT="/absolute/path/to/accepted-checkout" ./lean/verify.sh
+```
+
+Record the candidate and accepted-base commit IDs, the command and its completed
+log. Repeat the check if either revision changes. Candidate code executed locally
+has the local user's permissions; review changes to the verification setup before
+running it. The [manual verification procedure](docs/CI.md#manual-verification-before-merge)
+also explains the initial trusted-policy transition.
+
+GitHub CI runs source-integrity, contribution-history and administrative checks.
+It does not install Lean, compile proofs or replay the kernel. **A green
+`CI required` status is not evidence that the Lean proof passed.** Complete
+local mathematical verification remains required before merge. Candidate
+workflow edits do not change the trusted-base workflow already checking a PR.
 
 There is no maintenance exemption from complete mathematical verification or
 from the no-increase rule. Marcus Webb retains review discretion. Agents must

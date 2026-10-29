@@ -286,6 +286,10 @@ administration only. Cold builds and replay are substantial computations; see
 [parallelism and storage options](lean/README.md) and
 [observed validation](docs/MIGRATION.md).
 
+CI runs lightweight repository checks only. Marcus Webb runs the complete Lean
+verification locally before merging each PR; a green CI status does not certify
+the proofs. See [the manual review procedure](docs/CI.md).
+
 For a quick source-integrity check, run
 `python3 scripts/check_canonical_statement.py`. It checks the immutable bytes and
 README presentation and does not establish mathematical truth.
@@ -311,9 +315,8 @@ Submit Lean sources, concise explanation and attribution, and a history entry;
 no separate prose proof, PDF proof or Python certificate submission is part of
 the contract. The [contribution guide](CONTRIBUTING.md) explains where to edit
 the implementation and record credit. The [Lean interface](docs/CI.md#lean-interface)
-specifies the stable declarations checked by `./lean/verify.sh`. Installing the
-new hosted policy is a separate reviewed transition; candidate workflow edits
-do not change the policy already running on the target branch.
+specifies the stable declarations checked by `./lean/verify.sh`. The maintainer
+checks each proposed branch locally against the accepted base before merging.
 
 ## Provenance and citation
 

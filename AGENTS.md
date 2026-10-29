@@ -53,6 +53,9 @@ the proof or verification setup.
 
 ## Verification and storage
 
+- CI runs administrative repository checks only. Marcus Webb runs the complete
+  `./lean/verify.sh` locally before merging each PR; green CI is not evidence of
+  Lean verification. Preserve this manual check and all its mathematical checks.
 - Reuse compatible installed Lean tools and locked dependencies. Inspect the
   toolchain, Lake configuration and manifest before setup changes. Do not
   upgrade or replace dependencies during routine verification.
