@@ -32,6 +32,7 @@ checks repository administration only. The
 |---|---|
 | [MainTheoremStatement.lean](MainTheoremStatement.lean) | Immutable authoritative statement, reproduced below |
 | [lean/SingularValueBounds/](lean/SingularValueBounds/) | Maintained proofs and supporting mathematics |
+| [REPOSITORY_MAP.md](REPOSITORY_MAP.md) | Every folder, Python script and Markdown file, with simplification notes |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Constant policy, proof contributions and research standards |
 | [CONTRIBUTIONS.md](CONTRIBUTIONS.md) | Attribution and contribution history |
 
