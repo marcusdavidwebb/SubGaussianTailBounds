@@ -1,0 +1,24 @@
+open Lean in
+run_cmd do
+  let env ← getEnv
+  let newAxioms := env.constants.fold (fun acc name info =>
+    if info.isAxiom && !info.isUnsafe then
+      match env.getModuleIdxFor? name with
+      | none => name :: acc
+      | some idx =>
+        let origin := env.allImportedModuleNames[idx.toNat]!
+        if (`SingularValueBounds).isPrefixOf origin || origin == `CanonicalTrustedConstants
+          then name :: acc else acc
+    else acc) ([] : List Name)
+  for name in newAxioms do
+    throwError "Forbidden axiom declared by canonical implementation: {name}"
+  let targets : List Name := [@@TARGET_NAMES@@]
+  for name in targets do
+    unless (env.checked.get.find? name).isSome do
+      throwError "Canonical acceptance target is not kernel checked: {name}"
+  let (_, state) := (((targets.forM CollectAxioms.collect).run env).run {})
+  let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
+  for name in state.axioms do
+    unless allowed.contains name do
+      throwError "Forbidden axiom in canonical acceptance dependencies: {name}"
+  logInfo "CANONICAL_OBLIGATIONS_ELABORATED @@TARGET_COUNT@@ targets; independent replay required"

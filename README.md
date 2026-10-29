@@ -25,16 +25,17 @@ This builds the proofs, independently replays them through Lean's kernel, and
 checks the exact canonical results, constants comparisons and allowed axioms.
 See [Lean setup](lean/README.md) for external storage and memory settings.
 Marcus Webb runs this complete check locally before merging each PR; GitHub CI
-checks repository administration only. The
-[verification guide](docs/VERIFICATION.md) describes the checks and review procedure.
+checks repository administration only. A green CI status is not proof verification.
 
-| Source | Purpose |
+## Where to start
+
+| To… | Read… |
 |---|---|
-| [MainTheoremStatement.lean](MainTheoremStatement.lean) | Immutable authoritative statement, reproduced below |
-| [lean/SingularValueBounds/](lean/SingularValueBounds/) | Maintained proofs and supporting mathematics |
-| [REPOSITORY_MAP.md](REPOSITORY_MAP.md) | Every folder, Python script and Markdown file, with simplification notes |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Constant policy, proof contributions and research standards |
-| [CONTRIBUTIONS.md](CONTRIBUTIONS.md) | Attribution and contribution history |
+| Understand the theorem | [MainTheoremStatement.lean](MainTheoremStatement.lean), reproduced below |
+| Follow the proof | [Canonical/Results.lean](lean/SingularValueBounds/Canonical/Results.lean), then its imports |
+| Run verification | [lean/README.md](lean/README.md) for setup; [docs/VERIFICATION.md](docs/VERIFICATION.md) for what is checked and the before-merge procedure |
+| Make a contribution | [CONTRIBUTING.md](CONTRIBUTING.md) for the mathematical contract, process and attribution |
+| Understand the repository | [REPOSITORY_MAP.md](REPOSITORY_MAP.md) for every folder, Python helper, test file and Markdown document |
 
 ## Formal statement
 

@@ -1,4 +1,4 @@
-# Lean setup
+# Running the Lean proof
 
 Run the complete check from the repository root:
 
@@ -10,6 +10,13 @@ It configures the external workspace, builds the actual immutable root statement
 and maintained proofs, independently replays every module through Lean's kernel,
 and checks all canonical types, comparisons, universes and allowed axioms.
 [Verification and review](../docs/VERIFICATION.md) explains the full contract.
+For a PR review, pass the accepted checkout with `SVB_TRUSTED_ROOT` as described
+there. GitHub CI performs administrative checks only.
+
+The two starting points for reading the mathematics are the immutable
+[root statement](../MainTheoremStatement.lean) and the public
+[results](SingularValueBounds/Canonical/Results.lean). The
+[repository map](../REPOSITORY_MAP.md) explains every supporting folder and tool.
 
 ## Pinned environment and storage
 
@@ -67,5 +74,18 @@ kernel replay still runs afresh in dependency order. See
 
 Proof changes and new constants follow [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-`scripts/` and `tests/` support builds and independent Lean verification.
-They do not supply mathematical certificates; all proof obligations are in Lean.
+## Verification tools
+
+[verify.sh](verify.sh) is the full entry point. [setup.sh](setup.sh) calls
+[scripts/configure_lean.py](../scripts/configure_lean.py) to resolve the existing
+environment; setup alone does not check proofs. All six operational Python
+helpers live in [scripts/](../scripts/).
+
+[Verification/](Verification/) contains the Lean import parser, constants-source
+guard, independent kernel worker and two audit templates. The generator fills
+those templates in the external workspace. Keep these checking programs separate
+from the mathematical library under `SingularValueBounds/`.
+
+The Python [regression tests](../tests/) exercise the verification tools. Their
+optional Lean fixtures use small example modules; the full proof check remains
+`./lean/verify.sh`. Python does not supply mathematical certificates.

@@ -204,7 +204,9 @@ class AcceptancePreparationTests(unittest.TestCase):
                 path.parent.mkdir(parents=True)
                 path.write_text((SOURCE / gate.CONSTANTS_PATH).read_text())
                 for relative in gate.BUILD_INPUTS:
-                    (root / relative).write_bytes((SOURCE / relative).read_bytes())
+                    path = root / relative
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes((SOURCE / relative).read_bytes())
             candidate, trusted = roots
             (candidate / gate.RESULTS_PATH).write_text("-- deliberately incomplete; generation is not verification\n")
             constants = candidate / gate.CONSTANTS_PATH
@@ -368,11 +370,12 @@ end AcceptanceFixtures
         auditor = self.root / "CanonicalAcceptanceAudit.lean"
         auditor.write_text(gate.external_audit_source(include_library=False))
         worker = self.root / "CanonicalModuleReplay.lean"
-        worker.write_bytes((SOURCE / "lean/Acceptance/ModuleReplay.lean").read_bytes())
+        worker.write_bytes((SOURCE / "lean/Verification/ModuleReplay.lean").read_bytes())
         result = subprocess.run([
             sys.executable, str(SOURCE / "scripts/replay_lean_modules.py"),
             "--elan", self.elan, "--toolchain", self.toolchain,
-            "--worker", str(worker), "--auditor", str(auditor), "--jobs", "1"
+            "--worker", str(worker), "--auditor", str(auditor),
+            "--source-dir", str(self.root), "--jobs", "1"
         ], cwd=self.root, text=True,
             env=dict(os.environ, LEAN_PATH=str(self.root) + ":" + self.lean_path),
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=300)

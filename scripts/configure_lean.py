@@ -18,8 +18,8 @@ import subprocess
 import tempfile
 
 
-SOURCE = Path(__file__).resolve().parent
-PUBLIC_ROOT = SOURCE.parent
+PUBLIC_ROOT = Path(__file__).resolve().parents[1]
+SOURCE = PUBLIC_ROOT / "lean"
 CENTRAL_PACKAGES = Path.home() / "Lean" / "SingularValueBounds" / ".lake" / "packages"
 
 

@@ -69,9 +69,15 @@ class WorkflowBoundaryTests(unittest.TestCase):
         self.assertIn("ref: ${{ github.event.pull_request.head.sha || github.sha }}", preflight)
         self.assertIn("ref: ${{ github.event.pull_request.base.sha || github.sha }}", preflight)
         self.assertIn('merge --no-commit --no-ff "$BASE_REF"', preflight)
-        self.assertIn("python3 trusted/scripts/ci_context.py", preflight)
         self.assertIn("python3 trusted/scripts/check_contributions.py", preflight)
         self.assertIn('--root "$GITHUB_WORKSPACE/candidate" --trusted-root "$GITHUB_WORKSPACE/trusted"', preflight)
+        contribution_check = preflight.split(
+            "      - name: Check immutable source and contribution history with trusted policy\n", 1)[1]
+        self.assertIn("BASE_REF: ${{ github.event.pull_request.base.sha }}", contribution_check)
+        self.assertIn('args+=(--base-ref "$BASE_REF")', contribution_check)
+        self.assertNotIn("ci_context.py", self.source)
+        self.assertNotIn("GH_TOKEN", preflight)
+        self.assertNotIn("pull-requests:", preflight)
         self.assertNotIn("python3 candidate/", preflight)
         self.assertNotIn("-s candidate/tests", preflight)
         self.assertEqual(self.source.count("uses: actions/checkout@"),
@@ -87,17 +93,19 @@ class WorkflowBoundaryTests(unittest.TestCase):
         self.assertIn("live['head']['sha'] != sha or live['base']['sha'] != base", required)
         self.assertNotIn("supplement", required)
 
-    def reporter(self, *, preflight="success", announce="success", head=None, base=None):
+    def reporter(self, *, preflight="success", announce="success", head=None, base=None,
+                 context=None):
         """Execute the actual inline reporter with all HTTP calls mocked."""
         required = self.jobs["required"]
         code = textwrap.dedent(required.split("python3 - <<'PY'\n", 1)[1].rsplit("          PY", 1)[0])
         target, expected_base = "a" * 40, "b" * 40
-        posted = []
+        posted, requests = [], []
 
         class Reply(io.BytesIO):
             status = 201
 
         def urlopen(request, timeout):
+            requests.append(request.get_method())
             self.assertEqual(timeout, 30)
             if request.get_method() == "GET":
                 self.assertEqual(request.full_url, "https://api.github.com/repos/example/project/pulls/2")
@@ -113,6 +121,7 @@ class WorkflowBoundaryTests(unittest.TestCase):
                    GH_TOKEN="fixture-token", TARGET_SHA=target, EXPECTED_BASE_SHA=expected_base,
                    PR_NUMBER="2", GITHUB_REPOSITORY="example/project", GITHUB_SERVER_URL="https://github.com",
                    GITHUB_RUN_ID="123")
+        env.update(context or {})
         output, failure = io.StringIO(), None
         with patch.dict(os.environ, env, clear=True), patch("urllib.request.urlopen", urlopen), \
                 contextlib.redirect_stdout(output):
@@ -120,9 +129,13 @@ class WorkflowBoundaryTests(unittest.TestCase):
                 exec(compile(code, "ci-required-status", "exec"), {})
             except SystemExit as error:
                 failure = error.code
-        self.assertEqual(len(posted), 1)
-        self.assertEqual(posted[0]["context"], "CI required")
-        return posted[0], output.getvalue(), failure
+        if posted:
+            self.assertEqual(len(posted), 1)
+            self.assertEqual(posted[0]["context"], "CI required")
+            self.assertEqual(requests, ["GET", "POST"] if env["PR_NUMBER"] else ["POST"])
+        else:
+            self.assertEqual(requests, [], "Invalid identifiers must fail before any API request")
+        return posted[0] if posted else None, output.getvalue(), failure
 
     def test_green_status_explicitly_requires_separate_local_lean_verification(self):
         payload, output, failure = self.reporter()
@@ -150,6 +163,27 @@ class WorkflowBoundaryTests(unittest.TestCase):
                 self.assertIsNotNone(failure)
                 self.assertEqual(payload["state"], "failure")
                 self.assertIn("stale_revision", failure)
+
+    def test_invalid_identifiers_are_rejected_before_any_api_request(self):
+        for key, values in {
+            "TARGET_SHA": ("", "a" * 39, "g" * 40),
+            "GITHUB_REPOSITORY": ("owner/repo/../../../other", "owner/", "ownér/repo"),
+            "PR_NUMBER": ("0", "-2", "2/../../statuses"),
+            "EXPECTED_BASE_SHA": ("", "b" * 39, "z" * 40),
+        }.items():
+            for value in values:
+                with self.subTest(key=key, value=value):
+                    payload, _, failure = self.reporter(context={key: value})
+                    self.assertIsNone(payload)
+                    self.assertIn("Invalid trusted", failure)
+
+    def test_non_pr_run_reports_job_results_without_a_pull_request_api_call(self):
+        for result in ("success", "failure"):
+            with self.subTest(preflight=result):
+                payload, _, failure = self.reporter(preflight=result,
+                    context={"PR_NUMBER": "", "EXPECTED_BASE_SHA": ""})
+                self.assertEqual(payload["state"], result)
+                self.assertEqual(failure is None, result == "success")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,10 @@
 it locally before merging each PR. GitHub CI checks source integrity and
 repository administration; its green status does not certify a Lean proof.
 
+This guide explains the acceptance contract and review procedure. Use
+[lean/README.md](../lean/README.md) for setup and memory settings, or the
+[repository map](../REPOSITORY_MAP.md) to find each implementation file.
+
 ## Manual verification before merge
 
 Use the [pinned external setup](../lean/README.md). Check out the current PR
@@ -66,12 +70,24 @@ trusted ceiling; strict improvements still require their comparison proofs.
 
 ## What the complete verifier checks
 
+The launcher is [lean/verify.sh](../lean/verify.sh). All operational Python is in
+`scripts/`; the Lean checking programs and templates are in
+[lean/Verification/](../lean/Verification/). The mathematical proof modules
+remain in the separate `lean/SingularValueBounds/` tree.
+
 The actual immutable root statement and its README presentation are checked for
 byte identity. Trusted constants, expected-type templates and verification
 programs are prepared before candidate results. With a separate trusted base,
 setup files, Lake configuration, dependency manifest and toolchain must match
 that base. Framework changes require explicit review; the canonical source
 remains immutable.
+
+The generator prepares the exact expected types and comparison obligations in
+the external workspace. `SnapshotSource.lean` checks the constants sources;
+`SourceImports.lean` reads imports for bounded compilation. The generated
+obligations include the `ElaborationAudit.lean.in` template's axiom and checked-flag
+checks. These are followed by the independent verification below; successfully
+generating or elaborating obligations is not the final acceptance check.
 
 The auditor loads compiled candidate `.olean` data with environment extensions
 disabled, without executing candidate syntax, native plugins or initializers.
@@ -90,6 +106,12 @@ auditor compares compiled public results and generated obligations against
 independently elaborated exact types and universe counts. A misleading wrapper
 cannot hide an incorrectly typed public result. Source hashes and Python
 administration establish no mathematical truth.
+
+`ModuleReplay.lean` implements the independent kernel and axiom checks;
+`CanonicalAudit.lean.in` supplies the separate exact-type auditor. The
+`replay_lean_modules.py` scheduler combines their reports and validates complete
+source, umbrella and module coverage before it prints acceptance output.
+Generated Lean sources, compiled checkers and logs stay outside the repository.
 
 ## Administrative CI and repository settings
 

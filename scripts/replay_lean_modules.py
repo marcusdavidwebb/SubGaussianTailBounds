@@ -6,6 +6,9 @@ artifacts are data: no candidate source, native extension or initializer runs.
 An artifact becomes an admissible seed only after its own kernel replay and its
 complete ancestor replay finish, with unchanged SHA-256 hashes in this run.
 There is deliberately no receipt cache or candidate-provided "checked" shortcut.
+The combined report is checked against the candidate source inventory before any
+final acceptance output is printed. These administrative checks supplement the
+Lean kernel and exact-type checks; they establish no mathematical truth.
 """
 from __future__ import annotations
 
@@ -15,6 +18,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -105,6 +109,51 @@ def audit_summary(modules: dict[str, Module], reports: dict[str, dict[str, set[s
     for name, report in reports.items():
         combined.add(name, report)
     return combined.render()
+
+
+def validate_report(report: str, source_dir: Path) -> tuple[int, int]:
+    """Require the complete canonical audit and every maintained source module.
+
+    Supporting proofs may be reorganized: only the current public declarations
+    are fixed, not superseded implementation names or an old source inventory.
+    """
+    if re.search(r"error:|sorryAx", report):
+        raise ValueError("The Lean audit reports an error or sorryAx.")
+    if not re.search(r"^CANONICAL_ACCEPTANCE_COMPLETE 22 targets$", report, re.MULTILINE):
+        raise ValueError("The exact canonical acceptance check did not complete.")
+    targets = re.findall(r"^AUDIT_TARGET (\S+)$", report, re.MULTILINE)
+    complete = re.findall(r"^AUDIT_COMPLETE (\d+) targets; (\d+) visited constants$",
+                          report, re.MULTILINE)
+    axioms = re.findall(r"^AUDIT_AXIOMS \[([^]]*)\]$", report, re.MULTILINE)
+    if len(complete) != 1 or len(axioms) != 1:
+        raise ValueError("Missing or duplicate complete audit report.")
+    count, visited = map(int, complete[0])
+    if len(targets) != count or len(set(targets)) != count:
+        raise ValueError("The target inventory is incomplete or duplicated.")
+    if visited < count:
+        raise ValueError("The dependency traversal has not visited every target.")
+    used = {name.strip() for name in axioms[0].split(",") if name.strip()}
+    if not used <= ALLOWED_AXIOMS:
+        raise ValueError(f"Unexpected logical axioms: {sorted(used - ALLOWED_AXIOMS)}")
+    final_targets = set()
+    for regime in ("general", "unit"):
+        for suffix in ("", "_baseline", "_recorded"):
+            final_targets.add(f"SubGaussian.Current.{regime}{suffix}")
+        for ceiling in ("baseline", "current"):
+            for field in ("alpha", "beta", "gamma", "delta"):
+                final_targets.add(f"SubGaussian.Current.{regime}_{ceiling}_{field}")
+    if not final_targets <= set(targets):
+        raise ValueError("A final current-theorem declaration is absent from the audit.")
+    sources = {".".join(path.relative_to(source_dir).with_suffix("").parts)
+               for path in (source_dir / "SingularValueBounds").rglob("*.lean")}
+    imports = set(re.findall(r"^import (SingularValueBounds\.\S+)$",
+                             (source_dir / "SingularValueBounds.lean").read_text(), re.MULTILINE))
+    if sources != imports:
+        raise ValueError(f"Project import coverage differs from sources: {sorted(sources ^ imports)}")
+    loaded = re.findall(r"^AUDIT_MODULE (SingularValueBounds\.\S+)$", report, re.MULTILINE)
+    if len(loaded) != len(set(loaded)) or set(loaded) != sources:
+        raise ValueError(f"Compiled module coverage differs from sources: {sorted(set(loaded) ^ sources)}")
+    return count, visited
 
 
 def digest(path: Path) -> str:
@@ -249,6 +298,8 @@ def main() -> None:
     parser.add_argument("--toolchain", required=True)
     parser.add_argument("--worker", type=Path, required=True)
     parser.add_argument("--auditor", type=Path, required=True)
+    parser.add_argument("--source-dir", type=Path, required=True,
+                        help="Candidate Lean source directory whose import coverage is checked")
     parser.add_argument("--jobs", type=int, default=int(os.environ.get("SVB_REPLAY_JOBS", "1")))
     args = parser.parse_args()
     processes = LeanProcesses([args.elan, "run", args.toolchain, "lean", "--run"])
@@ -306,8 +357,9 @@ def main() -> None:
             if digest(module.path) != hashes[name]:
                 raise ValueError(f"Module artifact changed before final acceptance: {name}")
         unchanged_inventory()
-        print(reports.render(), end="", flush=True)
-        print(output, end="", flush=True)
+        report = reports.render() + output
+        validate_report(report, args.source_dir)
+        print(report, end="", flush=True)
     except (ValueError, OSError, json.JSONDecodeError, KeyboardInterrupt) as exc:
         processes.stop()
         raise SystemExit(f"Trusted module replay failed: {exc}") from exc

@@ -1,14 +1,37 @@
-"""Administrative scheduling checks; Lean itself checks the proof terms."""
+"""Replay scheduling and complete audit-report checks; no Lean processes run."""
+from contextlib import redirect_stderr, redirect_stdout
 import importlib.util
+import io
+import json
 from pathlib import Path
 import tempfile
 import threading
 import unittest
+from unittest import mock
 
 SOURCE = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("replay_modules", SOURCE / "scripts/replay_lean_modules.py")
 gate = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(gate)
+
+
+TARGETS = [f"SubGaussian.Current.{regime}{suffix}"
+           for regime in ("general", "unit")
+           for suffix in ("", "_baseline", "_recorded")]
+TARGETS += [f"SubGaussian.Current.{regime}_{ceiling}_{field}"
+            for regime in ("general", "unit")
+            for ceiling in ("baseline", "current")
+            for field in ("alpha", "beta", "gamma", "delta")]
+MODULES = ["SingularValueBounds.KL.Theorem", "SingularValueBounds.Canonical.Adapter"]
+CANONICAL_COMPLETE = "CANONICAL_ACCEPTANCE_COMPLETE 22 targets\n"
+
+
+def report(targets=TARGETS, axioms="propext, Classical.choice, Quot.sound", modules=MODULES):
+    return ("\n".join("AUDIT_MODULE " + module for module in modules) + "\n" +
+            "\n".join("AUDIT_TARGET " + target for target in targets) +
+            f"\nAUDIT_AXIOMS [{axioms}]\n" +
+            f"AUDIT_COMPLETE {len(targets)} targets; 100 visited constants\n" +
+            CANONICAL_COMPLETE)
 
 
 class ModuleReplayTests(unittest.TestCase):
@@ -180,6 +203,148 @@ class ModuleReplayTests(unittest.TestCase):
             incremental.render()
         incremental.add("SingularValueBounds.A", report)
         self.assertEqual(incremental.render(), summary)
+
+
+class CanonicalAuditTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name).resolve()
+        for module in ("KL/Theorem", "Canonical/Adapter"):
+            path = self.root / "SingularValueBounds" / (module + ".lean")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("-- Source-coverage fixture, not a mathematical proof.\n")
+        (self.root / "SingularValueBounds.lean").write_text(
+            "import SingularValueBounds.KL.Theorem\n"
+            "import SingularValueBounds.Canonical.Adapter\n")
+        (self.root / "audit_checkpoint.txt").write_text(TARGETS[0] + "\n")
+
+    def test_complete_report_and_both_source_families(self):
+        self.assertEqual(gate.validate_report(report(), self.root), (22, 100))
+
+    def test_missing_canonical_result_fails(self):
+        with self.assertRaisesRegex(ValueError, "final current-theorem declaration"):
+            gate.validate_report(report(TARGETS[:-1]), self.root)
+
+    def test_unimported_canonical_module_fails(self):
+        (self.root / "SingularValueBounds/Canonical/NewProof.lean").write_text("-- new module\n")
+        with self.assertRaisesRegex(ValueError, "Project import coverage"):
+            gate.validate_report(report(), self.root)
+
+    def test_replacing_old_implementation_does_not_freeze_historical_targets(self):
+        (self.root / "audit_checkpoint.txt").write_text("Earlier.supersededLemma\n")
+        self.assertEqual(gate.validate_report(report(), self.root), (22, 100))
+        old = self.root / "SingularValueBounds/KL/Theorem.lean"
+        old.unlink()
+        (self.root / "SingularValueBounds.lean").write_text(
+            "import SingularValueBounds.Canonical.Adapter\n")
+        self.assertEqual(gate.validate_report(report(modules=MODULES[1:]), self.root), (22, 100))
+
+    def test_new_axiom_cannot_be_hidden_among_allowed_axioms(self):
+        with self.assertRaisesRegex(ValueError, "Unexpected logical axioms"):
+            gate.validate_report(report(axioms="propext, Classical.choice, Quot.sound, fakeCertificate"),
+                                 self.root)
+
+    def test_shared_supporting_modules_are_covered_too(self):
+        path = self.root / "SingularValueBounds/Shared/NewLemma.lean"
+        path.parent.mkdir()
+        path.write_text("-- fixture\n")
+        with self.assertRaisesRegex(ValueError, "Project import coverage"):
+            gate.validate_report(report(), self.root)
+        with (self.root / "SingularValueBounds.lean").open("a") as stream:
+            stream.write("import SingularValueBounds.Shared.NewLemma\n")
+        modules = MODULES + ["SingularValueBounds.Shared.NewLemma"]
+        self.assertEqual(gate.validate_report(report(modules=modules), self.root), (22, 100))
+
+    def test_compiled_umbrella_cannot_omit_a_listed_source(self):
+        with self.assertRaisesRegex(ValueError, "Compiled module coverage"):
+            gate.validate_report(report(modules=MODULES[1:]), self.root)
+
+    def test_incomplete_or_duplicate_report_inventories_fail(self):
+        invalid = [report(TARGETS + [TARGETS[0]]),
+                   report() + "AUDIT_COMPLETE 22 targets; 100 visited constants\n",
+                   report() + "AUDIT_AXIOMS []\n",
+                   report().replace("AUDIT_AXIOMS [propext, Classical.choice, Quot.sound]\n", ""),
+                   report().replace("AUDIT_COMPLETE 22 targets; 100 visited constants\n", ""),
+                   report().replace("22 targets; 100 visited", "23 targets; 100 visited"),
+                   report().replace("100 visited", "21 visited"),
+                   report(modules=MODULES + [MODULES[0]]),
+                   report(modules=MODULES + ["SingularValueBounds.Extra"])]
+        for text in invalid:
+            with self.subTest(report=text), self.assertRaises(ValueError):
+                gate.validate_report(text, self.root)
+
+    def test_canonical_completion_requires_the_exact_marker(self):
+        for replacement in ("", "CANONICAL_ACCEPTANCE_COMPLETE 21 targets\n",
+                            "prefix " + CANONICAL_COMPLETE,
+                            CANONICAL_COMPLETE.rstrip() + " suffix\n"):
+            with self.subTest(replacement=replacement), self.assertRaisesRegex(
+                    ValueError, "exact canonical acceptance check did not complete"):
+                gate.validate_report(report().replace(CANONICAL_COMPLETE, replacement), self.root)
+
+    def test_errors_and_sorry_fail_even_with_all_completion_markers(self):
+        for diagnostic in ("error: failure\n", "axiom dependency sorryAx\n"):
+            with self.subTest(diagnostic=diagnostic), self.assertRaisesRegex(ValueError, "error or sorryAx"):
+                gate.validate_report(report() + diagnostic, self.root)
+
+    def run_coordinator(self, *, canonical_output=CANONICAL_COMPLETE, modules=MODULES,
+                        failure=None):
+        """Exercise the CLI through fake worker replies, including real file hashes."""
+        plan = []
+        for name in modules:
+            path = self.root / (name + ".olean")
+            path.write_text("Compiled-module fixture, not a Lean artifact.")
+            plan.append(dict(name=name, path=str(path), dependencies=[]))
+        worker, auditor = self.root / "Worker.lean", self.root / "Auditor.lean"
+
+        def run(arguments):
+            if arguments == [str(worker), "--", "inventory"]:
+                return json.dumps(dict(modules=["s4:Init"], constants=["s4:True"]))
+            if arguments[:3] == [str(worker), "--", "plan"]:
+                return json.dumps(dict(modules=plan))
+            if arguments[:3] == [str(worker), "--", "check-audit"]:
+                return json.dumps(dict(module=arguments[3], complete=True, theorems=TARGETS,
+                                       axioms=["propext"], visited=TARGETS + ["propext"]))
+            self.assertEqual(arguments, [str(auditor), "--", "--verified-module-replay"])
+            return canonical_output
+
+        processes = mock.Mock(spec=gate.LeanProcesses)
+        processes.run.side_effect = run
+        arguments = ["replay_lean_modules.py", "--elan", "unused-elan", "--toolchain", "unused-toolchain",
+                     "--worker", str(worker), "--auditor", str(auditor),
+                     "--source-dir", str(self.root), "--jobs", "1"]
+        stdout, stderr = io.StringIO(), io.StringIO()
+        with mock.patch.object(gate, "LeanProcesses", return_value=processes), \
+                mock.patch.object(gate.sys, "argv", arguments), \
+                redirect_stdout(stdout), redirect_stderr(stderr):
+            if failure:
+                with self.assertRaisesRegex(SystemExit, failure):
+                    gate.main()
+                processes.stop.assert_called_once()
+            else:
+                gate.main()
+                processes.stop.assert_not_called()
+        self.assertFalse(list(self.root.glob(".trusted-*.json")))
+        return stdout.getvalue()
+
+    def test_coordinator_prints_only_a_complete_validated_report(self):
+        output = self.run_coordinator()
+        self.assertEqual(gate.validate_report(output, self.root), (22, 23))
+        self.assertEqual(output.count(CANONICAL_COMPLETE), 1)
+
+    def test_coordinator_rejects_invalid_final_output_before_printing_success(self):
+        for output, failure in (("", "exact canonical acceptance check"),
+                                (CANONICAL_COMPLETE + "error: failure\n", "error or sorryAx"),
+                                (CANONICAL_COMPLETE + "sorryAx\n", "error or sorryAx")):
+            with self.subTest(output=output):
+                self.assertEqual(self.run_coordinator(canonical_output=output, failure=failure), "")
+
+    def test_coordinator_enforces_source_coverage_before_printing_success(self):
+        self.assertEqual(self.run_coordinator(modules=MODULES[1:],
+                                             failure="Compiled module coverage"), "")
+        (self.root / "SingularValueBounds.lean").write_text(
+            "import SingularValueBounds.Canonical.Adapter\n")
+        self.assertEqual(self.run_coordinator(failure="Project import coverage"), "")
 
 
 if __name__ == "__main__":

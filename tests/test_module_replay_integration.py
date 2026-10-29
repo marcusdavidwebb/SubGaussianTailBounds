@@ -59,7 +59,7 @@ class ModuleReplayIntegrationTests(unittest.TestCase):
         self.compile("CanonicalAcceptance", f"import {module}\n")
 
     def worker(self, *args):
-        return self.run_lean(["--run", str(SOURCE / "lean/Acceptance/ModuleReplay.lean"),
+        return self.run_lean(["--run", str(SOURCE / "lean/Verification/ModuleReplay.lean"),
                               "--", *args])
 
     def plan(self):

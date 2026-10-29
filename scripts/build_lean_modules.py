@@ -100,7 +100,7 @@ def main() -> None:
     if any(path.is_symlink() for path in files):
         raise SystemExit("Project proof sources must be regular files, not symlinks.")
     result = subprocess.run(command + ["env", "lean", "--run",
-        str(Path(__file__).resolve().parents[1] / "lean/SourceImports.lean")]
+        str(Path(__file__).resolve().parents[1] / "lean/Verification/SourceImports.lean")]
         + [str(path) for path in files], cwd=work, check=True, text=True, stdout=subprocess.PIPE)
     graph = source_graph(root, [json.loads(line) for line in result.stdout.splitlines()])
     validate_graph(graph)

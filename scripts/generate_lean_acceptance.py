@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Prepare complete canonical Lean obligations, without asserting they are proved.
+"""Prepare the exact theorem types and comparisons used by local verification.
 
-The constants snapshot and this generator MUST come from the trusted base in
-CI. Compile the emitted CanonicalTrustedConstants.lean in isolation first, then
-CanonicalAcceptance.lean. A successful generation is never verification.
+Read this generator and its Lean templates from the trusted checkout. Fixed
+checking code lives in lean/Verification/*.lean.in; this file supplies the
+22 target specifications and constants. verify.sh compiles the trusted types
+before candidate results, then independently checks them. CI uses only the
+source preflight functions. Generating these files does not prove a theorem.
 """
 from __future__ import annotations
 
@@ -20,7 +22,7 @@ _spec.loader.exec_module(canonical)
 
 CONSTANTS_PATH = Path("lean/SingularValueBounds/Canonical/AcceptedConstants.lean")
 RESULTS_PATH = Path("lean/SingularValueBounds/Canonical/Results.lean")
-BUILD_INPUTS = ("lean/setup.sh", "lean/configure.py", "lean/lakefile.toml",
+BUILD_INPUTS = ("lean/setup.sh", "scripts/configure_lean.py", "lean/lakefile.toml",
                 "lean/lake-manifest.json", "lean/lean-toolchain")
 FIELDS = ("alpha", "beta", "gamma", "delta")
 BASELINES = {
@@ -141,6 +143,18 @@ def expected_source() -> str:
     return "\n".join(lines + ["end", "end CanonicalAcceptanceExpected", ""])
 
 
+def render_lean_template(name: str, replacements: dict[str, str]) -> str:
+    """Read trusted Lean code; substitute only its declared generated fields."""
+    template_dir = Path(__file__).resolve().parents[1] / "lean/Verification"
+    source = (template_dir / name).read_text()
+    fields = re.findall(r"@@([A-Z_]+)@@", source)
+    if set(fields) != replacements.keys() or len(fields) != len(set(fields)):
+        raise ValueError(f"Missing, repeated or unexpected fields in Lean template: {name}")
+    for field, value in replacements.items():
+        source = source.replace(f"@@{field}@@", value)
+    return source
+
+
 def external_audit_source(*, independent_snapshot: bool = True, include_library: bool = True) -> str:
     """Inspect imported expressions without executing candidate syntax/initializers."""
     specs = []
@@ -154,140 +168,27 @@ def external_audit_source(*, independent_snapshot: bool = True, include_library:
         for field, constant in zip(FIELDS, current):
             specs += [(f"{regime}_{comparison}_{field}", 0, [constant])
                       for comparison in ("baseline", "current")]
-    rows = [f'  ("{name}", {universes}, [{", ".join(chr(34) + arg + chr(34) for arg in args)}])'
-            for name, universes, args in specs]
-    return """import Lean
-import Lean.Replay
-import Lean.Util.CollectAxioms
-
-/-! Trusted executable: this source is elaborated without importing candidate results.
-At runtime importModules loads constants with loadExts=false, so candidate syntax,
-elaborators and environment initializers cannot reinterpret the policy. -/
-open Lean
-def specs : List (String × Nat × List String) := [
-""" + ",\n".join(rows) + """
-]
-
-def publicTypeRequired (suffix : String) : Bool :=
-  suffix == "general" || suffix == "unit" || suffix.startsWith "general_baseline" ||
-  suffix.startsWith "unit_baseline" || suffix.endsWith "_recorded"
-
-def main (args : List String) : IO Unit := do
-  unless args.isEmpty || args == ["--verified-module-replay"] do
-    throw <| IO.userError "Unexpected canonical audit arguments"
-  initSearchPath (← findSysroot)
-  let imported ← importModules #[""" + (
-        "{ module := `SingularValueBounds }, " if include_library else "") + """{ module := `CanonicalAcceptance }""" + (
-        ", { module := `CanonicalCandidateConstants }" if independent_snapshot else "") + """] {} (loadExts := false)
-  -- The continuation follows the scheduler's complete per-module kernel and
-  -- axiom audits. Only the standalone mode needs a second trusted environment,
-  -- whole-library dependency scan and a proof-closure map.
-  let env ← if args.isEmpty then do
-      let trusted ← importModules #[{ module := `Mathlib }, { module := `CanonicalAcceptanceExpected }]
-        {} (loadExts := false)
-      let fresh := imported.constants.fold (fun acc name info =>
-        if trusted.contains name then acc else acc.insert name info)
-        ({} : Std.HashMap Name ConstantInfo)
-      for (name, info) in fresh.toList do
-        if info.isAxiom && !info.isUnsafe then
-          throw <| IO.userError s!"Forbidden axiom declared by canonical implementation: {name}"
-      -- Whole-source diagnostics remain independent of candidate commands. They
-      -- report every project theorem, including private/helper declarations.
-      let diagnosticTargets := fresh.toList.filterMap fun (name, info) =>
-        if info.isTheorem then some name else none
-      let diagnosticRoots := fresh.toList.filterMap fun (name, info) =>
-        if !info.isUnsafe && !info.isPartial then some name else none
-      let (_, diagnostic) := (((diagnosticRoots.forM CollectAxioms.collect).run imported).run {})
-      let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
-      for name in diagnostic.axioms do
-        unless allowed.contains name do
-          throw <| IO.userError s!"Forbidden axiom in project theorem dependencies: {name}"
-      for name in diagnosticTargets do
-        IO.println s!"AUDIT_TARGET {name}"
-      for name in imported.allImportedModuleNames do
-        if (`SingularValueBounds).isPrefixOf name && name != `SingularValueBounds then
-          IO.println s!"AUDIT_MODULE {name}"
-      IO.println s!"AUDIT_AXIOMS {diagnostic.axioms.toList}"
-      IO.println s!"AUDIT_COMPLETE {diagnosticTargets.length} targets; {diagnostic.visited.size} visited constants"
-      -- Replay every declaration reachable from the actual accepted types/proofs.
-      -- This omits unrelated implementation branches, never a logical dependency.
-      -- The global scan above still rejects even an unused new logical axiom.
-      let mut closure : Std.HashMap Name ConstantInfo := {}
-      let mut pending := specs.map fun (suffix, _, _) =>
-        ("CanonicalAcceptanceCI.checked_" ++ suffix).toName
-      pending := pending ++ (specs.filterMap fun (suffix, _, _) =>
-        if publicTypeRequired suffix then some (("SubGaussian.Current." ++ suffix).toName) else none)
-      pending := pending ++ specs.flatMap (fun (_, _, arguments) => arguments.map String.toName)
-      while !pending.isEmpty do
-        let name := pending.head!
-        pending := pending.tail!
-        if !closure.contains name then
-          if let some info := fresh[name]? then
-            closure := closure.insert name info
-            pending := info.getUsedConstantsAsSet.toList ++ pending
-            if let .inductInfo inductiveInfo := info then
-              pending := inductiveInfo.all ++ pending
-      -- Imported .olean flags are not evidence: the trusted kernel rechecks these.
-      -- The scheduler's private continuation follows verified module-DAG replay.
-      -- Standalone invocation always replays the entire logical target closure.
-      IO.eprintln s!"Replaying {closure.size} declarations in the complete acceptance dependency closure"
-      trusted.replay closure
-    else pure imported
-  let mut targets : List Name := []
-  for (suffix, universes, arguments) in specs do
-    let prefixes := if publicTypeRequired suffix then
-      ["CanonicalAcceptanceCI.checked_", "SubGaussian.Current."] else ["CanonicalAcceptanceCI.checked_"]
-    for namePrefix in prefixes do
-      let name := (namePrefix ++ suffix).toName
-      let some info := env.find? name | throw <| IO.userError s!"Missing acceptance target: {name}"
-      unless info.isTheorem do
-        throw <| IO.userError s!"Acceptance target must be a theorem declaration: {name}"
-      unless info.levelParams.length == universes do
-        throw <| IO.userError s!"Wrong universe parameters for acceptance target: {name}"
-      let levels := if universes == 1 then [Level.param `canonicalUniverse] else []
-      let actual := info.type.instantiateLevelParams info.levelParams levels
-      let expected := mkAppN (mkConst (("CanonicalAcceptanceExpected." ++ suffix).toName) levels)
-        (arguments.toArray.map fun argument => mkConst argument.toName)
-      unless Kernel.isDefEqGuarded env {} actual expected do
-        throw <| IO.userError s!"Wrong exact canonical acceptance type: {name}"
-      unless (env.checked.get.find? name).isSome do
-        throw <| IO.userError s!"Acceptance target is not kernel checked: {name}"
-      targets := name :: targets
-  if args.isEmpty then
-    let (_, state) := (((targets.forM CollectAxioms.collect).run env).run {})
-    let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
-    for name in state.axioms do
-      unless allowed.contains name do
-        throw <| IO.userError s!"Forbidden axiom in canonical acceptance dependencies: {name}"
-  IO.println "CANONICAL_ACCEPTANCE_COMPLETE 22 targets"
-"""
+    rows = []
+    for name, universes, arguments in specs:
+        quoted_arguments = ", ".join(f'"{argument}"' for argument in arguments)
+        rows.append(f'  ("{name}", {universes}, [{quoted_arguments}])')
+    imports = ["{ module := `CanonicalAcceptance }"]
+    if include_library:
+        imports.insert(0, "{ module := `SingularValueBounds }")
+    if independent_snapshot:
+        imports.append("{ module := `CanonicalCandidateConstants }")
+    return render_lean_template("CanonicalAudit.lean.in", {
+        "TARGET_SPECS": ",\n".join(rows),
+        "CANDIDATE_IMPORTS": ", ".join(imports),
+    })
 
 
 def audit_source(targets: list[str]) -> str:
-    lines = ["open Lean in", "run_cmd do",
-              "  let env ← getEnv",
-              "  let newAxioms := env.constants.fold (fun acc name info =>",
-              "    if info.isAxiom && !info.isUnsafe then",
-              "      match env.getModuleIdxFor? name with",
-              "      | none => name :: acc",
-              "      | some idx =>",
-              "        let origin := env.allImportedModuleNames[idx.toNat]!",
-              "        if (`SingularValueBounds).isPrefixOf origin || origin == `CanonicalTrustedConstants",
-              "          then name :: acc else acc",
-              "    else acc) ([] : List Name)",
-              "  for name in newAxioms do",
-              '    throwError "Forbidden axiom declared by canonical implementation: {name}"',
-              "  let targets : List Name := [" + ", ".join("`" + t for t in targets) + "]",
-              "  for name in targets do",
-              "    unless (env.checked.get.find? name).isSome do",
-              '      throwError "Canonical acceptance target is not kernel checked: {name}"',
-              "  let (_, state) := (((targets.forM CollectAxioms.collect).run env).run {})",
-              "  let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]",
-              "  for name in state.axioms do",
-              "    unless allowed.contains name do",
-              '      throwError "Forbidden axiom in canonical acceptance dependencies: {name}"',
-              f'  logInfo "CANONICAL_OBLIGATIONS_ELABORATED {len(targets)} targets; independent replay required"', ""]
-    return "\n".join(lines)
+    """Append the Lean elaboration/axiom check to generated proof obligations."""
+    return render_lean_template("ElaborationAudit.lean.in", {
+        "TARGET_NAMES": ", ".join("`" + target for target in targets),
+        "TARGET_COUNT": str(len(targets)),
+    })
 
 
 def verify_sources(root: Path, trusted_root: Path) -> str:

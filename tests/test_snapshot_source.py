@@ -31,7 +31,7 @@ class SnapshotSourceTests(unittest.TestCase):
             path = Path(directory) / "Constants.lean"
             path.write_text(source)
             result = subprocess.run([self.elan, "run", self.toolchain, "lean", "--run",
-                str(SOURCE / "lean/Acceptance/SnapshotSource.lean"), "--", str(path)],
+                str(SOURCE / "lean/Verification/SnapshotSource.lean"), "--", str(path)],
                 env=dict(os.environ, LEAN_PATH=self.lean_path), text=True,
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=180)
             self.assertEqual(result.returncode == 0, success, result.stdout)

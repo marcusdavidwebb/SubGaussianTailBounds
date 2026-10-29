@@ -43,6 +43,25 @@ and whitespace checks. The complete replay and installed-Lean regression run
 were stopped at the maintainer's request. Neither is recorded as successful;
 full verification of the simplified entry point is deferred.
 
+## Reading and navigation cleanup — 29 October 2026
+
+The six operational Python tools now live together in `scripts/`. Replay also
+validates its final report, replacing the separate report-checker script. CI
+uses the event's comparison base directly and checks the live head/base once,
+before reporting success. Its duplicate early API helper was removed.
+
+Lean checking programs and two readable Lean templates are grouped under
+`lean/Verification/`. The templates replace long Python string literals; all
+nine compared generated-source variants and all three relocated Lean checking
+programs are byte-for-byte identical to their predecessors. Mathematical
+sources, canonical bytes and dependency pins are unchanged. README and the
+repository map provide the reading path and describe each remaining part.
+
+The administrative suite passed: 78 tests, with 36 installed-Lean fixtures
+skipped. Source guards, the external workspace path, syntax and documentation
+links were checked separately. Full Lean compilation and replay remain
+deferred at the maintainer's request; these refactoring checks do not replace them.
+
 ## Historical sources
 
 These immutable Git links preserve the original detail without maintaining

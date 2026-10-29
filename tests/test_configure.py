@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 
 SOURCE = Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("lean_configure", SOURCE / "lean/configure.py")
+SPEC = importlib.util.spec_from_file_location("lean_configure", SOURCE / "scripts/configure_lean.py")
 configure = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(configure)
 
@@ -77,7 +77,7 @@ class ExistingDependencyTests(unittest.TestCase):
             self.assertFalse(configure.toolchain_ready("elan", "leanprover/lean4:v4.19.0"))
 
     def test_ci_installation_option_is_no_longer_available(self):
-        with patch.object(sys, "argv", ["configure.py", "--ci"]), \
+        with patch.object(sys, "argv", ["configure_lean.py", "--ci"]), \
                 patch.object(configure, "command") as command, \
                 contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit) as error:
