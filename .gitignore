@@ -1,23 +1,4 @@
-# Generated outputs; keep the readable supplementary PDF.
-/build/
-*.aux
-*.bbl
-*.bcf
-*.blg
-*.fdb_latexmk
-*.fls
-*.log
-*.out
-*.run.xml
-*.synctex
-*.synctex.gz
-*.synctex.gz(busy)
-*.toc
-*.lof
-*.lot
-*.dvi
-*.xdv
-*.ps
+# Local Python outputs.
 __pycache__/
 *.py[cod]
 

@@ -17,6 +17,6 @@ abstract: >-
   for the extreme singular values of sub-Gaussian matrices, by Marcus Webb and
   Morgan Lynch-Davies.
   The paper is in preparation and no public version is currently available.
-  Marcus Webb is the sole author of the supplementary document, which discloses
-  its AI generation and human responsibility. Identify the repository commit or
-  release used independently of the paper's publication status.
+  Attribution and assistance are recorded in the contribution history and
+  provenance documentation. Identify the repository commit or release used
+  independently of the paper's publication status.

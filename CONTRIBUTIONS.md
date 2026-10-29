@@ -17,11 +17,11 @@ proofs of the canonical propositions.
   `K ≥ 1`, and unit quartet `(33/25,28/25,58/25,Real.sqrt 2)` for `K = 1`.
   The legacy identifiers `baseline-general` and `baseline-one` refer to these
   two regimes of this one contribution, not separate contributions.
-- **Historical evidence:** [the supplement](supplementary.tex),
+- **Historical evidence:** [the historical supplement](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/73aa7fe4db3d982d446e292d82a34b6af784238b/supplementary.tex),
   [conditional Lean results](lean/SingularValueBounds/KL/Theorem.lean), the
   original exact Python checker and eleven interface runners in Git history, the
-  [formalisation record](lean/FORMALISATION_PLAN.md) and
-  [verification report](lean/VERIFICATION_REPORT.md).
+  [formalisation record](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/73aa7fe4db3d982d446e292d82a34b6af784238b/lean/FORMALISATION_PLAN.md) and
+  [verification report](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/73aa7fe4db3d982d446e292d82a34b6af784238b/lean/VERIFICATION_REPORT.md).
 - **Verification status:** hybrid verification observed on **20 October 2026**,
   after retirement of the earlier standalone theorem. Lean checked the
   analytic implication; Python checked finite conditions outside Lean. Neither
@@ -31,7 +31,7 @@ proofs of the canonical propositions.
   `SingularValueBounds.Canonical.unit_baseline` and the complete public interface
   supplied the second baseline, with all eleven finite-condition families proved
   in Lean. Python mathematical checkers and their registry were retired after
-  replacement. See [the current verification record](docs/MIGRATION.md); this
+  replacement. See [the current verification record](docs/HISTORY.md); this
   evidence is not backdated to the hybrid run.
 - **Attribution:** the accompanying in-preparation paper is by Marcus Webb and
   Morgan Lynch-Davies, whose extensive preceding mathematical work yielded
@@ -44,7 +44,7 @@ proofs of the canonical propositions.
 - **History:** source inventories, assisted timings, cleanup and validation
   scope remain in the original records. The initial record supplied no public
   PR, commit or release identifier; none is invented here. The current
-  [migration map](docs/MIGRATION.md) distinguishes subsequent preparation from
+  [migration map](docs/HISTORY.md) distinguishes subsequent preparation from
   the historical result. Unresolved attribution and novelty assessments remain
   in [PROVENANCE.md](docs/PROVENANCE.md).
 - **Efficiency revision — 26 October 2026:** the ongoing migration in
@@ -56,7 +56,7 @@ proofs of the canonical propositions.
   their quartets and all verification obligations. The work was implemented
   with Codex assistance; it makes no new mathematical or novelty claim.
   Measurements and completed validation are recorded separately in
-  [MIGRATION.md](docs/MIGRATION.md).
+  [HISTORY.md](docs/HISTORY.md).
 
 - **Proof simplification — 26 October 2026:** a further revision in the same
   [PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2)
@@ -72,7 +72,7 @@ proofs of the canonical propositions.
   the existing Taylor, rounding and
   Bernstein arguments, with Codex assistance; it asserts no new mathematical
   result or novelty. The separate measurements and verification status
-  are recorded in [MIGRATION.md](docs/MIGRATION.md).
+  are recorded in [HISTORY.md](docs/HISTORY.md).
 
 - **Further proof simplification — 27 October 2026:** the same
   [PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2)
@@ -85,7 +85,7 @@ proofs of the canonical propositions.
   verification policy are preserved. This is an implementation revision with
   Codex assistance, using existing mathematical methods; it makes no novelty
   claim. Measurements and verification status are recorded separately in
-  [MIGRATION.md](docs/MIGRATION.md).
+  [HISTORY.md](docs/HISTORY.md).
 
 - **Hosted CI scheduling — 28 October 2026:** the same PR splits cold
   compilation and independent kernel replay into dependency stages across
@@ -95,14 +95,23 @@ proofs of the canonical propositions.
   still required. The Lean proofs, canonical source, quartets and dependency
   pins are unchanged. This infrastructure revision was implemented with Codex
   assistance and makes no mathematical or novelty claim. See
-  [the failure and validation record](docs/MIGRATION.md).
+  [the failure and validation record](docs/HISTORY.md).
 
 - **Manual Lean verification — 29 October 2026:** at Marcus Webb's request,
   the same PR removes automated Lean compilation and auditing from CI. He will
   run the unchanged complete `./lean/verify.sh` locally before merging each PR.
   CI retains administrative repository checks and makes no proof-success claim.
   This workflow and documentation revision has Codex assistance; it changes no
-  theorem, constant or proof. See [the policy and validation record](docs/MIGRATION.md).
+  theorem, constant or proof. See [the policy and validation record](docs/HISTORY.md).
+
+- **Lean-only cleanup — 29 October 2026:** at Marcus Webb's request, the same
+  PR removes the historical supplement and paper tooling, retired hosted Lean
+  infrastructure and duplicate diagnostic commands. Current guides are
+  consolidated around the formalization and `./lean/verify.sh`. The canonical
+  source, proofs, constants and complete mathematical checks are preserved.
+  Codex assisted this repository simplification; it makes no mathematical or
+  novelty claim. Original documents and detailed measurements remain in Git
+  history, linked from [HISTORY.md](docs/HISTORY.md).
 
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet

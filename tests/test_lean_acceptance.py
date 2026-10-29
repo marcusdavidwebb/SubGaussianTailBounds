@@ -36,14 +36,47 @@ class AcceptancePreparationTests(unittest.TestCase):
             setup = root / "lean/setup.sh"
             setup.write_text('#!/bin/sh\ntouch "$TEST_SETUP_MARKER"\nexit 0\n')
             setup.chmod(0o755)
+            verifier = root / "lean/verify.sh"
+            verifier.write_bytes((SOURCE / "lean/verify.sh").read_bytes())
             marker = root / "setup-was-executed"
-            result = subprocess.run(["bash", str(SOURCE / "lean/check_acceptance.sh")],
-                                    env=dict(os.environ, SVB_SOURCE_ROOT=str(root),
-                                             SVB_TRUSTED_ROOT=str(SOURCE), TEST_SETUP_MARKER=str(marker)),
+            result = subprocess.run(["bash", str(verifier)],
+                                    env=dict(os.environ, SVB_TRUSTED_ROOT=str(SOURCE),
+                                             TEST_SETUP_MARKER=str(marker)),
                                     stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
             self.assertNotEqual(result.returncode, 0, result.stdout)
             self.assertIn("differs from trusted base", result.stdout)
             self.assertFalse(marker.exists(), "Candidate setup executed before its provenance was checked.")
+
+    def test_incomplete_proof_interface_is_rejected_before_setup(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "lean").mkdir()
+            canonical = (SOURCE / "MainTheoremStatement.lean").read_bytes()
+            (root / "MainTheoremStatement.lean").write_bytes(canonical)
+            (root / "README.md").write_bytes(gate.canonical.BEGIN + b"\n```lean\n" + canonical +
+                                            b"```\n" + gate.canonical.END)
+            verifier = root / "lean/verify.sh"
+            verifier.write_bytes((SOURCE / "lean/verify.sh").read_bytes())
+            setup = root / "lean/setup.sh"
+            setup.write_text('#!/bin/sh\ntouch "$TEST_SETUP_MARKER"\nexit 0\n')
+            setup.chmod(0o755)
+            marker = root / "setup-was-executed"
+            result = subprocess.run(["bash", str(verifier)],
+                                    env=dict(os.environ, SVB_TRUSTED_ROOT=str(SOURCE),
+                                             TEST_SETUP_MARKER=str(marker)),
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+            self.assertIn("Missing complete canonical proof interface", result.stdout)
+            self.assertFalse(marker.exists())
+
+    def test_verification_has_no_partial_success_modes(self):
+        for mode in ("all", "build", "snapshot", "audit", "audit-prepare"):
+            result = subprocess.run(["bash", str(SOURCE / "lean/verify.sh"), mode],
+                                    env=dict(os.environ, SVB_TRUSTED_ROOT=str(SOURCE)),
+                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+            with self.subTest(mode=mode):
+                self.assertEqual(result.returncode, 2, result.stdout)
+                self.assertIn("Usage:", result.stdout)
 
     def test_build_configuration_pins_and_root_cannot_be_redirected(self):
         with tempfile.TemporaryDirectory() as temp:

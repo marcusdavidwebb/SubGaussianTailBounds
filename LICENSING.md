@@ -2,8 +2,9 @@
 
 The original contents of this Lean formalization repository are licensed under the
 [MIT License](LICENSE), selected by the maintainer on 22 October 2026. This
-includes the Lean/Python/shell code, mathematical prose, documentation, LaTeX
-sources and supplementary PDF, unless an individual file states otherwise.
+includes the Lean proofs, supporting Python/shell code and documentation,
+unless an individual file states otherwise. Historical files retained in Git
+keep their applicable licences.
 The licence text follows the
 [Open Source Initiative's MIT License](https://opensource.org/license/mit).
 

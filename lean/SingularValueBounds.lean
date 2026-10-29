@@ -528,6 +528,6 @@ import SingularValueBounds.SpectralConcentration.Rows
 The single maintained formalization includes both canonical baseline results,
 componentwise monotonicity, their public acceptance interface, and complete
 concrete Lean proofs of all finite conditions. Every maintained source module
-is imported here for whole-library verification. See docs/MIGRATION.md for
+is imported here for whole-library verification. See docs/HISTORY.md for
 validation evidence and historical scope.
 -/

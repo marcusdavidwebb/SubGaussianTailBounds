@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Resolve the pinned Lean project into an external, source-specific workspace.
 
-Ordinary use only inspects existing Elan/dependencies. Downloads are available
-solely with --ci on a disposable GitHub-hosted Linux runner.
+Only existing Elan toolchains and exact pinned dependencies are used. This
+command never installs, downloads, clones or upgrades anything.
 """
 from __future__ import annotations
 
@@ -15,33 +15,25 @@ import platform
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 
 
 SOURCE = Path(__file__).resolve().parent
 PUBLIC_ROOT = SOURCE.parent
-CHECKOUT_ROOT = (
-    PUBLIC_ROOT.parent
-    if PUBLIC_ROOT.name == "supplementary" and (PUBLIC_ROOT.parent / "main.tex").is_file()
-    else PUBLIC_ROOT
-)
-LEGACY_WORK = Path.home() / "Lean" / "SingularValueBounds"
+CENTRAL_PACKAGES = Path.home() / "Lean" / "SingularValueBounds" / ".lake" / "packages"
 
 
 def fail(message: str) -> None:
     raise SystemExit(message)
 
 
-def command(args: list[str], *, capture: bool = False) -> str:
+def command(args: list[str]) -> str:
     result = subprocess.run(
-        args, text=True, stdout=subprocess.PIPE if capture else sys.stderr,
-        stderr=subprocess.PIPE if capture else sys.stderr, check=False,
+        args, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
     )
     if result.returncode:
-        detail = (result.stderr or "").strip() if capture else ""
-        fail(f"Command failed: {' '.join(args)}\n{detail}")
-    return result.stdout.strip() if capture else ""
+        fail(f"Command failed: {' '.join(args)}\n{result.stderr.strip()}")
+    return result.stdout.strip()
 
 
 def external_path(value: str | Path, label: str) -> Path:
@@ -49,36 +41,26 @@ def external_path(value: str | Path, label: str) -> Path:
     if not path.is_absolute():
         fail(f"{label} must be an absolute path: {path}")
     path = path.resolve()
-    if path == CHECKOUT_ROOT or CHECKOUT_ROOT in path.parents:
+    if path == PUBLIC_ROOT or PUBLIC_ROOT in path.parents:
         fail(f"{label} must stay outside the source checkout: {path}")
     if any("onedrive" in part.casefold() for part in path.parts):
         fail(f"{label} must stay outside OneDrive: {path}")
     return path
 
 
-def source_link_matches(work: Path) -> bool:
-    link = work / "SingularValueBounds"
-    return link.is_symlink() and link.resolve() == SOURCE / "SingularValueBounds"
-
-
-def workspace(ci: bool) -> Path:
+def workspace() -> Path:
     if os.environ.get("SVB_WORK_DIR"):
         return external_path(os.environ["SVB_WORK_DIR"], "SVB_WORK_DIR")
-    if ci:
-        return external_path(Path(os.environ["RUNNER_TEMP"]) / "svb-work", "CI workspace")
-    if source_link_matches(LEGACY_WORK):
-        return external_path(LEGACY_WORK, "Existing central workspace")
     source_id = hashlib.sha256(str(SOURCE).encode()).hexdigest()[:16]
     return external_path(Path.home() / "Lean" / "SubGaussianTailBounds" / source_id,
                          "Default workspace")
 
 
-def packages_path(work: Path, ci: bool) -> Path:
+def packages_path(work: Path) -> Path:
     if os.environ.get("SVB_PACKAGES_DIR"):
         return external_path(os.environ["SVB_PACKAGES_DIR"], "SVB_PACKAGES_DIR")
-    legacy_packages = LEGACY_WORK / ".lake" / "packages"
-    if not ci and legacy_packages.is_dir():
-        return external_path(legacy_packages, "Existing pinned dependency directory")
+    if CENTRAL_PACKAGES.is_dir():
+        return external_path(CENTRAL_PACKAGES, "Existing pinned dependency directory")
     return external_path(work / ".lake" / "packages", "Pinned dependency directory")
 
 
@@ -89,12 +71,11 @@ def check_ownership(work: Path) -> None:
         if recorded.get("source") != str(SOURCE):
             fail(f"Workspace belongs to another source checkout: {work}\n"
                  "Select a different SVB_WORK_DIR; build outputs must not be shared.")
-    elif not source_link_matches(work):
-        if any((work / name).exists() or (work / name).is_symlink()
-               for name in ("lakefile.toml", "lakefile.lean", "lake-manifest.json", ".lake/build")):
-            fail(f"Refusing to replace an unrecognised Lean workspace: {work}\n"
-                 "Select an unused external SVB_WORK_DIR.")
-    for name in ("SingularValueBounds", "SingularValueBounds.lean", "Audit.lean", "lean-toolchain"):
+    elif any((work / name).exists() or (work / name).is_symlink()
+             for name in ("lakefile.toml", "lakefile.lean", "lake-manifest.json", ".lake/build")):
+        fail(f"Refusing to replace an unrecognised Lean workspace: {work}\n"
+             "Select an unused external SVB_WORK_DIR.")
+    for name in ("SingularValueBounds", "SingularValueBounds.lean", "lean-toolchain"):
         entry = work / name
         if entry.is_symlink() and entry.resolve() != SOURCE / name:
             fail(f"Existing central source link points to another checkout: {entry}")
@@ -113,7 +94,7 @@ def elan_binary() -> str:
 
 
 def toolchain_ready(elan: str, toolchain: str) -> bool:
-    installed = command([elan, "toolchain", "list"], capture=True)
+    installed = command([elan, "toolchain", "list"])
     return toolchain in {line.split()[0] for line in installed.splitlines() if line.split()}
 
 
@@ -124,19 +105,19 @@ def check_dependencies(packages: Path, lock: dict) -> None:
             fail(f"Missing existing pinned dependency: {path}\n"
                  "Set SVB_PACKAGES_DIR to the compatible existing package directory.\n"
                  "No installation or dependency download was attempted.")
-        actual = command(["git", "-C", str(path), "rev-parse", "HEAD"], capture=True)
+        actual = command(["git", "-C", str(path), "rev-parse", "HEAD"])
         if actual != package["rev"]:
             fail(f"Pinned dependency mismatch for {package['name']}: expected {package['rev']}, got {actual}.\n"
                  "No checkout, update, or replacement was attempted.")
-        dirty = command(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=no"], capture=True)
+        dirty = command(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=no"])
         if dirty:
             fail(f"Pinned dependency has tracked local changes: {path}\n"
                  "Review those changes before verification; nothing was reset.")
 
 
-def write_config_file(path: Path, contents: str, *, source_name: str | None = None) -> None:
+def write_config_file(path: Path, contents: str) -> None:
     if path.is_symlink():
-        expected = SOURCE / (source_name or path.name)
+        expected = SOURCE / path.name
         if path.resolve() != expected:
             fail(f"Refusing to replace an unrelated configuration link: {path}")
         # Atomic replacement changes only the central link, never its source target.
@@ -174,61 +155,16 @@ def configure(work: Path, packages: Path, lock: dict, toolchain: str) -> None:
     write_config_file(work / ".svb-source.json", json.dumps({"source": str(SOURCE)}, indent=2) + "\n")
 
 
-def provision_ci(elan: str, toolchain: str, packages: Path, lock: dict) -> None:
-    if not toolchain_ready(elan, toolchain):
-        command([elan, "toolchain", "install", toolchain])
-    packages.mkdir(parents=True, exist_ok=True)
-    for package in lock["packages"]:
-        path = packages / package["name"]
-        if not (path / ".git").exists():
-            if path.exists() and any(path.iterdir()):
-                fail(f"Nonempty CI dependency path has no Git metadata: {path}")
-            command(["git", "init", "--quiet", str(path)])
-            command(["git", "-C", str(path), "remote", "add", "origin", package["url"]])
-            command(["git", "-C", str(path), "fetch", "--quiet", "--depth=1", "origin", package["rev"]])
-            command(["git", "-C", str(path), "checkout", "--quiet", "--detach", "FETCH_HEAD"])
-        if package["name"] == "proofwidgets":
-            # Lake resolves the release archive via an exact local tag at HEAD.
-            # A shallow fetch of the locked commit alone need not retain that tag.
-            tag = package.get("inputRev")
-            if tag != "v0.0.57":
-                fail("Expected the preserved ProofWidgets release tag v0.0.57.")
-            tag_ref = f"refs/tags/{tag}"
-            tag_status = subprocess.run(
-                ["git", "-C", str(path), "show-ref", "--verify", "--quiet", tag_ref],
-                check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-            )
-            if tag_status.returncode == 1:
-                command(["git", "-C", str(path), "fetch", "--quiet", "--no-tags", "--depth=1",
-                         "origin", f"{tag_ref}:{tag_ref}"])
-            elif tag_status.returncode:
-                fail(f"Cannot inspect ProofWidgets release tag: {tag_status.stderr.strip()}")
-            tagged = command(["git", "-C", str(path), "rev-parse", f"{tag_ref}^{{commit}}"],
-                             capture=True)
-            if tagged != package["rev"]:
-                fail(f"ProofWidgets release tag {tag} does not match the locked revision: "
-                     f"expected {package['rev']}, got {tagged}.")
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--ci", action="store_true", help="Provision exact pins on a GitHub-hosted Linux runner only")
     parser.add_argument("--print-work-dir", action="store_true", help="Print the selected external workspace without configuring it")
     args = parser.parse_args()
-    if args.ci and not (
-        os.environ.get("GITHUB_ACTIONS") == "true"
-        and os.environ.get("RUNNER_ENVIRONMENT") == "github-hosted"
-        and os.environ.get("RUNNER_TEMP")
-        and platform.system() == "Linux"
-    ):
-        fail("--ci downloads are restricted to disposable GitHub-hosted Linux runners.\n"
-             "No installation or dependency download was attempted.")
-    work = workspace(args.ci)
+    work = workspace()
     if args.print_work_dir:
         print(work)
         return
     check_ownership(work)
-    packages = packages_path(work, args.ci)
+    packages = packages_path(work)
     cache_default = (Path.home() / "Library/Caches/mathlib" if platform.system() == "Darwin"
                      else Path.home() / ".cache/mathlib")
     cache = external_path(os.environ.get("MATHLIB_CACHE_DIR", str(cache_default)), "MATHLIB_CACHE_DIR")
@@ -247,17 +183,10 @@ def main() -> None:
     if toolchain != "leanprover/lean4:v4.19.0":
         fail("This verification setup requires the preserved Lean 4.19.0 toolchain pin.")
     elan = elan_binary()
-    if args.ci:
-        provision_ci(elan, toolchain, packages, lock)
-    elif not toolchain_ready(elan, toolchain):
+    if not toolchain_ready(elan, toolchain):
         fail(f"Required existing toolchain is unavailable: {toolchain}\nNo download was attempted.")
     check_dependencies(packages, lock)
     configure(work, packages, lock, toolchain)
-    if args.ci:
-        # This explicit bootstrap step is the only place cache downloads occur.
-        subprocess.run([elan, "run", toolchain, "lake", "exe", "cache", "get"],
-                       cwd=work, stdout=sys.stderr, stderr=sys.stderr, check=True)
-        check_dependencies(packages, lock)
     print(work)
 
 

@@ -6,7 +6,7 @@ defaultTargets = ["MainTheoremStatement", "SingularValueBounds"]
 weakLeanArgs = ["-j2"]
 
 # Portable template: ./setup.sh resolves these paths in an external workspace.
-# Run ./check.sh instead of invoking Lake in this source directory.
+# Run ./verify.sh instead of invoking Lake in this source directory.
 buildDir = "@SVB_BUILD_DIR@"
 packagesDir = "@SVB_PACKAGES_DIR@"
 

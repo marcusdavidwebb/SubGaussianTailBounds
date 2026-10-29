@@ -27,4 +27,4 @@ Every PR requires the same complete local Lean check, including comparison with
 the accepted base; maintenance comments cannot exempt a claim. Record the checked
 head/base revisions and result. Identify any build-policy migration requiring
 separate review. See the
-[Lean interface](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/main/docs/CI.md#lean-interface).
+[Lean interface](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/main/docs/VERIFICATION.md#lean-interface).

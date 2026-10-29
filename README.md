@@ -1,90 +1,45 @@
 # SubGaussianTailBounds
 
-A Lean formalization project for explicit tail bounds on the extreme singular
-values of matrices with independent sub-Gaussian rows. The two fixed targets are:
+Complete Lean proofs of explicit tail bounds for the extreme singular values of
+matrices with independent sub-Gaussian rows. The two baseline results are:
 
 ```lean
 SubGaussian.GeneralSingularValueTailBound 3.84 1.58 2.35 1.5
 SubGaussian.UnitSingularValueTailBound 1.32 1.12 2.32 (Real.sqrt 2)
 ```
 
-Both baselines have complete, universe-polymorphic Lean proofs, including all
-finite numerical inequalities. The public results are
-[`SubGaussian.Current.general`](lean/SingularValueBounds/Canonical/Results.lean)
-and [`SubGaussian.Current.unit`](lean/SingularValueBounds/Canonical/Results.lean).
-There are no external certificate premises or Python mathematical checks.
-See the [migration and validation record](docs/MIGRATION.md).
-[MainTheoremStatement.lean](MainTheoremStatement.lean) defines the authoritative
-propositions; their proofs belong in the maintained implementation.
+Both proofs cover arbitrary sample-space universes and all finite numerical
+obligations. The public results are `SubGaussian.Current.general` and
+`SubGaussian.Current.unit` in
+[Canonical/Results.lean](lean/SingularValueBounds/Canonical/Results.lean).
 
-| Find | Location |
+## Quickstart
+
+With the existing pinned Lean **4.19.0** and Mathlib dependencies, run:
+
+```sh
+./lean/verify.sh
+```
+
+This builds the proofs, independently replays them through Lean's kernel, and
+checks the exact canonical results, constants comparisons and allowed axioms.
+See [Lean setup](lean/README.md) for external storage and memory settings.
+Marcus Webb runs this complete check locally before merging each PR; GitHub CI
+checks repository administration only. The
+[verification guide](docs/VERIFICATION.md) describes the checks and review procedure.
+
+| Source | Purpose |
 |---|---|
-| The authoritative formal statement | [MainTheoremStatement.lean](MainTheoremStatement.lean), reproduced below |
-| The maintained mathematical library | [lean/SingularValueBounds/](lean/SingularValueBounds/) |
-| Baseline proofs | [General.lean](lean/SingularValueBounds/Canonical/General.lean) · [Unit.lean](lean/SingularValueBounds/Canonical/Unit.lean) |
-| Current results and comparisons | [Canonical/Results.lean](lean/SingularValueBounds/Canonical/Results.lean) |
-| Canonical adapters | [Canonical/Adapter.lean](lean/SingularValueBounds/Canonical/Adapter.lean) |
-| Setup and verification | [Quickstart](#quickstart) · [Detailed Lean setup](lean/README.md) |
-| Contribute and find credit | [Contribution contract](CONTRIBUTING.md) · [Contribution history](CONTRIBUTIONS.md) |
-
-## Theorem statement
-
-This is Theorem S1.1 (`thm:explicit-constants`) from the historical supplement,
-with its mathematical content unchanged.
-
-There are positive universal constants $\alpha,\beta,\gamma,\delta$ with the
-following property. Let $S\in\mathbb R^{m\times n}$, $m\ge n\ge1$, have
-independent, centred, isotropic rows $X_i^T$, meaning
-$\mathbb E X_i=0$ and $\mathbb E X_iX_i^T=I_n$. Suppose that, for some $K\ge1$,
-
-$$
-\mathbb E e^{\lambda\langle X_i,v\rangle}
-\le e^{K^2\lambda^2\|v\|_2^2/2}
-\qquad(\lambda\in\mathbb R,\ v\in\mathbb R^n,\ 1\le i\le m).
-$$
-
-Put $L=\log(eK)$, with natural logarithms, and let $\sigma_{\min}(S)$ and
-$\sigma_{\max}(S)$ denote the smallest and largest of its $n$ singular values,
-including zeros. Then, for every $t\ge0$,
-
-$$
-\mathbb P\left\{\sigma_{\min}(S)\le\sqrt m-K\sqrt n
--\alpha KL-\beta K\sqrt L\,t\right\}\le e^{-t^2/2},
-$$
-
-$$
-\mathbb P\left\{\sigma_{\max}(S)\ge\sqrt m+K\sqrt n
-+\gamma KL+\delta K\sqrt L\,t\right\}\le e^{-t^2/2}.
-$$
-
-For every $K\ge1$, one may take $(\alpha,\beta,\gamma,\delta)=(3.84,1.58,2.35,1.5)$.
-When $K=1$, one may instead take $(1.32,1.12,2.32,\sqrt2)$.
-
-The constants $\alpha,\gamma$ control the additive correction $KL$;
-$\beta,\delta$ control the fluctuation correction $K\sqrt L\,t$. At $K=1$,
-$L=1$, so the two thresholds are $\sqrt m-\sqrt n-\alpha-\beta t$ and
-$\sqrt m+\sqrt n+\gamma+\delta t$. Each tail has its own failure bound
-$e^{-t^2/2}$. The events are non-strict, including at $t=0$; all singular values
-are included even for a rank-deficient matrix. Rows can have different laws,
-and coordinates in a row need not be independent.
-
-| Regime | Initial comparison quartet $(\alpha,\beta,\gamma,\delta)$ | Complete canonical Lean proof |
-|---|---|---|
-| Every $K\ge1$ | $(3.84,1.58,2.35,1.5)$ | `SubGaussian.Current.general` |
-| $K=1$ | $(1.32,1.12,2.32,\sqrt2)$ | `SubGaussian.Current.unit` |
-
-No improvement over these baselines has been accepted. Decimal constants are
-exact rationals in Lean; $\sqrt2$ is exact. The baseline quartets remain
-permanent ceilings and proof targets. See [CONSTANTS.md](CONSTANTS.md) for the
-replacement policy and historical verification status.
+| [MainTheoremStatement.lean](MainTheoremStatement.lean) | Immutable authoritative statement, reproduced below |
+| [lean/SingularValueBounds/](lean/SingularValueBounds/) | Maintained proofs and supporting mathematics |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Constant policy, proof contributions and research standards |
+| [CONTRIBUTIONS.md](CONTRIBUTIONS.md) | Attribution and contribution history |
 
 ## Formal statement
 
-The root file is immutable, including its comments and imports. Its full
-annotated contents appear below. This is a presentation of the authoritative
-source, not a second definition to edit. The canonical propositions quantify
-over arbitrary sample-space universes and explicitly require integrability,
-event measurability, and probability bounds in `ℝ≥0∞`.
+The root statement is immutable, including its comments and imports. This is its
+complete annotated source. The hypotheses and both non-strict tail bounds are
+part of the propositions being proved.
 
 <details>
 <summary>Complete annotated MainTheoremStatement.lean</summary>
@@ -267,76 +222,15 @@ end SubGaussian
 
 </details>
 
-## Quickstart
-
-Reuse Lean **4.19.0** and the exact locked dependencies; follow
-[the pinned setup](lean/README.md#pinned-environment-and-storage). Keep packages,
-caches and build outputs in an external workspace under `~/Lean/`. Ordinary
-local verification does not install or upgrade dependencies.
-
-```sh
-./lean/verify.sh
-```
-
-This builds the actual root statement and the maintained formalization, checks
-both exact canonical results and their comparison proofs, and independently
-replays the maintained modules through Lean's kernel. The only permitted axioms
-are `propext`, `Classical.choice` and `Quot.sound`. Python performs repository
-administration only. Cold builds and replay are substantial computations; see
-[parallelism and storage options](lean/README.md) and
-[observed validation](docs/MIGRATION.md).
-
-CI runs lightweight repository checks only. Marcus Webb runs the complete Lean
-verification locally before merging each PR; a green CI status does not certify
-the proofs. See [the manual review procedure](docs/CI.md).
-
-For a quick source-integrity check, run
-`python3 scripts/check_canonical_statement.py`. It checks the immutable bytes and
-README presentation and does not establish mathematical truth.
-
-## Contribute
-
-Contributions update one maintained formalization. A contribution can concern
-either regime alone, and a complete alternative proof with all four constants
-unchanged is eligible for review. It must prove the canonical proposition and
-all four comparisons against both the original baseline and the trusted current
-accepted quartet. **No current constant may increase.** Marcus Webb reserves
-the decision to accept or reject every PR; eligibility does not guarantee
-acceptance.
-
-For example, a general-regime proof at `(3.70, 1.58, 2.35, 1.5)` would satisfy
-the initial numerical ceilings if it proves the whole canonical proposition
-and its comparisons in Lean. After acceptance, a proposal at
-`(3.75, 1.55, 2.35, 1.5)` would be ineligible because it increases the accepted
-first constant. These numbers illustrate policy and do not assert a proved
-improvement.
-
-Submit Lean sources, concise explanation and attribution, and a history entry;
-no separate prose proof, PDF proof or Python certificate submission is part of
-the contract. The [contribution guide](CONTRIBUTING.md) explains where to edit
-the implementation and record credit. The [Lean interface](docs/CI.md#lean-interface)
-specifies the stable declarations checked by `./lean/verify.sh`. The maintainer
-checks each proposed branch locally against the accepted base before merging.
-
 ## Provenance and citation
 
-[CONTRIBUTIONS.md](CONTRIBUTIONS.md) contains one initial contribution credited
-to Marcus Webb and preserves substantial credit when implementations are
-superseded. [Provenance](docs/PROVENANCE.md) preserves the preceding human
-mathematics, model identities, tool roles, historical validation and unresolved
-attribution assessments. Verification does not establish novelty.
+[CONTRIBUTIONS.md](CONTRIBUTIONS.md) credits Marcus Webb's initial contribution
+covering both regimes and preserves subsequent credit. See
+[provenance](docs/PROVENANCE.md) for preceding human mathematics and tool roles,
+and [verification history](docs/HISTORY.md) for dated evidence.
 
-[supplementary.tex](supplementary.tex) and its [PDF](supplementary.pdf) are
-**historical documents, pending the maintainer's later deletion**. They are not
-maintained proof submissions or specifications for future Lean changes. See the
-[historical notice](docs/HISTORICAL_SUPPLEMENT.md).
-
-The accompanying paper, *Sharp tail bounds for the extreme singular values of
-sub-Gaussian matrices*, by Marcus Webb and Morgan Lynch-Davies, is **in
-preparation**, with no public version established here. Use [CITATION.cff](CITATION.cff)
-and identify the actual repository commit or release used. Repository releases
-are separate from publication of the paper; no DOI or release identifier is
-invented here.
-
-The project's original code, proofs and documentation use the [MIT License](LICENSE).
-Third-party material retains its own terms and notices; see [LICENSING.md](LICENSING.md).
+The accompanying paper remains in preparation. Cite this repository's exact
+commit or release using [CITATION.cff](CITATION.cff); a repository release is
+separate from paper publication. Original code, proofs and documentation use the
+[MIT License](LICENSE); [LICENSING.md](LICENSING.md) records its scope and
+third-party terms.
