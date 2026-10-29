@@ -1,12 +1,73 @@
 # SubGaussianTailBounds
 
 Complete Lean proofs of explicit tail bounds for the extreme singular values of
-matrices with independent sub-Gaussian rows. The two baseline results are:
+matrices with independent sub-Gaussian rows.
 
-```lean
-SubGaussian.GeneralSingularValueTailBound 3.84 1.58 2.35 1.5
-SubGaussian.UnitSingularValueTailBound 1.32 1.12 2.32 (Real.sqrt 2)
-```
+## Theorem
+
+Let $A$ be a random real $m \times n$ matrix on any probability space, with
+integer dimensions $m \ge n \ge 1$. Write $a_i \in \mathbb{R}^n$ for its rows.
+Assume:
+
+- The rows are measurable and mutually independent. They need not have the same
+  distribution, and coordinates within a row may be dependent.
+- Each row has mean zero and identity covariance: for every row $i$ and
+  coordinates $j,k$,
+
+  $$
+  \mathbb{E}[A_{ij}] = 0,
+  \qquad
+  \mathbb{E}[A_{ij}A_{ik}] =
+  \begin{cases}1 & j=k,\\ 0 & j\ne k.\end{cases}
+  $$
+
+- For a common parameter $K \ge 1$, every row satisfies the following
+  **sub-Gaussian bound**, for every $v \in \mathbb{R}^n$ and $\theta \in \mathbb{R}$:
+
+  $$
+  \mathbb{E}\!\left[\exp\!\left(\theta\langle a_i,v\rangle\right)\right]
+  \le \exp\!\left(\frac{K^2\theta^2\lVert v\rVert_2^2}{2}\right).
+  $$
+
+The coordinates, their pairwise products within each row, and the exponentials
+above are assumed integrable. Here $\lVert\cdot\rVert_2$ is the Euclidean norm.
+Let $\sigma_{\min}(A)$ and $\sigma_{\max}(A)$ denote the smallest and largest singular
+values of $A$, including zero singular values, and put $L=\log(eK)$, using the
+natural logarithm.
+
+Then, for every $t \ge 0$, the smallest singular value is unlikely to fall far
+below $\sqrt m-K\sqrt n$, and the largest is unlikely to lie far above
+$\sqrt m+K\sqrt n$. Specifically,
+
+$$
+\mathbb{P}\!\left(\sigma_{\min}(A) \le
+\sqrt m-K\sqrt n-3.84\,KL-1.58\,K\sqrt L\,t\right)
+\le e^{-t^2/2},
+$$
+
+$$
+\mathbb{P}\!\left(\sigma_{\max}(A) \ge
+\sqrt m+K\sqrt n+2.35\,KL+1.5\,K\sqrt L\,t\right)
+\le e^{-t^2/2}.
+$$
+
+**When $K=1$, sharper bounds hold under the same assumptions:**
+
+$$
+\mathbb{P}\!\left(\sigma_{\min}(A) \le
+\sqrt m-\sqrt n-1.32-1.12\,t\right)
+\le e^{-t^2/2},
+$$
+
+$$
+\mathbb{P}\!\left(\sigma_{\max}(A) \ge
+\sqrt m+\sqrt n+2.32+\sqrt{2}\,t\right)
+\le e^{-t^2/2}.
+$$
+
+Each displayed tail event is measurable and has its own probability bound.
+The inequalities include equality at the thresholds and apply also at $t=0$.
+All decimal constants are exact.
 
 Both proofs cover arbitrary sample-space universes and all finite numerical
 obligations. The public results are `SubGaussian.Current.general` and
@@ -31,7 +92,7 @@ checks repository administration only. A green CI status is not proof verificati
 
 | To… | Read… |
 |---|---|
-| Understand the theorem | [MainTheoremStatement.lean](MainTheoremStatement.lean), reproduced below |
+| Understand the theorem | The [statement above](#theorem); [MainTheoremStatement.lean](MainTheoremStatement.lean) gives its exact formal version below |
 | Follow the proof | [Canonical/Results.lean](lean/SingularValueBounds/Canonical/Results.lean), then its imports |
 | Run verification | [lean/README.md](lean/README.md) for setup; [docs/VERIFICATION.md](docs/VERIFICATION.md) for what is checked and the before-merge procedure |
 | Make a contribution | [CONTRIBUTING.md](CONTRIBUTING.md) for the mathematical contract, process and attribution |
