@@ -1,4 +1,7 @@
-import Mathlib
+import Mathlib.Analysis.Convex.Deriv
+import Mathlib.Analysis.Convex.Mul
+import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 
 open Set Finset
 namespace SingularValueBounds.KL

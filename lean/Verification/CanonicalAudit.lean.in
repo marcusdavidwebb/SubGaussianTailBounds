@@ -1,0 +1,102 @@
+import Lean
+import Lean.Replay
+import Lean.Util.CollectAxioms
+
+/-! Trusted executable: this source is elaborated without importing candidate results.
+At runtime importModules loads constants with loadExts=false, so candidate syntax,
+elaborators and environment initializers cannot reinterpret the policy. -/
+open Lean
+def specs : List (String × Nat × List String) := [
+@@TARGET_SPECS@@
+]
+
+def publicTypeRequired (suffix : String) : Bool :=
+  suffix == "general" || suffix == "unit" || suffix.startsWith "general_baseline" ||
+  suffix.startsWith "unit_baseline" || suffix.endsWith "_recorded"
+
+def main (args : List String) : IO Unit := do
+  unless args.isEmpty || args == ["--verified-module-replay"] do
+    throw <| IO.userError "Unexpected canonical audit arguments"
+  initSearchPath (← findSysroot)
+  let imported ← importModules #[@@CANDIDATE_IMPORTS@@] {} (loadExts := false)
+  -- The continuation follows the scheduler's complete per-module kernel and
+  -- axiom audits. Only the standalone mode needs a second trusted environment,
+  -- whole-library dependency scan and a proof-closure map.
+  let env ← if args.isEmpty then do
+      let trusted ← importModules #[{ module := `Mathlib }, { module := `CanonicalAcceptanceExpected }]
+        {} (loadExts := false)
+      let fresh := imported.constants.fold (fun acc name info =>
+        if trusted.contains name then acc else acc.insert name info)
+        ({} : Std.HashMap Name ConstantInfo)
+      for (name, info) in fresh.toList do
+        if info.isAxiom && !info.isUnsafe then
+          throw <| IO.userError s!"Forbidden axiom declared by canonical implementation: {name}"
+      -- Whole-source diagnostics remain independent of candidate commands. They
+      -- report every project theorem, including private/helper declarations.
+      let diagnosticTargets := fresh.toList.filterMap fun (name, info) =>
+        if info.isTheorem then some name else none
+      let diagnosticRoots := fresh.toList.filterMap fun (name, info) =>
+        if !info.isUnsafe && !info.isPartial then some name else none
+      let (_, diagnostic) := (((diagnosticRoots.forM CollectAxioms.collect).run imported).run {})
+      let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
+      for name in diagnostic.axioms do
+        unless allowed.contains name do
+          throw <| IO.userError s!"Forbidden axiom in project theorem dependencies: {name}"
+      for name in diagnosticTargets do
+        IO.println s!"AUDIT_TARGET {name}"
+      for name in imported.allImportedModuleNames do
+        if (`SingularValueBounds).isPrefixOf name && name != `SingularValueBounds then
+          IO.println s!"AUDIT_MODULE {name}"
+      IO.println s!"AUDIT_AXIOMS {diagnostic.axioms.toList}"
+      IO.println s!"AUDIT_COMPLETE {diagnosticTargets.length} targets; {diagnostic.visited.size} visited constants"
+      -- Replay every declaration reachable from the actual accepted types/proofs.
+      -- This omits unrelated implementation branches, never a logical dependency.
+      -- The global scan above still rejects even an unused new logical axiom.
+      let mut closure : Std.HashMap Name ConstantInfo := {}
+      let mut pending := specs.map fun (suffix, _, _) =>
+        ("CanonicalAcceptanceCI.checked_" ++ suffix).toName
+      pending := pending ++ (specs.filterMap fun (suffix, _, _) =>
+        if publicTypeRequired suffix then some (("SubGaussian.Current." ++ suffix).toName) else none)
+      pending := pending ++ specs.flatMap (fun (_, _, arguments) => arguments.map String.toName)
+      while !pending.isEmpty do
+        let name := pending.head!
+        pending := pending.tail!
+        if !closure.contains name then
+          if let some info := fresh[name]? then
+            closure := closure.insert name info
+            pending := info.getUsedConstantsAsSet.toList ++ pending
+            if let .inductInfo inductiveInfo := info then
+              pending := inductiveInfo.all ++ pending
+      -- Imported .olean flags are not evidence: the trusted kernel rechecks these.
+      -- The scheduler's private continuation follows verified module-DAG replay.
+      -- Standalone invocation always replays the entire logical target closure.
+      IO.eprintln s!"Replaying {closure.size} declarations in the complete acceptance dependency closure"
+      trusted.replay closure
+    else pure imported
+  let mut targets : List Name := []
+  for (suffix, universes, arguments) in specs do
+    let prefixes := if publicTypeRequired suffix then
+      ["CanonicalAcceptanceCI.checked_", "SubGaussian.Current."] else ["CanonicalAcceptanceCI.checked_"]
+    for namePrefix in prefixes do
+      let name := (namePrefix ++ suffix).toName
+      let some info := env.find? name | throw <| IO.userError s!"Missing acceptance target: {name}"
+      unless info.isTheorem do
+        throw <| IO.userError s!"Acceptance target must be a theorem declaration: {name}"
+      unless info.levelParams.length == universes do
+        throw <| IO.userError s!"Wrong universe parameters for acceptance target: {name}"
+      let levels := if universes == 1 then [Level.param `canonicalUniverse] else []
+      let actual := info.type.instantiateLevelParams info.levelParams levels
+      let expected := mkAppN (mkConst (("CanonicalAcceptanceExpected." ++ suffix).toName) levels)
+        (arguments.toArray.map fun argument => mkConst argument.toName)
+      unless Kernel.isDefEqGuarded env {} actual expected do
+        throw <| IO.userError s!"Wrong exact canonical acceptance type: {name}"
+      unless (env.checked.get.find? name).isSome do
+        throw <| IO.userError s!"Acceptance target is not kernel checked: {name}"
+      targets := name :: targets
+  if args.isEmpty then
+    let (_, state) := (((targets.forM CollectAxioms.collect).run env).run {})
+    let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
+    for name in state.axioms do
+      unless allowed.contains name do
+        throw <| IO.userError s!"Forbidden axiom in canonical acceptance dependencies: {name}"
+  IO.println "CANONICAL_ACCEPTANCE_COMPLETE 22 targets"

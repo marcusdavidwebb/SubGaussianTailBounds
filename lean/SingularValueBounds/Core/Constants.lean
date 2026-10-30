@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 /-!
 # The logarithmic and fourth-moment constants

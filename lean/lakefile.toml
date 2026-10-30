@@ -1,9 +1,12 @@
 name = "singularValueBounds"
 version = "0.1.0"
-defaultTargets = ["SingularValueBounds"]
+defaultTargets = ["MainTheoremStatement", "SingularValueBounds"]
+# Bound per-module proof parallelism for large exact certificate tables.
+# Weak arguments do not invalidate already checked build artifacts.
+weakLeanArgs = ["-j2"]
 
 # Portable template: ./setup.sh resolves these paths in an external workspace.
-# Run ./check.sh instead of invoking Lake in this source directory.
+# Run ./verify.sh instead of invoking Lake in this source directory.
 buildDir = "@SVB_BUILD_DIR@"
 packagesDir = "@SVB_PACKAGES_DIR@"
 
@@ -16,3 +19,8 @@ rev = "v4.19.0"
 name = "SingularValueBounds"
 # The resolved configuration uses the canonical source root, without a copy.
 srcDir = "@SVB_SOURCE_DIR@"
+
+[[lean_lib]]
+name = "MainTheoremStatement"
+# Compile the actual immutable root file; never copy or shadow this module.
+srcDir = "@SVB_ROOT_DIR@"

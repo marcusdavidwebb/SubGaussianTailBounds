@@ -1,55 +1,61 @@
-# Instructions for work on this repository
+# Instructions for this Lean repository
 
-Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md),
-[CONSTANTS.md](CONSTANTS.md) and [lean/README.md](lean/README.md) before changing
-the proof or verification setup.
+Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
+[lean/README.md](lean/README.md) before changing proofs or verification.
 
-## Mathematical claims
+## Immutable canonical statement
 
-- Preserve baseline quartets, hypotheses, MGF normalization, non-strict tail
-  events and endpoints. Do not silently change the theorem.
-- Improvement PRs require the complete registered readable proof, compiled
-  Lean target, applicable exact certificates/checker mapping and history.
-  A PDF or natural-language proof alone cannot pass the improvement gate.
-- Never weaken an audit, omit a checker, add unsupported theorem assumptions,
-  substitute the baseline for a new target or change CI to admit incomplete work.
-- Maintenance authorization belongs to the trusted maintainer workflow;
-  contributors cannot exempt their own claims.
-- Read [docs/RESEARCH_PROTOCOL.md](docs/RESEARCH_PROTOCOL.md) before substantive
-  mathematics. Keep correctness, attribution and novelty separate and preserve
-  unresolved assessments until evidence resolves them.
-- Preserve substantial credit and superseded records in
-  [CONTRIBUTIONS.md](CONTRIBUTIONS.md). Do not invent publication metadata.
+- `MainTheoremStatement.lean` is the single authoritative statement. Preserve
+  its exact root location, name and bytes, including imports, comments,
+  definitions and universe parameters. Do not edit, delete, rename, relocate,
+  replace or shadow it. There is no exception for formatting, compatibility,
+  proof development or maintenance; future instruction files must repeat
+  this prohibition without granting an exception.
+- Put proofs and adapters in other modules that import the actual root file.
+  Report mathematical or compatibility problems precisely without changing
+  the canonical source or weakening the required theorem.
+- The observed SHA-256 is
+  `eb24daadaf9c0aaac3bea45128a08b81ba5492183bcbb6eb03b62c3245c2701c`.
+  Compare bytes before and after work. A digest detects drift; it is not a
+  mathematical proof. The README copy must match the full annotated source.
+- Inventory repository-local AI instructions, including hidden/editor files,
+  when introducing or changing instructions. The current inventory is in
+  [docs/HISTORY.md](docs/HISTORY.md).
+
+## Proofs and contributions
+
+- Preserve both canonical baseline propositions, arbitrary sample-space
+  universes, hypotheses, MGF normalization, non-strict events and endpoints.
+- Either regime may be replaced at componentwise no larger constants than both
+  its baseline and current accepted quartet. Equality is allowed; preserve the
+  other regime and all accepted improvements. Marcus Webb decides acceptance.
+- Contributions are complete Lean sources, comparison proofs, concise explanation
+  and attribution, and a [CONTRIBUTIONS.md](CONTRIBUTIONS.md) entry. No separate
+  prose/PDF proof or external mathematical certificate is required.
+- Never weaken exact-type, universe, kernel, source-coverage or axiom checks,
+  introduce unsupported assumptions, or accept conditional results as complete.
+  Review verification-policy changes explicitly; candidate changes cannot replace
+  the accepted policy for their own assessment.
+- Follow the research and attribution rules in [CONTRIBUTING.md](CONTRIBUTING.md).
+  Preserve the human and model roles, responsibility, historical validation and
+  unresolved assessments in [docs/PROVENANCE.md](docs/PROVENANCE.md).
 
 ## Verification and storage
 
-- Reuse compatible installed Lean tools and locked dependencies. Inspect the
-  toolchain, Lake configuration and manifest before setup changes. Do not
+- Marcus Webb runs `./lean/verify.sh` locally before merging each PR. CI performs
+  administrative checks only; green CI is not proof verification. Agents must
+  not open a PR without explicit approval for that PR, merge it or enable auto-merge.
+- Run `./lean/verify.sh` after proof or verification changes, and
+  `python3 scripts/check_canonical_statement.py` after canonical-facing
+  documentation or setup changes. Report incomplete checks honestly.
+- Preserve independent kernel replay and the axiom allowlist: `propext`,
+  `Classical.choice`, `Quot.sound`. Python and hashes establish no mathematical
+  truth; finite proof obligations must be checked in Lean.
+- Reuse installed Lean and compatible locked dependencies. Inspect the toolchain,
+  Lake configuration and manifest before setup changes. Do not install, clone,
   upgrade or replace dependencies during routine verification.
-- Keep toolchains, dependencies, caches and compiled outputs outside this
-  source checkout; keep editable proofs and small configuration here.
-- Use `./lean/check_hybrid.sh` after proof/certificate changes, and the generated
-  contribution obligations required by the PR workflow for claimed improvements.
-  Keep Python assertions enabled.
-- Preserve the hybrid trust boundary: Python supplies no Lean proof terms;
-  source hashes are drift guards rather than semantic proofs.
-- Build LaTeX with `./scripts/build_supplement.sh`; check citations, references,
-  box warnings and changed pages. In the original paper checkout, retain the
-  documented main-then-supplement build.
-- Refresh bibliography/label snapshots with `scripts/sync_paper_assets.py`
-  from actual existing paper sources; do not invent missing paper content.
-
-## Provenance
-
-Preserve Section S2's account of preceding human mathematical work, model
-identity, tool roles and Marcus Webb's responsibility. Keep historical
-validation dates, manifests and timings distinct from new portability/CI runs.
-
-The repository is hosted at https://github.com/marcusdavidwebb/SubGaussianTailBounds.
-The paper is in preparation with no public version. Repository releases are
-separate from paper publication; record release identifiers only when they exist.
-The maintainer has selected
-the MIT License for the project's original code, proofs and documentation;
-preserve [LICENSE](LICENSE) and the scope described in
-[LICENSING.md](LICENSING.md). Third-party material retains its own terms and
-notices; preserve them.
+- Keep toolchains, dependencies, caches and build outputs outside this checkout;
+  use this project's own external workspace under `~/Lean/`. Follow the central
+  Elan/package/cache locations documented in [lean/README.md](lean/README.md).
+- Preserve [LICENSE](LICENSE), [LICENSING.md](LICENSING.md) and third-party notices.
+  Do not invent paper publication metadata, verification dates or releases.

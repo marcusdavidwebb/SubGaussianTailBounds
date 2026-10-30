@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
 /-!
 # Weighted entropy: finite-integrability version of Lemma S1.4

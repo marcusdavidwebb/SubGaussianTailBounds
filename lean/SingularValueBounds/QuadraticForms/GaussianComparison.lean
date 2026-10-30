@@ -1,3 +1,5 @@
+import Mathlib.Probability.Distributions.Gaussian
+import Mathlib.MeasureTheory.Integral.Pi
 import SingularValueBounds.QuadraticForms.Basic
 
 /-!

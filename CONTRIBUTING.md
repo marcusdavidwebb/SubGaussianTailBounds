@@ -1,153 +1,96 @@
 # Contributing
 
-This project welcomes better constants, corrections, literature pointers, and
-work on written proofs, exact certificates and Lean formalisation. Marcus Webb
-is the initial maintainer. The accompanying paper is in preparation.
+This project maintains one Lean formalization of the two propositions in
+[MainTheoremStatement.lean](MainTheoremStatement.lean). Marcus Webb decides
+whether to accept each contribution; a verified result is eligible for review,
+not automatically accepted.
 
-## Choose a contribution route
+## Mathematical contract
 
-- **Questions, ideas or problems:** [open an issue](https://github.com/marcusdavidwebb/SubGaussianTailBounds/issues/new/choose).
-  Preliminary arguments, setup questions and documentation suggestions are welcome.
-- **Better constants:** use the complete improvement package below and the
-  [technical contribution guide](contributions/README.md).
-- **Documentation, metadata or other maintenance:** explain the change and its
-  checks in a PR. A new constants record is not required for genuine maintenance,
-  but an authorized maintainer must approve this route for the exact PR head as
-  described under [Checks and review](#checks-and-review). All regression checks
-  still run. Selecting this route does not authorize an exception.
+A contribution may replace either regime's proof, including at unchanged
+constants. Prove the complete canonical proposition at one exact quartet
+`(α, β, γ, δ)`, for arbitrary sample-space universe `u`:
 
-Discuss mathematical corrections or changes to the proof/checker framework in an
-issue before preparing a PR, so that the required evidence and review route are clear.
-
-## Discuss an idea
-
-Use an issue for questions, numerical exploration or an argument not yet fully
-formalised. Distinguish proved statements, conjectures and numerical evidence.
-An issue is a discussion record, not an accepted theorem or an automatic claim
-to priority.
-
-## A complete constants-improvement pull request
-
-An improvement PR must contain **all** of the following:
-
-1. A machine-readable record in `contributions/records/`, specifying the exact
-   quartet, regime, contributor credit, predecessor and evidence paths. Follow
-   the [technical contract and template](contributions/README.md).
-2. An editable readable proof in `contributions/proofs/`, with precise statements,
-   hypotheses, changed estimates and local citations. A PDF may accompany it;
-   a PDF or natural-language proof alone is insufficient.
-3. A Lean theorem for the claimed quartet under the original row assumptions,
-   in `lean/SingularValueBounds/KL/Contributions/`, with the required appended
-   umbrella import. The generated gate obligation checks that theorem against
-   the exact claimed quartet and the required quantified statement.
-4. The applicable exact finite certificates and their checker-to-Lean mapping.
-   List reused baseline conditions/checkers explicitly. Any extra finite data
-   must use the gate's supported exact format. Numerical samples or floating-point
-   optimization do not replace certificates. No new analytic assumption may be
-   hidden among the theorem's premises.
-5. A note in `contributions/verification/`, and updates to
-   [CONTRIBUTIONS.md](CONTRIBUTIONS.md), [CONSTANTS.md](CONSTANTS.md) and relevant
-   verification documentation. Record attribution, remaining uncertainties and
-   the role of AI or other computational tools.
-
-Preserve the immutable baseline Lean sources, original checker and interface
-runners. Improvement PRs add evidence rather than replace those files or weaken
-the audit. A different proof architecture, certificate format or intentional
-framework revision needs separate maintainer-authorized maintenance work,
-still subject to full regression checks.
-
-Use [CONSTANTS.md](CONSTANTS.md) for the exact normalization. Identify the
-general-$K$ and $K=1$ scopes, unchanged entries and any tradeoff.
-
-## Checks and review
-
-Marcus Webb is the sole maintainer and approves all contributor PRs. His own
-PRs use a maintainer-only review bypass: GitHub does not accept self-approval,
-so his decision to merge records that approval. Every PR, including his own,
-must still pass the complete required CI checks. The review bypass does not
-authorize maintenance or waive any mathematical evidence requirement.
-
-From the repository root, with [the pinned setup](lean/README.md):
-
-```sh
-./lean/check_hybrid.sh
-./scripts/build_supplement.sh
+```lean
+SubGaussian.GeneralSingularValueTailBound.{u} α β γ δ
+SubGaussian.UnitSingularValueTailBound.{u} α β γ δ
 ```
 
-The hybrid command validates the current contribution registry, generates and
-compiles its claimed theorem targets, and runs the Lean and certificate checks.
-For a quick registry preflight using Python alone, run
-`python3 scripts/check_contributions.py --root .`; this does not verify the
-analytic proof or establish that a PR is complete.
+Preserve every hypothesis, positivity, both non-strict tail events and endpoints,
+event measurability and `ℝ≥0∞` probability bounds. All numerical obligations must
+be proved in Lean; no conditional certificate or analytic premise may remain.
 
-Before submitting an improvement branch, also compare it with the intended base
-revision using the [PR comparison instructions](contributions/README.md#before-an-improvement-pr).
-These local checks use your working tree and local validator. The trusted PR
-workflow performs its own comparisons and generated target checks against the
-exact base and head revisions. Unchanged baseline checks passing do not verify
-new constants.
+Prove all four componentwise comparisons against both the original baseline
+and the current accepted quartet of the same regime:
 
-The required jobs are **Contribution completeness**, **Exact certificates**,
-**Lean verification** and **Supplement build**, aggregated by **CI required**.
-The contribution job requires the complete registered package; all PRs run the
-full hybrid regression checks. A missing Lean result or certificate package
-fails even when a readable mathematical proof is provided.
+| Regime | Permanent baseline ceiling |
+|---|---|
+| General | `(3.84, 1.58, 2.35, 1.5)` = `(96/25, 79/50, 47/20, 3/2)` |
+| Unit | `(1.32, 1.12, 2.32, Real.sqrt 2)` = `(33/25, 28/25, 58/25, Real.sqrt 2)` |
 
-The trusted base revision supplies the `pull_request_target` workflow and
-contribution validator. Candidate code runs on disposable hosted runners with
-read-only permissions, no repository secrets, no persisted checkout credentials
-and no reusable Actions caches. It is tested at the exact PR head merged with
-the event's base revision. Isolated status-writer jobs execute static code
-without checking out the candidate and report **CI required** on that exact
-head. See [CI policy and trust boundaries](docs/CI.md).
+**No current component may increase.** Equality in every component is allowed.
+Preserve the other regime and every accepted improvement. The quartet must be
+proved jointly; selecting coordinates from unrelated results is insufficient.
+Decimal literals are exact rationals, and `Real.sqrt 2` is exact.
 
-The only maintenance exception requires an authorized maintainer's exact
-PR-head-bound comment:
+No improvement over these baselines has yet been accepted. The current ceiling
+comes from [AcceptedConstants.lean](lean/SingularValueBounds/Canonical/AcceptedConstants.lean)
+in the trusted accepted base. A candidate's snapshot or an older predecessor
+cannot authorize a regression. For example, after accepting `(3.70, 1.58, 2.35,
+1.5)`, the proposed `(3.75, 1.55, 2.35, 1.5)` would fail the first comparison.
+These example constants assert no mathematical improvement.
 
-```text
-/ci-maintenance <40-character current HEAD SHA>
-```
+## Make and verify a change
 
-The trusted workflow checks the commenter against its trusted base-revision
-maintainer list, initially `marcusdavidwebb`. CI must then be rerun. A new commit
-invalidates the previous authorization. A contributor cannot exempt their own
-work by declaring a category, changing a label or editing the PR's workflow.
-Maintenance authorization permits a PR without a new improvement record; it
-does not skip regression checks or accept an incomplete constants claim.
+The root `MainTheoremStatement.lean` is immutable: preserve its exact bytes,
+name and location, including imports, comments and universe parameters. Do not
+edit, delete, rename, relocate, replace or shadow it. Put proofs and adapters in
+other modules importing the actual root source; report problems without changing
+or weakening the statement.
 
-Passing CI is necessary for acceptance. Maintainer review also checks the
-mathematics, theorem/checker correspondence, attribution and scope. Python
-checks remain external to Lean; CI does not establish novelty. Read the
-[research protocol](docs/RESEARCH_PROTOCOL.md).
+Edit proofs under [lean/SingularValueBounds/](lean/SingularValueBounds/).
+[Canonical/Results.lean](lean/SingularValueBounds/Canonical/Results.lean) exposes
+the public results, baseline corollaries and comparisons. An improved quartet
+also updates `AcceptedConstants.lean` and proves its equality with the constants
+used by the results. The [22-declaration interface](docs/VERIFICATION.md#lean-interface)
+is the acceptance contract. Supporting modules may be reorganized or replaced;
+keep the umbrella imports current and preserve credit for superseded work.
 
-## Credit and history
+Submit Lean sources, a concise explanation and attribution, and an entry in
+[CONTRIBUTIONS.md](CONTRIBUTIONS.md). Include computational or AI assistance and
+actual commit/PR links when available. Separate prose proofs, PDF proofs and
+Python certificate packages are not contribution artifacts.
 
-Credit every substantial contributor as they wish, with an optional ORCID or
-profile link and their agreement before adding personal details. Record the
-contribution ID, result, proof/checker evidence, review status and actual
-issue/PR/commit/release links when available. Keep earlier entries and add
-explicit superseding or corrective entries. Preserve commit authorship and
-coauthor credit when integrating work.
+Run `./lean/verify.sh` with the [pinned external setup](lean/README.md).
+The maintainer repeats the complete check on the PR branch against the current
+accepted base before merging; see [manual verification](docs/VERIFICATION.md#manual-verification-before-merge).
+A green administrative CI status is not a Lean proof check. No maintenance
+route exempts a mathematical claim from complete verification.
 
-The ledger is append-only: retain its existing bytes and append a new entry or
-correction. The gate enforces this even for authorized maintenance PRs. Current
-overviews can change in `CONSTANTS.md` while the older credited result remains
-in the records and ledger.
+Keep toolchains, dependencies, caches and build outputs outside the source
+checkout, and preserve dependency pins. Changes to verification policy require
+explicit maintainer review. Agents need prior approval for a specific PR and
+must not merge or enable automatic merging on the maintainer's behalf.
 
-Substantial proof ideas, certificate construction, formalisation and material
-corrections merit a ledger entry; small editorial changes can remain in Git
-history and the changelog. This record does not automatically grant paper
-authorship. Future authorship and acknowledgements are decided separately with
-the people involved.
+## Research and credit
 
-## Dependencies and licensing
+Before substantive proof development, state the exact target and hypotheses and
+investigate primary sources, including stronger results, alternative formulations
+and the sources of the methods. For material comparisons record the source and
+version, theorem/page, inspected material, hypotheses and precise implication
+or obstruction. Report access limitations; an abstract or snippet is not a
+full-text check, and inaccessible sources must not be described as read.
 
-Preserve the pinned toolchain/dependency revisions. Keep dependencies, compiled
-outputs and caches outside this source checkout; do not commit build logs or
-SyncTeX. Include editable proofs, scripts and the readable supplementary PDF.
+Keep correctness, attribution and novelty separate. Attribute borrowed methods
+where used; independent derivation, successful Lean verification and unsuccessful
+literature searches do not establish novelty. Distinguish established results,
+adaptations, alternative proofs and candidate new results. Preserve unresolved
+assessments and record checks, limitations and outstanding questions in the
+contribution's explanation and Lean documentation. The maintainer reviews
+substantive statement and attribution changes; mathematical credit and paper
+authorship are separate decisions. [PROVENANCE.md](docs/PROVENANCE.md) records
+the existing assessment's scope.
 
-The project's original code, proofs and documentation use the
-[MIT License](LICENSE); see [LICENSING.md](LICENSING.md). Contributions submitted
-for inclusion are provided under the MIT License unless explicitly stated
-otherwise and agreed by the maintainer. Identify the source and applicable
-terms of any third-party material before adding it, and preserve its notices.
+Contributions use the [MIT License](LICENSE) unless explicitly agreed otherwise.
+Preserve substantive credit, including Marcus Webb's initial contribution
+covering both regimes, and the third-party terms in [LICENSING.md](LICENSING.md).

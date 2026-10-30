@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.MeasureTheory.Function.L2Space
 
 /-!
 # Cauchy--Schwarz and the endpoint lower-shift excess

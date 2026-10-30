@@ -1,3 +1,4 @@
+import Mathlib.Tactic.NormNum.NatFactorial
 import SingularValueBounds.Core.ScalarTail
 
 open MeasureTheory Set

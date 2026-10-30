@@ -1,12 +1,12 @@
 name: Report a correctness or verification problem
-description: Report a mathematical gap, certificate mismatch, or reproduction failure.
+description: Report a mathematical gap, Lean proof error, or reproduction failure.
 title: "[Correctness] "
 body:
   - type: textarea
     id: location
     attributes:
       label: Affected result or file
-      description: Give a commit identifier and precise theorem, equation, or checker.
+      description: Give a commit identifier and precise Lean declaration, source file, or verification step.
     validations:
       required: true
   - type: textarea

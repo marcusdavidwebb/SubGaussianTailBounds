@@ -1,3 +1,5 @@
+import Mathlib.LinearAlgebra.Matrix.Spectrum
+import Mathlib.Probability.Independence.Basic
 import SingularValueBounds.Core.Assumptions
 import SingularValueBounds.Core.Constants
 

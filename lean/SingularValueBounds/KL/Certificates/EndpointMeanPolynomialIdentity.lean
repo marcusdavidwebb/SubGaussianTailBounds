@@ -1,0 +1,190 @@
+import SingularValueBounds.KL.Upper.EndpointMeanFinite
+import SingularValueBounds.KL.Certificates.TensorAffineIdentity
+
+/-! Exact coefficient identities for the five endpoint determinant tests used by the finite cover.
+The four parameters are the coefficients of the entropy bilinear interpolant. -/
+open Polynomial
+open scoped BigOperators
+namespace SingularValueBounds.KL.Certificates
+noncomputable section
+set_option maxHeartbeats 0
+set_option maxRecDepth 10000
+
+def endpointBilinearCoefficients (ki : Fin 60) (ai : Fin 42) : Fin 4 → ℚ :=
+  let b := endpointMeanBox ki ai
+  let D := endpointMeanCorner ki ai
+  let ac := (D 1-D 0)/(b.right-b.left)
+  let kc := (D 2-D 0)/(b.top-b.bottom)
+  let cross := (D 3-D 2-D 1+D 0)/((b.right-b.left)*(b.top-b.bottom))
+  ![D 0-ac*b.left-kc*b.bottom+cross*b.left*b.bottom,
+    ac-cross*b.bottom, kc-cross*b.left, cross]
+
+def endpointMeanPolynomial (h : Fin 7) (d : Fin 4 → ℚ) : ℚ[X][X] :=
+  let bilinear := C (C (d 0))+C (C (d 1))*C X+C (C (d 2))*X+C (C (d 3))*C X*X
+  let base := C (C (58/25))-bilinear
+  let i := endpointMeanMajorantIndex h
+  if h=3 then base-C (C (1/2))*endpointMeanJ0Q else
+    (base-C (C (1/2))*C (majorantBQ i)+C (C (1/2))*majorantHQ i)*padeDQ comparisonZQ-
+      C (C (1/2))*padeNQ comparisonZQ
+
+theorem endpointMeanTestQ_eq (ki : Fin 60) (ai : Fin 42) :
+    endpointMeanTestQ ki ai = endpointMeanPolynomial (endpointMeanChoice ki ai)
+      (endpointBilinearCoefficients ki ai) := rfl
+
+def endpointMeanPolynomialCoefficients0 (d : Fin 4 → ℚ) : Fin 7 → Fin 16 → ℚ :=
+  fun k l => (![![((371/300) - d 0*(1/1)), ((0/1) - d 1*(1/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-424/75) - d 0*(-32/7) - d 2*(1/1)), ((0/1) - d 1*(-32/7) - d 3*(1/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((2569/300) - d 0*(48/7) - d 2*(-32/7)), ((-923/150) - d 0*(-32/7) - d 1*(48/7) - d 3*(-32/7)), ((9/2) - d 1*(-32/7)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((11497/1750) - d 0*(192/35) - d 2*(48/7)), ((4461/350) - d 0*(96/7) - d 1*(192/35) - d 2*(-32/7) - d 3*(48/7)), ((-144/7) - d 1*(96/7) - d 3*(-32/7)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-27602/875) - d 0*(-944/35) - d 2*(192/35)), ((21884/2625) - d 0*(-384/35) - d 1*(-944/35) - d 2*(96/7) - d 3*(192/35)), ((7109/175) - d 0*(48/7) - d 1*(-384/35) - d 3*(96/7)), ((-144/7) - d 1*(48/7)), ((0/1)), ((0/1)), ((0/1))],
+    ![((21344/875) - d 0*(768/35) - d 2*(-944/35)), ((-56268/875) - d 0*(-128/5) - d 1*(768/35) - d 2*(-384/35) - d 3*(-944/35)), ((30228/875) - d 0*(-384/35) - d 1*(-128/5) - d 2*(48/7) - d 3*(-384/35)), ((432/7) - d 1*(-384/35) - d 3*(48/7)), ((0/1)), ((0/1)), ((0/1))],
+    ![((69568/2625) - d 0*(832/35) - d 2*(768/35)), ((13288/875) - d 0*(1536/35) - d 1*(832/35) - d 2*(-128/5) - d 3*(768/35)), ((-160432/875) - d 0*(96/35) - d 1*(1536/35) - d 2*(-384/35) - d 3*(-128/5)), ((-47324/875) - d 0*(-128/35) - d 1*(96/35) - d 3*(-384/35)), ((216/7) - d 1*(-128/35)), ((0/1)), ((0/1))],
+    ![((-4584/125) - d 0*(-1536/35) - d 2*(832/35)), ((312184/2625) - d 0*(-384/35) - d 1*(-1536/35) - d 2*(1536/35) - d 3*(832/35)), ((150144/875) - d 0*(768/35) - d 1*(-384/35) - d 2*(96/35) - d 3*(1536/35)), ((-130688/875) - d 0*(64/35) - d 1*(768/35) - d 2*(-128/35) - d 3*(96/35)), ((-1728/35) - d 1*(64/35) - d 3*(-128/35)), ((0/1)), ((0/1))],
+    ![((15616/2625) - d 0*(384/35) - d 2*(-1536/35)), ((-118288/875) - d 0*(-1536/35) - d 1*(384/35) - d 2*(-384/35) - d 3*(-1536/35)), ((209528/875) - d 0*(-384/35) - d 1*(-1536/35) - d 2*(768/35) - d 3*(-384/35)), ((5168/21) - d 1*(-384/35) - d 2*(64/35) - d 3*(768/35)), ((10478/875) - d 0*(16/35) - d 3*(64/35)), ((-576/35) - d 1*(16/35)), ((0/1))],
+    ![((14592/875) - d 0*(1024/35) - d 2*(384/35)), ((-119456/875) - d 0*(768/35) - d 1*(1024/35) - d 2*(-1536/35) - d 3*(384/35)), ((-13616/35) - d 1*(768/35) - d 2*(-384/35) - d 3*(-1536/35)), ((-153872/2625) - d 0*(-128/35) - d 3*(-384/35)), ((816/7) - d 1*(-128/35) - d 2*(16/35)), ((288/35) - d 3*(16/35)), ((0/1))],
+    ![((14304/875) - d 0*(-512/35) - d 2*(1024/35)), ((1280/7) - d 1*(-512/35) - d 2*(768/35) - d 3*(1024/35)), ((77872/875) - d 0*(384/35) - d 3*(768/35)), ((-2144/7) - d 1*(384/35) - d 2*(-128/35)), ((-5996/105) - d 3*(-128/35)), ((8/35)), ((72/35))],
+    ![((1216/105) - d 2*(-512/35)), ((-31296/875) - d 0*(-512/35) - d 3*(-512/35)), ((2496/7) - d 1*(-512/35) - d 2*(384/35)), ((15136/105) - d 3*(384/35)), ((-72/35)), ((-648/35)), ((0/1))],
+    ![((-18656/2625) - d 0*(256/35)), ((-1152/7) - d 1*(256/35) - d 2*(-512/35)), ((-5344/35) - d 3*(-512/35)), ((256/35)), ((2304/35)), ((0/1)), ((0/1))],
+    ![((512/35) - d 2*(256/35)), ((5248/105) - d 3*(256/35)), ((-64/5)), ((-576/5)), ((0/1)), ((0/1)), ((0/1))],
+    ![((832/105)), ((384/35)), ((3456/35)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-128/35)), ((-1152/35)), ((0/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))]]) l k
+
+theorem endpointMeanPolynomial_identity_0 (d : Fin 4 → ℚ) :
+    endpointMeanPolynomial 0 d = tensorOfFn 6 15 (endpointMeanPolynomialCoefficients0 d) := by
+  simp only [endpointMeanPolynomial, show (0 : Fin 7) ≠ 3 by decide, if_false]
+  apply tensor_eq_of_eval
+  intro a b
+  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+    endpointMeanPolynomialCoefficients0, Polynomial.ofFn_eq_sum_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
+    Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
+    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+  ring
+
+def endpointMeanPolynomialCoefficients1 (d : Fin 4 → ℚ) : Fin 7 → Fin 16 → ℚ :=
+  fun k l => (![![((817/600) - d 0*(1/1)), ((-1/1) - d 1*(1/1)), ((2/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-3268/525) - d 0*(-32/7) - d 2*(1/1)), ((32/7) - d 1*(-32/7) - d 3*(1/1)), ((-64/7)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((39041/4200) - d 0*(48/7) - d 2*(-32/7)), ((-7393/525) - d 0*(-32/7) - d 1*(48/7) - d 3*(-32/7)), ((184/7) - d 1*(-32/7)), ((-64/7)), ((0/1)), ((0/1)), ((0/1))],
+    ![((8161/875) - d 0*(192/35) - d 2*(48/7)), ((144/25) - d 0*(96/7) - d 1*(192/35) - d 2*(-32/7) - d 3*(48/7)), ((-1376/35) - d 1*(96/7) - d 3*(-32/7)), ((192/7)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-37302/875) - d 0*(-944/35) - d 2*(192/35)), ((147584/2625) - d 0*(-384/35) - d 1*(-944/35) - d 2*(96/7) - d 3*(192/35)), ((4339/175) - d 0*(48/7) - d 1*(-384/35) - d 3*(96/7)), ((-2288/35) - d 1*(48/7)), ((96/7)), ((0/1)), ((0/1))],
+    ![((4592/125) - d 0*(768/35) - d 2*(-944/35)), ((-121168/875) - d 0*(-128/5) - d 1*(768/35) - d 2*(-384/35) - d 3*(-944/35)), ((122628/875) - d 0*(-384/35) - d 1*(-128/5) - d 2*(48/7) - d 3*(-384/35)), ((2432/35) - d 1*(-384/35) - d 3*(48/7)), ((-768/35)), ((0/1)), ((0/1))],
+    ![((107818/2625) - d 0*(832/35) - d 2*(768/35)), ((1888/875) - d 0*(1536/35) - d 1*(832/35) - d 2*(-128/5) - d 3*(768/35)), ((-301482/875) - d 0*(96/35) - d 1*(1536/35) - d 2*(-384/35) - d 3*(-128/5)), ((-9924/875) - d 0*(-128/35) - d 1*(96/35) - d 3*(-384/35)), ((64/1) - d 1*(-128/35)), ((-256/35)), ((0/1))],
+    ![((-74688/875) - d 0*(-1536/35) - d 2*(832/35)), ((749584/2625) - d 0*(-384/35) - d 1*(-1536/35) - d 2*(1536/35) - d 3*(832/35)), ((32392/125) - d 0*(768/35) - d 1*(-384/35) - d 2*(96/35) - d 3*(1536/35)), ((-275488/875) - d 0*(64/35) - d 1*(768/35) - d 2*(-128/35) - d 3*(96/35)), ((-320/7) - d 1*(64/35) - d 3*(-128/35)), ((128/35)), ((0/1))],
+    ![((97816/2625) - d 0*(384/35) - d 2*(-1536/35)), ((-287088/875) - d 0*(-1536/35) - d 1*(384/35) - d 2*(-384/35) - d 3*(-1536/35)), ((428028/875) - d 0*(-384/35) - d 1*(-1536/35) - d 2*(768/35) - d 3*(-384/35)), ((40144/105) - d 1*(-384/35) - d 2*(64/35) - d 3*(768/35)), ((1328/875) - d 0*(16/35) - d 3*(64/35)), ((-208/7) - d 1*(16/35)), ((32/35))],
+    ![((53792/875) - d 0*(1024/35) - d 2*(384/35)), ((-179056/875) - d 0*(768/35) - d 1*(1024/35) - d 2*(-1536/35) - d 3*(384/35)), ((-5184/7) - d 1*(768/35) - d 2*(-384/35) - d 3*(-1536/35)), ((-224072/2625) - d 0*(-128/35) - d 3*(-384/35)), ((7568/35) - d 1*(-128/35) - d 2*(16/35)), ((256/35) - d 3*(16/35)), ((0/1))],
+    ![((-46096/875) - d 0*(-512/35) - d 2*(1024/35)), ((2112/5) - d 1*(-512/35) - d 2*(768/35) - d 3*(1024/35)), ((189072/875) - d 0*(384/35) - d 3*(768/35)), ((-20416/35) - d 1*(384/35) - d 2*(-128/35)), ((-8786/105) - d 3*(-128/35)), ((0/1)), ((128/35))],
+    ![((512/21) - d 2*(-512/35)), ((-158496/875) - d 0*(-512/35) - d 3*(-512/35)), ((24064/35) - d 1*(-512/35) - d 2*(384/35)), ((26512/105) - d 3*(384/35)), ((16/35)), ((-1184/35)), ((0/1))],
+    ![((103744/2625) - d 0*(256/35)), ((-2048/7) - d 1*(256/35) - d 2*(-512/35)), ((-10896/35) - d 3*(-512/35)), ((-128/35)), ((4352/35)), ((0/1)), ((0/1))],
+    ![((-256/35) - d 2*(256/35)), ((1984/15) - d 3*(256/35)), ((384/35)), ((-7936/35)), ((0/1)), ((0/1)), ((0/1))],
+    ![((736/105)), ((-512/35)), ((1024/5)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((256/35)), ((-512/7)), ((0/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))]]) l k
+
+theorem endpointMeanPolynomial_identity_1 (d : Fin 4 → ℚ) :
+    endpointMeanPolynomial 1 d = tensorOfFn 6 15 (endpointMeanPolynomialCoefficients1 d) := by
+  simp only [endpointMeanPolynomial, show (1 : Fin 7) ≠ 3 by decide, if_false]
+  apply tensor_eq_of_eval
+  intro a b
+  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+    endpointMeanPolynomialCoefficients1, Polynomial.ofFn_eq_sum_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
+    Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
+    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+  ring
+
+def endpointMeanPolynomialCoefficients2 (d : Fin 4 → ℚ) : Fin 7 → Fin 16 → ℚ :=
+  fun k l => (![![((51/50) - d 0*(1/1)), ((0/1) - d 1*(1/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-816/175) - d 0*(-32/7) - d 2*(1/1)), ((0/1) - d 1*(-32/7) - d 3*(1/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((2553/350) - d 0*(48/7) - d 2*(-32/7)), ((-4898/525) - d 0*(-32/7) - d 1*(48/7) - d 3*(-32/7)), ((12/1) - d 1*(-32/7)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((3209/375) - d 0*(192/35) - d 2*(48/7)), ((11194/525) - d 0*(96/7) - d 1*(192/35) - d 2*(-32/7) - d 3*(48/7)), ((-384/7) - d 1*(96/7) - d 3*(-32/7)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-113566/2625) - d 0*(-944/35) - d 2*(192/35)), ((13508/875) - d 0*(-384/35) - d 1*(-944/35) - d 2*(96/7) - d 3*(192/35)), ((8221/75) - d 0*(48/7) - d 1*(-384/35) - d 3*(96/7)), ((-384/7) - d 1*(48/7)), ((0/1)), ((0/1)), ((0/1))],
+    ![((43224/875) - d 0*(768/35) - d 2*(-944/35)), ((-391444/2625) - d 0*(-128/5) - d 1*(768/35) - d 2*(-384/35) - d 3*(-944/35)), ((48308/875) - d 0*(-384/35) - d 1*(-128/5) - d 2*(48/7) - d 3*(-384/35)), ((1152/7) - d 1*(-384/35) - d 3*(48/7)), ((0/1)), ((0/1)), ((0/1))],
+    ![((100708/2625) - d 0*(832/35) - d 2*(768/35)), ((345664/2625) - d 0*(1536/35) - d 1*(832/35) - d 2*(-128/5) - d 3*(768/35)), ((-55236/125) - d 0*(96/35) - d 1*(1536/35) - d 2*(-384/35) - d 3*(-128/5)), ((-61556/375) - d 0*(-128/35) - d 1*(96/35) - d 3*(-384/35)), ((576/7) - d 1*(-128/35)), ((0/1)), ((0/1))],
+    ![((-353824/2625) - d 0*(-1536/35) - d 2*(832/35)), ((158288/875) - d 0*(-384/35) - d 1*(-1536/35) - d 2*(1536/35) - d 3*(832/35)), ((1434712/2625) - d 0*(768/35) - d 1*(-384/35) - d 2*(96/35) - d 3*(1536/35)), ((-912104/2625) - d 0*(64/35) - d 1*(768/35) - d 2*(-128/35) - d 3*(96/35)), ((-4608/35) - d 1*(64/35) - d 3*(-128/35)), ((0/1)), ((0/1))],
+    ![((87632/875) - d 0*(384/35) - d 2*(-1536/35)), ((-425648/875) - d 0*(-1536/35) - d 1*(384/35) - d 2*(-384/35) - d 3*(-1536/35)), ((336128/875) - d 0*(-384/35) - d 1*(-1536/35) - d 2*(768/35) - d 3*(-384/35)), ((112928/175) - d 1*(-384/35) - d 2*(64/35) - d 3*(768/35)), ((17882/375) - d 0*(16/35) - d 3*(64/35)), ((-1536/35) - d 1*(16/35)), ((0/1))],
+    ![((87392/875) - d 0*(1024/35) - d 2*(384/35)), ((5472/125) - d 0*(768/35) - d 1*(1024/35) - d 2*(-1536/35) - d 3*(384/35)), ((-172448/175) - d 1*(768/35) - d 2*(-384/35) - d 3*(-1536/35)), ((-233584/875) - d 0*(-128/35) - d 3*(-384/35)), ((6320/21) - d 1*(-128/35) - d 2*(16/35)), ((768/35) - d 3*(16/35)), ((0/1))],
+    ![((-422528/2625) - d 0*(-512/35) - d 2*(1024/35)), ((71936/175) - d 1*(-512/35) - d 2*(768/35) - d 3*(1024/35)), ((457712/875) - d 0*(384/35) - d 3*(768/35)), ((-2240/3) - d 1*(384/35) - d 2*(-128/35)), ((-26776/175) - d 3*(-128/35)), ((-176/105)), ((192/35))],
+    ![((11136/175) - d 2*(-512/35)), ((-155584/375) - d 0*(-512/35) - d 3*(-512/35)), ((768/1) - d 1*(-512/35) - d 2*(384/35)), ((68288/175) - d 3*(384/35)), ((528/35)), ((-1728/35)), ((0/1))],
+    ![((96288/875) - d 0*(256/35)), ((-4864/21) - d 1*(256/35) - d 2*(-512/35)), ((-74304/175) - d 3*(-512/35)), ((-5632/105)), ((6144/35)), ((0/1)), ((0/1))],
+    ![((-4864/105) - d 2*(256/35)), ((27392/175) - d 3*(256/35)), ((1408/15)), ((-1536/5)), ((0/1)), ((0/1)), ((0/1))],
+    ![((1664/175)), ((-2816/35)), ((9216/35)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((2816/105)), ((-3072/35)), ((0/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))]]) l k
+
+theorem endpointMeanPolynomial_identity_2 (d : Fin 4 → ℚ) :
+    endpointMeanPolynomial 2 d = tensorOfFn 6 15 (endpointMeanPolynomialCoefficients2 d) := by
+  simp only [endpointMeanPolynomial, show (2 : Fin 7) ≠ 3 by decide, if_false]
+  apply tensor_eq_of_eval
+  intro a b
+  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+    endpointMeanPolynomialCoefficients2, Polynomial.ofFn_eq_sum_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
+    Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
+    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+  ring
+
+def endpointMeanPolynomialCoefficients3 (d : Fin 4 → ℚ) : Fin 5 → Fin 2 → ℚ :=
+  fun k l => (![![((-207/200) - d 0*(1/1)), ((1/1) - d 1*(1/1)), ((671/100)), ((-671/100)), ((671/200))],
+    ![((0/1) - d 2*(1/1)), ((0/1) - d 3*(1/1)), ((0/1)), ((0/1)), ((0/1))]]) l k
+
+theorem endpointMeanPolynomial_identity_3 (d : Fin 4 → ℚ) :
+    endpointMeanPolynomial 3 d = tensorOfFn 4 1 (endpointMeanPolynomialCoefficients3 d) := by
+  apply tensor_eq_of_eval
+  intro a b
+  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+    endpointMeanPolynomialCoefficients3, Polynomial.ofFn_eq_sum_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
+    Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
+    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+  ring
+
+def endpointMeanPolynomialCoefficients4 (d : Fin 4 → ℚ) : Fin 7 → Fin 16 → ℚ :=
+  fun k l => (![![((827/600) - d 0*(1/1)), ((-1/1) - d 1*(1/1)), ((2/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-3308/525) - d 0*(-32/7) - d 2*(1/1)), ((32/7) - d 1*(-32/7) - d 3*(1/1)), ((-64/7)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((39451/4200) - d 0*(48/7) - d 2*(-32/7)), ((-7433/525) - d 0*(-32/7) - d 1*(48/7) - d 3*(-32/7)), ((184/7) - d 1*(-32/7)), ((-64/7)), ((0/1)), ((0/1)), ((0/1))],
+    ![((24923/2625) - d 0*(192/35) - d 2*(48/7)), ((1048/175) - d 0*(96/7) - d 1*(192/35) - d 2*(-32/7) - d 3*(48/7)), ((-1376/35) - d 1*(96/7) - d 3*(-32/7)), ((192/7)), ((0/1)), ((0/1)), ((0/1))],
+    ![((-16198/375) - d 0*(-944/35) - d 2*(192/35)), ((147304/2625) - d 0*(-384/35) - d 1*(-944/35) - d 2*(96/7) - d 3*(192/35)), ((4359/175) - d 0*(48/7) - d 1*(-384/35) - d 3*(96/7)), ((-2288/35) - d 1*(48/7)), ((96/7)), ((0/1)), ((0/1))],
+    ![((32384/875) - d 0*(768/35) - d 2*(-944/35)), ((-365224/2625) - d 0*(-128/5) - d 1*(768/35) - d 2*(-384/35) - d 3*(-944/35)), ((122468/875) - d 0*(-384/35) - d 1*(-128/5) - d 2*(48/7) - d 3*(-384/35)), ((2432/35) - d 1*(-384/35) - d 3*(48/7)), ((-768/35)), ((0/1)), ((0/1))],
+    ![((110038/2625) - d 0*(832/35) - d 2*(768/35)), ((384/125) - d 0*(1536/35) - d 1*(832/35) - d 2*(-128/5) - d 3*(768/35)), ((-301542/875) - d 0*(96/35) - d 1*(1536/35) - d 2*(-384/35) - d 3*(-128/5)), ((-4276/375) - d 0*(-128/35) - d 1*(96/35) - d 3*(-384/35)), ((64/1) - d 1*(-128/35)), ((-256/35)), ((0/1))],
+    ![((-75648/875) - d 0*(-1536/35) - d 2*(832/35)), ((750224/2625) - d 0*(-384/35) - d 1*(-1536/35) - d 2*(1536/35) - d 3*(832/35)), ((227224/875) - d 0*(768/35) - d 1*(-384/35) - d 2*(96/35) - d 3*(1536/35)), ((-826384/2625) - d 0*(64/35) - d 1*(768/35) - d 2*(-128/35) - d 3*(96/35)), ((-320/7) - d 1*(64/35) - d 3*(-128/35)), ((128/35)), ((0/1))],
+    ![((97256/2625) - d 0*(384/35) - d 2*(-1536/35)), ((-288368/875) - d 0*(-1536/35) - d 1*(384/35) - d 2*(-384/35) - d 3*(-1536/35)), ((427828/875) - d 0*(-384/35) - d 1*(-1536/35) - d 2*(768/35) - d 3*(-384/35)), ((200752/525) - d 1*(-384/35) - d 2*(64/35) - d 3*(768/35)), ((572/375) - d 0*(16/35) - d 3*(64/35)), ((-208/7) - d 1*(16/35)), ((32/35))],
+    ![((164576/2625) - d 0*(1024/35) - d 2*(384/35)), ((-178576/875) - d 0*(768/35) - d 1*(1024/35) - d 2*(-1536/35) - d 3*(384/35)), ((-129664/175) - d 1*(768/35) - d 2*(-384/35) - d 3*(-1536/35)), ((-224312/2625) - d 0*(-128/35) - d 3*(-384/35)), ((7568/35) - d 1*(-128/35) - d 2*(16/35)), ((256/35) - d 3*(16/35)), ((0/1))],
+    ![((-139408/2625) - d 0*(-512/35) - d 2*(1024/35)), ((74048/175) - d 1*(-512/35) - d 2*(768/35) - d 3*(1024/35)), ((27056/125) - d 0*(384/35) - d 3*(768/35)), ((-20416/35) - d 1*(384/35) - d 2*(-128/35)), ((-43934/525) - d 3*(-128/35)), ((0/1)), ((128/35))],
+    ![((1792/75) - d 2*(-512/35)), ((-477088/2625) - d 0*(-512/35) - d 3*(-512/35)), ((24064/35) - d 1*(-512/35) - d 2*(384/35)), ((132592/525) - d 3*(384/35)), ((16/35)), ((-1184/35)), ((0/1))],
+    ![((104704/2625) - d 0*(256/35)), ((-2048/7) - d 1*(256/35) - d 2*(-512/35)), ((-54512/175) - d 3*(-512/35)), ((-128/35)), ((4352/35)), ((0/1)), ((0/1))],
+    ![((-256/35) - d 2*(256/35)), ((69568/525) - d 3*(256/35)), ((384/35)), ((-7936/35)), ((0/1)), ((0/1)), ((0/1))],
+    ![((3616/525)), ((-512/35)), ((1024/5)), ((0/1)), ((0/1)), ((0/1)), ((0/1))],
+    ![((256/35)), ((-512/7)), ((0/1)), ((0/1)), ((0/1)), ((0/1)), ((0/1))]]) l k
+
+theorem endpointMeanPolynomial_identity_4 (d : Fin 4 → ℚ) :
+    endpointMeanPolynomial 4 d = tensorOfFn 6 15 (endpointMeanPolynomialCoefficients4 d) := by
+  simp only [endpointMeanPolynomial, show (4 : Fin 7) ≠ 3 by decide, if_false]
+  apply tensor_eq_of_eval
+  intro a b
+  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+    endpointMeanPolynomialCoefficients4, Polynomial.ofFn_eq_sum_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
+    Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
+    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+  ring
+
+end
+end SingularValueBounds.KL.Certificates

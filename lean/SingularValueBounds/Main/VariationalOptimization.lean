@@ -1,4 +1,7 @@
-import Mathlib
+import Mathlib.Data.Real.Basic
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.Ring
 
 /-! # Optimizing the potential parameter for the current spectral proof
 

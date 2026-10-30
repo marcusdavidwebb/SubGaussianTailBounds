@@ -136,7 +136,7 @@ structure EndpointMeanCertificateConditions : Prop where
       (majorantBoxes i).left≤b.left ∧ b.right≤(majorantBoxes i).right ∧
         b.top≤(majorantBoxes i).top
   polynomialTests : ∀ki : Fin 60,∀ai : Fin 42,endpointMeanActive ki ai →
-    BoxCertificate (endpointMeanTestQ ki ai) 8 16 (endpointMeanBox ki ai)
+    ∃ n m, BoxCertificate (endpointMeanTestQ ki ai) n m (endpointMeanBox ki ai)
 
 end
 end SingularValueBounds.KL.Certificates
