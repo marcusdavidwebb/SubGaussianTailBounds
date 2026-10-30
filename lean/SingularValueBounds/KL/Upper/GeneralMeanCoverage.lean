@@ -66,7 +66,7 @@ lemma upperComparisonShapeMean_ratio_bounds {R : Matrix ι ι ℝ} (hR : R.PosDe
         apply Finset.sum_le_sum
         intro j _
         have hh := mul_le_mul_of_nonneg_right (upperNormalizedSpectrum_le_ratio hR j) (sq_nonneg (x j))
-        convert hh using 1 <;> dsimp [x] <;> ring
+        convert! hh using 1 <;> dsimp [x] <;> ring
       _ = spectralRatio R hR := by rw [←Finset.mul_sum,h2,mul_one]
 
 end

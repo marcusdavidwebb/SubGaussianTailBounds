@@ -43,8 +43,8 @@ theorem generalMeanAPartition_valid :
   decide +kernel
 
 private def clippedRowValid (j : ℕ) : Prop :=
-  ∀ ai : Fin 42, (generalMeanClippedTrees (Fin.ofNat' 48 j) ai).Valid
-    (fun i => (generalMeanRows i).box) (generalMeanSeed (Fin.ofNat' 48 j) ai)
+  ∀ ai : Fin 42, (generalMeanClippedTrees (Fin.ofNat 48 j) ai).Valid
+    (fun i => (generalMeanRows i).box) (generalMeanSeed (Fin.ofNat 48 j) ai)
 
 private theorem clippedRowValid_block00 : ∀ k : Fin 4,
     0 * 4 + k.val < 48 → clippedRowValid (0 * 4 + k.val) := by
@@ -132,13 +132,13 @@ theorem generalMeanClippedTrees_valid (ki : Fin 48) (ai : Fin 42) :
     (generalMeanClippedTrees ki ai).Valid
       (fun i => (generalMeanRows i).box) (generalMeanSeed ki ai) := by
   have h := clippedRowValid_all ki
-  have hk : Fin.ofNat' 48 ki.val = ki := by
+  have hk : Fin.ofNat 48 ki.val = ki := by
     apply Fin.ext
     exact Nat.mod_eq_of_lt ki.isLt
   simpa only [clippedRowValid, hk] using h ai
 
 private def rowDomainValid (j : ℕ) : Prop :=
-  let r := generalMeanRows (Fin.ofNat' 1330 j)
+  let r := generalMeanRows (Fin.ofNat 1330 j)
   0 ≤ r.klo ∧ r.khi ≤ 1 ∧ 0 ≤ r.alo ∧ r.ahi ≤ 1 ∧ r.rateCompatible
 
 private theorem rowDomainValid_block00 : ∀ k : Fin 32,
@@ -408,7 +408,7 @@ theorem generalMeanRows_domains (i : Fin 1330) :
     0 ≤ (generalMeanRows i).alo ∧ (generalMeanRows i).ahi ≤ 1 ∧
     (generalMeanRows i).rateCompatible := by
   have h := rowDomainValid_all i
-  have hi : Fin.ofNat' 1330 i.val = i := by
+  have hi : Fin.ofNat 1330 i.val = i := by
     apply Fin.ext
     exact Nat.mod_eq_of_lt i.isLt
   simpa only [rowDomainValid, hi] using h

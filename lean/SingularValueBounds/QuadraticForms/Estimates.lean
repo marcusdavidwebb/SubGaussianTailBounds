@@ -1,5 +1,5 @@
 import Mathlib.Data.Real.StarOrdered
-import Mathlib.LinearAlgebra.Matrix.PosDef
+import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import SingularValueBounds.Core.Constants
 
@@ -49,7 +49,7 @@ structure QuadraticFormEstimates (μ : Measure Ω) (X : Ω → ι → ℝ) (K : 
 omit [MeasurableSpace Ω] [DecidableEq ι] in
 theorem quadraticForm_nonneg {B : Matrix ι ι ℝ} (hB : B.PosSemidef)
     (X : Ω → ι → ℝ) (ω : Ω) : 0 ≤ quadraticForm B X ω := by
-  simpa only [quadraticForm, star_trivial] using hB.2 (X ω)
+  simpa only [quadraticForm, star_trivial] using hB.dotProduct_mulVec_nonneg (X ω)
 
 /-- Positive definiteness in a nonzero dimension makes the normalizing trace
 strictly positive. -/
@@ -58,16 +58,9 @@ theorem trace_square_pos [Nonempty ι] {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   have hsym : ∀ i j, R j i = R i j := by
     intro i j
     have ht : Rᵀ = R := by
-      simpa only [Matrix.conjTranspose_eq_transpose_of_trivial] using hR.isHermitian
+      simpa only [Matrix.conjTranspose_eq_transpose_of_trivial] using hR.isHermitian.eq
     exact congrFun (congrFun ht i) j
-  have hdiag : ∀ i, 0 < R i i := by
-    intro i
-    have hne : (Pi.single i (1 : ℝ) : ι → ℝ) ≠ 0 := by
-      intro hz
-      have hz' := congrFun hz i
-      simp at hz'
-    simpa only [star_trivial, Matrix.mulVec_single_one, single_dotProduct, one_mul]
-      using hR.2 (Pi.single i (1 : ℝ)) hne
+  have hdiag : ∀ i, 0 < R i i := fun _ => hR.diag_pos
   have htrace : Matrix.trace (R ^ 2) = ∑ i, ∑ j, R i j ^ 2 := by
     simp only [pow_two, Matrix.trace, Matrix.diag, Matrix.mul_apply]
     apply Finset.sum_congr rfl
@@ -110,7 +103,7 @@ theorem QuadraticFormEstimates.normalize {μ : Measure Ω} [IsProbabilityMeasure
   · intro ω
     exact div_nonneg (quadraticForm_nonneg hR2 X ω) hS.le
   · change MemLp (fun ω => quadraticForm (R ^ 2) X ω / Matrix.trace (R ^ 2)) 2 μ
-    convert hq2.const_mul (Matrix.trace (R ^ 2))⁻¹ using 1
+    convert! hq2.const_mul (Matrix.trace (R ^ 2))⁻¹ using 1
     funext ω
     rw [div_eq_mul_inv, mul_comm]
   · simp only [normalizedQuadraticForm, integral_div, h.mean (R ^ 2) hR2]

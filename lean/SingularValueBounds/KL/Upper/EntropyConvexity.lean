@@ -24,7 +24,7 @@ theorem upperJointCost_hasSum {q k a : ℝ} (hq : 0 ≤ q) (hk : 0 < k)
   have h := (hasSum_nat_add_iff' 1).2 (Real.hasSum_pow_div_log_of_abs_lt_one habs)
   norm_num [Finset.sum_range_succ, Nat.cast_add, Nat.cast_one, Nat.add_assoc, add_assoc] at h
   have hh := h.mul_left (a/k^3)
-  convert hh using 1
+  convert! hh using 1
   · ext n
     have hn : (n+2 : ℝ) ≠ 0 := by positivity
     have hp : k^(2*n+1)*k^3=k^(2*(n+2)) := by rw [← pow_add]; congr 1 <;> omega
@@ -64,7 +64,7 @@ theorem upperJointCost_convex_shape {q a kl kh : ℝ}
   have hscale : 0 ≤ a*q^(n+2)/(n+2 : ℝ) := by positivity
   have hh := mul_le_mul_of_nonneg_left hc hscale
   simp only [smul_eq_mul] at hh ⊢
-  convert hh using 1 <;> ring
+  convert! hh using 1 <;> ring
 
 def upperJointPrefactor (q a k : ℝ) : ℝ := Real.exp (upperJointCost q k a/2)
 
@@ -116,7 +116,7 @@ theorem entropy_sum_separately_convex {n : ℕ} {q d : Fin n → ℝ}
       intro i hi
       have hh := mul_le_mul_of_nonneg_left ((hc i).2 hx hy hs ht hst) (hd i)
       simp only [smul_eq_mul] at hh
-      convert hh using 1 <;> ring
+      convert! hh using 1 <;> ring
     rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum] at hh
     have hcst : s*c+t*c=c := by
       calc

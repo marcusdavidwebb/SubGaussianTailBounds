@@ -44,7 +44,7 @@ lemma upper_norm_polynomial_antitone :
   · intro u hu
     have hd : HasDerivAt (fun u : ℝ => 1 - 2 * u ^ 2 - u ^ 4 + 2 * u ^ 3)
         (-2 * u * (2 - 3 * u + 2 * u ^ 2)) u := by
-      convert ((hasDerivAt_const u (1 : ℝ)).sub
+      convert! ((hasDerivAt_const u (1 : ℝ)).sub
         ((hasDerivAt_id u).pow 2 |>.const_mul 2)).sub
           ((hasDerivAt_id u).pow 4) |>.add
             ((hasDerivAt_id u).pow 3 |>.const_mul 2) using 1 <;> simp only [id_eq] <;> ring
@@ -320,7 +320,6 @@ theorem normalized_upper_eigenvalue_le_of_concentrated {x : ι → ℝ}
     have he := Finset.sum_erase_add (Finset.univ : Finset ι) (fun j => x j ^ 2)
       (Finset.mem_univ i)
     rw [h2] at he
-    dsimp only at he
     linarith
   have hsmall : x i ≤ (381 : ℝ) / 1000 := by nlinarith [hx i, hx k]
   have hsquare : x i ^ 2 ≤ ((381 : ℝ) / 1000) ^ 2 := by nlinarith [hx i]

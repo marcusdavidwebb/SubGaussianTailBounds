@@ -58,7 +58,6 @@ lemma mixed_scalar_initial_cap {a b : ℝ} (ha : 0 ≤ a)
       (mul_pos (Real.sqrt_pos.mpr (Nat.cast_pos.mpr Fintype.card_pos))
         (hh _ (mixedInitialShape_mem Fintype.card_pos)))
   field_simp [hb.ne',hn.ne']
-  ring
 
 /-- Its initial trace is the reciprocal of the profile cap's flat-shape value. -/
 lemma mixed_scalar_initial_trace {a b : ℝ} (ha : 0 ≤ a)
@@ -75,7 +74,7 @@ lemma mixed_scalar_initial_trace {a b : ℝ} (ha : 0 ≤ a)
   have hnum : 0 < a*(Fintype.card ι:ℝ)+Real.sqrt (Fintype.card ι)*h (1/Real.sqrt (Fintype.card ι)) := by positivity
   unfold mixedInitialDistance
   field_simp [hb.ne',hn.ne',hs.ne',hd.ne',hnum.ne']
-  have heq := congrArg (fun z : ℝ => b*h (1/Real.sqrt (Fintype.card ι))*z) hsq
+  have heq := congrArg (fun z : ℝ => h (1/Real.sqrt (Fintype.card ι))*z) hsq
   nlinarith only [heq]
 
 lemma mixed_scalar_initial_trace_lt {a b : ℝ} (ha : 0 ≤ a)

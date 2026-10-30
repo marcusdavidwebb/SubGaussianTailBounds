@@ -10,7 +10,7 @@ namespace SingularValueBounds
 noncomputable section
 
 theorem singularValues_sq {m n : ℕ} (S : Matrix (Fin m) (Fin n) ℝ) (j : Fin n) :
-    singularValues S j ^ 2 = (Matrix.isHermitian_transpose_mul_self S).eigenvalues j := by
+    singularValues S j ^ 2 = (Matrix.isHermitian_conjTranspose_mul_self S).eigenvalues j := by
   exact Real.sq_sqrt ((Matrix.posSemidef_conjTranspose_mul_self S).eigenvalues_nonneg j)
 
 theorem smallestSingularValue_sq_gt {m n : ℕ} [NeZero n]
@@ -21,7 +21,7 @@ theorem smallestSingularValue_sq_gt {m n : ℕ} [NeZero n]
     Finset.univ_nonempty (singularValues S)
   change smallestSingularValue S = singularValues S j at hj
   rw [hj, singularValues_sq]
-  have h := eigenvalue_gap_pos (Matrix.isHermitian_transpose_mul_self S) hgap j
+  have h := eigenvalue_gap_pos (Matrix.isHermitian_conjTranspose_mul_self S) hgap j
   linarith
 
 theorem largestSingularValue_sq_lt {m n : ℕ} [NeZero n]
@@ -32,7 +32,7 @@ theorem largestSingularValue_sq_lt {m n : ℕ} [NeZero n]
     Finset.univ_nonempty (singularValues S)
   change largestSingularValue S = singularValues S j at hj
   rw [hj, singularValues_sq]
-  have h := eigenvalue_gap_pos (Matrix.isHermitian_transpose_mul_self S) hgap j
+  have h := eigenvalue_gap_pos (Matrix.isHermitian_conjTranspose_mul_self S) hgap j
   linarith
 
 theorem gram_eq_sum_outer {m n : ℕ} (S : Matrix (Fin m) (Fin n) ℝ) :

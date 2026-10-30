@@ -72,10 +72,7 @@ lemma scalar_initial_potential (K : ℝ) {w b : ℝ} (hw : 0 < w) (hb : 0 < b) :
   have hnum : K^2*(Fintype.card ι)+w*Real.sqrt (Fintype.card ι) ≠ 0 := by positivity
   unfold traceBudgetPrimitive initialDistance
   field_simp [hb.ne', hnum]
-  rw [show b*(b*(K^2*(Fintype.card ι)+w*Real.sqrt (Fintype.card ι))-
-    K^2*((Fintype.card ι)*b)) = b^2*w*Real.sqrt (Fintype.card ι) by ring]
-  field_simp
-  nlinarith only [congrArg (fun z : ℝ => w^2*b^2*z) hs]
+  nlinarith only [congrArg (fun z : ℝ => w*z) hs]
 
 /-- Complete pathwise constant-profile correction budget. -/
 theorem constant_process_budget (K : ℝ) {w b : ℝ} (hw : 0 < w) (hb : 0 < b)
@@ -100,7 +97,7 @@ theorem process_upper_gap (c : CorrectionRule ι) (u : ℝ) (hu : 0 < u)
   have hp := (c.process true (scalarResolvent (ι := ι) u hu) x m).positive.inv
   rw [c.process_inverse] at hp
   simp only [Bool.true_eq, if_true, scalarResolvent_inv] at hp
-  convert hp using 1 <;> simp only [add_smul] <;> abel
+  convert! hp using 1 <;> simp only [add_smul] <;> abel
 
 /-- A generic deterministic cost budget yields the final strict lower gap. -/
 theorem process_lower_gap (c : CorrectionRule ι) (u : ℝ) (hu : 0 < u)
@@ -111,7 +108,7 @@ theorem process_lower_gap (c : CorrectionRule ι) (u : ℝ) (hu : 0 < u)
   have hp := (c.process false (scalarResolvent (ι := ι) u hu) x m).positive.inv
   rw [c.process_inverse] at hp
   simp only [Bool.false_eq_true, if_false, scalarResolvent_inv] at hp
-  convert hp using 1 <;> simp only [add_smul, sub_smul] <;> abel
+  convert! hp using 1 <;> simp only [add_smul, sub_smul] <;> abel
 
 end
 end SingularValueBounds.KL

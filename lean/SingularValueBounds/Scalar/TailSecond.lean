@@ -38,12 +38,11 @@ theorem scalar_tail_coefficient {K : ℝ} (hK : 1 ≤ K) :
     rw [heq]
     exact (Real.exp_le_exp.mpr (by linarith)).trans hneg
   have hcancel : (1 / (3 * K ^ 2)) * (8 * K ^ 2 * logParameter K) =
-      (8 / 3 : ℝ) * logParameter K := by field_simp [hK0.ne']; ring
+      (8 / 3 : ℝ) * logParameter K := by field_simp [hK0.ne'] <;> ring
   rw [hcancel]
   have hi : Real.sqrt 3 * Real.exp (-((8 / 3 : ℝ) * logParameter K)) / (1 / (3 * K ^ 2)) =
       3 * Real.sqrt 3 * (K ^ 2 * Real.exp (-((8 / 3 : ℝ) * logParameter K))) := by
-    field_simp
-    ring
+    field_simp <;> ring
   rw [hi]
   have hm := mul_le_mul_of_nonneg_left he (show 0 ≤ 3 * Real.sqrt 3 by positivity)
   nlinarith
@@ -102,7 +101,7 @@ theorem scalar_tail_second_moment {Y : Ω → ℝ} {K : ℝ}
   have ht : ∀ x : ℝ, 0 ≤ x → μ.real {ω | x < Y ω} ≤
       Real.sqrt 3 * Real.exp (-((1 / (3 * K ^ 2)) * x)) := by
     intro x hx
-    convert htail x hx using 1
+    convert! htail x hx using 1
     congr 2
     ring
   have h := exponential_tail_second_le hY hY0 (Real.sqrt_nonneg 3)

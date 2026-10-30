@@ -53,13 +53,12 @@ lemma real_spectral_cube {R : Matrix ι ι ℝ} (hR : R.IsHermitian) :
     _ = _ := by
       have h := congrArg₂ (fun A B : Matrix ι ι ℝ => A * B)
         (real_spectral_square hR) (real_spectral_decomposition hR)
-      dsimp only at h
       rw [unitary_conjugate_mul, Matrix.diagonal_mul_diagonal] at h
-      convert h using 1 <;> simp only [pow_succ]
+      convert! h using 1 <;> simp only [pow_succ]
 
 lemma lowerDenominator_pos {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     0 < 1 + x ⬝ᵥ (R *ᵥ x) := by
-  have : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.2 x
+  have : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.dotProduct_mulVec_nonneg x
   linarith
 
 theorem lowerDrop_pos {R : Matrix ι ι ℝ} (hR : R.PosDef)
@@ -82,7 +81,6 @@ theorem quadratic_moment_cauchy {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι �
       (x ⬝ᵥ (R *ᵥ x)) * (x ⬝ᵥ ((R ^ 3) *ᵥ x)) := by
   have hq1 := congrArg (fun A : Matrix ι ι ℝ => x ⬝ᵥ (A *ᵥ x))
     (real_spectral_decomposition hR.isHermitian)
-  dsimp only at hq1
   rw [quadratic_conjugate_diagonal] at hq1
   rw [hq1, real_spectral_square hR.isHermitian, real_spectral_cube hR.isHermitian]
   simp only [quadratic_conjugate_diagonal]
@@ -117,7 +115,7 @@ theorem lowerRowMean_le_maximum {R : Matrix ι ι ℝ} (hR : R.PosDef)
   have h := mul_le_mul_of_nonneg_left (eigenvalue_le_spectralMaximum hR.isHermitian i)
     (mul_nonneg (sq_nonneg ((star (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) *ᵥ x) i))
       (sq_nonneg (hR.isHermitian.eigenvalues i)))
-  convert h using 1 <;> ring
+  convert! h using 1 <;> ring
 
 lemma trace_outer (x y : ι → ℝ) : Matrix.trace (Matrix.vecMulVec x y) = y ⬝ᵥ x := by
   simp only [Matrix.trace, Matrix.diag, Matrix.vecMulVec_apply, dotProduct]
@@ -179,7 +177,6 @@ lemma lowerResolvent_spectral {G : Matrix ι ι ℝ} (hG : G.PosDef) {δ : ℝ}
       Matrix.diagonal (fun i => (g i)⁻¹ - δ) * star (U : Matrix ι ι ℝ) := by
     have hi := congrArg (fun A : Matrix ι ι ℝ => A⁻¹)
       (real_spectral_decomposition hG.isHermitian)
-    dsimp only at hi
     rw [unitary_conjugate_inverse, positive_diagonal_inverse _ hg] at hi
     rw [hi, hd, Matrix.mul_sub, Matrix.sub_mul, unitary_conjugate_scalar]
   have hdp : ∀ i, 0 < (g i)⁻¹ - δ :=
@@ -195,7 +192,6 @@ lemma lowerResolvent_spectral {G : Matrix ι ι ℝ} (hG : G.PosDef) {δ : ℝ}
     funext i
     have hi : (g i)⁻¹ - δ = (1 - δ * g i) / g i := by
       field_simp [(hg i).ne']
-      ring
     rw [hi, inv_div]
   rw [he]
 
@@ -220,7 +216,8 @@ theorem resolvent_trace_ratio_bound {G : Matrix ι ι ℝ} (hG : G.PosDef)
     intro i
     change g i / (1 - δ * g i) - g i = δ * g i * (g i / (1 - δ * g i))
     have hi : 1 - δ * g i ≠ 0 := (hd i).ne'
-    field_simp [hi]
+    have hi' : 1 - g i * δ ≠ 0 := by simpa only [mul_comm] using hi
+    field_simp [hi, hi']
     ring
   have hn : ∀ i, 0 ≤ f i - g i := by
     intro i
@@ -233,7 +230,6 @@ theorem resolvent_trace_ratio_bound {G : Matrix ι ι ℝ} (hG : G.PosDef)
     intro i _
     rw [hdiff]
     field_simp [hδ.ne']
-    ring
   rw [heq, ← Finset.sum_sub_distrib, Finset.sum_mul, ← Finset.sum_add_distrib]
   apply Finset.sum_le_sum
   intro i _
@@ -248,7 +244,7 @@ theorem lowerUnshifted_eigenvalue_le_maximum {R : Matrix ι ι ℝ}
   let G := lowerUnshifted R x
   let hG := lowerUnshifted_posDef hR x
   let v : ι → ℝ := hG.isHermitian.eigenvectorBasis i
-  have hv : v ≠ 0 := hG.isHermitian.eigenvectorBasis.orthonormal.ne_zero i
+  have hv : v ≠ 0 := by simpa [v] using hG.isHermitian.eigenvectorBasis.orthonormal.ne_zero i
   have hvnorm : 0 < v ⬝ᵥ v := by
     obtain ⟨j, hj⟩ := Function.ne_iff.mp hv
     have hs := Finset.single_le_sum (s := Finset.univ)
@@ -257,7 +253,7 @@ theorem lowerUnshifted_eigenvalue_le_maximum {R : Matrix ι ι ℝ}
   have hquad : v ⬝ᵥ (G *ᵥ v) ≤ v ⬝ᵥ (R *ᵥ v) := by
     change v ⬝ᵥ (lowerUnshifted R x *ᵥ v) ≤ _
     rw [lowerUnshifted, rankOne_inverse hR, Matrix.sub_mulVec,
-      Matrix.smul_mulVec_assoc, dotProduct_sub, dotProduct_smul, outer_quadratic]
+      Matrix.smul_mulVec, dotProduct_sub, dotProduct_smul, outer_quadratic]
     simp only [smul_eq_mul]
     exact sub_le_self _ (mul_nonneg (inv_nonneg.mpr (lowerDenominator_pos hR x).le)
       (sq_nonneg _))
@@ -266,7 +262,7 @@ theorem lowerUnshifted_eigenvalue_le_maximum {R : Matrix ι ι ℝ}
   rw [heig, dotProduct_smul] at hquad
   have hb := hquad.trans (quadratic_le_spectralMaximum hR.isHermitian v)
   simp only [smul_eq_mul] at hb
-  exact (mul_le_mul_right hvnorm).mp hb
+  exact (mul_le_mul_iff_left₀ hvnorm).mp hb
 
 /-- The exact trace ratio using either spectral upper bound for `G`. -/
 lemma lowerDrop_ratio_bound {R : Matrix ι ι ℝ} (hR : R.PosDef)
@@ -380,7 +376,7 @@ theorem lowerDrop_ratio_normalized {R : Matrix ι ι ℝ} (hR : R.PosDef)
         (Real.sqrt (1 - (lowerRowMean R x / frobenius R) ^ 2)) := by
     rw [mul_min_of_nonneg _ _ hη.le, mul_div_cancel₀ _ hη.ne']
   rw [hm] at hb
-  convert hb using 1 <;> field_simp [hη.ne'] <;> ring
+  convert! hb using 1 <;> field_simp [hη.ne'] <;> ring
 
 lemma lowerComparison_polynomial (R : Matrix ι ι ℝ) (A c : ℝ) :
     lowerComparison R A c = R + (Matrix.trace (R ^ 2))⁻¹ •
@@ -395,7 +391,7 @@ theorem lowerComparison_quadratic (R : Matrix ι ι ℝ) (x : ι → ℝ) (A c :
       ((A * frobenius R) * (x ⬝ᵥ ((R ^ 2) *ᵥ x)) -
         c * (x ⬝ᵥ ((R ^ 3) *ᵥ x))) / Matrix.trace (R ^ 2) := by
   rw [lowerComparison_polynomial]
-  simp only [Matrix.add_mulVec, Matrix.sub_mulVec, Matrix.smul_mulVec_assoc,
+  simp only [Matrix.add_mulVec, Matrix.sub_mulVec, Matrix.smul_mulVec,
     dotProduct_add, dotProduct_sub, dotProduct_smul, smul_eq_mul]
   ring
 
@@ -490,10 +486,10 @@ theorem lowerShift_quadratic_comparison {R : Matrix ι ι ℝ} (hR : R.PosDef)
     have hh : (x ⬝ᵥ ((R ^ 2) *ᵥ x)) / (1 + x ⬝ᵥ (R *ᵥ x)) ≤
         (frobenius R ^ 2 * (1 + x ⬝ᵥ (lowerComparison R A c *ᵥ x)) * lowerShift R hR x) /
           (1 + x ⬝ᵥ (R *ᵥ x)) := by
-      convert hb' using 1 <;> dsimp [lowerDrop] <;> ring
+      convert! hb' using 1 <;> ring
     exact (div_le_div_iff_of_pos_right hd).mp hh
   unfold lowerWeight
-  simp only [Matrix.smul_mulVec_assoc, dotProduct_smul, smul_eq_mul]
+  simp only [Matrix.smul_mulVec, dotProduct_smul, smul_eq_mul]
   rw [← hf]
   have hfinal := (div_le_iff₀ (sq_pos_of_pos hη)).mpr
     (show x ⬝ᵥ ((R ^ 2) *ᵥ x) ≤

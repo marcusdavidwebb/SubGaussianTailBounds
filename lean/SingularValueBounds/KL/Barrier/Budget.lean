@@ -17,7 +17,9 @@ lemma hasDerivAt_traceBudgetPrimitive {a w b τ : ℝ} (hb : b ≠ 0) (hg : b-a*
   have hd := ((hasDerivAt_id τ).const_mul (w^2)).div
     ((hasDerivAt_const τ b).mul ((hasDerivAt_const τ b).sub
       ((hasDerivAt_id τ).const_mul a))) (mul_ne_zero hb hg)
-  convert hd using 1 <;> dsimp [traceBudgetPrimitive] <;> field_simp <;> ring
+  convert! hd using 1 <;> (try ext x) <;>
+    simp only [traceBudgetPrimitive, Pi.div_apply, Pi.mul_apply, Pi.sub_apply, id_eq] <;>
+    field_simp <;> ring
 
 lemma traceBudgetPrimitive_nonneg {a w b τ : ℝ} (hb : 0 < b)
     (hτ : 0 ≤ τ) (hg : 0 < b-a*τ) : 0 ≤ traceBudgetPrimitive a w b τ :=
@@ -47,7 +49,7 @@ theorem constantCorrection_budget {R : Matrix ι ι ℝ} (hR : R.PosDef)
     have h := (hasDerivAt_id x).add
       ((hasDerivAt_traceBudgetPrimitive (w := w) hb.ne' (hgap hx).ne').comp x
         (hasDerivAt_outwardTrace hR hx))
-    simpa only [τ, F, mul_neg, sub_eq_add_neg] using h
+    simpa only [τ, F, mul_neg, sub_eq_add_neg] using! h
   have hanti : AntitoneOn (fun y => y + traceBudgetPrimitive (K^2) w b (τ y)) (Icc 0 c) := by
     apply antitoneOn_of_hasDerivWithinAt_nonpos (convex_Icc 0 c)
     · intro x hx

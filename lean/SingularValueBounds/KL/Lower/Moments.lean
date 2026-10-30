@@ -1,4 +1,4 @@
-import Mathlib.Data.Complex.ExponentialBounds
+import Mathlib.Analysis.Complex.ExponentialBounds
 import SingularValueBounds.KL.Weighted.Gaussian
 import SingularValueBounds.KL.Lower.Laplace
 
@@ -137,14 +137,14 @@ theorem fourth_implicit_offset {m K : ℝ} (hK : 1 ≤ K) (hm : 0 < m)
     apply (le_div_iff₀ (by positivity : 0 < 2 * K ^ 2)).2
     dsimp [C]
     nlinarith [mul_nonneg (sq_nonneg K) (sub_nonneg.mpr hL)]
-  have hprod : 2 * m = (2 * C) * r := by dsimp [r]; field_simp [hC.ne']; ring
+  have hprod : 2 * m = (2 * C) * r := by dsimp [r]; field_simp [hC.ne']
   have hl : Real.log (2 * m) < m / (2 * K ^ 2) := by
     calc
       Real.log (2 * m) = Real.log (2 * C) + Real.log r := by
         rw [hprod, Real.log_mul (by positivity) hr.ne']
       _ ≤ Real.log (2 * C) + (r - 1) :=
-        add_le_add_left (Real.log_le_sub_one_of_pos hr) _
-      _ < C / (2 * K ^ 2) + (r - 1) := add_lt_add_right hbase _
+        add_le_add_right (Real.log_le_sub_one_of_pos hr) _
+      _ < C / (2 * K ^ 2) + (r - 1) := add_lt_add_left hbase _
       _ ≤ r * (C / (2 * K ^ 2)) := by
         nlinarith [mul_nonneg (sub_nonneg.mpr hr1) (sub_nonneg.mpr hratio)]
       _ = m / (2 * K ^ 2) := by dsimp [r]; field_simp [hC.ne']

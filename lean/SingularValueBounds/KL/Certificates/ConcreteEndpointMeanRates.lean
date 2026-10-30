@@ -42,7 +42,7 @@ private lemma clipped_rate_bounds (k u : ℚ) (opt : ℤ) (hk : 0 < k) (hk1 : k 
     have hm : (margin : ℚ) ≤ 100+100*(58/25)/(u*k) := by
       dsimp [margin]
       push_cast
-      exact add_le_add_left (Int.floor_le _) _
+      exact add_le_add_right (Int.floor_le (100 * (58 / 25) / (u * k))) 100
     have h90 : (90:ℚ) ≤ 100+100*(58/25)/(u*k) := by
       have : (0:ℚ) ≤ 100*(58/25)/(u*k) := by positivity
       linarith

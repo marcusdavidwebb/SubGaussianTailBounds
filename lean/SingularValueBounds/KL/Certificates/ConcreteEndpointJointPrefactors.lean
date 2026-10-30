@@ -23,7 +23,7 @@ theorem endpointJointLog_le_unitMax {k a q : ℚ} (ha : 0 ≤ a) (ha1 : a ≤ 1)
     endpointJointLogUpperQ k a q ≤ roundUpQ (q/2) +
       roundUpQ (max 0 ((-(logRoundedQ (1-q*k^2)).1-roundDownQ (q*k^2))/(2*k^3))) := by
   unfold endpointJointLogUpperQ
-  apply add_le_add_left
+  apply add_le_add_right
   apply roundUpQ_mono
   rw [mul_div_assoc]
   by_cases hz : 0 ≤ (-(logRoundedQ (1-q*k^2)).1-roundDownQ (q*k^2))/(2*k^3)

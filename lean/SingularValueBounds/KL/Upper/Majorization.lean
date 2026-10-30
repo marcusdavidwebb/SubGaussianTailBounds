@@ -186,7 +186,7 @@ theorem normalizedShiftWeight_top_sum {ρ : ι → ℝ} {H κ : ℝ}
     have hij := hTop i hi j (Finset.mem_compl.mp hj)
     have hdiv := div_le_div_of_nonneg_left (mul_nonneg (sq_nonneg (ρ i)) (sq_nonneg (ρ j)))
       (show 0 < 1+H*ρ j by positivity) (show 1+H*ρ j ≤ 1+H*ρ i by nlinarith)
-    convert hdiv using 1 <;> ring
+    convert! hdiv using 1 <;> ring
   rw [hq, hn] at hcross
   simp only [normalizedShiftWeight, ← Finset.sum_div]
   change b/Z ≤ a
@@ -269,7 +269,7 @@ theorem normalizedShiftWeight_log_prefactor {ρ : ι → ℝ} {H κ q : ℝ}
     have hident := shape_power_term_identity (q := q) (a := ∑ i, ρ i^3) hκ.ne' (n+2) (by omega)
     norm_num only [Nat.cast_add, Nat.cast_ofNat] at hident
     rw [hident] at h
-    convert h using 1
+    convert! h using 1
     simp only [mul_pow, Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro i hi

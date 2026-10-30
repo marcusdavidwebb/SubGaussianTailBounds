@@ -11,7 +11,7 @@ set_option maxHeartbeats 800000000
 set_option maxRecDepth 10000
 
 private def secondUpperPrimary (j : ℕ) : Prop :=
-  ∀ i : Fin 3, secondCellUpperQ (Fin.ofNat' 334 j) i < 9 / 2
+  ∀ i : Fin 3, secondCellUpperQ (Fin.ofNat 334 j) i < 9 / 2
 
 private theorem secondUpperPrimary_block00 : ∀ k : Fin 32,
     0 * 32 + k.val < 334 → secondUpperPrimary (0 * 32 + k.val) := by
@@ -126,7 +126,7 @@ private theorem secondUpperPrimary_all (j : Fin 334) : secondUpperPrimary j.val 
 theorem secondCellUpperQ_lt (j : Fin 334) (i : Fin 3) :
     secondCellUpperQ j i < 9 / 2 := by
   have h := secondUpperPrimary_all j
-  have hj : Fin.ofNat' 334 j.val = j := by
+  have hj : Fin.ofNat 334 j.val = j := by
     apply Fin.ext
     exact Nat.mod_eq_of_lt j.isLt
   have hall : ∀ i : Fin 3, secondCellUpperQ j i < 9 / 2 := by

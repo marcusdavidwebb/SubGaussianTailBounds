@@ -60,7 +60,7 @@ theorem exponential_tail_moment {Y : Ω → ℝ} {C r : ℝ}
           (∫⁻ x in Ioi 0, μ {ω | x < Y ω} * ENNReal.ofReal (x ^ n)) ≤
           ENNReal.ofReal (n + 1 : ℝ) *
           (∫⁻ x in Ioi 0, ENNReal.ofReal (C * g x)) := by
-        apply mul_le_mul_left'
+        apply mul_le_mul_right
         apply lintegral_mono_ae
         filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
         have ht := ENNReal.ofReal_le_ofReal (htail x hx.le)
@@ -68,7 +68,7 @@ theorem exponential_tail_moment {Y : Ω → ℝ} {C r : ℝ}
         calc
           μ {ω | x < Y ω} * ENNReal.ofReal (x ^ n) ≤
               ENNReal.ofReal (C * Real.exp (-(r * x))) * ENNReal.ofReal (x ^ n) :=
-            mul_le_mul_right' ht _
+            mul_le_mul_left ht _
           _ = ENNReal.ofReal (C * g x) := by
             rw [← ENNReal.ofReal_mul (by positivity)]
             congr 1

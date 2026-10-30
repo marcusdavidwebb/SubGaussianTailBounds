@@ -79,7 +79,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 70).c)).2-
       (generalMeanRows 70).J/2-(generalMeanRows 70).error 4 := by
   have he : (generalMeanRows 70).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -156,7 +156,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 71).c)).2-
       (generalMeanRows 71).J/2-(generalMeanRows 71).error 4 := by
   have he : (generalMeanRows 71).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -231,7 +231,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 72).c)).2-
       (generalMeanRows 72).J/2-(generalMeanRows 72).error 4 := by
   have he : (generalMeanRows 72).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -306,7 +306,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 73).c)).2-
       (generalMeanRows 73).J/2-(generalMeanRows 73).error 4 := by
   have he : (generalMeanRows 73).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -381,7 +381,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 74).c)).2-
       (generalMeanRows 74).J/2-(generalMeanRows 74).error 4 := by
   have he : (generalMeanRows 74).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -456,7 +456,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 75).c)).2-
       (generalMeanRows 75).J/2-(generalMeanRows 75).error 4 := by
   have he : (generalMeanRows 75).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -533,7 +533,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 76).c)).2-
       (generalMeanRows 76).J/2-(generalMeanRows 76).error 4 := by
   have he : (generalMeanRows 76).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -610,7 +610,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 77).c)).2-
       (generalMeanRows 77).J/2-(generalMeanRows 77).error 4 := by
   have he : (generalMeanRows 77).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -687,7 +687,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 78).c)).2-
       (generalMeanRows 78).J/2-(generalMeanRows 78).error 4 := by
   have he : (generalMeanRows 78).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -764,7 +764,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 79).c)).2-
       (generalMeanRows 79).J/2-(generalMeanRows 79).error 4 := by
   have he : (generalMeanRows 79).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -841,7 +841,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 80).c)).2-
       (generalMeanRows 80).J/2-(generalMeanRows 80).error 4 := by
   have he : (generalMeanRows 80).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -918,7 +918,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 81).c)).2-
       (generalMeanRows 81).J/2-(generalMeanRows 81).error 4 := by
   have he : (generalMeanRows 81).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -995,7 +995,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 82).c)).2-
       (generalMeanRows 82).J/2-(generalMeanRows 82).error 4 := by
   have he : (generalMeanRows 82).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1072,7 +1072,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 83).c)).2-
       (generalMeanRows 83).J/2-(generalMeanRows 83).error 4 := by
   have he : (generalMeanRows 83).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1149,7 +1149,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 84).c)).2-
       (generalMeanRows 84).J/2-(generalMeanRows 84).error 4 := by
   have he : (generalMeanRows 84).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1226,7 +1226,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 85).c)).2-
       (generalMeanRows 85).J/2-(generalMeanRows 85).error 4 := by
   have he : (generalMeanRows 85).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1301,7 +1301,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 86).c)).2-
       (generalMeanRows 86).J/2-(generalMeanRows 86).error 4 := by
   have he : (generalMeanRows 86).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1378,7 +1378,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 87).c)).2-
       (generalMeanRows 87).J/2-(generalMeanRows 87).error 4 := by
   have he : (generalMeanRows 87).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1455,7 +1455,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 88).c)).2-
       (generalMeanRows 88).J/2-(generalMeanRows 88).error 4 := by
   have he : (generalMeanRows 88).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1530,7 +1530,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 89).c)).2-
       (generalMeanRows 89).J/2-(generalMeanRows 89).error 4 := by
   have he : (generalMeanRows 89).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1605,7 +1605,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 90).c)).2-
       (generalMeanRows 90).J/2-(generalMeanRows 90).error 4 := by
   have he : (generalMeanRows 90).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1680,7 +1680,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 91).c)).2-
       (generalMeanRows 91).J/2-(generalMeanRows 91).error 4 := by
   have he : (generalMeanRows 91).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1757,7 +1757,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 92).c)).2-
       (generalMeanRows 92).J/2-(generalMeanRows 92).error 4 := by
   have he : (generalMeanRows 92).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1834,7 +1834,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 93).c)).2-
       (generalMeanRows 93).J/2-(generalMeanRows 93).error 4 := by
   have he : (generalMeanRows 93).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1911,7 +1911,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 94).c)).2-
       (generalMeanRows 94).J/2-(generalMeanRows 94).error 4 := by
   have he : (generalMeanRows 94).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -1988,7 +1988,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 95).c)).2-
       (generalMeanRows 95).J/2-(generalMeanRows 95).error 4 := by
   have he : (generalMeanRows 95).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2065,7 +2065,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 96).c)).2-
       (generalMeanRows 96).J/2-(generalMeanRows 96).error 4 := by
   have he : (generalMeanRows 96).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2142,7 +2142,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 97).c)).2-
       (generalMeanRows 97).J/2-(generalMeanRows 97).error 4 := by
   have he : (generalMeanRows 97).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2219,7 +2219,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 98).c)).2-
       (generalMeanRows 98).J/2-(generalMeanRows 98).error 4 := by
   have he : (generalMeanRows 98).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2294,7 +2294,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 99).c)).2-
       (generalMeanRows 99).J/2-(generalMeanRows 99).error 4 := by
   have he : (generalMeanRows 99).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2371,7 +2371,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 100).c)).2-
       (generalMeanRows 100).J/2-(generalMeanRows 100).error 4 := by
   have he : (generalMeanRows 100).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2448,7 +2448,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 101).c)).2-
       (generalMeanRows 101).J/2-(generalMeanRows 101).error 4 := by
   have he : (generalMeanRows 101).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2525,7 +2525,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 102).c)).2-
       (generalMeanRows 102).J/2-(generalMeanRows 102).error 4 := by
   have he : (generalMeanRows 102).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2602,7 +2602,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 103).c)).2-
       (generalMeanRows 103).J/2-(generalMeanRows 103).error 4 := by
   have he : (generalMeanRows 103).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2679,7 +2679,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 104).c)).2-
       (generalMeanRows 104).J/2-(generalMeanRows 104).error 4 := by
   have he : (generalMeanRows 104).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2754,7 +2754,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 105).c)).2-
       (generalMeanRows 105).J/2-(generalMeanRows 105).error 4 := by
   have he : (generalMeanRows 105).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2831,7 +2831,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 106).c)).2-
       (generalMeanRows 106).J/2-(generalMeanRows 106).error 4 := by
   have he : (generalMeanRows 106).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2908,7 +2908,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 107).c)).2-
       (generalMeanRows 107).J/2-(generalMeanRows 107).error 4 := by
   have he : (generalMeanRows 107).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -2985,7 +2985,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 108).c)).2-
       (generalMeanRows 108).J/2-(generalMeanRows 108).error 4 := by
   have he : (generalMeanRows 108).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3062,7 +3062,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 109).c)).2-
       (generalMeanRows 109).J/2-(generalMeanRows 109).error 4 := by
   have he : (generalMeanRows 109).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3137,7 +3137,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 110).c)).2-
       (generalMeanRows 110).J/2-(generalMeanRows 110).error 4 := by
   have he : (generalMeanRows 110).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3212,7 +3212,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 111).c)).2-
       (generalMeanRows 111).J/2-(generalMeanRows 111).error 4 := by
   have he : (generalMeanRows 111).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3289,7 +3289,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 112).c)).2-
       (generalMeanRows 112).J/2-(generalMeanRows 112).error 4 := by
   have he : (generalMeanRows 112).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3366,7 +3366,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 113).c)).2-
       (generalMeanRows 113).J/2-(generalMeanRows 113).error 4 := by
   have he : (generalMeanRows 113).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3443,7 +3443,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 114).c)).2-
       (generalMeanRows 114).J/2-(generalMeanRows 114).error 4 := by
   have he : (generalMeanRows 114).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3520,7 +3520,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 115).c)).2-
       (generalMeanRows 115).J/2-(generalMeanRows 115).error 4 := by
   have he : (generalMeanRows 115).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3597,7 +3597,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 116).c)).2-
       (generalMeanRows 116).J/2-(generalMeanRows 116).error 4 := by
   have he : (generalMeanRows 116).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3674,7 +3674,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 117).c)).2-
       (generalMeanRows 117).J/2-(generalMeanRows 117).error 4 := by
   have he : (generalMeanRows 117).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3751,7 +3751,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 118).c)).2-
       (generalMeanRows 118).J/2-(generalMeanRows 118).error 4 := by
   have he : (generalMeanRows 118).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3828,7 +3828,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 119).c)).2-
       (generalMeanRows 119).J/2-(generalMeanRows 119).error 4 := by
   have he : (generalMeanRows 119).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3905,7 +3905,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 120).c)).2-
       (generalMeanRows 120).J/2-(generalMeanRows 120).error 4 := by
   have he : (generalMeanRows 120).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -3982,7 +3982,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 121).c)).2-
       (generalMeanRows 121).J/2-(generalMeanRows 121).error 4 := by
   have he : (generalMeanRows 121).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4059,7 +4059,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 122).c)).2-
       (generalMeanRows 122).J/2-(generalMeanRows 122).error 4 := by
   have he : (generalMeanRows 122).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4136,7 +4136,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 123).c)).2-
       (generalMeanRows 123).J/2-(generalMeanRows 123).error 4 := by
   have he : (generalMeanRows 123).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4213,7 +4213,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 124).c)).2-
       (generalMeanRows 124).J/2-(generalMeanRows 124).error 4 := by
   have he : (generalMeanRows 124).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4290,7 +4290,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 125).c)).2-
       (generalMeanRows 125).J/2-(generalMeanRows 125).error 4 := by
   have he : (generalMeanRows 125).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4367,7 +4367,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 126).c)).2-
       (generalMeanRows 126).J/2-(generalMeanRows 126).error 4 := by
   have he : (generalMeanRows 126).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4444,7 +4444,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 127).c)).2-
       (generalMeanRows 127).J/2-(generalMeanRows 127).error 4 := by
   have he : (generalMeanRows 127).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4521,7 +4521,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 128).c)).2-
       (generalMeanRows 128).J/2-(generalMeanRows 128).error 4 := by
   have he : (generalMeanRows 128).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4598,7 +4598,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 129).c)).2-
       (generalMeanRows 129).J/2-(generalMeanRows 129).error 4 := by
   have he : (generalMeanRows 129).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4675,7 +4675,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 130).c)).2-
       (generalMeanRows 130).J/2-(generalMeanRows 130).error 4 := by
   have he : (generalMeanRows 130).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4752,7 +4752,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 131).c)).2-
       (generalMeanRows 131).J/2-(generalMeanRows 131).error 4 := by
   have he : (generalMeanRows 131).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4829,7 +4829,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 132).c)).2-
       (generalMeanRows 132).J/2-(generalMeanRows 132).error 4 := by
   have he : (generalMeanRows 132).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4906,7 +4906,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 133).c)).2-
       (generalMeanRows 133).J/2-(generalMeanRows 133).error 4 := by
   have he : (generalMeanRows 133).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -4983,7 +4983,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 134).c)).2-
       (generalMeanRows 134).J/2-(generalMeanRows 134).error 4 := by
   have he : (generalMeanRows 134).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -5060,7 +5060,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 135).c)).2-
       (generalMeanRows 135).J/2-(generalMeanRows 135).error 4 := by
   have he : (generalMeanRows 135).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -5137,7 +5137,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 136).c)).2-
       (generalMeanRows 136).J/2-(generalMeanRows 136).error 4 := by
   have he : (generalMeanRows 136).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -5214,7 +5214,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 137).c)).2-
       (generalMeanRows 137).J/2-(generalMeanRows 137).error 4 := by
   have he : (generalMeanRows 137).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -5291,7 +5291,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 138).c)).2-
       (generalMeanRows 138).J/2-(generalMeanRows 138).error 4 := by
   have he : (generalMeanRows 138).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]
@@ -5368,7 +5368,7 @@ private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 139).c)).2-
       (generalMeanRows 139).J/2-(generalMeanRows 139).error 4 := by
   have he : (generalMeanRows 139).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]

@@ -94,7 +94,7 @@ theorem adaptive_weighted_iteration [IsProbabilityMeasure μ]
     induction i with
     | zero =>
       intro _
-      simpa only [adaptiveState, hwinit, pow_zero, integral_const, measureReal_univ_eq_one,
+      simpa only [adaptiveState, hwinit, pow_zero, integral_const, probReal_univ,
         smul_eq_mul, one_mul] using (show Integrable (fun _ : Ω => (1 : ℝ)) μ ∧
           (∫ _ : Ω, (1 : ℝ) ∂μ) ≤ 1 from ⟨integrable_const 1, by simp⟩)
     | succ i ih =>

@@ -22,9 +22,9 @@ theorem exp_le_pade {t : ℝ} (ht : 0 ≤ t) (ht2 : t < 2) :
     apply monotone_of_hasDerivAt_nonneg
       (f' := fun x : ℝ => 1 + (x - 1) * Real.exp x)
     · intro x
-      convert ((hasDerivAt_const x 2).add (hasDerivAt_id x)).sub
+      convert! ((hasDerivAt_const x 2).add (hasDerivAt_id x)).sub
         (((hasDerivAt_const x 2).sub (hasDerivAt_id x)).mul (Real.hasDerivAt_exp x)) using 1 <;>
-        simp only [id_eq] <;> ring
+        simp only [id_eq, Pi.sub_apply] <;> ring
     · intro x
       have he := mul_le_mul_of_nonneg_right (Real.add_one_le_exp (-x)) (Real.exp_nonneg x)
       have hid : Real.exp (-x) * Real.exp x = 1 := by rw [← Real.exp_add]; simp
@@ -50,7 +50,7 @@ theorem exp_truncation_majorant {y v ℓ : ℝ} (hy : 0 ≤ y) (hv : 0 < v) :
     have hc := convexOn_exp.2 (mem_univ (0 : ℝ)) (mem_univ (ℓ * v))
       ha hb (by ring : 1 - y / v + y / v = 1)
     simp only [smul_eq_mul, mul_zero, zero_add, Real.exp_zero, mul_one] at hc
-    convert hc using 1 <;> field_simp <;> ring
+    convert! hc using 1 <;> field_simp <;> ring
   · rw [max_eq_left (by linarith : 0 ≤ y - v)]
     have he : Real.exp (ℓ * y) = Real.exp (ℓ * v) * Real.exp (ℓ * (y - v)) := by
       rw [← Real.exp_add]
@@ -95,10 +95,10 @@ theorem truncated_exp_rational_bound {t a B : ℝ}
       have hm := mul_le_mul_of_nonneg_right hp (show 0 ≤ (2 + t) / (2 - t) by positivity)
       nlinarith
     _ ≤ t + t ^ 2 / (1 - t) := by
-      apply (mul_le_mul_right ht1').mp
+      apply (mul_le_mul_iff_left₀ ht1').mp
       have he : (t + t ^ 2 / (1 - t)) * (1 - t) = t := by field_simp; ring
       rw [he]
-      apply (mul_le_mul_right (sq_pos_of_pos ht2)).mp
+      apply (mul_le_mul_iff_left₀ (sq_pos_of_pos ht2)).mp
       have he' : ((1 / 2 : ℝ) * (((2 + t) / (2 - t)) ^ 2 - 1) * (1 - t)) *
           (2 - t) ^ 2 = 4 * t * (1 - t) := by field_simp; ring
       rw [he']
@@ -128,7 +128,7 @@ theorem exponential_tail_remainder [IsFiniteMeasure μ] {U : Ω → ℝ} {D r �
     linarith
   have hFderiv : ∀ x : ℝ, HasDerivAt F (g x) x := by
     intro x
-    convert ((((hasDerivAt_id x).const_mul ℓ).exp.sub_const 1).const_mul E).sub
+    convert! ((((hasDerivAt_id x).const_mul ℓ).exp.sub_const 1).const_mul E).sub
       ((hasDerivAt_id x).const_mul b) using 1 <;> simp only [id_eq] <;> dsimp [F, g] <;> ring
   have hFi : ∀ x : ℝ, (∫ t in (0 : ℝ)..x, g t) = F x := by
     intro x
@@ -183,7 +183,7 @@ theorem exponential_tail_remainder [IsFiniteMeasure μ] {U : Ω → ℝ} {D r �
         rw [ofReal_measureReal] at ht
         calc
           _ ≤ ENNReal.ofReal (D * Real.exp (-(r * x))) * ENNReal.ofReal (g x) :=
-            mul_le_mul_right' ht _
+            mul_le_mul_left ht _
           _ = ENNReal.ofReal (D * H x) := by
             rw [← ENNReal.ofReal_mul (by positivity), hH]
             congr 1
@@ -289,7 +289,7 @@ theorem upper_mgf_of_mean_tail [IsProbabilityMeasure μ] {Y : Ω → ℝ} {C r v
     (div_nonneg hD hr.le) hsmall
   have hscalar : b + D * (E * ℓ / (r - ℓ) - b / r) ≤
       ℓ + v * ℓ ^ 2 / (1 - v * ℓ) := by
-    apply (mul_le_mul_right hv).mp
+    apply (mul_le_mul_iff_left₀ hv).mp
     have hi₁ : (b + D * (E * ℓ / (r - ℓ) - b / r)) * v =
         (Real.exp (ℓ * v) - 1) + D / r *
           ((ℓ * v) * Real.exp (ℓ * v) / (1 - ℓ / r) - Real.exp (ℓ * v) + 1) := by
@@ -307,8 +307,8 @@ theorem upper_mgf_of_mean_tail [IsProbabilityMeasure μ] {Y : Ω → ℝ} {C r v
   refine ⟨heint, hun.trans ?_⟩
   have hid : ℓ + v * ℓ ^ 2 / (1 - v * ℓ) = ℓ / (1 - v * ℓ) := by
     have hd : 1 - v * ℓ ≠ 0 := by nlinarith
-    field_simp [hd]
-    ring
+    have hd' : 1 - ℓ * v ≠ 0 := by nlinarith
+    field_simp [hd, hd'] <;> ring
   rw [add_assoc, hid]
   simpa only [add_comm] using Real.add_one_le_exp (ℓ / (1 - v * ℓ))
 

@@ -87,7 +87,7 @@ theorem normalized_lower_higher_mixed {X : Ω → ι → ℝ} {K p u C : ℝ}
   have he := (le_div_iff₀ hden).1 hEntropy
   have hscale : (u/2)*C*logParameter K*(p-1) = 2*p*logParameter K := by
     nlinarith [congrArg (fun z : ℝ => z*logParameter K) huC]
-  apply (mul_le_mul_right hden).1
+  apply (mul_le_mul_iff_left₀ hden).1
   rw [add_mul,hscale]
   change _ ≤ _
   change _ ≤ _ at hcondition

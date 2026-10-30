@@ -36,6 +36,18 @@ self-comparison an independent accepted-base check. Candidate Lean metaprograms
 run with the local user's permissions, so review setup and verification changes
 before executing them. The local command is not a hostile-code sandbox.
 
+The 30 October 2026 NLA-lib migration changes the canonical source and the
+pinned toolchain/dependencies with the maintainer's authorization. Its verifier
+compatibility changes require review as part of that adoption: the constants
+parser handles Lean 4.33's syntax while rejecting module/import modifiers, and
+the axiom auditors traverse actual checked types and proof bodies instead of
+Lean's new cached axiom summaries. Pinned dependencies load their private proof
+bodies with extensions disabled. Split project artifacts are rejected because
+the current scheduler hashes one artifact per project module. The exact-type,
+universe, source-coverage, replay and axiom requirements are retained.
+Compilation and selected checks during this migration do not constitute a
+complete verification run; the maintainer explicitly deferred kernel replay.
+
 ## Lean interface
 
 <a id="prepared-complete-lean-acceptance"></a>
@@ -97,6 +109,15 @@ Each module is independently replayed through Lean's kernel after its project
 ancestors pass. Artifact hashes are checked throughout; an ancestor is a trusted
 seed only after its replay and axiom audit succeed in this run. Compiled checked
 flags and earlier runs cannot substitute for this verification.
+
+The pinned declaration inventory comes from `Mathlib` and
+`CanonicalAcceptanceExpected`; NLA-lib is covered through the modules imported
+by the canonical statement. Pinning NLA-lib does not automatically add all of
+its modules to that inventory. An additional split NLA-lib module outside this
+import closure is rejected by the single-artifact replay guard. Supporting such
+an import requires a separately reviewed inventory expansion or support for
+hashing and replaying every artifact part, with the complete replay and axiom
+requirements preserved.
 
 All fresh safe declarations, including private theorems and ordinary definitions,
 receive a transitive axiom audit. Unsafe implementation stubs cannot be logical

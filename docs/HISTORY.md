@@ -78,10 +78,80 @@ Local verification logs remain outside the source checkout, under the project's
 
 ## Canonical source and instructions
 
-The canonical root SHA-256 remains
+At the maintainer's explicit request on 30 October 2026, the preceding
+byte-preservation restriction was revoked for a canonical statement rewrite.
+The subsequent clarification required equivalence with the natural-language
+theorem in the README, retaining both sharp regimes, exact constants, arbitrary
+sample-space universes, measurability and non-strict tail events.
+
+The first rewrite bundled the original row assumptions and tail conclusions
+using local definitions. Lean 4.19.0 compiled that intermediate root, its two
+equivalence proofs, the adapters and public general/unit results. Administrative
+checks passed 78 tests, with 36 optional Lean fixtures skipped. The complete
+`./lean/verify.sh` run was stopped during compilation at the maintainer's request;
+independent kernel replay was deferred. These historical logs remain in the
+older external workspace's `validation/statement-simplification-20261030.log`
+and `validation/statement-public-results-20261030.log`.
+
+The maintainer then clarified that “import” meant an actual NLA-lib dependency,
+and authorized the compatible Lean/Mathlib upgrade. The current 80-line source
+imports NLA-lib's row predicates and singular values directly. Its variance proxy
+is `K²`, and its singular-value indices retain zero singular values. The new
+`Canonical/NLARows.lean` and `Canonical/NLASingularValues.lean` bridge these imported
+definitions to the original assumptions and extrema. `StatementEquivalence.lean`
+proves equivalence with both preceding expanded propositions for arbitrary
+quartets and sample-space universes. Existing proof modules receive API
+compatibility changes for Mathlib 4.33.1.
+
+Lean 4.33.1 is installed through central Elan. NLA-lib commit
+`6491e7528c1b1e68e46301cde6a76ae153e8e834`, Mathlib commit
+`0df444a360eaa60ab8c11dca51a86af692955474` and their locked dependencies live under
+`~/Lean/SubGaussianTailBounds/<source-path-digest>/nla-4.33.1/.lake/packages/`.
+The prior Lean 4.19.0 environment and the SingularValueBounds dependency tree
+remain separate. No dependency sources, compiled outputs or bulky dependency
+symlinks are stored in this repository. Routine setup still reuses installed,
+exactly pinned dependencies and never installs or updates them.
+
+The original root SHA-256 was
 `eb24daadaf9c0aaac3bea45128a08b81ba5492183bcbb6eb03b62c3245c2701c`.
+The intermediate local-definition rewrite had SHA-256
+`8527f13f9a79531eb226f1ce276b000fa780955a54b91d352a0e5845ed8aa760`.
+The current imported canonical root SHA-256 is
+`e62053135682c168816033858a78828abbf34fe47c3b2f9e9db44f6d6fb828b5`.
 The digest detects drift; it is not mathematical evidence. Its complete
 annotated README presentation is checked against the root bytes.
+The executable source guard is repinned to these explicitly requested new
+bytes; its shadow checks and the kernel, axiom, exact-type and universe
+requirements remain in force. A trusted checkout with the previous digest or
+dependency pins intentionally rejects this revision until the maintainer adopts
+the updated statement and setup policy.
+
+The Lean 4.33.1 compatibility migration is complete. The following checks passed
+on 30 October 2026:
+
+- All 530 Lean source modules compiled, including all 487 KL modules, both sharp
+  canonical theorems and the umbrella module. The official bounded build tool
+  subsequently checked every source trace and reported all 530 targets current.
+- Both full statement equivalences compiled for arbitrary quartets and
+  sample-space universes. Their axiom reports contain only `propext`,
+  `Classical.choice` and `Quot.sound`.
+- All 22 generated canonical acceptance obligations compiled and passed the
+  supplemental audit of actual checked proof bodies against the same axiom
+  allowlist.
+- The default administrative test run passed 78 cases, with 40 opt-in Lean
+  fixtures skipped. Separately, all nine constants-source parser fixtures,
+  two split-import elaboration-audit fixtures and one plan-only rejection of
+  split project artifacts passed. The canonical source guard and whitespace
+  checks also passed.
+
+The proof port changes imports, API spellings, coercions and tactics while
+preserving the numerical certificate data, hypotheses and sharp bounds.
+Build outputs and retained logs are in the central workspace; the validation
+directory is `validation/nla-imports-20261030/`. The three selected split-module
+fixture results were recorded in the tool transcript rather than saved logs.
+Independent kernel replay and the complete `./lean/verify.sh` run were deferred
+at the maintainer's request. These compilation and regression checks therefore
+do not constitute a completed verification run under the repository policy.
 
 The 29 October instruction inventory included hidden, ignored and editor paths.
 After retirement of the one-off `restructure_prompt.md`, only root `AGENTS.md`
@@ -89,3 +159,7 @@ remains. No nested AGENTS, CLAUDE, GEMINI, Copilot, Cursor, Windsurf, `.agents` 
 `.codex` instruction files were present. The root canonical file must never be
 edited, deleted, renamed, relocated, replaced or shadowed; future instructions
 must repeat that prohibition without an exception.
+
+The 30 October inventory again included hidden and ignored/editor paths and
+found only root `AGENTS.md`. Its observed digest now identifies the revised
+canonical source; its protection applies to that revised source.

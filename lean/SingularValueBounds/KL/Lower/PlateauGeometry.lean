@@ -137,7 +137,7 @@ theorem plateau_comparison_posDef {ι : Type*} [Fintype ι] [DecidableEq ι] [No
           (mul_nonneg (mul_nonneg hc hr.le) (sub_nonneg.mpr hr1))
       nlinarith only [hp]
   change 0 < r+r^2/1*(A*1-c*r)
-  convert mul_pos hr hbase using 1 <;> ring
+  convert! mul_pos hr hbase using 1 <;> ring
 
 end
 end SingularValueBounds.KL

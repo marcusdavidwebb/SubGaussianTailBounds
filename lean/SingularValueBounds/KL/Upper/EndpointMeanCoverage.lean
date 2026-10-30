@@ -39,8 +39,8 @@ theorem endpoint_mean_joint_cover (h : EndpointMeanCertificateConditions)
       · push_cast at hr
         linarith
   let p : ℕ → ℝ := fun i => if hi : i<43 then (endpointMeanAPoint ⟨i,hi⟩ : ℝ) else 1
-  have hp0 : p 0=0 := by simpa only [p,dif_pos (by omega : 0<43),Rat.cast_zero] using congrArg (fun q : ℚ => (q : ℝ)) h.aGrid.1
-  have hp42 : p 42=1 := by simpa only [p,dif_pos (by omega : 42<43),Rat.cast_one] using congrArg (fun q : ℚ => (q : ℝ)) h.aGrid.2.1
+  have hp0 : p 0=0 := by simpa only [p,dif_pos (by omega : 0<43),Rat.cast_zero] using! congrArg (fun q : ℚ => (q : ℝ)) h.aGrid.1
+  have hp42 : p 42=1 := by simpa only [p,dif_pos (by omega : 42<43),Rat.cast_one] using! congrArg (fun q : ℚ => (q : ℝ)) h.aGrid.2.1
   have ha0 : 0<a := (pow_pos (by linarith [hk.1] : 0<k) 3).trans_le ha.1
   have hap : a∈Ioc (p 0) (p 42) := by rw [hp0,hp42]; exact ⟨ha0,ha.2.trans hk.2⟩
   obtain ⟨j,hj,hal,hah⟩ := finite_grid_covers_Ioc p hap

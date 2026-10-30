@@ -88,21 +88,18 @@ theorem upperRateNumerator_identity {v C y : ℝ} (hv : 1 < v) (hy : 0 ≤ y) :
         (A*W^11*(W^2-V^2)) := by
     have hOne : 1-(V/W)^2 ≠ 0 := by
       have he : 1-(V/W)^2 = (W^2-V^2)/W^2 := by
-        field_simp only [hW]
-        ring
+        field_simp [hW] <;> ring
       rw [he]
       exact div_ne_zero hZ (pow_ne_zero 2 hW)
     have hDen : 1-(V/W)^2 = (W^2-V^2)/W^2 := by
-      field_simp only [hW]
-      ring
+      field_simp [hW] <;> ring
     unfold Certificates.logTaylorUpper Certificates.logTaylor
     norm_num only [Finset.sum_range_succ, pow_zero, pow_one, Nat.cast_zero,
       Nat.cast_succ, Finset.sum_range_zero, zero_add, Nat.reduceAdd, Nat.reduceMul, Nat.reduceSub]
     simp_rw [div_pow]
     simp only [div_pow] at hDen
     rw [hDen]
-    field_simp only [hW,hA,hZ]
-    ring
+    field_simp [hW,hA,hZ] <;> ring
   exact hgeneric _ _ _ _ _ hd.2.1.ne' hd.1.ne' hz.ne'
 
 /-- Whole-domain analytic consequence of a finite polynomial certificate. -/
@@ -130,9 +127,9 @@ theorem upperRateRescaled_hasDerivAt {r u : ℝ} (hr : 0 ≤ r) (hu : 0 ≤ u) :
   have h2 := ((hasDerivAt_const r (1:ℝ)).add ((hasDerivAt_id r).mul_const (u^2))).log he.ne'
   have h3 := (((hasDerivAt_id r).add_const 1).mul_const u).div
     ((hasDerivAt_const r (1:ℝ)).add ((hasDerivAt_id r).mul_const u)) hd.ne'
-  convert (((hasDerivAt_const r (Real.log (1+u))).add h1).sub h2).sub h3 using 1
-  field_simp
-  ring
+  simp only [Pi.add_apply, Pi.div_apply, id_eq, zero_add, one_mul] at h1 h2 h3
+  convert! (((hasDerivAt_const r (Real.log (1+u))).add h1).sub h2).sub h3 using 1
+  field_simp [hd.ne', he.ne'] <;> ring
 
 /-- Increasing the allowed rate can only increase its rescaled correction. -/
 theorem upperRateRescaled_mono {u : ℝ} (hu : 0 ≤ u) :
@@ -157,7 +154,7 @@ theorem quadratic_rescaling_of_third_deriv {f f1 f2 f3 : ℝ → ℝ} {b x : ℝ
   let H := fun t => t*f2 t-f1 t
   let G := fun t => t*f1 t-2*f t
   have hH (t : ℝ) (ht : t ∈ Icc 0 b) : HasDerivAt H (t*f3 t) t := by
-    convert ((hasDerivAt_id t).mul (hf2 t ht)).sub (hf1 t ht) using 1 <;> simp [H] <;> ring
+    convert! ((hasDerivAt_id t).mul (hf2 t ht)).sub (hf1 t ht) using 1 <;> simp [H] <;> ring
   have hHm : MonotoneOn H (Icc 0 b) := by
     apply monotoneOn_of_deriv_nonneg (convex_Icc _ _)
     · exact fun t ht => (hH t ht).continuousAt.continuousWithinAt
@@ -170,7 +167,7 @@ theorem quadratic_rescaling_of_third_deriv {f f1 f2 f3 : ℝ → ℝ} {b x : ℝ
     have ht0 := hHm ⟨le_rfl,hb.le⟩ ht ht.1
     rwa [hH0] at ht0
   have hG (t : ℝ) (ht : t ∈ Icc 0 b) : HasDerivAt G (H t) t := by
-    convert ((hasDerivAt_id t).mul (hf1 t ht)).sub ((hf t ht).const_mul 2) using 1 <;>
+    convert! ((hasDerivAt_id t).mul (hf1 t ht)).sub ((hf t ht).const_mul 2) using 1 <;>
       simp [G,H] <;> ring
   have hGm : MonotoneOn G (Icc 0 b) := by
     apply monotoneOn_of_deriv_nonneg (convex_Icc _ _)
@@ -187,11 +184,9 @@ theorem quadratic_rescaling_of_third_deriv {f f1 f2 f3 : ℝ → ℝ} {b x : ℝ
   · simp [hf0]
   have hR (t : ℝ) (ht : t ∈ Icc x b) : HasDerivAt (fun t => f t/t^2) (G t/t^3) t := by
     have ht0 : 0 < t := hx.trans_le ht.1
-    convert (hf t ⟨ht0.le,ht.2⟩).div ((hasDerivAt_id t).pow 2) (pow_ne_zero 2 ht0.ne') using 1
-    simp only [id_eq]
+    convert! (hf t ⟨ht0.le,ht.2⟩).div ((hasDerivAt_id t).pow 2) (pow_ne_zero 2 ht0.ne') using 1
     dsimp [G]
-    field_simp only [ht0.ne']
-    ring
+    field_simp [ht0.ne'] <;> ring
   have hRm : MonotoneOn (fun t => f t/t^2) (Icc x b) := by
     apply monotoneOn_of_deriv_nonneg (convex_Icc _ _)
     · exact fun t ht => (hR t ht).continuousAt.continuousWithinAt

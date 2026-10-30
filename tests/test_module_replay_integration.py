@@ -78,6 +78,18 @@ class ModuleReplayIntegrationTests(unittest.TestCase):
         self.module_inventory.write_text(json.dumps({"modules": inventory["modules"]}))
         return path
 
+    def test_split_project_artifacts_rejected_during_planning(self):
+        self.compile("SplitProject", """module
+public import Init
+public theorem splitTrue : True := True.intro
+""")
+        self.roots("SplitProject")
+        # The scheduler currently hashes one .olean per project module. Reject
+        # split artifacts before replay rather than leaving private parts unchecked.
+        result = self.worker("plan")
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("Split project module artifacts are not supported", result.stdout)
+
     def test_valid_dependency_chain_replays_once_in_order(self):
         self.compile("ReplayBase", "import Init\ndef replayValue : Nat := 3\n")
         self.compile("ReplayChild", "import ReplayBase\ntheorem replayCorrect : replayValue = 3 := rfl\n")

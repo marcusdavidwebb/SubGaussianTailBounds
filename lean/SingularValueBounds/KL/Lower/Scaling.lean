@@ -10,11 +10,12 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
 
 theorem lower_posDef_smul {R : Matrix ι ι ℝ} (hR : R.PosDef) {s : ℝ} (hs : 0<s) :
     (s • R).PosDef := by
+  apply Matrix.posDef_iff_dotProduct_mulVec.mpr
   constructor
   · change (s • R)ᴴ=s • R
     simp only [Matrix.conjTranspose_smul,star_trivial,hR.isHermitian.eq]
   · intro x hx
-    simpa only [Matrix.smul_mulVec_assoc,dotProduct_smul,smul_eq_mul] using mul_pos hs (hR.2 x hx)
+    simpa only [Matrix.smul_mulVec,dotProduct_smul,smul_eq_mul] using mul_pos hs (hR.dotProduct_mulVec_pos hx)
 
 theorem lower_frobenius_smul (R : Matrix ι ι ℝ) {s : ℝ} (hs : 0≤s) :
     frobenius (s • R)=s*frobenius R := by
@@ -30,11 +31,11 @@ theorem lower_spectralMaximum_smul {R : Matrix ι ι ℝ} (hR : R.PosDef)
   apply le_antisymm
   · apply (spectralMaximum_le_iff_euclidean_quadratic _ _).mpr
     intro x
-    simpa only [Matrix.smul_mulVec_assoc,dotProduct_smul,smul_eq_mul,mul_assoc] using
+    simpa only [Matrix.smul_mulVec,dotProduct_smul,smul_eq_mul,mul_assoc] using
       mul_le_mul_of_nonneg_left (euclidean_quadratic_le_spectralMaximum hR.isHermitian x) hs.le
   · obtain ⟨x,hx,hq⟩ := spectralMaximum_attained hR.isHermitian
     have hh := euclidean_quadratic_le_spectralMaximum (lower_posDef_smul hR hs).isHermitian x
-    simpa only [Matrix.smul_mulVec_assoc,dotProduct_smul,smul_eq_mul,hq,hx,one_pow,mul_one] using hh
+    simpa only [Matrix.smul_mulVec,dotProduct_smul,smul_eq_mul,hq,hx,one_pow,mul_one] using hh
 
 theorem lowerWeight_smul {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {s : ℝ} (hs : s≠0) : lowerWeight (s • R)=lowerWeight R := by

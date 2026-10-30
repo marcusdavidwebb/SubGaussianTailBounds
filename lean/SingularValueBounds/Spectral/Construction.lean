@@ -35,7 +35,7 @@ theorem gap_posDef_iff (H : SymmetricMatrix ι) (u : ℝ) :
   constructor
   · intro hgap j
     have h := eigenvalue_gap_pos H.2 (a := u) (ε := 1)
-      (by simpa only [one_smul] using hgap) j
+      (by simpa only [gap, one_smul] using hgap) j
     simpa only [one_mul, sub_pos] using h
   · intro hu
     rw [gap_spectral]

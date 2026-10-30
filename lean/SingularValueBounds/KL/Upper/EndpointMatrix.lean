@@ -79,7 +79,7 @@ theorem upperComparison_endpoint_log_mgf (hcert : EndpointLogratioCertificateCon
   have hgapd : ∀j,0<1-2*(1 : ℝ)^2*((6/5 : ℝ)/η)*d j := by
     intro j
     rw [hd]
-    convert hgap j using 1
+    convert! hgap j using 1
     field_simp [hη.ne']
     <;> ring
   have hb := unitary_quadratic_exponential_bound hsg hm U d

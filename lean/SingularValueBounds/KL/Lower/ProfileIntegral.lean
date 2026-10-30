@@ -1,6 +1,6 @@
-import Mathlib.Data.Real.Pi.Bounds
+import Mathlib.Analysis.Real.Pi.Bounds
 import SingularValueBounds.KL.Lower.CellAnalysis
-import Mathlib.Analysis.SpecialFunctions.Integrals
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.IntegrationByParts
 
@@ -85,7 +85,7 @@ theorem profile_sin_lower3 {x : ℝ} (hx : 0 ≤ x) : x-x^3/6 ≤ Real.sin x := 
   have hh := profile_nonneg_of_deriv
     (f := fun x => Real.sin x-x+x^3/6)
     (f' := fun x => Real.cos x-1+x^2/2) (by fun_prop)
-    (by intro x; convert (((Real.hasDerivAt_sin x).sub (hasDerivAt_id x)).add
+    (by intro x; convert! (((Real.hasDerivAt_sin x).sub (hasDerivAt_id x)).add
       (((hasDerivAt_id x).pow 3).div_const 6)) using 1 <;> simp [id_eq] <;> ring)
     (by norm_num) (fun x _ => by linarith [Real.one_sub_sq_div_two_le_cos (x := x)]) hx
   linarith
@@ -95,7 +95,7 @@ theorem profile_cos_upper4 {x : ℝ} (hx : 0 ≤ x) :
   have hh := profile_nonneg_of_deriv
     (f := fun x => 1-x^2/2+x^4/24-Real.cos x)
     (f' := fun x => Real.sin x-x+x^3/6) (by fun_prop)
-    (by intro x; convert (((hasDerivAt_const x 1).sub
+    (by intro x; convert! (((hasDerivAt_const x 1).sub
       (((hasDerivAt_id x).pow 2).div_const 2)).add
       (((hasDerivAt_id x).pow 4).div_const 24)).sub (Real.hasDerivAt_cos x) using 1 <;> simp [id_eq] <;> ring)
     (by norm_num) (fun x hx => by linarith [profile_sin_lower3 hx]) hx
@@ -106,7 +106,7 @@ theorem profile_sin_upper5 {x : ℝ} (hx : 0 ≤ x) :
   have hh := profile_nonneg_of_deriv
     (f := fun x => x-x^3/6+x^5/120-Real.sin x)
     (f' := fun x => 1-x^2/2+x^4/24-Real.cos x) (by fun_prop)
-    (by intro x; convert (((hasDerivAt_id x).sub
+    (by intro x; convert! (((hasDerivAt_id x).sub
       (((hasDerivAt_id x).pow 3).div_const 6)).add
       (((hasDerivAt_id x).pow 5).div_const 120)).sub (Real.hasDerivAt_sin x) using 1 <;> simp [id_eq] <;> ring)
     (by norm_num) (fun x hx => by linarith [profile_cos_upper4 hx]) hx
@@ -117,7 +117,7 @@ theorem profile_cos_lower6 {x : ℝ} (hx : 0 ≤ x) :
   have hh := profile_nonneg_of_deriv
     (f := fun x => Real.cos x-1+x^2/2-x^4/24+x^6/720)
     (f' := fun x => x-x^3/6+x^5/120-Real.sin x) (by fun_prop)
-    (by intro x; convert (((((Real.hasDerivAt_cos x).sub_const 1).add
+    (by intro x; convert! (((((Real.hasDerivAt_cos x).sub_const 1).add
       (((hasDerivAt_id x).pow 2).div_const 2)).sub
       (((hasDerivAt_id x).pow 4).div_const 24)).add
       (((hasDerivAt_id x).pow 6).div_const 720)) using 1 <;> simp [id_eq] <;> ring)
@@ -130,7 +130,7 @@ theorem profile_sin_lower7 {x : ℝ} (hx : 0 ≤ x) :
   have hh := profile_nonneg_of_deriv
     (f := fun x => Real.sin x-x+x^3/6-x^5/120+x^7/5040)
     (f' := fun x => Real.cos x-1+x^2/2-x^4/24+x^6/720) (by fun_prop)
-    (by intro x; convert (((((Real.hasDerivAt_sin x).sub (hasDerivAt_id x)).add
+    (by intro x; convert! (((((Real.hasDerivAt_sin x).sub (hasDerivAt_id x)).add
       (((hasDerivAt_id x).pow 3).div_const 6)).sub
       (((hasDerivAt_id x).pow 5).div_const 120)).add
       (((hasDerivAt_id x).pow 7).div_const 5040)) using 1 <;> simp [id_eq] <;> ring)
@@ -180,10 +180,8 @@ theorem general_profile_polynomial_integral (t : ℝ) :
   rw [intervalIntegral.integral_add (hi1.const_mul _) ((hi 2).const_mul _)]
   simp only [intervalIntegral.integral_const_mul]
   have hm := profile_sin_moments t
-  simp only [pow_one] at *
   rw [hm.1,hm.2.1,hm.2.2.1,hm.2.2.2]
   have hs := congrArg (fun u : ℝ => u*Real.cos t) (Real.sin_sq_add_cos_sq t)
-  dsimp at hs
   nlinarith only [hs]
 
 theorem generalLowerProfile_small_majorant {k : ℝ} (hk : k ∈ Icc (0:ℝ) 1) :
@@ -228,6 +226,8 @@ theorem generalLowerProfile_angularCost_majorant :
     ((hp.add hs).intervalIntegrable 0 a) (fun θ hθ => by
       have hθ' : θ ∈ Icc (0:ℝ) (Real.pi/2) := ⟨hθ.1,hθ.2.trans (hab.trans hb)⟩
       have hm := mul_le_mul_of_nonneg_left (generalLowerProfile_small_majorant (hsin hθ')) (hsin hθ').1
+      change Real.sin θ * generalLowerProfile (Real.sin θ) ≤
+        Real.sin θ * generalLowerPolynomial (Real.sin θ) + (3/40:ℝ) * Real.sin θ
       nlinarith only [hm])
   have h2 := intervalIntegral.integral_mono_on (μ := volume) hab (hc.intervalIntegrable a b)
     (hp.intervalIntegrable a b) (fun θ hθ => by
@@ -241,6 +241,7 @@ theorem generalLowerProfile_angularCost_majorant :
     (ht.intervalIntegrable b (Real.pi/2)) (fun θ hθ => by
       have hθ' : θ ∈ Icc (0:ℝ) (Real.pi/2) := ⟨(ha.trans hab).trans hθ.1,hθ.2⟩
       simpa [mul_comm] using mul_le_mul_of_nonneg_left (generalLowerProfile_bounds (Real.sin θ)).2 (hsin hθ').1)
+  simp only [Pi.add_apply] at h1
   rw [intervalIntegral.integral_add (μ := volume) (hp.intervalIntegrable 0 a) (hs.intervalIntegrable 0 a)] at h1
   have hsplit := intervalIntegral.integral_add_adjacent_intervals (μ := volume)
     (hc.intervalIntegrable 0 a) (hc.intervalIntegrable a b)
@@ -362,14 +363,14 @@ theorem endpointLowerProfile_angularCost_eq :
       (73/100)*Real.sqrt (1-(73/100)^2) := by
   have h := profile_linearCap_angularCost (show (73/100:ℝ) ∈ Icc 0 1 by norm_num)
   change profileAngularCost (fun y => min (2*y) (73/50)) = _
-  convert h using 2 <;> norm_num
+  convert! h using 2 <;> norm_num
 
 theorem endpointLowerProfile_angularCost_lt : profileAngularCost endpointLowerProfile < 33/25 := by
   have hpoly : (∫ y in (0:ℝ)..(73/100), (1-y^2/2-y^4/8)) =
       (73/100:ℝ)-(73/100)^3/6-(73/100)^5/40 := by
     have hd (y : ℝ) : HasDerivAt (fun y : ℝ => y-y^3/6-y^5/40)
         (1-y^2/2-y^4/8) y := by
-      convert ((hasDerivAt_id y).sub (((hasDerivAt_id y).pow 3).div_const 6)).sub
+      convert! ((hasDerivAt_id y).sub (((hasDerivAt_id y).pow 3).div_const 6)).sub
         (((hasDerivAt_id y).pow 5).div_const 40) using 1 <;> simp [id_eq] <;> ring
     have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt (fun y _ => hd y)
       (show IntervalIntegrable (fun y : ℝ => 1-y^2/2-y^4/8) volume 0 (73/100) from

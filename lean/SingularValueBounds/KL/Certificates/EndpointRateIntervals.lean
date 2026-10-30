@@ -22,7 +22,8 @@ theorem endpointRateOpt_mono (k a u v : ℚ) (hk : 0 < k) (ha : 0 < a)
 
 theorem endpointRateMargin_antitone (kh u v : ℚ) (hk : 0 < kh)
     (hu : 0 < u) (huv : u ≤ v) : endpointRateMargin kh v ≤ endpointRateMargin kh u := by
-  apply add_le_add_left
+  unfold endpointRateMargin
+  apply add_le_add_right
   apply Int.floor_mono
   exact div_le_div_of_nonneg_left (by norm_num) (mul_pos hu hk)
     (mul_le_mul_of_nonneg_right huv hk.le)

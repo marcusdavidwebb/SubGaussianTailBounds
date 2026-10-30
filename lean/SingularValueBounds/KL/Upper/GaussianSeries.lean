@@ -58,11 +58,11 @@ private theorem gaussianSquareDerivative_hasDeriv (p : ℕ) {t : ℝ} (ht : t < 
   have hd := (((hasDerivAt_const t 1).sub ((hasDerivAt_id t).const_mul 2)).rpow_const
     (p := -(p : ℝ)-1/2) (Or.inl hbase)).const_mul
       ((p.factorial : ℝ)*gaussianSquareCoefficient p)
-  convert hd using 1
+  convert! hd using 1
   simp only [gaussianSquareDerivative,gaussianSquareCoefficient,Nat.factorial_succ,
       Nat.cast_mul,Nat.cast_add,Nat.cast_one]
   rw [show -((p : ℝ)+1)-1/2=-(p : ℝ)-1/2-1 by ring]
-  simp only [id_eq,zero_sub,mul_one]
+  simp only [id_eq, Pi.sub_apply, zero_sub, mul_one]
   field_simp
   <;> ring
 
@@ -161,7 +161,7 @@ theorem standardGaussian_quadratic_moment_le {w : ι → ℝ}
       (t := Finset.univ) (w := w) (p := fun i => (g i)^2)
       (fun i hi => hw i) hsum (fun i hi => sq_nonneg (g i))
   have hupper : Integrable (fun g : ι → ℝ => ∑ i, w i*((g i)^2)^p)
-      (standardGaussian ι) := integrable_finset_sum _
+      (standardGaussian ι) := integrable_finsetSum _
     (fun i hi => (standardGaussian_coordinate_even_integrable i p).const_mul (w i))
   have hInt : Integrable (fun g : ι → ℝ => (∑ i, w i*(g i)^2)^p) (standardGaussian ι) := by
     apply hupper.mono'
@@ -174,7 +174,7 @@ theorem standardGaussian_quadratic_moment_le {w : ι → ℝ}
   refine ⟨hInt, ?_⟩
   apply (div_le_iff₀ (by positivity : (0 : ℝ)<p.factorial)).2
   have hi := integral_mono hInt hupper hpoint
-  rw [integral_finset_sum _ (fun i hi =>
+  rw [integral_finsetSum _ (fun i hi =>
     (standardGaussian_coordinate_even_integrable i p).const_mul (w i))] at hi
   simp_rw [integral_const_mul,standardGaussian_coordinate_even_moment] at hi
   rw [← Finset.sum_mul,hsum,one_mul] at hi

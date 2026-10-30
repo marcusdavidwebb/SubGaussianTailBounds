@@ -20,7 +20,8 @@ import tempfile
 
 PUBLIC_ROOT = Path(__file__).resolve().parents[1]
 SOURCE = PUBLIC_ROOT / "lean"
-CENTRAL_PACKAGES = Path.home() / "Lean" / "SingularValueBounds" / ".lake" / "packages"
+PINNED_TOOLCHAIN = "leanprover/lean4:v4.33.1"
+WORKSPACE_VERSION = "nla-4.33.1"
 
 
 def fail(message: str) -> None:
@@ -52,15 +53,13 @@ def workspace() -> Path:
     if os.environ.get("SVB_WORK_DIR"):
         return external_path(os.environ["SVB_WORK_DIR"], "SVB_WORK_DIR")
     source_id = hashlib.sha256(str(SOURCE).encode()).hexdigest()[:16]
-    return external_path(Path.home() / "Lean" / "SubGaussianTailBounds" / source_id,
+    return external_path(Path.home() / "Lean" / "SubGaussianTailBounds" / source_id / WORKSPACE_VERSION,
                          "Default workspace")
 
 
 def packages_path(work: Path) -> Path:
     if os.environ.get("SVB_PACKAGES_DIR"):
         return external_path(os.environ["SVB_PACKAGES_DIR"], "SVB_PACKAGES_DIR")
-    if CENTRAL_PACKAGES.is_dir():
-        return external_path(CENTRAL_PACKAGES, "Existing pinned dependency directory")
     return external_path(work / ".lake" / "packages", "Pinned dependency directory")
 
 
@@ -180,8 +179,8 @@ def main() -> None:
         if not package["url"].startswith("https://github.com/"):
             fail("Only explicit HTTPS GitHub dependency URLs are supported.")
     toolchain = (SOURCE / "lean-toolchain").read_text().strip()
-    if toolchain != "leanprover/lean4:v4.19.0":
-        fail("This verification setup requires the preserved Lean 4.19.0 toolchain pin.")
+    if toolchain != PINNED_TOOLCHAIN:
+        fail(f"This verification setup requires the pinned toolchain {PINNED_TOOLCHAIN}.")
     elan = elan_binary()
     if not toolchain_ready(elan, toolchain):
         fail(f"Required existing toolchain is unavailable: {toolchain}\nNo download was attempted.")

@@ -30,6 +30,7 @@ lemma mixedInitialAngle_cos {n : ℕ} (hn : 0<n) :
   rw [mixedInitialAngle,Real.cos_arcsin]
   congr 1
   field_simp
+  nlinarith only [hsq]
 
 lemma mixedAngularCoordinate_cos_pos {n : ℕ} (hn : 0<n) {θ : ℝ}
     (hθ : θ ∈ Icc (0:ℝ) (Real.pi/2-mixedInitialAngle n)) : 0<Real.cos θ := by
@@ -52,7 +53,7 @@ lemma mixedAngularCoordinate_shape {n : ℕ} (hn : 0<n) {θ : ℝ}
   have hfirst : 1/((n:ℝ)*mixedAngularCoordinate n θ)=Real.cos θ/Real.sqrt (n:ℝ) := by
     unfold mixedAngularCoordinate
     field_simp
-    nlinarith only [congrArg (fun z : ℝ => z*Real.cos θ) hsq]
+    exact hsq
   rw [mixedShapeEnvelope,harg,Real.sqrt_sq ht0,hfirst,Real.sin_add,
     mixedInitialAngle_sin hn,mixedInitialAngle_cos hn]
   ring
@@ -63,12 +64,11 @@ lemma mixedAngularCoordinate_hasDerivAt {n : ℕ} (hn : 0<n) {θ : ℝ}
       (Real.sin θ/(Real.sqrt (n:ℝ)*Real.cos θ^2)) θ := by
   have hs : 0<Real.sqrt (n:ℝ) := Real.sqrt_pos.mpr (by exact_mod_cast hn)
   have hc := mixedAngularCoordinate_cos_pos hn hθ
-  convert (((Real.hasDerivAt_cos θ).const_mul (Real.sqrt (n:ℝ))).inv
+  convert! (((Real.hasDerivAt_cos θ).const_mul (Real.sqrt (n:ℝ))).inv
     (mul_ne_zero hs.ne' hc.ne')) using 1
   · funext y
     simp [mixedAngularCoordinate,one_div,mul_comm]
   · field_simp
-    ring
 
 /-- Exact transformation of the scalar budget integral. It includes `n=1`
 through the degenerate angular interval. -/
@@ -137,7 +137,6 @@ theorem mixedScalarCap_integral_eq {n : ℕ} (hn : 0<n) (a : ℝ)
     generalize hsdef : Real.sqrt (n:ℝ)=s at *
     rw [← hsq]
     field_simp [hs.ne',hcos.ne']
-    ring
   have hsub' : (∫ x in (1/Real.sqrt (n:ℝ))..1, 2*mixedScalarCap n a h x/x^3) =
       ∫ θ in (0:ℝ)..T, (2*a*(n:ℝ))*(Real.sin θ*Real.cos θ)+
         (2*Real.sqrt (n:ℝ))*(h (Real.sin (θ+φ))*Real.sin θ) := by
@@ -161,6 +160,7 @@ theorem mixedScalarCap_integral_eq {n : ℕ} (hn : 0<n) (a : ℝ)
   have hid := Real.sin_sq_add_cos_sq φ
   rw [hsinφ] at hid
   field_simp [hs.ne'] at hid ⊢
+  rw [hsq] at hid
   nlinarith only [congrArg (fun z : ℝ => a*z) hid]
   all_goals norm_num
 

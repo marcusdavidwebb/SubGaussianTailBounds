@@ -48,7 +48,7 @@ def logTaylorUpper (N : ℕ) (z : ℝ) : ℝ :=
 
 private theorem hasSum_exp (x : ℝ) :
     HasSum (fun j : ℕ => x ^ j / (j.factorial : ℝ)) (Real.exp x) := by
-  simpa only [Real.exp_eq_exp_ℝ] using NormedSpace.expSeries_div_hasSum_exp ℝ x
+  simpa only [Real.exp_eq_exp_ℝ] using NormedSpace.expSeries_div_hasSum_exp x
 
 /-- Nonnegative Taylor terms give the lower half of (S1.2). -/
 theorem expTaylor_le_exp (N : ℕ) {x : ℝ} (hx : 0 ≤ x) :

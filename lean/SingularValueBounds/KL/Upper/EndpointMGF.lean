@@ -65,10 +65,10 @@ theorem endpoint_mgf_of_low_tail {Y : Ω → ℝ} {t : ℝ}
     have hTa : a≤S := hT
     have hprod := mul_nonneg (sub_nonneg.mpr he) (sub_nonneg.mpr hTa)
     have hh : (∫ ω,Y ω^(n+1) ∂μ)/((n+1).factorial : ℝ)≤(1-e)*a+e*S := by
-      convert h using 1 <;> dsimp [a,S] <;> ring
+      convert! h using 1 <;> dsimp [a,S] <;> ring
     have hg : (∫ ω,Y ω^(n+1) ∂μ)/((n+1).factorial : ℝ)≤(16/21 : ℝ)*a+(5/21 : ℝ)*S := by
       nlinarith
-    convert hg using 1 <;> dsimp [a,S] <;> ring
+    convert! hg using 1 <;> dsimp [a,S] <;> ring
   apply mgf_of_bernstein_moments hY.aemeasurable hY0 (by norm_num : (0 : ℝ)≤4)
     ht ht4 hm hMean
   · have h := hc 1
@@ -125,11 +125,13 @@ theorem endpoint_mgf_of_rare_gaussian
   let g : ℕ → ℝ := fun n => ((∫ω,G ω^(n+2) ∂ν)/((n+2).factorial : ℝ))*t^(n+2)
   let r : ℕ → ℝ := fun n => ((∫ω in E,Y ω^(n+2) ∂μ)/((n+2).factorial : ℝ))*t^(n+2)
   have hg0 (n : ℕ) : 0≤g n := by
-    have h := integral_nonneg (μ := ν) (fun ω => pow_nonneg (hG0 ω) (n+2))
+    have h : 0 ≤ ∫ ω, G ω ^ (n+2) ∂ν :=
+      integral_nonneg (fun ω => pow_nonneg (hG0 ω) (n+2))
     dsimp [g]
     positivity
   have hr0' (n : ℕ) : 0≤r n := by
-    have h := integral_nonneg (μ := μ.restrict E) (fun ω => pow_nonneg (hY0 ω) (n+2))
+    have h : 0 ≤ ∫ ω in E, Y ω ^ (n+2) ∂μ :=
+      integral_nonneg (fun ω => pow_nonneg (hY0 ω) (n+2))
     dsimp [r]
     positivity
   have hbound (n : ℕ) : g n+r n≤bernsteinMajorantTerm 4 t (n+2) := by
@@ -155,7 +157,7 @@ theorem endpoint_mgf_of_rare_gaussian
           endpointRareCoefficient_higher i (by omega : 3≤n+2)
     have hh := mul_le_mul_of_nonneg_right (hTotal.trans hCoeff) (pow_nonneg ht (n+2))
     dsimp [g,r,bernsteinMajorantTerm]
-    convert hh using 1 <;> ring
+    convert! hh using 1 <;> ring
   have hMajor := bernsteinMajorant_hasSum (by norm_num : (0 : ℝ)≤4) ht ht4
   have hMajorTail : Summable (fun n => bernsteinMajorantTerm 4 t (n+2)) :=
     (summable_nat_add_iff 2).2 hMajor.summable

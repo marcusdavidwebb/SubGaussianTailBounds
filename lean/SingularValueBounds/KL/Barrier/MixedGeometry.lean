@@ -28,10 +28,10 @@ theorem continuous_spectralMaximum :
     obtain ⟨x,hx,hq⟩ := spectralMaximum_attained R.2
     have hc : Continuous (fun H : SymmetricMatrix ι => (x : ι → ℝ) ⬝ᵥ (H.1 *ᵥ (x : ι → ℝ))) := by
       dsimp [dotProduct, Matrix.mulVec]
-      apply continuous_finset_sum
+      apply continuous_finsetSum
       intro i _
       apply continuous_const.mul
-      apply continuous_finset_sum
+      apply continuous_finsetSum
       intro j _
       have hm : Continuous (fun H : SymmetricMatrix ι => H.1) := continuous_subtype_val
       have hij : Continuous (fun H : SymmetricMatrix ι => H.1 i j) :=

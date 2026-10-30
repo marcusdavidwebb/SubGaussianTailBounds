@@ -88,11 +88,13 @@ class ExistingDependencyTests(unittest.TestCase):
     def test_workspace_is_separate_from_other_project_builds(self):
         with patch.dict(os.environ, {}, clear=True), patch.object(Path, "home", return_value=self.root):
             work = configure.workspace()
-            self.assertEqual(work.parent, self.root / "Lean/SubGaussianTailBounds")
+            self.assertEqual(work.parent.parent, self.root / "Lean/SubGaussianTailBounds")
+            self.assertEqual(work.name, configure.WORKSPACE_VERSION)
             self.assertNotEqual(work, self.root / "Lean/SingularValueBounds")
-        with patch.dict(os.environ, {}, clear=True), \
-                patch.object(configure, "CENTRAL_PACKAGES", self.packages):
-            self.assertEqual(configure.packages_path(work), self.packages)
+            legacy_packages = self.root / "Lean/SingularValueBounds/.lake/packages"
+            legacy_packages.mkdir(parents=True)
+            self.assertEqual(configure.packages_path(work), work / ".lake/packages")
+            self.assertNotEqual(configure.packages_path(work), legacy_packages)
 
     def test_existing_unowned_or_other_checkout_workspace_is_not_overwritten(self):
         work = self.root / "work"
@@ -116,7 +118,7 @@ class CanonicalBuildConfigurationTests(unittest.TestCase):
             lock = json.loads((SOURCE / "lean/lake-manifest.json").read_text())
             original_lock = copy.deepcopy(lock)
             original_statement = (SOURCE / "MainTheoremStatement.lean").read_bytes()
-            configure.configure(work, packages, lock, "leanprover/lean4:v4.19.0")
+            configure.configure(work, packages, lock, configure.PINNED_TOOLCHAIN)
             config = tomllib.loads((work / "lakefile.toml").read_text())
             libraries = {library["name"]: library for library in config["lean_lib"]}
             self.assertEqual(libraries["MainTheoremStatement"]["srcDir"], str(SOURCE))

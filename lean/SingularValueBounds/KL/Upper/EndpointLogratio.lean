@@ -53,7 +53,7 @@ theorem endpointLogratioZ_bounds {A x : ℝ} (hA : A∈Icc (1/2 : ℝ) 1)
     · intro y hy
       have hy' : y∈Icc (0 : ℝ) (7/20) := interior_subset hy
       have hd : HasDerivAt (fun x : ℝ => x+A*x^2-2*x^3) (1+2*A*y-6*y^2) y := by
-        convert ((hasDerivAt_id y).add (((hasDerivAt_id y).pow 2).const_mul A)).sub
+        convert! ((hasDerivAt_id y).add (((hasDerivAt_id y).pow 2).const_mul A)).sub
           (((hasDerivAt_id y).pow 3).const_mul 2) using 1 <;> simp only [id_eq] <;> ring
       rw [hd.deriv]
       have hy2 := pow_le_pow_left₀ hy'.1 hy'.2 2
@@ -110,7 +110,7 @@ theorem endpointLogratio_monotone (hcert : EndpointLogratioCertificateConditions
     let zp := (12/5 : ℝ)*(1+2*A*x-6*x^2)
     have hz : 1-z≠0 := ne_of_gt (by dsimp [z]; linarith)
     have hdZ : HasDerivAt (endpointLogratioZ A) zp x := by
-      convert (((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
+      convert! (((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
         (((hasDerivAt_id x).pow 3).const_mul 2)).const_mul (12/5 : ℝ) using 1 <;>
         dsimp [endpointLogratioZ,zp] <;> ring
     have hd := ((((hasDerivAt_const x 1).sub hdZ).log hz).neg.sub hdZ).div
@@ -118,7 +118,8 @@ theorem endpointLogratio_monotone (hcert : EndpointLogratioCertificateConditions
     have hd' : HasDerivAt (endpointLogratio A)
         (((zp/(1-z)-zp)*x^2-(-Real.log (1-z)-z)*(2*x))/(x^2)^2) x := by
       simpa only [endpointLogratio,id_eq,Nat.cast_ofNat,Nat.reduceSub,pow_one,
-        mul_one,zero_sub,neg_div,neg_neg] using hd
+        mul_one,zero_sub,neg_div,neg_neg,Pi.sub_apply,Pi.neg_apply,Pi.pow_apply,
+        Pi.div_apply] using! hd
     rw [hd'.deriv]
     have hP := hcert.nonneg (show endpointLogratioBox.contains A x by
       simpa [endpointLogratioBox,RationalBox.contains] using
@@ -140,7 +141,7 @@ theorem endpointLogratio_monotone (hcert : EndpointLogratioCertificateConditions
     apply div_nonneg _ (sq_nonneg _)
     apply nonneg_of_mul_nonneg_left (b := 1-z) _ hzpos
     have hn := mul_nonneg hx'.1.le hnum
-    convert hn using 1
+    convert! hn using 1
     field_simp [hz]
     <;> ring
 

@@ -15,12 +15,13 @@ theorem lowerWeight_posSemidef {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     (lowerWeight R).PosSemidef := by
   have hsq : (R^2).PosSemidef := by
     simpa only [hR.isHermitian.eq,pow_two] using Matrix.posSemidef_conjTranspose_mul_self R
+  apply Matrix.posSemidef_iff_dotProduct_mulVec.mpr
   constructor
   · change ((Matrix.trace (R^2))⁻¹ • R^2)ᴴ=(Matrix.trace (R^2))⁻¹ • R^2
     simp only [Matrix.conjTranspose_smul,star_trivial,hsq.isHermitian.eq]
   · intro x
-    simpa only [lowerWeight,Matrix.smul_mulVec_assoc,dotProduct_smul,smul_eq_mul] using
-      mul_nonneg (inv_nonneg.mpr (trace_square_pos hR).le) (hsq.2 x)
+    simpa only [lowerWeight,Matrix.smul_mulVec,dotProduct_smul,smul_eq_mul] using
+      mul_nonneg (inv_nonneg.mpr (trace_square_pos hR).le) (hsq.dotProduct_mulVec_nonneg x)
 
 theorem lowerWeight_trace_one {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     Matrix.trace (lowerWeight R)=1 := by

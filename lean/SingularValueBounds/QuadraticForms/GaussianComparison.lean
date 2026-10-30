@@ -1,4 +1,4 @@
-import Mathlib.Probability.Distributions.Gaussian
+import Mathlib.Probability.Distributions.Gaussian.Real
 import Mathlib.MeasureTheory.Integral.Pi
 import SingularValueBounds.QuadraticForms.Basic
 
@@ -56,7 +56,7 @@ theorem standardGaussian_integral_exp_sq (s : ℝ) (hs : 0 < 1 - 2 * s) :
       rw [integral_gaussian]
     _ = (Real.sqrt (1 - 2 * s))⁻¹ := by
       rw [show Real.pi / ((1 - 2 * s) / 2) =
-        (2 * Real.pi) / (1 - 2 * s) by field_simp; ring]
+        (2 * Real.pi) / (1 - 2 * s) by field_simp <;> ring]
       rw [Real.sqrt_div (by positivity), div_eq_mul_inv]
       rw [← mul_assoc, inv_mul_cancel₀ (Real.sqrt_pos.2 (by positivity)).ne', one_mul]
 
@@ -67,7 +67,7 @@ theorem standardGaussian_integral_prod {ι : Type*} [Fintype ι]
   letI : MeasureSpace ℝ := ⟨gaussianReal 0 1⟩
   haveI : SigmaFinite (volume : Measure ℝ) :=
     inferInstanceAs (SigmaFinite (gaussianReal 0 1))
-  exact integral_fintype_prod_eq_prod ι f
+  exact integral_fintype_prod_eq_prod f
 
 theorem standardGaussian_integral_exp_sum {ι : Type*} [Fintype ι] (a : ι → ℝ) :
     (∫ g, Real.exp (∑ i, a i * g i) ∂standardGaussian ι) =
@@ -234,7 +234,7 @@ theorem quadratic_exponential_bound {Ω ι : Type*}
   have hs : B = (hB.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) *
       Matrix.diagonal hB.isHermitian.eigenvalues *
         star (hB.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) := by
-    simpa only [Function.comp_def, RCLike.ofReal_real_eq_id, id_eq] using
+    simpa only [Unitary.conjStarAlgAut_apply, Function.comp_def, RCLike.ofReal_real_eq_id, id_eq] using
       hB.isHermitian.spectral_theorem
   have h := unitary_quadratic_exponential_bound hsg hm hB.isHermitian.eigenvectorUnitary
     hB.isHermitian.eigenvalues hB.eigenvalues_nonneg t ht hf

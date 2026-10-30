@@ -106,8 +106,8 @@ lemma measurable_step (c : CorrectionRule ι) (upper : Bool) :
     (show Continuous (fun x : ι → ℝ => Matrix.vecMulVec x x) by fun_prop).measurable.comp hx
   have hg : Measurable (fun z : T => rowGap upper (c.prepared z.1.1) z.2) := by
     cases upper
-    · simpa only [rowGap, Bool.false_eq_true, if_false] using (hR.add ho).sub (hδ.smul measurable_const)
-    · simpa only [rowGap, Bool.true_eq, if_true] using (hR.add (hδ.smul measurable_const)).sub ho
+    · simpa only [rowGap, Bool.false_eq_true, if_false] using! (hR.add ho).sub (hδ.smul measurable_const)
+    · simpa only [rowGap, Bool.true_eq, if_true] using! (hR.add (hδ.smul measurable_const)).sub ho
   have hs : Measurable (fun z : T => z.1.shifts) :=
     measurable_fst.comp (measurable_snd.comp measurable_fst)
   have hc : Measurable (fun z : T => z.1.outward) :=
@@ -118,7 +118,8 @@ lemma measurable_step (c : CorrectionRule ι) (upper : Bool) :
       (⟨(rowGap upper (c.prepared z.1.1) z.2)⁻¹,
         (rowGap_preserves upper (c.prepared z.1.1) z.2).1.inv⟩ : PositiveResolvent ι)) :=
     (measurable_matrix_inverse.comp hg).subtype_mk
-  simpa only [step, BarrierState.shifts, BarrierState.outward, BarrierState.gram] using
+  simpa only [step, BarrierState.shifts, BarrierState.outward, BarrierState.gram,
+    Pi.add_apply, Function.comp_def] using!
     hnew.prodMk ((hs.add hδ).prodMk ((hc.add (c.measurable.comp hr)).prodMk (hgram.add ho)))
 
 attribute [local semireducible] prepared exactShift rowGap

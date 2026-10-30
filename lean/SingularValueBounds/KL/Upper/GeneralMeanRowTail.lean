@@ -14,7 +14,7 @@ theorem upperJointCost_mono_third {v k a a' : ℝ} (hk : 0<k)
   have hl := Real.log_le_sub_one_of_pos (show 0<1-v*k^2 by linarith)
   have hr : 0≤-Real.log (1-v*k^2)-v*k^2 := by linarith
   unfold upperJointCost
-  exact add_le_add_left (mul_le_mul_of_nonneg_right
+  exact add_le_add_right (mul_le_mul_of_nonneg_right
     (div_le_div_of_nonneg_right ha (by positivity : 0≤k^3)) hr) _
 
 theorem upperRateF_nonpos_of_le_two {v theta : ℝ} (hv : 1<v) (hv2 : v≤2)

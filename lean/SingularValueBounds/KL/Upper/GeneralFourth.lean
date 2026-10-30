@@ -1,5 +1,6 @@
 import SingularValueBounds.KL.Lower.Moments
 import Mathlib.Analysis.Convex.SpecificFunctions.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.DerivHyp
 
 /-! Sharpened cosh interpolation and the finite fourth-moment exclusion
 principle in supplementary S1.6.4. -/
@@ -46,12 +47,12 @@ theorem scalar_cosh_fourth_lower_sharp {Y : Ω → ℝ}
       simp_rw [mul_pow]
       rw [integral_div,integral_const_mul]
       have h := mul_le_mul_of_nonneg_left (hmom n) (hnonneg t n)
-      convert h using 1 <;> ring
+      convert! h using 1 <;> ring
     _ = m*(∫ ω,∑ n ∈ Finset.range N,(t*Y ω)^(2*(n+1))/(Nat.factorial (2*(n+1)):ℝ) ∂μ) := by
-      rw [integral_finset_sum _ (fun n _ => hiterm n)]
+      rw [integral_finsetSum _ (fun n _ => hiterm n)]
     _ ≤ m*(∫ ω,Real.cosh (t*Y ω)-1 ∂μ) := by
       apply mul_le_mul_of_nonneg_left _ hm
-      apply integral_mono (integrable_finset_sum _ (fun n _ => hiterm n))
+      apply integral_mono (integrable_finsetSum _ (fun n _ => hiterm n))
         ((scalar_cosh_integrable he t).sub (integrable_const 1))
       intro ω
       change (∑ n ∈ Finset.range N,_) ≤ Real.cosh (t*Y ω)-1
@@ -59,7 +60,7 @@ theorem scalar_cosh_fourth_lower_sharp {Y : Ω → ℝ}
       exact (hseries (t*Y ω)).summable.sum_le_tsum (Finset.range N) (fun n _ => hnonneg _ n)
     _ = _ := by
       rw [integral_sub (scalar_cosh_integrable he t) (integrable_const 1)]
-      simp only [integral_const,measureReal_univ_eq_one,smul_eq_mul,one_mul]
+      simp only [integral_const,probReal_univ,smul_eq_mul,one_mul]
       rfl
 
 theorem scalar_cosh_fourth_implicit_sharp {Y : Ω → ℝ} {K : ℝ}

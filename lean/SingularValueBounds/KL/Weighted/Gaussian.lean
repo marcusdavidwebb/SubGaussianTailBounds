@@ -98,7 +98,8 @@ theorem quadratic_log_mgf_le_sum (hsg : SubGaussianMGF μ X K)
     intro i
     simpa only [one_smul] using eigenvalue_gap_pos hB.isHermitian (by simpa only [one_smul] using hgap) i
   have h := quadratic_log_mgf_le_logdet hsg hm B hB lam hlam hgap
-  rwa [det_one_sub_smul_eq_prod, Real.log_prod Finset.univ _ (fun i _ => (hf i).ne')] at h
+  rwa [det_one_sub_smul_eq_prod B hB.isHermitian (2 * K ^ 2 * lam),
+    Real.log_prod (fun i _ => (hf i).ne')] at h
 
 set_option maxHeartbeats 800000 in
 /-- Gaussian averaging gives the stronger diagonal quadratic moment bound,

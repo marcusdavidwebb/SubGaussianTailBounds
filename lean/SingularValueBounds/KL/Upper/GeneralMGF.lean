@@ -103,7 +103,7 @@ theorem general_rare_scalar_normalization (i : Fin 3) {K d m ey : ℝ}
   rw [add_div,hn1,hn2,hn3] at hh
   dsimp [generalSecondScalar]
   rw [hn3]
-  convert hh using 1 <;> field_simp [hK.ne',hd1] <;> ring
+  convert! hh using 1 <;> field_simp [hK.ne',hd1] <;> ring
 
 theorem upperShift_tail_nine_tenths {X : Ω → ι → ℝ} {K b : ℝ}
     (hsg : SubGaussianMGF μ X K) (hm : Measurable X) (hK : 0 < K)
@@ -121,7 +121,7 @@ theorem upperShift_tail_nine_tenths {X : Ω → ι → ℝ} {K b : ℝ}
     apply (div_eq_iff hp.ne').2
     nlinarith
   rw [he] at h
-  convert h using 1 <;> congr 2 <;> ring
+  convert! h using 1 <;> congr 2 <;> ring
 
 theorem upperShift_general_high_second_of_mean
     (hcert : EndpointLogratioCertificateConditions) (hsecond : GeneralSecondCertificateConditions)
@@ -137,10 +137,10 @@ theorem upperShift_general_high_second_of_mean
   have hd : 0 ≤ logParameter K-1 := by linarith [one_le_logParameter hK]
   obtain ⟨m4,hm4,hfourth,hScalar⟩ := general_second_uniform_fourth hsecond hsg hiso hK hL
   have hr := upperShift_general_rare_second hcert hsg hiso hK0 hd hm4 hfourth hR i top hw
-    (by convert hcap using 1 <;> ring) hb hκ
+    (by convert! hcap using 1 <;> ring) hb hκ
   have hh := general_rare_scalar_normalization i hK0 hd (K_sq_eq_exp_logParameter hK0) hr
   have hf := hh.trans (hScalar i)
-  convert hf using 1 <;> ring
+  convert! hf using 1 <;> ring
 
 theorem upperShift_general_second_of_mean
     (hcert : EndpointLogratioCertificateConditions) (hsecond : GeneralSecondCertificateConditions)
@@ -173,7 +173,7 @@ theorem upperShift_general_second_of_mean
   have hi := (exponential_tail_moment hY.aemeasurable hY0 (Real.sqrt_nonneg 10)
     (by positivity : 0 < 9/(20*K^2)) (by
       intro u hu
-      convert hTail u hu using 1 <;> congr 2 <;> ring) 1).1
+      convert! hTail u hu using 1 <;> congr 2 <;> ring) 1).1
   refine ⟨hi,?_⟩
   let x := upperNormalizedSpectrum R hR
   have hx := upperNormalizedSpectrum_properties hR
@@ -193,7 +193,7 @@ theorem upperShift_general_second_of_mean
     have hd : 0 ≤ logParameter K-1 := by linarith
     have hh := (upper_low_second_of_tail hY hY0 hMean hK0 hd (K_sq_eq_exp_logParameter hK0) htlow).2
     have hf := hh.trans ((generalLowSecondCost_le_four hd).trans (by norm_num : (4:ℝ) ≤ 9/2))
-    convert hf using 1 <;> ring
+    convert! hf using 1 <;> ring
   · have hpos : (15/16:ℝ) ≤ x top := le_of_not_ge hlow
     by_cases h0 : x top ≤ (47/50:ℝ)
     · exact upperShift_general_high_second_of_mean hcert hsecond hsg hiso hK hsmall hR 0 top hw hcap hb
@@ -233,7 +233,7 @@ theorem upperShift_general_mgf_of_mean
   have hTail := upperShift_tail_nine_tenths hsg hiso.measurable hK0 hR htrace hb
   have hTail' : ∀ u,0 ≤ u → μ.real {ω | u<Y ω} ≤ Real.sqrt 10*Real.exp (-((9/(20*K^2))*u)) := by
     intro u hu
-    convert hTail u hu using 1 <;> congr 2 <;> ring
+    convert! hTail u hu using 1 <;> congr 2 <;> ring
   have hmom (p : ℕ) : Integrable (fun ω=>Y ω^p) μ := by
     cases p with
     | zero => simpa using integrable_const (1:ℝ)

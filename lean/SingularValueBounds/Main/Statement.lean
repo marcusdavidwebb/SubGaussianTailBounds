@@ -1,4 +1,4 @@
-import Mathlib.LinearAlgebra.Matrix.Spectrum
+import Mathlib.Analysis.Matrix.Spectrum
 import Mathlib.Probability.Independence.Basic
 import SingularValueBounds.Core.Assumptions
 import SingularValueBounds.Core.Constants
@@ -38,7 +38,7 @@ def confidenceCoefficient (K : ℝ) : ℝ := 2 * K * Real.sqrt (logParameter K)
 /-- The `n` singular values, including zeros, indexed by a spectral basis of
 the Gram matrix `Sᵀ S`. Their order is irrelevant to the minimum and maximum. -/
 def singularValues {m n : ℕ} (S : Matrix (Fin m) (Fin n) ℝ) : Fin n → ℝ :=
-  fun j => Real.sqrt ((Matrix.isHermitian_transpose_mul_self S).eigenvalues j)
+  fun j => Real.sqrt ((Matrix.isHermitian_conjTranspose_mul_self S).eigenvalues j)
 
 def smallestSingularValue {m n : ℕ} [NeZero n]
     (S : Matrix (Fin m) (Fin n) ℝ) : ℝ :=

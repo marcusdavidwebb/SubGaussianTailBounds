@@ -50,8 +50,9 @@ theorem spectralComplementMoment_monotone :
       (((hasDerivAt_const x 1).sub ((hasDerivAt_id x).pow 2)).sqrt hd.ne' |>.pow 3)
     have he : HasDerivAt spectralComplementMoment
         (3*x*(x-Real.sqrt (1-x^2))) x := by
-      convert hf using 1
-      simp only [spectralComplementMoment,id_eq,Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,zero_sub]
+      convert! hf using 1
+      simp only [spectralComplementMoment,id_eq,Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,zero_sub,
+        Pi.sub_apply,Pi.pow_apply]
       field_simp [hs0.ne']
       nlinarith [hs2]
     rw [he.deriv]
@@ -65,7 +66,7 @@ theorem endpoint_cubic_monotone {A : ℝ} (hA : 0≤A) :
   · intro x hx
     have hx' : x∈Icc (0 : ℝ) (7/20) := interior_subset hx
     have hd : HasDerivAt (fun x : ℝ => x+A*x^2-2*x^3) (1+2*A*x-6*x^2) x := by
-      convert ((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
+      convert! ((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
         (((hasDerivAt_id x).pow 3).const_mul 2) using 1 <;> simp only [id_eq] <;> ring
     rw [hd.deriv]
     have hx2 := pow_le_pow_left₀ hx'.1 hx'.2 2

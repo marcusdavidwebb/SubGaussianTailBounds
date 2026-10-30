@@ -18,34 +18,53 @@ The two starting points for reading the mathematics are the immutable
 [results](SingularValueBounds/Canonical/Results.lean). The
 [repository map](../REPOSITORY_MAP.md) explains every supporting folder and tool.
 
+The NLA-lib migration on 30 October 2026 compiled all 530 Lean source modules
+with Lean 4.33.1, including both sharp canonical theorems and the equivalences
+with the preceding statement. The 22 generated canonical acceptance obligations
+also compiled and passed their supplemental axiom audit. Marcus Webb explicitly
+deferred independent kernel replay, so this is not a completed verification run.
+The complete requirements above remain in place;
+[HISTORY.md](../docs/HISTORY.md) records the checks performed.
+
 ## Pinned environment and storage
 
-Reuse Lean **4.19.0** and the exact dependency revisions in
-[lake-manifest.json](lake-manifest.json). Mathlib is pinned to
-`c44e0c8ee63ca166450922a373c7409c5d26b00b`. Check the central installation before
-running a command that could otherwise download a toolchain:
+Reuse Lean **4.33.1** and the exact dependency revisions in
+[lake-manifest.json](lake-manifest.json): Mathlib is pinned to
+`0df444a360eaa60ab8c11dca51a86af692955474`, and
+[NLA-lib](https://github.com/NLA-lib/NLAlib/tree/6491e7528c1b1e68e46301cde6a76ae153e8e834)
+to `6491e7528c1b1e68e46301cde6a76ae153e8e834`. These versions were installed
+centrally for the explicitly requested NLA-lib imports. Check the central
+installation before running a command that could otherwise download a toolchain:
 
 ```sh
 "$HOME/.elan/bin/elan" toolchain list
 ```
 
-The list must include `leanprover/lean4:v4.19.0`. The verifier reports missing or
+The list must include `leanprover/lean4:v4.33.1`. The verifier reports missing or
 incompatible dependencies; ordinary local verification does not install, clone,
 fetch or upgrade them.
 
 The default setup uses:
 
-- Elan in `~/.elan` and compatible pinned dependencies in
-  `~/Lean/SingularValueBounds/.lake/packages/`.
+- Elan in `~/.elan`.
 - This checkout's own build workspace at
-  `~/Lean/SubGaussianTailBounds/<source-path-digest>/`.
+  `~/Lean/SubGaussianTailBounds/<source-path-digest>/nla-4.33.1/`.
+- All pinned dependencies in that external workspace's `.lake/packages/`,
+  including `NLAlib/` and `mathlib/`; build outputs in `.lake/build/`.
 - The Mathlib download cache at `~/Library/Caches/mathlib` on macOS.
+
+For the current checkout, the workspace is
+`~/Lean/SubGaussianTailBounds/0ad011255e709e4d/nla-4.33.1/`; NLA-lib is stored
+under its `.lake/packages/NLAlib/`. The older Lean 4.19.0 dependency tree at
+`~/Lean/SingularValueBounds/.lake/packages/` remains untouched and is not used
+by this setup.
 
 Keep dependencies, caches and compiled outputs outside this source checkout and
 OneDrive. Do not reuse `SingularValueBounds/.lake/build/` for this project or
 symlink bulky dependencies into the repository. Workspace ownership checks keep
 different checkouts' build outputs separate. Lake's configuration and manifest
-are resolved in that external workspace; proof sources remain here.
+are resolved in that external workspace; this repository contains proof sources,
+scripts and small configuration templates, with no local dependency tree.
 
 | Environment variable | Override |
 |---|---|
@@ -69,10 +88,20 @@ kernel replay still runs afresh in dependency order. See
 |---|---|
 | [MainTheoremStatement.lean](../MainTheoremStatement.lean) | Actual immutable statement compiled from the repository root |
 | [Canonical/Results.lean](SingularValueBounds/Canonical/Results.lean) | Public current results, baseline corollaries and comparisons |
-| [Canonical/](SingularValueBounds/Canonical/) | Baseline proofs, adapters, monotonicity and accepted constants |
+| [Canonical/](SingularValueBounds/Canonical/) | Baseline proofs, adapters, NLA-lib equivalence bridges, monotonicity and accepted constants |
 | [KL/](SingularValueBounds/KL/) | Analytic arguments and complete finite numerical proofs under `Certificates/` |
 
 Proof changes and new constants follow [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+The root statement directly imports NLA-lib's `IsSubgaussianVector`,
+`IsIsotropic` and `singularValues`. Its sub-Gaussian argument is the variance
+proxy `K²`; row measurability remains explicit. The bridges in
+[NLARows.lean](SingularValueBounds/Canonical/NLARows.lean),
+[NLASingularValues.lean](SingularValueBounds/Canonical/NLASingularValues.lean)
+and [StatementEquivalence.lean](SingularValueBounds/Canonical/StatementEquivalence.lean)
+connect these imports to the preceding expanded propositions, retaining both
+sharp regimes, non-strict measurable tail events and arbitrary sample-space
+universes.
 
 ## Verification tools
 

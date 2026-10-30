@@ -113,6 +113,46 @@ proofs of the canonical propositions.
   novelty claim. Original documents and detailed measurements remain in Git
   history, linked from [HISTORY.md](docs/HISTORY.md).
 
+## Statement presentation revision — 30 October 2026
+
+At Marcus Webb's explicit request, Codex simplified the canonical statement's
+presentation while preserving the natural-language theorem in the README.
+Actual Lean imports from
+[NLA-lib at commit 6491e752](https://github.com/NLA-lib/NLAlib/tree/6491e7528c1b1e68e46301cde6a76ae153e8e834)
+supply `IsSubgaussianVector`, `IsIsotropic` and `singularValues`; a shared tail
+conclusion removes repetition. The root statement is now 80 lines. The MGF
+parameter remains `K`, passed to NLA-lib as variance proxy `K²`. Explicit row
+measurability, both sharp quartets, both individual non-strict measurable tail
+guarantees and arbitrary sample-space universes are preserved. The revision
+uses NLA-lib's definitions and supporting lemmas; its
+[sub-Gaussian row tail theorem](https://github.com/NLA-lib/NLAlib/blob/6491e7528c1b1e68e46301cde6a76ae153e8e834/NLAlib/RandomMatrix/SubGaussian/ExtremeSingularValues.lean)
+does not replace this repository's sharp proof.
+
+[StatementEquivalence.lean](lean/SingularValueBounds/Canonical/StatementEquivalence.lean)
+connects the statement to the preceding expanded propositions, using
+[NLARows.lean](lean/SingularValueBounds/Canonical/NLARows.lean) for the exact MGF
+normalization and coordinate moments, and
+[NLASingularValues.lean](lean/SingularValueBounds/Canonical/NLASingularValues.lean)
+for the old minimum/maximum definitions, including zero singular values.
+The existing adapters and monotonicity proofs are updated accordingly. The
+authorized root replacement also repins the source-integrity digest and
+refreshes the README copy; it does not relax any mathematical verification check.
+
+The requested imports use Lean/Mathlib 4.33.1 and a separate central workspace
+under `~/Lean/SubGaussianTailBounds/0ad011255e709e4d/nla-4.33.1/`. NLA-lib and
+Mathlib reside in its `.lake/packages/`; the older 4.19.0 dependencies remain
+untouched. No NLA-lib source is copied into the repository, and the external
+dependency retains its Apache 2.0 licence; see [LICENSING.md](LICENSING.md).
+
+The complete proof library, both sharp canonical results and the full statement
+equivalences compile with Lean 4.33.1. The generated canonical acceptance
+obligations also compile and pass their supplemental axiom audit. Marcus Webb
+explicitly deferred independent kernel replay, so no complete verification of
+this dependency migration is claimed. Validation is recorded in
+[HISTORY.md](docs/HISTORY.md). This presentation and compatibility revision makes
+no new bound or novelty claim, and has not been recorded as an accepted
+contribution or published PR.
+
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet
 or implementation change, explanation and attribution, supersession, and

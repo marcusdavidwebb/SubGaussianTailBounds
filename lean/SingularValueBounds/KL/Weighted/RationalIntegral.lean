@@ -60,12 +60,12 @@ private def upperCoeff (x : ℝ) (j : ℕ) : ℝ :=
 private theorem polynomial_integrable (c : ℕ → ℝ) (n : ℕ) :
     IntegrableOn (fun u : ℝ => ∑ j ∈ Finset.range n, c j * (u ^ j * Real.exp (-u)))
       (Ioi 0) := by
-  exact integrable_finset_sum _ (fun j hj => (exp_power_integrable j).const_mul (c j))
+  exact integrable_finsetSum _ (fun j hj => (exp_power_integrable j).const_mul (c j))
 
 private theorem polynomial_integral (c : ℕ → ℝ) (n : ℕ) :
     (∫ u in Ioi 0, ∑ j ∈ Finset.range n, c j * (u ^ j * Real.exp (-u))) =
       ∑ j ∈ Finset.range n, c j * (j.factorial : ℝ) := by
-  rw [integral_finset_sum _ (fun j hj => (exp_power_integrable j).const_mul (c j))]
+  rw [integral_finsetSum _ (fun j hj => (exp_power_integrable j).const_mul (c j))]
   simp_rw [integral_const_mul, exponential_factorial_moment]
 
 /-- The first printed positive-square remainder identity. -/

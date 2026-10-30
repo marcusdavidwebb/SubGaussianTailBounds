@@ -27,7 +27,7 @@ theorem entropyKernel_nonneg {c u : ℝ} (hc : 0 < c) (hu : c ≤ u) :
 
 theorem entropyKernel_mono {c u v : ℝ} (hc : 0 < c) (hu : 0 < u) (huv : u ≤ v) :
     entropyKernel c u ≤ entropyKernel c v := by
-  exact add_le_add_left (Real.log_le_log (div_pos hu hc)
+  exact add_le_add_right (Real.log_le_log (div_pos hu hc)
     (div_le_div_of_nonneg_right huv hc.le)) 1
 
 /-- A single upper Riemann rectangle uses the left survival value and right
@@ -123,7 +123,7 @@ theorem entropy_tail_integrable {c C r : ℝ} {T : ℝ → ℝ}
     have hh := mul_le_mul hk (htail u hu0) (hT0 u)
       (show 0 ≤ 1+u/c by positivity)
     simp only [Pi.add_apply,pow_zero,pow_one,one_mul]
-    convert hh using 1 <;> ring
+    convert! hh using 1 <;> ring
 
 /-- The rigorously bounded infinite remainder, with no analytic statement
 hidden in the finite numerical premises. -/
@@ -156,7 +156,7 @@ theorem entropy_remainder_bound {c C r H : ℝ} {T : ℝ → ℝ}
   have huPos : 0 < u := hc.trans hcu
   have hlog := Real.log_le_sub_one_of_pos (div_pos huPos hc)
   have hk : entropyKernel c u ≤ 1+u/c := by dsimp [entropyKernel]; linarith
-  convert mul_le_mul hk (htail u hcu) (hT0 u)
+  convert! mul_le_mul hk (htail u hcu) (hT0 u)
     (show 0 ≤ 1+u/c by positivity) using 1 <;> ring
 
 /-- Split the infinite entropy integral into the finite interval and its tail. -/
@@ -217,7 +217,7 @@ theorem separately_convex_corner_bound {F : ℝ → ℝ → ℝ} {al ah kl kh a 
   have hh := h1.trans (add_le_add (mul_le_mul_of_nonneg_left h2 hs)
     (mul_le_mul_of_nonneg_left h3 ht))
   dsimp [s,t,u,v] at hh
-  convert hh using 1 <;> ring
+  convert! hh using 1 <;> ring
 
 end
 end SingularValueBounds.KL

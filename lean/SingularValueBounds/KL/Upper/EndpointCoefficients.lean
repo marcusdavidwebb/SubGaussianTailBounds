@@ -41,7 +41,8 @@ theorem endpointLowCoefficient_higher {p : ℕ} (hp : 3 ≤ p) :
       have he : (13/2 : ℝ)^n/((n+1).factorial : ℝ) =
           ((13/2 : ℝ)/(n+1))*((13/2 : ℝ)^(n-1)/(n.factorial : ℝ)) := by
         rw [Nat.factorial_succ,Nat.cast_mul,Nat.cast_add,Nat.cast_one]
-        rw [show n=(n-1)+1 by omega,pow_succ]
+        nth_rw 1 [show n=(n-1)+1 by omega]
+        rw [pow_succ]
         field_simp
         <;> ring
       rw [he]
@@ -52,7 +53,7 @@ theorem endpointLowCoefficient_higher {p : ℕ} (hp : 3 ≤ p) :
     dsimp [endpointLowCoefficient]
     have h := add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num : (0 : ℝ)≤16/21))
       (mul_le_mul_of_nonneg_left hTT (by norm_num : (0 : ℝ)≤5/21))
-    convert h using 1 <;> ring
+    convert! h using 1 <;> ring
   clear hp hp3 hbase3
   induction p,hp4 using Nat.le_induction with
   | base => simpa using hbase4
@@ -110,7 +111,7 @@ theorem endpointRareCoefficient_higher (i : Fin 3) {p : ℕ} (hp : 3≤p) :
     have hSS := hS.trans (mul_le_mul_of_nonneg_right hratio hS0)
     have hh := add_le_add hg4 (mul_le_mul_of_nonneg_left hSS hr0)
     simp only [endpointRareCoefficient,show n≠2 by omega,show n+1≠2 by omega,if_false]
-    convert hh using 1 <;> ring
+    convert! hh using 1 <;> ring
   clear hp h5
   induction p,hp5 using Nat.le_induction with
   | base => exact hbase 5 (Or.inr (Or.inr rfl))

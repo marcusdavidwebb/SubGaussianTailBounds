@@ -180,7 +180,7 @@ theorem cappedMinimizer_minimizes (d : ι → ℝ) {φ η : ℝ}
       exact mul_nonneg (sub_nonneg.mpr huv)
         (sub_nonneg.mpr (cappedMinimizer_squareTrace d hφ hη))
   change u + reciprocalTrace d 1 u / η ^ 2 ≤ v + reciprocalTrace d 1 v / η ^ 2
-  apply (mul_le_mul_right hη2).mp
+  apply (mul_le_mul_iff_left₀ hη2).mp
   simp only [add_mul, div_mul_cancel₀ _ hη2.ne']
   dsimp [u] at hterm ⊢
   nlinarith

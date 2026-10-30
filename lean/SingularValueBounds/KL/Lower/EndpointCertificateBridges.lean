@@ -99,7 +99,7 @@ theorem endpoint_weighted_average {ι : Type*} (s : Finset ι) (p f g : ι → �
         ring
       _ = _ := by rw [hsum]; ring
   rw [he, ← Finset.sum_mul, hsum] at hs
-  exact (mul_le_mul_left hM).mp hs
+  exact (mul_le_mul_iff_right₀ hM).mp hs
 
 def endpointOrdinaryMajorant {ι : Type*} [Fintype ι] (r : ι → ℝ) (A c ξ : ℝ) : ℝ :=
   A+1/(2*ξ)+∑ i, r i^2*endpointG A c ξ (r i)
@@ -190,7 +190,8 @@ lemma hasDerivAt_endpointFarJ (k : ℝ) :
   have hg := ((h1.add h2).sub h3).add h4
   have hd := (((hasDerivAt_id k).pow 2).mul hg).add
     (((hasDerivAt_const k (1 : ℝ)).sub ((hasDerivAt_id k).pow 2)).mul_const (7/100))
-  convert hd using 1 <;> simp only [id_eq] <;> ring
+  convert! hd using 1 <;>
+    simp only [Pi.pow_apply, Pi.add_apply, Pi.sub_apply, Pi.mul_apply, id_eq] <;> ring
 
 theorem endpoint_far_scalar_le (h : EndpointFarConditions) {x : ℝ}
     (hx : x ∈ Icc (0 : ℝ) 1) : endpointFarScalar x ≤ 7/100 := by

@@ -1,5 +1,5 @@
 import Mathlib.Data.Real.StarOrdered
-import Mathlib.LinearAlgebra.Matrix.PosDef
+import Mathlib.Analysis.Matrix.PosDef
 
 /-! # Shared real matrix and rank-one algebra -/
 
@@ -39,7 +39,7 @@ theorem real_spectral_decomposition {ι : Type*} [Fintype ι] [DecidableEq ι]
     {R : Matrix ι ι ℝ} (hR : R.IsHermitian) :
     R = (hR.eigenvectorUnitary : Matrix ι ι ℝ) * Matrix.diagonal hR.eigenvalues *
       star (hR.eigenvectorUnitary : Matrix ι ι ℝ) := by
-  simpa only [Function.comp_def, RCLike.ofReal_real_eq_id, id_eq] using hR.spectral_theorem
+  simpa only [Unitary.conjStarAlgAut_apply, Function.comp_def, RCLike.ofReal_real_eq_id, id_eq] using hR.spectral_theorem
 
 theorem real_spectral_square {ι : Type*} [Fintype ι] [DecidableEq ι]
     {R : Matrix ι ι ℝ} (hR : R.IsHermitian) :
@@ -70,14 +70,15 @@ theorem eigenvalue_gap_pos {ι : Type*} [Fintype ι] [DecidableEq ι]
     {H : Matrix ι ι ℝ} (hH : H.IsHermitian) {a ε : ℝ}
     (hgap : (a • (1 : Matrix ι ι ℝ) - ε • H).PosDef) (j : ι) :
     0 < a - ε * hH.eigenvalues j := by
-  have hq := hgap.re_dotProduct_pos (hH.eigenvectorBasis.orthonormal.ne_zero j)
+  have hq := hgap.re_dotProduct_pos (x := ⇑(hH.eigenvectorBasis j))
+    (by simpa using hH.eigenvectorBasis.orthonormal.ne_zero j)
   have hv : (star ⇑(hH.eigenvectorBasis j)) ⬝ᵥ ⇑(hH.eigenvectorBasis j) = (1 : ℝ) := by
     rw [dotProduct_comm, ← EuclideanSpace.inner_eq_star_dotProduct, inner_self_eq_norm_sq_to_K,
       hH.eigenvectorBasis.orthonormal.1 j]
     norm_num
   change 0 < (star ⇑(hH.eigenvectorBasis j)) ⬝ᵥ
     ((a • (1 : Matrix ι ι ℝ) - ε • H) *ᵥ ⇑(hH.eigenvectorBasis j)) at hq
-  rw [Matrix.sub_mulVec, Matrix.smul_mulVec_assoc, Matrix.smul_mulVec_assoc,
+  rw [Matrix.sub_mulVec, Matrix.smul_mulVec, Matrix.smul_mulVec,
     Matrix.one_mulVec, hH.mulVec_eigenvectorBasis, dotProduct_sub,
     dotProduct_smul, dotProduct_smul, dotProduct_smul, hv] at hq
   simpa only [mul_one, smul_eq_mul] using hq
@@ -174,6 +175,7 @@ theorem outer_mul_outer {ι : Type*} [Fintype ι]
 /-- The outer product of a real vector with itself is positive semidefinite. -/
 theorem outer_posSemidef {ι : Type*} [Fintype ι] (x : ι → ℝ) :
     (Matrix.vecMulVec x x).PosSemidef := by
+  apply Matrix.posSemidef_iff_dotProduct_mulVec.mpr
   refine ⟨?_, ?_⟩
   · ext i j
     simp [Matrix.conjTranspose_apply, Matrix.vecMulVec, mul_comm]

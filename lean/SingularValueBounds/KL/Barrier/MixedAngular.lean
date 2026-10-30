@@ -37,7 +37,7 @@ theorem mixedAngularA_hasDerivAt {h : ℝ → ℝ} (hc : Continuous h) (φ : ℝ
     HasDerivAt (mixedAngularA h) (-h (Real.sin φ)*Real.sin φ) φ := by
   have hf : Continuous (fun θ => h (Real.sin θ)*Real.sin θ) :=
     (hc.comp Real.continuous_sin).mul Real.continuous_sin
-  simpa only [mixedAngularA, neg_mul] using
+  simpa only [mixedAngularA, neg_mul] using!
     intervalIntegral.integral_hasDerivAt_left (hf.intervalIntegrable _ _)
       (hf.stronglyMeasurableAtFilter _ _) hf.continuousAt
 
@@ -45,7 +45,7 @@ theorem mixedAngularB_hasDerivAt {h : ℝ → ℝ} (hc : Continuous h) (φ : ℝ
     HasDerivAt (mixedAngularB h) (-h (Real.sin φ)*Real.cos φ) φ := by
   have hf : Continuous (fun θ => h (Real.sin θ)*Real.cos θ) :=
     (hc.comp Real.continuous_sin).mul Real.continuous_cos
-  simpa only [mixedAngularB, neg_mul] using
+  simpa only [mixedAngularB, neg_mul] using!
     intervalIntegral.integral_hasDerivAt_left (hf.intervalIntegrable _ _)
       (hf.stronglyMeasurableAtFilter _ _) hf.continuousAt
 
@@ -53,10 +53,10 @@ theorem mixedAngularExpression_hasDerivAt {h : ℝ → ℝ} (hc : Continuous h) 
     HasDerivAt (mixedAngularExpression h)
       (h 1*Real.cos φ-2*Real.sin φ*mixedAngularA h φ-
         2*Real.cos φ*mixedAngularB h φ) φ := by
-  convert (((Real.hasDerivAt_sin φ).const_mul (h 1)).add
+  convert! (((Real.hasDerivAt_sin φ).const_mul (h 1)).add
     (((Real.hasDerivAt_cos φ).const_mul 2).mul (mixedAngularA_hasDerivAt hc φ))).sub
     (((Real.hasDerivAt_sin φ).const_mul 2).mul (mixedAngularB_hasDerivAt hc φ)) using 1 <;>
-    dsimp [mixedAngularExpression] <;> ring
+    (try dsimp [mixedAngularExpression]) <;> ring
 
 theorem mixedAngularB_zero {h : ℝ → ℝ} (hc : Continuous h) :
     mixedAngularB h 0 = ∫ k in (0:ℝ)..1, h k := by

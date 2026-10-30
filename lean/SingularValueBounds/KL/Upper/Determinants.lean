@@ -31,23 +31,23 @@ private theorem upperPade_deriv {z : ℝ} (hz : z < 1) :
       (z^7 / (1225 * upperPadeD z^2)) z := by
   have hn : HasDerivAt upperPadeN
       (1-(25/7)*z+(19/7)*z^2-(47/105)*z^3) z := by
-    convert (((hasDerivAt_id z).sub (((hasDerivAt_id z).pow 2).const_mul (25/14))).add
+    convert! (((hasDerivAt_id z).sub (((hasDerivAt_id z).pow 2).const_mul (25/14))).add
       (((hasDerivAt_id z).pow 3).const_mul (19/21))).sub
       (((hasDerivAt_id z).pow 4).const_mul (47/420)) using 1 <;>
-      simp [upperPadeN] <;> ring
+      (try ext x) <;> simp [upperPadeN, Pi.add_apply, Pi.sub_apply, Pi.pow_apply] <;> ring
   have hd : HasDerivAt upperPadeD
       (-(16/7)+(24/7)*z-(48/35)*z^2+(4/35)*z^3) z := by
-    convert ((((hasDerivAt_const z (1:ℝ)).sub ((hasDerivAt_id z).const_mul (16/7))).add
+    convert! ((((hasDerivAt_const z (1:ℝ)).sub ((hasDerivAt_id z).const_mul (16/7))).add
       (((hasDerivAt_id z).pow 2).const_mul (12/7))).sub
       (((hasDerivAt_id z).pow 3).const_mul (16/35))).add
       (((hasDerivAt_id z).pow 4).const_mul (1/35)) using 1 <;>
-      simp [upperPadeD] <;> ring
-  convert (hn.div hd (upperPadeD_pos hz).ne').add
+      (try ext x) <;> simp [upperPadeD, Pi.add_apply, Pi.sub_apply, Pi.pow_apply] <;> ring
+  convert! (hn.div hd (upperPadeD_pos hz).ne').add
     (((hasDerivAt_const z (1:ℝ)).sub (hasDerivAt_id z)).log (by linarith : 1-z ≠ 0)) using 1
   have hDn := (upperPadeD_pos hz).ne'
   have hzn : 1-z ≠ 0 := by linarith
-  simp only [id_eq]
-  field_simp only [hDn,hzn]
+  simp only [Pi.add_apply, Pi.sub_apply, Pi.div_apply, id_eq]
+  field_simp [hDn,hzn]
   unfold upperPadeD upperPadeN
   ring
 

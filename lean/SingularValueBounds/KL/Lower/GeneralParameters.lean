@@ -50,7 +50,7 @@ theorem normalized_general_lower_parameters {X : Ω→ι→ℝ} {K : ℝ}
 
 theorem lower_quadratic_smul (B : Matrix ι ι ℝ) (s : ℝ) (X : Ω→ι→ℝ) (ω : Ω) :
     quadraticForm (s • B) X ω=s*quadraticForm B X ω := by
-  simp only [quadraticForm,Matrix.smul_mulVec_assoc,dotProduct_smul,smul_eq_mul]
+  simp only [quadraticForm,Matrix.smul_mulVec,dotProduct_smul,smul_eq_mul]
 
 theorem general_lower_mixed_cap_of_certificates {X : Ω→ι→ℝ} {K : ℝ}
     (hdata : GeneralLowerCertificateConditions) (hsg : SubGaussianMGF μ X K)

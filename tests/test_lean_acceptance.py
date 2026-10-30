@@ -111,11 +111,14 @@ class AcceptancePreparationTests(unittest.TestCase):
         self.assertEqual(source.count("theorem checked_"), 22)
         self.assertNotIn("FinalCertificateConditions", source)
         self.assertNotIn("NumericalCertificateConditions", source)
-        self.assertIn("CollectAxioms.collect", source)
+        self.assertIn("targets.forM (collectDirect env)", source)
+        self.assertIn("env.checked.get.find? name", source)
+        self.assertNotIn("CollectAxioms.collect", source)
 
     def test_external_auditor_inspects_types_without_candidate_extensions(self):
         source = gate.external_audit_source()
         self.assertIn("loadExts := false", source)
+        self.assertIn("level := .private", source)
         self.assertIn("Kernel.isDefEqGuarded", source)
         self.assertIn("trusted.replay closure", source)
         self.assertIn("info.getUsedConstantsAsSet", source)
@@ -123,6 +126,7 @@ class AcceptancePreparationTests(unittest.TestCase):
         self.assertIn("info.levelParams.length == universes", source)
         self.assertNotIn("import SingularValueBounds.Canonical.Results", source)
         self.assertNotIn("import CanonicalAcceptance\n", source)
+        self.assertNotIn("CollectAxioms.collect", source)
 
     def test_baseline_and_trusted_current_comparisons_are_distinct(self):
         source = gate.acceptance_source()
@@ -258,6 +262,26 @@ universe u
 def wrong (h : SubGaussian.GeneralSingularValueTailBound.{0} 3.84 1.58 2.35 1.5) :
     SubGaussian.GeneralSingularValueTailBound.{u} 3.84 1.58 2.35 1.5 := h
 """, success=False, error="type mismatch")
+
+    def test_elaboration_audit_reads_split_import_private_proofs(self):
+        self.compile("SplitAxiomDependency", """module
+public import Init
+private axiom hiddenFalse : False
+public theorem splitFalse : False := hiddenFalse
+""")
+        # The exported theorem stub has no proof. The ordinary audit module
+        # must load the private body and find its actual forbidden premise.
+        # This check performs elaboration/axiom traversal, not kernel replay.
+        self.compile("SplitAxiomAudit", "import SplitAxiomDependency\nimport Lean\n" +
+                     gate.audit_source(["splitFalse"]), success=False, error="hiddenFalse")
+
+    def test_elaboration_audit_accepts_split_import_checked_proofs(self):
+        self.compile("SplitCheckedDependency", """module
+public import Init
+public theorem splitZero : (0 : Nat) = 0 := rfl
+""")
+        self.compile("SplitCheckedAudit", "import SplitCheckedDependency\nimport Lean\n" +
+                     gate.audit_source(["splitZero"]))
 
     def test_actual_canonical_rejects_extra_certificate_premise(self):
         self.compile("ConditionalResult", """import MainTheoremStatement

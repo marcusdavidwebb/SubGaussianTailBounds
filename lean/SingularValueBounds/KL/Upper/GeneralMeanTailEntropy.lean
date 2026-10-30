@@ -93,13 +93,13 @@ theorem generalMean_tail_integral_bound {T : ℝ → ℝ} {A q c s K L : ℝ}
     have hlow : ∀u∈Icc (c*K^2*L) (s*K^2*L),T u≤A*Real.exp (-((q/(2*K^2))*u)) := by
       intro u hu
       have hh := hp.1 u (ha.le.trans hu.1) hu.2
-      convert hh using 1 <;> congr 2 <;> ring
+      convert! hh using 1 <;> congr 2 <;> ring
     have hhigh : ∀u,s*K^2*L<u →
         T u≤(A*Real.exp (-(q-1)*s*L/2))*Real.exp (-((1/(2*K^2))*u)) := by
       intro u hu
       have hh := hp.2 u hu
       rw [mul_assoc,← Real.exp_add]
-      convert hh using 1 <;> congr 2 <;> ring
+      convert! hh using 1 <;> congr 2 <;> ring
     have hi := generalMean_two_piece_integral ha hcut hA (by positivity)
       (by positivity : 0<q/(2*K^2)) (by positivity : 0<1/(2*K^2)) hTi hlow hhigh
     have hbase := generalMean_base_integral_scale (A := A) hK hL hq hc hKL
@@ -111,7 +111,7 @@ theorem generalMean_tail_integral_bound {T : ℝ → ℝ} {A q c s K L : ℝ}
     have hi := generalMean_one_piece_integral ha hA (by positivity : 0<q/(2*K^2)) hTi
       (fun u hu => by
         have hh := hp u (ha.le.trans hu.le)
-        convert hh using 1 <;> congr 2 <;> ring)
+        convert! hh using 1 <;> congr 2 <;> ring)
     rw [generalMean_base_integral_scale hK hL hq hc hKL] at hi
     simpa only [generalMeanError,if_neg hq1,add_zero] using hi
 

@@ -81,7 +81,7 @@ theorem endpoint_ordinary_cost_young (r : ι → ℝ) (A c : ℝ)
   have hB : 0 ≤ ∑ i, endpointComparisonEigen A c (r i)^2 := Finset.sum_nonneg fun _ _ => by positivity
   have hy : Real.sqrt (spectralMoment r 4)*Real.sqrt (∑ i, endpointComparisonEigen A c (r i)^2) ≤
       ξ/2*spectralMoment r 4+(∑ i, endpointComparisonEigen A c (r i)^2)/(2*ξ) := by
-    apply (mul_le_mul_right (show 0 < 2*ξ by positivity)).mp
+    apply (mul_le_mul_iff_left₀ (show 0 < 2*ξ by positivity)).mp
     have hs := sq_nonneg (Real.sqrt (∑ i, endpointComparisonEigen A c (r i)^2) -
       ξ*Real.sqrt (spectralMoment r 4))
     have hex : (Real.sqrt (∑ i, endpointComparisonEigen A c (r i)^2)-
@@ -94,7 +94,6 @@ theorem endpoint_ordinary_cost_young (r : ι → ℝ) (A c : ℝ)
     have heq : (ξ/2*spectralMoment r 4+(∑ i, endpointComparisonEigen A c (r i)^2)/(2*ξ))*(2*ξ) =
         ξ^2*spectralMoment r 4+(∑ i, endpointComparisonEigen A c (r i)^2) := by
       field_simp [hξ.ne']
-      ring
     rw [heq]
     nlinarith only [hs]
   have hp (x : ℝ) : x^2*endpointG A c ξ x =

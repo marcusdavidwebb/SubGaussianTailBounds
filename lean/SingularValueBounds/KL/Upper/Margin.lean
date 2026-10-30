@@ -14,11 +14,11 @@ theorem upperFactorF_hasDerivAt {q x : ℝ} (hx : 0 ≤ x) (hd : (q-1)*x < 1) :
       (q*x*((q-2)+(q-1)*x)/((1+x)*(1-(q-1)*x))) x := by
   have h1 : 1+x ≠ 0 := by linarith
   have h2 : 1-(q-1)*x ≠ 0 := by linarith
-  convert ((((hasDerivAt_const x (1:ℝ)).add (hasDerivAt_id x)).log h1).sub
+  convert! ((((hasDerivAt_const x (1:ℝ)).add (hasDerivAt_id x)).log h1).sub
     (((hasDerivAt_const x (1:ℝ)).sub ((hasDerivAt_id x).const_mul (q-1))).log h2)).sub
       ((hasDerivAt_id x).const_mul q) using 1
-  simp only [id_eq]
-  field_simp only [h1,h2]
+  simp only [Pi.add_apply, Pi.sub_apply, id_eq]
+  field_simp (disch := nlinarith)
   ring
 
 /-- The first determinant factor keeps its exponential bound past rate one
@@ -95,7 +95,7 @@ theorem upper_tail_spectral_shape_of_factors {r : ι → ℝ} (hr : ∀ i,0 < r 
         (1-(q-1)*h*r i)-q*upperTailWeight r h i := by
       rw [mul_sub,mul_one,← mul_assoc,mul_div_cancel₀ _ (hden i).ne']
     rw [hn]
-    field_simp only [hdr]
+    field_simp [hdr]
     ring
   constructor
   · intro i
@@ -108,7 +108,7 @@ theorem upper_tail_spectral_shape_of_factors {r : ι → ℝ} (hr : ∀ i,0 < r 
     have hp := Finset.prod_le_prod (s := Finset.univ)
       (fun i _ => (Real.exp_pos (-(q*h*r i))).le) (fun i _ => hfirst i)
     rw [← Real.exp_sum] at hp
-    convert hp using 1
+    convert! hp using 1
     congr 1
     rw [Finset.sum_neg_distrib, ← Finset.mul_sum]
 
@@ -131,7 +131,7 @@ theorem upper_tail_factorization {r : ι → ℝ} (hr : ∀ i,0 < r i)
       (1-(q-1)*h*r i)-q*upperTailWeight r h i := by
     rw [mul_sub,mul_one,← mul_assoc,mul_div_cancel₀ _ (hden i).ne']
   rw [hn]
-  field_simp only [hdr]
+  field_simp [hdr]
   ring
 
 /-- Separate first-factor and second-factor costs add in the log determinant.
@@ -190,7 +190,7 @@ theorem upper_tail_second_cost_shape {r : ι → ℝ} (hr : ∀ i,0 < r i)
   have hp := upper_weight_product_shape hw hsum hws hs hv.le hvs
   simp_rw [he] at hp
   have hl := Real.log_le_log (Real.exp_pos _) hp
-  rw [Real.log_exp,Real.log_prod _ _ (fun i _ => (hpos i).ne')] at hl
+  rw [Real.log_exp,Real.log_prod (fun i _ => (hpos i).ne')] at hl
   refine ⟨hpos,?_⟩
   rw [neg_div]
   linarith
@@ -211,7 +211,7 @@ theorem upper_margin_rescaling {v theta H : ℝ} (hv : 0 < v) (hv2 : v ≤ 2)
     refine ⟨by linarith,?_,?_⟩
     · exact (div_le_self hq.le hd).trans hqv
     · have he := upper_first_factor_exp_rate (r := (1:ℝ)) zero_lt_one hH hq.le hq1
-      convert he using 1 <;> dsimp [q] <;> ring
+      convert! he using 1 <;> dsimp [q] <;> ring
   · have hq1 : 1 < q := lt_of_not_ge hq1
     have hv1 : 1 < v := hq1.trans_le hqv
     have hm : (q-1)*H ≤ (theta-1)/theta := by
@@ -228,13 +228,13 @@ theorem upper_margin_rescaling {v theta H : ℝ} (hv : 0 < v) (hv2 : v ≤ 2)
     have hrate : q/(1-(q-1)*H) ≤ v := by
       apply (div_le_iff₀ hd).2
       have hmul := mul_le_mul_of_nonneg_left hm hv.le
-      have he : v*((theta-1)/theta) = v-q := by dsimp [q];field_simp only [ht0.ne'];ring
+      have he : v*((theta-1)/theta) = v-q := by dsimp [q];field_simp [ht0.ne']
       rw [he] at hmul
       linarith
     have hid : theta*((2-q)*(v-1)-(theta-1)*(q-1)) =
         (v-1)*(2-v)+(theta-1)*(theta+v-2) := by
       dsimp [q]
-      field_simp only [ht0.ne']
+      field_simp [ht0.ne']
       ring
     have hn : 0 ≤ (2-q)*(v-1)-(theta-1)*(q-1) := by
       have h1 := mul_nonneg (show 0 ≤ v-1 by linarith) (show 0 ≤ 2-v by linarith)
@@ -242,7 +242,7 @@ theorem upper_margin_rescaling {v theta H : ℝ} (hv : 0 < v) (hv2 : v ≤ 2)
       nlinarith
     have hm2 : (q-1)*H ≤ 2-q := by
       have hmul := mul_le_mul_of_nonneg_right hmargin (show 0 ≤ q-1 by linarith)
-      apply (mul_le_mul_right (show 0 < v-1 by linarith)).1
+      apply (mul_le_mul_iff_left₀ (show 0 < v-1 by linarith)).1
       nlinarith
     exact ⟨hd,hrate,upper_first_factor_exp_extended hq1 hH hm2⟩
 
@@ -262,7 +262,7 @@ theorem upper_tail_spectral_margin {r : ι → ℝ} (hr : ∀ i,0 < r i)
   · intro i
     simpa only [mul_assoc] using (hprops i).1
   · intro i
-    convert (hprops i).2.2 using 1 <;> ring
+    convert! (hprops i).2.2 using 1 <;> ring
   · intro i
     simpa only [mul_assoc] using (hprops i).2.1
 
@@ -273,7 +273,7 @@ theorem upperTailWeight_le_normalized {r : ι → ℝ} (hr : ∀ i,0 < r i)
     upperTailWeight r h i ≤ k^2 := by
   have ht := upperTailWeight_le_shape hr hh hmax i
   rw [← hnorm] at ht
-  have he : (k*eta)^2/eta^2 = k^2 := by field_simp only [heta.ne'];ring
+  have he : (k*eta)^2/eta^2 = k^2 := by field_simp [heta.ne']
   rwa [he] at ht
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
@@ -304,12 +304,12 @@ theorem upperShift_tail_margin_of_spectrum {X : Ω → ι → ℝ} {K b v k eta 
   have ht1 : 1 ≤ theta := (one_le_div hb0).2 (by linarith)
   have hmarg (i : ι) : h*hR.isHermitian.eigenvalues i*(v-1) ≤ theta-1 := by
     have ht := div_le_div_of_nonneg_right (hmargin i) hb0.le
-    convert ht using 1 <;> dsimp [h,theta] <;> field_simp only [hb0.ne'] <;> ring
+    convert! ht using 1 <;> dsimp [h,theta] <;> field_simp [hb0.ne'] <;> ring
   obtain ⟨hgap,hdet⟩ := upper_tail_spectral_margin hR.eigenvalues_pos hh.le hv hv2 ht1
     (sq_pos_of_pos hk) (upperTailWeight_le_normalized hR.eigenvalues_pos hh.le heta hnorm hmax) hvk hmarg
   have hl := Real.log_le_log (mul_pos (Real.exp_pos _) (Real.exp_pos _)) hdet
   rw [Real.log_mul (Real.exp_pos _).ne' (Real.exp_pos _).ne',Real.log_exp,Real.log_exp,
-    Real.log_prod _ _ (fun i _ => (hgap i).ne')] at hl
+    Real.log_prod (fun i _ => (hgap i).ne')] at hl
   have hlog : -(∑ i,Real.log (1-(v/theta)*upperTailEigenvalue hR.isHermitian.eigenvalues h i)) ≤
       (v/theta)*h*Matrix.trace R-Real.log (1-v*k^2)/k^2 := by
     rw [real_spectral_trace hR.isHermitian]
@@ -321,11 +321,10 @@ theorem upperShift_tail_margin_of_spectrum {X : Ω → ι → ℝ} {K b v k eta 
     change u < (1-b)*upperShift R hR (X ω) ↔ u/(1-b) < upperShift R hR (X ω)
     rw [div_lt_iff₀ hb0,mul_comm]
   rw [hevent]
-  convert ht using 1
+  convert! ht using 1
   congr 1
   dsimp [h,theta]
-  field_simp only [hb0.ne',hcap1.ne',hK.ne']
-  ring
+  field_simp [hb0.ne',hcap1.ne',hK.ne']
 
 /-- Supplementary `eq:app-up-tail-margin`, with all cap and rate restrictions. -/
 theorem upperShift_tail_margin {X : Ω → ι → ℝ} {K L w b v k eta u : ℝ}

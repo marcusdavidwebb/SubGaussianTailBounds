@@ -15,6 +15,7 @@ theorem GeneralSingularValueTailBound.mono
     (h : GeneralSingularValueTailBound.{u} α β γ δ)
     (ha : α ≤ α') (hb : β ≤ β') (hg : γ ≤ γ') (hd : δ ≤ δ') :
     GeneralSingularValueTailBound.{u} α' β' γ' δ' := by
+  rw [general_iff_previous] at h ⊢
   refine ⟨⟨h.1.1.trans_le ha, h.1.2.1.trans_le hb,
     h.1.2.2.1.trans_le hg, h.1.2.2.2.trans_le hd⟩, ?_⟩
   intro Ω _ μ _ m n hn A K hnm hK hm hind hc hi hsg t ht
@@ -34,12 +35,12 @@ theorem GeneralSingularValueTailBound.mono
   · refine ⟨measurableSet_le ((measurable_smallestSingularValue hn).comp hA)
       measurable_const, le_trans (measure_mono ?_) hl.2⟩
     intro ω hω
-    dsimp only [Set.mem_setOf_eq] at hω ⊢
+    change Previous.smallestSingularValue hn (A ω) ≤ _ at hω ⊢
     nlinarith
   · refine ⟨measurableSet_le measurable_const
       ((measurable_largestSingularValue hn).comp hA), le_trans (measure_mono ?_) hu.2⟩
     intro ω hω
-    dsimp only [Set.mem_setOf_eq] at hω ⊢
+    change _ ≤ Previous.largestSingularValue hn (A ω) at hω ⊢
     nlinarith
 
 theorem UnitSingularValueTailBound.mono
@@ -47,6 +48,7 @@ theorem UnitSingularValueTailBound.mono
     (h : UnitSingularValueTailBound.{u} α β γ δ)
     (ha : α ≤ α') (hb : β ≤ β') (hg : γ ≤ γ') (hd : δ ≤ δ') :
     UnitSingularValueTailBound.{u} α' β' γ' δ' := by
+  rw [unit_iff_previous] at h ⊢
   refine ⟨⟨h.1.1.trans_le ha, h.1.2.1.trans_le hb,
     h.1.2.2.1.trans_le hg, h.1.2.2.2.trans_le hd⟩, ?_⟩
   intro Ω _ μ _ m n hn A hnm hm hind hc hi hsg t ht
@@ -58,12 +60,12 @@ theorem UnitSingularValueTailBound.mono
   · refine ⟨measurableSet_le ((measurable_smallestSingularValue hn).comp hA)
       measurable_const, le_trans (measure_mono ?_) hl.2⟩
     intro ω hω
-    dsimp only [Set.mem_setOf_eq] at hω ⊢
+    change Previous.smallestSingularValue hn (A ω) ≤ _ at hω ⊢
     linarith
   · refine ⟨measurableSet_le measurable_const
       ((measurable_largestSingularValue hn).comp hA), le_trans (measure_mono ?_) hu.2⟩
     intro ω hω
-    dsimp only [Set.mem_setOf_eq] at hω ⊢
+    change _ ≤ Previous.largestSingularValue hn (A ω) at hω ⊢
     linarith
 
 end SubGaussian

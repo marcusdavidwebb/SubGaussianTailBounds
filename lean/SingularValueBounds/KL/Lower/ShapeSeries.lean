@@ -19,7 +19,7 @@ theorem lowerJ_div_hasSum {q : ℝ} (hq0 : 0 < q) (hq : q < 1) :
   have ht := ((hasSum_nat_add_iff' 1).2 hJ).div_const q
   have ht' : HasSum (fun n : ℕ => q^(n+2)/(n+3 : ℝ))
       (lowerJ q/q-q/2) := by
-    convert ht using 1
+    convert! ht using 1
     · ext n
       norm_num only [Nat.cast_add,Nat.cast_one,Finset.sum_range_succ] at *
       simp only [show n+1+2 = n+2+1 by omega,pow_succ]
@@ -37,7 +37,7 @@ theorem lowerM_hasSum {q : ℝ} (hq0 : 0 < q) (hq : q < 1) :
   have hJ := lowerJ_hasSum (show |q| < 1 by rwa [abs_of_pos hq0])
   have ht' := lowerJ_div_hasSum hq0 hq
   have hs := (hJ.sub ht').mul_left 2
-  convert hs using 1
+  convert! hs using 1
   · ext n
     have hn : (n+2 : ℝ) ≠ 0 := by positivity
     have hn' : (n+3 : ℝ) ≠ 0 := by positivity
@@ -49,7 +49,7 @@ theorem lowerM_hasSum {q : ℝ} (hq0 : 0 < q) (hq : q < 1) :
 
 theorem lowerJ_scaled_hasSum {u k : ℝ} (hk : k ≠ 0) (huk : |u*k| < 1) :
     HasSum (fun n : ℕ => u^(n+2)*k^n/(n+2 : ℝ)) (lowerJ (u*k)/k^2) := by
-  convert (lowerJ_hasSum huk).div_const (k^2) using 1
+  convert! (lowerJ_hasSum huk).div_const (k^2) using 1
   ext n
   rw [mul_pow,pow_add k n 2]
   field_simp
@@ -58,7 +58,7 @@ theorem lowerJ_scaled_hasSum {u k : ℝ} (hk : k ≠ 0) (huk : |u*k| < 1) :
 theorem lowerM_scaled_hasSum {u k : ℝ} (hu : 0 < u) (hk : 0 < k) (huk : u*k < 1) :
     HasSum (fun n : ℕ => 2*u^(n+2)*k^n/((n+2 : ℝ)*(n+3 : ℝ)))
       (lowerM (u*k)/k^2) := by
-  convert (lowerM_hasSum (mul_pos hu hk) huk).div_const (k^2) using 1
+  convert! (lowerM_hasSum (mul_pos hu hk) huk).div_const (k^2) using 1
   ext n
   rw [mul_pow,pow_add k n 2]
   field_simp

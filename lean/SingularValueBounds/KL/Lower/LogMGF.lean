@@ -84,7 +84,7 @@ theorem normalized_lower_log_mgf {X : Ω → ι → ℝ} {K : ℝ}
     have h := (lowerShapeEigenvalue_bounds hk.le hk1
       ⟨(hR.eigenvalues_pos i).le,eigenvalue_le_spectralMaximum hR.isHermitian i⟩).2
     nlinarith [mul_le_mul_of_nonneg_left h hu.le]
-  rw [Real.log_prod Finset.univ _ (fun i _ => (hfactor i).ne')] at hl
+  rw [Real.log_prod (fun i _ => (hfactor i).ne')] at hl
   have hs := Finset.sum_le_sum (s := Finset.univ) (fun i _ =>
     lower_shape_envelope hu hk hk1 huk hM
       ⟨(hR.eigenvalues_pos i).le,eigenvalue_le_spectralMaximum hR.isHermitian i⟩)

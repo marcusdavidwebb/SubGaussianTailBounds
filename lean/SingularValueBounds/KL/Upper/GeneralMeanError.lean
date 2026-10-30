@@ -102,7 +102,7 @@ theorem affineExp_convex (α : ℝ) :
   intro x hx y hy a b ha hb hab
   have h := convexOn_exp.2 (mem_univ (-(α*x))) (mem_univ (-(α*y))) ha hb hab
   simp only [smul_eq_mul] at h ⊢
-  convert h using 1 <;> congr 1 <;> ring
+  convert! h using 1 <;> congr 1 <;> ring
 
 theorem affineExp_antitone {α : ℝ} (hα : 0≤α) :
     AntitoneOn (fun L => Real.exp (-(α*L))) (Ici (1 : ℝ)) := by
@@ -143,7 +143,7 @@ theorem generalMeanRemainder_convex {A q c : ℝ}
   have hh' := ConvexOn.smul (show 0≤(2*A/q)*Real.exp (-2) by positivity) hh
   apply hh'.congr
   intro L hL
-  simpa only [smul_eq_mul] using (generalMeanRemainder_eq hq hc hL).symm
+  simpa only [smul_eq_mul, Pi.add_apply] using (generalMeanRemainder_eq hq hc hL).symm
 
 theorem generalMeanContinuation_convex {A q c s : ℝ}
     (hA : 0≤A) (hq : 1<q) (hc : 0<c) (hsc : c≤s) (hqs : 2≤q*s/2) :
@@ -162,7 +162,7 @@ theorem generalMeanContinuation_convex {A q c s : ℝ}
   have hh' := ConvexOn.smul (show 0≤A*Real.exp (-2) by positivity) hh
   apply hh'.congr
   intro L hL
-  simpa only [smul_eq_mul] using (generalMeanContinuation_eq hs hq hL).symm
+  simpa only [smul_eq_mul, Pi.add_apply] using (generalMeanContinuation_eq hs hq hL).symm
 
 theorem generalMeanRemainder_antitone {A q c : ℝ}
     (hA : 0≤A) (hq : 0<q) (hc : 0<c) (hqc : 2≤q*c/2) :
@@ -256,7 +256,7 @@ theorem generalMeanRemainder_bound {A q c L e I : ℝ}
   unfold generalMeanRemainder
   exact mul_le_mul
     (mul_le_mul_of_nonneg_left he (by positivity))
-    (add_le_add_left hI 1) (by linarith) (by positivity)
+    (add_le_add_right hI 1) (by linarith) (by positivity)
 
 theorem generalMeanContinuation_bound {A q c s L e loghi Ihi Ilo : ℝ}
     (hA : 0≤A) (hq : 1<q) (hc : 0<c) (hcs : c≤s) (hL : 1≤L)

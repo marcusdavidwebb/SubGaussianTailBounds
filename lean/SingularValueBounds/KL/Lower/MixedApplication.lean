@@ -16,7 +16,6 @@ theorem profileAngularCost_const_mul (c : ℝ) (h : ℝ → ℝ) :
     _ = ∫ θ in (0:ℝ)..Real.pi/2, c*(Real.sin θ*h (Real.sin θ)) := by
       apply intervalIntegral.integral_congr
       intro θ _
-      dsimp only
       ring
     _ = _ := intervalIntegral.integral_const_mul _ _
 
@@ -47,7 +46,9 @@ theorem lower_tail_general_of_certificates
   apply lower_tail_general_from_mixed_input hnm X hK generalLowerProfile_angularCost_pos
     generalLowerProfile_angularCost_lt.le ?_ ht
   intro b hb
-  have hinput := mixedLowerTransferInput X (fun i => (hiso i).measurable) hindep
+  have hinput := mixedLowerTransferInput
+    (h := fun k => K^2*logParameter K*generalLowerProfile k)
+    X (fun i => (hiso i).measurable) hindep
     (sq_nonneg K) (continuous_const.mul generalLowerProfile_continuous)
     (scaled_general_profile_mono hc0.le)
     (fun k _ => mul_nonneg hc0.le (generalLowerProfile_pos k).le)

@@ -330,7 +330,6 @@ theorem constant_dimension_cost_lt {K w : ℝ} (hK : 0 < K) (hw : 0 < w) :
   have hform : (K*Real.sqrt n+w/K)^2 = K^2*n+2*w*Real.sqrt n+(w/K)^2 := by
     rw [add_sq, mul_pow, hs]
     field_simp
-    ring
   nlinarith [sq_pos_of_pos (div_pos hw hK), Real.sqrt_nonneg (K^2*n+2*w*Real.sqrt n)]
 
 /-- The same strict allowance for the mixed-profile budget
@@ -339,7 +338,7 @@ profile integration package through `LowerTransferInput`. -/
 theorem mixed_dimension_cost_lt {K L H : ℝ} (hK : 0 < K) (hL : 0 < L) (hH : 0 < H) :
     Real.sqrt (K^2*n+2*K^2*L*H*Real.sqrt n) < K*Real.sqrt n+K*L*H := by
   have h := constant_dimension_cost_lt (n := n) hK (show 0 < K^2*L*H by positivity)
-  have he : K^2*L*H/K=K*L*H := by field_simp; ring
+  have he : K^2*L*H/K=K*L*H := by field_simp
   rw [he] at h
   convert h using 1 <;> congr 1 <;> ring
 

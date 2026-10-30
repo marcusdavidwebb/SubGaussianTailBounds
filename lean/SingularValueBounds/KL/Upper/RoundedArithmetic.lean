@@ -151,7 +151,7 @@ theorem LogTranscript.sound {N : ℕ} {z lo hi : ℚ}
     have hp := (h.powers (j := j) (by have := Finset.mem_range.mp hj; omega)).1
     have hh := div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hp (by norm_num : (0 : ℝ)≤2))
       (by positivity : (0 : ℝ)≤2*(j : ℝ)+1)
-    convert hc.trans hh using 1 <;> ring
+    convert! hc.trans hh using 1 <;> ring
   have hupp : logTaylorUpper N z≤(hi : ℝ) := by
     have ho : (∑j∈Finset.range N,(ch j : ℝ))+
         2*(ph N : ℝ)/((2*(N : ℝ)+1)*(1-(z : ℝ)^2))≤(hi : ℝ) := by exact_mod_cast h.upper
@@ -162,7 +162,7 @@ theorem LogTranscript.sound {N : ℕ} {z lo hi : ℚ}
       have hp := (h.powers (j := j) (by have := Finset.mem_range.mp hj; omega)).2
       have hh := div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hp (by norm_num : (0 : ℝ)≤2))
         (by positivity : (0 : ℝ)≤2*(j : ℝ)+1)
-      convert hh.trans hc using 1 <;> ring
+      convert! hh.trans hc using 1 <;> ring
     have hd : 0≤(2*(N : ℝ)+1)*(1-(z : ℝ)^2) := by
       have hs : 0≤1-(z : ℝ)^2 := by nlinarith
       exact mul_nonneg (by positivity) hs

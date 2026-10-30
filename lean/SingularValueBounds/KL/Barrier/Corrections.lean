@@ -110,10 +110,10 @@ theorem hasDerivAt_outwardTrace {R : Matrix ι ι ℝ} (hR : R.PosDef)
       (-reciprocalTrace H.2.eigenvalues 2 ω) ω := by
     have ht (i : ι) : HasDerivAt (fun x : ℝ => (x - H.2.eigenvalues i)⁻¹)
         (-((ω - H.2.eigenvalues i)⁻¹)^2) ω := by
-      convert ((hasDerivAt_id ω).sub_const (H.2.eigenvalues i)).inv
-        (sub_pos.mpr (ha i)).ne' using 1 <;> simp <;> ring
+      convert! ((hasDerivAt_id ω).sub_const (H.2.eigenvalues i)).inv
+        (sub_pos.mpr (ha i)).ne' using 1 <;> (try simp) <;> ring
     unfold reciprocalTrace
-    simpa only [pow_one, Finset.sum_neg_distrib] using
+    simpa only [pow_one, Finset.sum_neg_distrib, Finset.sum_fn] using!
       HasDerivAt.sum (u := Finset.univ) (fun i _ => ht i)
   have hf : (frobenius (outwardResolvent R ω))^2 = reciprocalTrace H.2.eigenvalues 2 ω := by
     rw [outward_frobenius hR hω]
@@ -128,7 +128,7 @@ lemma leastCorrection_mem {f : ℝ → ℝ} {b : ℝ}
     0 ≤ leastCorrection f b ∧ f (leastCorrection f b) ≤ b := by
   have hclosed : IsClosed {x : ℝ | 0 ≤ x ∧ f x ≤ b} := by
     have := hc.preimage_isClosed_of_isClosed isClosed_Ici (isClosed_Iic : IsClosed (Iic b))
-    simpa only [Set.preimage, Set.mem_Iic, Set.setOf_and] using this
+    simpa only [Set.preimage, Set.mem_Iic, Set.setOf_and] using! this
   exact hclosed.csInf_mem hne ⟨0, fun x hx => hx.1⟩
 
 lemma leastCorrection_le_iff {f : ℝ → ℝ} {b x : ℝ}
@@ -178,7 +178,7 @@ lemma constantCost_tendsto {R : Matrix ι ι ℝ} (hR : R.PosDef) (K w : ℝ) :
     filter_upwards [eventually_ge_atTop (0 : ℝ)] with x hx
     simp only [regularityCost, outward_trace hR hx, outward_frobenius hR hx]
   apply Filter.Tendsto.congr' he.symm
-  simpa only [mul_zero, Real.sqrt_zero, add_zero] using
+  simpa only [mul_zero, Real.sqrt_zero, add_zero] using!
     ((tendsto_const_nhds.mul (reciprocalTrace_tendsto (outwardBase R hR).2.eigenvalues
       (by decide : 1 ≠ 0))).add (tendsto_const_nhds.mul
         (Real.continuous_sqrt.continuousAt.tendsto.comp

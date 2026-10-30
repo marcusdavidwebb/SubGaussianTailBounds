@@ -13,9 +13,9 @@ theorem exponential_secant {c y : ℝ} (hc : 0 < c) (hy : y ∈ Icc (0:ℝ) c) :
   have h := convexOn_exp.2 (mem_univ (0:ℝ)) (mem_univ (-c))
     (sub_nonneg.mpr ((div_le_one hc).2 hy.2)) (div_nonneg hy.1 hc.le)
     (show 1-y/c+y/c = (1:ℝ) by ring)
-  have he : (1-y/c)*(0:ℝ)+(y/c)*(-c) = -y := by field_simp
+  have he : (1-y/c)*(0:ℝ)+(y/c)*(-c) = -y := by field_simp <;> ring
   simp only [smul_eq_mul,he,Real.exp_zero,mul_one] at h
-  convert h using 1 <;> ring
+  convert! h using 1 <;> ring
 
 theorem real_power_exponential_ratio_bound {p c : ℝ} (hp : 1 < p)
     (hc : 0 < c) (hroot : c ≤ p*(1-Real.exp (-c))) {y : ℝ} (hy : 0 ≤ y) :
@@ -147,7 +147,7 @@ theorem real_moment_of_exponential {T : Ω → ℝ} {p scale M : ℝ}
   refine ⟨hint,?_⟩
   have hi := integral_mono hint hdom hpoint
   rw [integral_const_mul,integral_sub hExp (integrable_const 1),integral_const] at hi
-  simp only [measureReal_univ_eq_one,one_smul] at hi
+  simp only [probReal_univ,one_smul] at hi
   exact hi.trans (mul_le_mul_of_nonneg_left (sub_le_sub_right hM 1) hC)
 
 end

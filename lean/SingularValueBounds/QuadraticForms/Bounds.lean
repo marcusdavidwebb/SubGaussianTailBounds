@@ -27,6 +27,7 @@ theorem directional_fourth_of_unit (hsg : SubGaussianMGF μ X K)
   unfold fourthMomentConstant
   split_ifs with hK1
   · subst K
+    change HasSubgaussianMGF (fun ω => u ⬝ᵥ X ω) (NNReal.mk ((1 : ℝ) ^ 2) _) μ at hs
     exact scalar_fourth_unit (by simpa using hs) hm
   · exact scalar_fourth_general hs hK hm
 
@@ -190,7 +191,7 @@ theorem quadratic_endpoint_variance (hsg : SubGaussianMGF μ X 1)
           (hq2i.sub (hqi.const_mul (2 * Matrix.trace B))) (integrable_const _),
           integral_sub hq2i (hqi.const_mul _), integral_const_mul,
           hiso.quadratic_mean]
-        simp only [integral_const, measureReal_univ_eq_one, smul_eq_mul, one_mul]
+        simp only [integral_const, probReal_univ, smul_eq_mul, one_mul]
         ring
   rw [he]
   linarith

@@ -2,7 +2,10 @@ import SingularValueBounds.Canonical.AcceptedConstants
 import SingularValueBounds.Canonical.Adapter
 import SingularValueBounds.Canonical.General
 import SingularValueBounds.Canonical.Monotonicity
+import SingularValueBounds.Canonical.NLARows
+import SingularValueBounds.Canonical.NLASingularValues
 import SingularValueBounds.Canonical.Results
+import SingularValueBounds.Canonical.StatementEquivalence
 import SingularValueBounds.Canonical.Unit
 import SingularValueBounds.Concentration.IndependentAveraging
 import SingularValueBounds.Core.Assumptions

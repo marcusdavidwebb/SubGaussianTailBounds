@@ -109,16 +109,16 @@ theorem lower_shape_envelope_of_cubic {u k c : ℝ} (hu : 0 < u) (hk : 0 < k)
         (x/d x*((2*c-u^2-2*u*k)+(3*u-u^2*k-2*u*c)*x+
           (u^2-2*u*c*k)*x^2+2*u*c*x^3)) x := by
     have hb : HasDerivAt (lowerShapeEigenvalue k) (1+2*k*x-3*x^2) x := by
-      convert (hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).mul
+      convert! (hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).mul
         ((hasDerivAt_const x k).sub (hasDerivAt_id x))) using 1 <;>
         simp [lowerShapeEigenvalue] <;> ring
     have hdd := (hasDerivAt_const x (1:ℝ)).sub (hb.const_mul u)
-    convert (((hasDerivAt_id x).const_mul u).add
+    convert! (((hasDerivAt_id x).const_mul u).add
       (((hasDerivAt_id x).pow 2).const_mul c)).add (hdd.log (hd x hx).ne') using 1
     norm_num only [id_eq, Nat.cast_ofNat, Nat.reduceSub, pow_one, mul_one]
     change x / d x * _ = u+c*(2*x)+(0-u*(1+2*k*x-3*x^2))/d x
     have hn := (hd x hx).ne'
-    field_simp only [hn]
+    field_simp [hn]
     dsimp [d,lowerShapeEigenvalue]
     ring
   have hF0 : F 0 = 0 := by simp [F,d,lowerShapeEigenvalue]

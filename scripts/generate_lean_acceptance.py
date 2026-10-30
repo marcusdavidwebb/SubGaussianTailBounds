@@ -84,7 +84,7 @@ def acceptance_source() -> str:
         "import MainTheoremStatement",
         "import SingularValueBounds.Canonical.AcceptedConstants",
         "import SingularValueBounds.Canonical.Results",
-        "import Lean.Util.CollectAxioms",
+        "import Lean",
         "namespace CanonicalAcceptanceCI",
         "universe u",
         "noncomputable section",

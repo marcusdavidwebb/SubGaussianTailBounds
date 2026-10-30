@@ -61,7 +61,7 @@ theorem endpoint_capped_weight_log_bound {p : ι → ℝ}
     have hd := capped_weight_product_of_large hp (by norm_num : (1/2 : ℝ)≤225/256)
       (by norm_num : (225/256 : ℝ)<1) hsum hcap (j := j) (by norm_num; exact hj)
     have hh := Real.log_le_log (by norm_num : (0 : ℝ)<(225/256)*(1-225/256)) hd
-    rw [Real.log_prod Finset.univ _ (fun i hi => (hpos i).ne')] at hh
+    rw [Real.log_prod (fun i hi => (hpos i).ne')] at hh
     have hn : -(Real.log ((225/256 : ℝ)*(1-225/256)))≤2*Real.log (46/15 : ℝ) := by
       have hnum : 1/((46/15 : ℝ)^2)≤(225/256 : ℝ)*(1-225/256) := by norm_num
       have hlog := Real.log_le_log (by norm_num : (0 : ℝ)<1/((46/15 : ℝ)^2)) hnum
@@ -77,9 +77,9 @@ theorem endpoint_capped_weight_log_bound {p : ι → ℝ}
       have hh := Real.log_le_sub_one_of_pos (one_div_pos.mpr (hpos i))
       rw [Real.log_div (by norm_num) (hpos i).ne',Real.log_one] at hh
       have hdiv : 1/(1-p i)-1≤2*p i := by
-        apply (mul_le_mul_right (hpos i)).mp
-        field_simp [(hpos i).ne']
-        nlinarith [hp i,hsmall i,sq_nonneg (p i)]
+        apply sub_le_iff_le_add.mpr
+        apply (div_le_iff₀ (hpos i)).mpr
+        nlinarith [mul_nonneg (hp i) (sub_nonneg.mpr (hsmall i))]
       linarith
     have hs := Finset.sum_le_sum (s := Finset.univ) (fun i hi => hlog i)
     rw [Finset.sum_neg_distrib,← Finset.mul_sum,hsum,mul_one] at hs

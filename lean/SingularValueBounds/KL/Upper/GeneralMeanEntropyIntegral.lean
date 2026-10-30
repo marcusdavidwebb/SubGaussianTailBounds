@@ -10,12 +10,12 @@ theorem generalMean_integral_translate (f : ℝ → ℝ) (c : ℝ) :
     (∫ u in Ioi 0,f (c+u))=∫u in Ioi c,f u := by
   rw [← integral_indicator measurableSet_Ioi,← integral_indicator measurableSet_Ioi]
   have h := integral_add_left_eq_self (μ := volume) ((Ioi c).indicator f) c
-  convert h using 1
+  convert! h using 1
   apply integral_congr_ae
   exact Filter.Eventually.of_forall fun u => by
     by_cases hu : 0<u
     · simp [Set.indicator_of_mem,hu,show c<c+u by linarith]
-    · simp [Set.indicator_of_not_mem,hu,show ¬c<c+u by linarith]
+    · simp [Set.indicator_of_notMem,hu,show ¬c<c+u by linarith]
 
 theorem generalMean_resolvent_cutoff {β v : ℝ} (hβ : 0<β) (hv : 0<v) :
     (∫u in Ioi v,Real.exp (-(β*u))/u)=
@@ -61,14 +61,15 @@ theorem generalMean_entropy_exponential_integral {a v β : ℝ}
     have hu0 : 0<u := hv.trans_le hu
     have hlog := ((hasDerivAt_id u).div_const a).log (ne_of_gt (div_pos hu0 ha))
     have he := ((hasDerivAt_id u).const_mul (-β)).exp
-    convert ((hasDerivAt_const u 1).add hlog).mul he using 1 <;>
-      dsimp [F,g,entropyKernel] <;> (try simp only [id_eq,zero_add]) <;> field_simp <;> ring
+    convert! ((hasDerivAt_const u 1).add hlog).mul he using 1 <;>
+      (try funext z) <;> dsimp [F,g,entropyKernel] <;>
+      (try simp only [id_eq,zero_add,Pi.add_apply,Pi.mul_apply,Pi.div_apply]) <;> field_simp <;> ring
   have hlim : Tendsto F atTop (nhds 0) := by
     have h0 := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (0:ℝ) β hβ
     have h1 := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (1:ℝ) β hβ
     have hu : Tendsto (fun u : ℝ => (1+u/a)*Real.exp (-(β*u))) atTop (nhds 0) := by
       have hh := h0.add (h1.div_const a)
-      convert hh using 1 <;> simp only [Real.rpow_zero,Real.rpow_one,one_mul,zero_div,add_zero]
+      convert! hh using 1 <;> simp only [Real.rpow_zero,Real.rpow_one,one_mul,zero_div,add_zero]
       ext u
       ring
     apply squeeze_zero' _ _ hu

@@ -175,7 +175,7 @@ theorem frobenius_sq (R : Matrix ι ι ℝ) :
 
 theorem trace_square_eq_sum_sq {R : Matrix ι ι ℝ} (hR : R.IsHermitian) :
     Matrix.trace (R ^ 2) = ∑ i, ∑ j, R i j ^ 2 := by
-  have hs : Rᵀ = R := by simpa only [Matrix.conjTranspose_eq_transpose_of_trivial] using hR
+  have hs : Rᵀ = R := by simpa only [Matrix.conjTranspose_eq_transpose_of_trivial] using hR.eq
   simp only [pow_two, Matrix.trace, Matrix.diag, Matrix.mul_apply]
   apply Finset.sum_congr rfl
   intro i _
@@ -257,7 +257,7 @@ theorem correction_total_cost {n : ℕ} {K w b outward : ℝ}
   have he : (K^2*n+w*Real.sqrt n)/b + w*Real.sqrt n/b =
       (K^2*n+2*w*Real.sqrt n)/b := by rw [← add_div]; congr 1; ring
   rw [← he]
-  exact add_le_add_left h.2 _
+  exact add_le_add_right h.2 _
 
 end MatrixQuantities
 end

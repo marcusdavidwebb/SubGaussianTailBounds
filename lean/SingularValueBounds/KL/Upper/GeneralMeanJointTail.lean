@@ -91,7 +91,7 @@ theorem upper_extended_spectral_logdet_joint {ι : Type*} [Fintype ι] [Decidabl
   obtain ⟨hsecond,hsecondcost⟩ := upper_tail_second_cost_joint hr hh.le (by linarith : 0 < q)
     (by linarith : 0 < v) hk hvk heta hnorm hmax hden hrate
   have ht := upper_tail_logdet_of_costs hr hh.le hden hsecond hfirstcost hsecondcost
-  convert ht using 1 <;> dsimp [q] <;> ring
+  convert! ht using 1 <;> dsimp [q] <;> ring
 
 variable [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
 
@@ -132,7 +132,7 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
     have hm := mul_le_mul_of_nonneg_right hmargin heta.le
     have hm0 : u*eta*k*(v0-1) ≤ b-K^2*Matrix.trace R := by nlinarith
     have ht := div_le_div_of_nonneg_right hm0 hb0.le
-    convert ht using 1 <;> dsimp [h,theta] <;> field_simp only [hb0.ne'] <;> ring
+    convert! ht using 1 <;> dsimp [h,theta] <;> field_simp [hb0.ne'] <;> ring
   have hps := upperTailWeight_le_normalized hr hh.le heta hnorm hmax
   have hspec : (∀ i,0 < 1-q*upperTailEigenvalue r h i) ∧
       -(∑ i,Real.log (1-q*upperTailEigenvalue r h i)) ≤
@@ -144,7 +144,7 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
         nlinarith
       have hfirst (i : ι) : Real.exp (-(q*h*r i)) ≤ (1-(q-1)*h*r i)/(1+h*r i) := by
         have he := upper_first_factor_exp_rate (hr i) hh.le hq.le hq1
-        convert he using 1 <;> ring
+        convert! he using 1 <;> ring
       have hrate (i : ι) : q/(1-(q-1)*h*r i) ≤ v := by
         have hd : 1 ≤ 1-(q-1)*h*r i := by
           have hnon := mul_nonpos_of_nonpos_of_nonneg (show q-1 ≤ 0 by linarith)
@@ -179,7 +179,7 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
   have hlog : -(∑ i,Real.log (1-q*upperTailEigenvalue hR.isHermitian.eigenvalues h i)) ≤
       q*h*Matrix.trace R+(C/k^2+upperJointCost v k (∑ i,(r i/eta)^3)) := by
     rw [real_spectral_trace hR.isHermitian]
-    exact (by convert hspec.2 using 1 <;> ring)
+    exact (by convert! hspec.2 using 1 <;> ring)
   have ht := upperShift_tail_of_spectral_logdet hsg hm hK hR hh hq hspec.1 hlog
   have hevent : {ω | u < (1-b)*upperShift R hR (X ω)} =
       {ω | h < upperShift R hR (X ω)} := by
@@ -187,10 +187,10 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
     change u < (1-b)*upperShift R hR (X ω) ↔ u/(1-b) < upperShift R hR (X ω)
     rw [div_lt_iff₀ hb0,mul_comm]
   rw [hevent]
-  convert ht using 1
+  convert! ht using 1
   congr 1
   dsimp [q,h,theta]
-  field_simp only [hb0.ne',hcap1.ne',hK.ne']
+  field_simp [hb0.ne',hcap1.ne',hK.ne']
   ring
 
 def extendedJointPrefactor (v k C a : ℝ) : ℝ :=

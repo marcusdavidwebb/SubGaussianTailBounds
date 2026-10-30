@@ -27,7 +27,7 @@ theorem normalized_resolvent_spectrum {R : Matrix ι ι ℝ} (hR : R.PosDef)
   have hf := frobenius_sq R
   rw [← trace_square_eq_sum_sq hR.isHermitian, hF] at hf
   rw [real_spectral_trace_square hR.isHermitian] at hf
-  simpa only [one_pow] using hf.symm
+  simpa only [one_pow, spectralMoment] using hf.symm
 
 theorem lowerComparison_normalized_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (hF : frobenius R = 1) (A c : ℝ) :

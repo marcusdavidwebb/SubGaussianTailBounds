@@ -135,9 +135,9 @@ theorem resolvent_harmonic_tangent (s : Finset ι) {r : ι → ℝ}
     · intro i hi
       exact mul_nonneg (sq_nonneg _) (hd i hi).le
     · intro i hi
-      field_simp [(hd i hi).ne']
-      ring
-  convert hc using 2
+      have hd' : 1 + r i * h ≠ 0 := by simpa only [mul_comm] using (hd i hi).ne'
+      field_simp [(hd i hi).ne', hd']
+  convert! hc using 2
   rw [Finset.mul_sum, ← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl
   intro i _
@@ -250,7 +250,7 @@ theorem upper_fixed_quadratic_comparison {R : Matrix ι ι ℝ} (hR : R.PosDef)
   have hr : ∀ i,0 < r i := hR.eigenvalues_pos
   have hd : 0 < ∑ j,r j^2/(1+h*r j) :=
     Finset.sum_pos (fun j _ => div_pos (sq_pos_of_pos (hr j)) (add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh.le (hr j).le))) Finset.univ_nonempty
-  rw [upperTailMatrix_eq_smul_criterion hR hh, Matrix.smul_mulVec_assoc,
+  rw [upperTailMatrix_eq_smul_criterion hR hh, Matrix.smul_mulVec,
     dotProduct_smul, smul_eq_mul, upperCriterion_spectral hR hh.le,
     quadratic_conjugate_diagonal, upperSquareWeight_spectral hR,
     quadratic_conjugate_diagonal, upperFixedComparison_spectral hR,
@@ -261,13 +261,12 @@ theorem upper_fixed_quadratic_comparison {R : Matrix ι ι ℝ} (hR : R.PosDef)
   apply Finset.sum_le_sum
   intro i _
   have hb := mul_le_mul_of_nonneg_left (upper_fixed_eigenvalue_bound hr hh.le i) (sq_nonneg (y i))
-  convert hb using 1
+  convert! hb using 1
   · dsimp [y,r]
     have hdi : 0 < 1+h*hR.isHermitian.eigenvalues i := by
       have hi := hR.eigenvalues_pos i
       positivity
     field_simp [hh.ne',hd.ne',hdi.ne']
-    ring
   · dsimp [y,r]
     ring
 
@@ -306,7 +305,7 @@ theorem upperShift_tail_event_nonneg {R : Matrix ι ι ℝ} (hR : R.PosDef)
   · rw [upperShift_pos_iff hR x,upperTailMatrix_zero hR]
     constructor
     · intro hx
-      simpa only [star_trivial] using (upperSquareWeight_posDef hR).2 x hx
+      simpa only [star_trivial] using (upperSquareWeight_posDef hR).dotProduct_mulVec_pos hx
     · intro hx hz
       subst x
       simpa using hx
@@ -347,10 +346,11 @@ theorem upper_fixed_matrix_comparison {R : Matrix ι ι ℝ} (hR : R.PosDef)
     change (h • upperFixedComparison R).conjTranspose = h • upperFixedComparison R
     rw [Matrix.conjTranspose_smul,hC]
     rfl
+  apply Matrix.posSemidef_iff_dotProduct_mulVec.mpr
   refine ⟨(hP.add hCs).sub hB,?_⟩
   intro x
   have hq := upper_fixed_quadratic_comparison_nonneg hR x hh
-  simpa only [star_trivial,Matrix.sub_mulVec,Matrix.add_mulVec,Matrix.smul_mulVec_assoc,
+  simpa only [star_trivial,Matrix.sub_mulVec,Matrix.add_mulVec,Matrix.smul_mulVec,
     dotProduct_sub,dotProduct_add,dotProduct_smul,smul_eq_mul,sub_nonneg] using hq
 
 end

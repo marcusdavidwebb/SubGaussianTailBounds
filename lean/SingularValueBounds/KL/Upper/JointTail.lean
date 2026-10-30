@@ -27,7 +27,7 @@ theorem upperTailWeight_normalize {r : ι → ℝ} (hr : ∀ i, 0 < r i)
       (r j^2/(1+h*r j))/eta^2 := by
     intro j
     have hd : 1+h*r j ≠ 0 := ne_of_gt (by have hj := hr j; positivity)
-    have harg : 1+(h*eta)*(r j/eta) = 1+h*r j := by field_simp; ring
+    have harg : 1+(h*eta)*(r j/eta) = 1+h*r j := by field_simp <;> ring
     rw [harg]
     field_simp [heta.ne', hd]
     <;> ring
@@ -66,7 +66,7 @@ theorem upper_tail_spectral_joint {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     intro i
     have h := mul_le_mul_of_nonneg_right (hprops i).2.1
       ((upperTailWeight_properties hr hh).1 i).le
-    convert h using 1
+    convert! h using 1
     · dsimp [upperTailSecondArgument]
       congr 2
       ring
@@ -119,7 +119,7 @@ theorem upperShift_tail_joint_of_spectrum {X : Ω → ι → ℝ} {K b v k eta u
   have ht1 : 1 ≤ theta := (one_le_div hb0).2 (by linarith)
   have hmarg (i : ι) : h*hR.isHermitian.eigenvalues i*(v-1) ≤ theta-1 := by
     have ht := div_le_div_of_nonneg_right (hmargin i) hb0.le
-    convert ht using 1 <;> dsimp [h, theta] <;> field_simp only [hb0.ne'] <;> ring
+    convert! ht using 1 <;> dsimp [h, theta] <;> field_simp [hb0.ne'] <;> ring
   obtain ⟨hgap, hlog⟩ := upper_tail_spectral_joint hR.eigenvalues_pos hh.le hv hv2 ht1 hk hvk heta hnorm hmax hmarg
   have hlog' : -(∑ i, Real.log (1-(v/theta)*upperTailEigenvalue hR.isHermitian.eigenvalues h i)) ≤
       (v/theta)*h*Matrix.trace R+upperJointCost v k (∑ i, (hR.isHermitian.eigenvalues i/eta)^3) := by
@@ -131,11 +131,10 @@ theorem upperShift_tail_joint_of_spectrum {X : Ω → ι → ℝ} {K b v k eta u
     change u < (1-b)*upperShift R hR (X ω) ↔ u/(1-b) < upperShift R hR (X ω)
     rw [div_lt_iff₀ hb0, mul_comm]
   rw [hevent]
-  convert ht using 1
+  convert! ht using 1
   congr 1
   dsimp [h, theta]
-  field_simp only [hb0.ne', hcap1.ne', hK.ne']
-  ring
+  field_simp [hb0.ne', hcap1.ne', hK.ne'] <;> ring
 
 /-- Supplementary joint prefactor tail with the cap supplying the margin. -/
 theorem upperShift_tail_joint {X : Ω → ι → ℝ} {K L w b v k eta u : ℝ}

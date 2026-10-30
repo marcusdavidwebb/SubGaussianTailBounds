@@ -33,7 +33,7 @@ theorem integral_ratio_cauchy {q D : Ω → ℝ}
     intro ω
     rw [← Real.sqrt_mul (div_nonneg (hq0 ω) (hD0 ω).le)]
     have hid : q ω / D ω * (q ω * D ω) = (q ω) ^ 2 := by
-      field_simp [(hD0 ω).ne']; ring
+      field_simp [(hD0 ω).ne'] <;> ring
     rw [hid, Real.sqrt_sq (hq0 ω)]
   simpa only [he, hs₁, hs₂] using integral_mul_sq_le h₁ h₂
 
@@ -54,10 +54,11 @@ theorem scalar_lower_exponential [IsProbabilityMeasure μ]
     apply hY.mono' (hY.aemeasurable.div
       (aemeasurable_const.add (hY.aemeasurable.const_mul ℓ))).aestronglyMeasurable
     filter_upwards [] with ω
+    change ‖Y ω / D ω‖ ≤ Y ω
     rw [Real.norm_eq_abs, abs_of_nonneg (div_nonneg (hY0 ω) (hD ω).le)]
     exact div_le_self (hY0 ω) (hD1 ω)
   have hmul : Integrable (fun ω => Y ω * D ω) μ := by
-    convert hY.add (hY2.const_mul ℓ) using 1
+    convert! hY.add (hY2.const_mul ℓ) using 1
     funext ω; dsimp [D]; ring
   have hc := integral_ratio_cauchy hY0 hD hdiv hmul
   have hmul_eq : (∫ ω, Y ω * D ω ∂μ) =
@@ -75,7 +76,7 @@ theorem scalar_lower_exponential [IsProbabilityMeasure μ]
     have hc' : (∫ ω, Y ω ∂μ) ^ 2 ≤
         (∫ ω, Y ω / D ω ∂μ) * ((∫ ω, Y ω ∂μ) + ℓ * v) := by
       exact hc.trans (mul_le_mul_of_nonneg_left
-        (add_le_add_left (mul_le_mul_of_nonneg_left hsecond hℓ) _) hd0)
+        (add_le_add_right (mul_le_mul_of_nonneg_left hsecond hℓ) _) hd0)
     have hr : 1 / (1 + ℓ * v) ≤
         (∫ ω, Y ω ∂μ) ^ 2 / ((∫ ω, Y ω ∂μ) + ℓ * v) := by
       apply (div_le_div_iff₀ (by positivity) hden).2
@@ -99,7 +100,7 @@ theorem scalar_lower_exponential [IsProbabilityMeasure μ]
     rw [hi] at hm
     have hid : (1 - ℓ * (Y ω / D ω)) * D ω = 1 := by
       field_simp [(hD ω).ne']; dsimp [D]; ring
-    apply (mul_le_mul_right (hD ω)).mp
+    apply (mul_le_mul_iff_left₀ (hD ω)).mp
     rw [hid]
     dsimp [D]
     nlinarith
@@ -107,7 +108,7 @@ theorem scalar_lower_exponential [IsProbabilityMeasure μ]
   simp only [Pi.sub_apply] at hi
   rw [integral_sub (integrable_const 1) (hdiv.const_mul ℓ), integral_const_mul] at hi
   simp only [integral_const] at hi
-  simp only [measureReal_univ_eq_one, smul_eq_mul, one_mul] at hi
+  simp only [probReal_univ, smul_eq_mul, one_mul] at hi
   calc
     _ ≤ 1 - ℓ * (∫ ω, Y ω / D ω ∂μ) := hi
     _ ≤ 1 - ℓ / (1 + v * ℓ) := by
@@ -136,11 +137,11 @@ theorem scalar_upper_exponential [IsProbabilityMeasure μ]
     (show 2 ≤ (1 / (3 * K ^ 2)) * (8 * K ^ 2 * logParameter K) from ?_)
     ((scalar_tail_coefficient hK).trans (by norm_num)) hℓ hℓv ?_ hmean
   · have hi : (1 / (3 * K ^ 2)) * (8 * K ^ 2 * logParameter K) =
-        (8 / 3 : ℝ) * logParameter K := by field_simp [hK0.ne']; ring
+        (8 / 3 : ℝ) * logParameter K := by field_simp [hK0.ne'] <;> ring
     rw [hi]
     linarith
   · intro x hx
-    convert htail x hx using 1
+    convert! htail x hx using 1
     congr 2
     ring
 end

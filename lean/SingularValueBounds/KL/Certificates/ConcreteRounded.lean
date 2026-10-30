@@ -40,7 +40,7 @@ lemma expTermLowerQ_nonneg {x : ℚ} (hx : 0 ≤ x) (j : ℕ) : 0 ≤ expTermLow
 
 lemma expLowerSumQ_pos {x : ℚ} (hx : 0 ≤ x) : 0 < expLowerSumQ x := by
   have h : (1 : ℚ) ≤ expLowerSumQ x := by
-    simpa only [expTermLowerQ] using
+    simpa only [expLowerSumQ, expTermLowerQ] using
       (Finset.single_le_sum (fun j _ => expTermLowerQ_nonneg hx j)
         (show 0 ∈ Finset.range 81 by decide))
   exact lt_of_lt_of_le (by norm_num) h
@@ -56,7 +56,8 @@ theorem expUpperTranscript (x : ℚ) (hx : 0 ≤ x) (hdom : x < 82) :
   refine ⟨hx, by norm_num; exact hdom, by simp [expTermUpperQ], ?_, ?_⟩
   · intro j _
     exact le_roundUpQ _
-  · apply add_le_add_left
+  · unfold expPositiveUpperQ
+    apply add_le_add_right
     apply le_trans _ (le_roundUpQ _)
     norm_num only [Nat.cast_ofNat, Nat.reduceAdd]
     apply div_le_div_of_nonneg_right (le_roundUpQ _)

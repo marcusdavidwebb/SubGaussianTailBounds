@@ -40,7 +40,8 @@ theorem spectralUpperDrop_eq {r : ι → ℝ} (hr : ∀ i, 0 < r i)
   intro i _
   have hd : 0 < 1 + h * r i :=
     add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh (hr i).le)
-  field_simp [hd.ne']
+  have hd' : 1 + r i * h ≠ 0 := by simpa only [mul_comm] using hd.ne'
+  field_simp [hd.ne', hd']
   ring
 
 theorem spectralUpperDrop_pos [Nonempty ι] {r : ι → ℝ} (hr : ∀ i, 0 < r i)
@@ -79,7 +80,7 @@ theorem spectralUpperEquation_tendsto {r : ι → ℝ} (hr : ∀ i, 0 < r i) (x 
       ((spectralUpperResolvent_tendsto hr i).pow 2).const_mul (x i ^ 2))
   have htrace : Tendsto (fun _ : ℝ => ∑ i, r i) atTop (𝓝 (∑ i, r i)) := tendsto_const_nhds
   have hone : Tendsto (fun _ : ℝ => (1 : ℝ)) atTop (𝓝 1) := tendsto_const_nhds
-  simpa only [spectralUpperEquation, spectralUpperDrop, sub_zero, mul_one, zero_sub] using
+  simpa only [spectralUpperEquation, spectralUpperDrop, sub_zero, mul_one, zero_sub] using!
     hq2.sub ((htrace.sub hsum).mul (hone.sub hq1))
 
 theorem spectralUpperEquation_zero_pos {r : ι → ℝ} (hr : ∀ i, 0 < r i)

@@ -22,9 +22,9 @@ theorem spectralSquareMass_monotone :
   · intro k hk
     have hk' : k∈Icc (9/10 : ℝ) 1 := interior_subset hk
     have hd : HasDerivAt (fun k : ℝ => k^4+(1-k^2)^2) (4*k*(2*k^2-1)) k := by
-      convert ((hasDerivAt_id k).pow 4).add
+      convert! ((hasDerivAt_id k).pow 4).add
         (((hasDerivAt_const k 1).sub ((hasDerivAt_id k).pow 2)).pow 2) using 1 <;>
-        simp only [id_eq] <;> ring
+        simp only [Pi.sub_apply, Pi.pow_apply, id_eq] <;> ring
     rw [hd.deriv]
     have hk0 : 0≤k := by linarith [hk'.1]
     have hh : 0≤2*k^2-1 := by nlinarith [hk'.1]
@@ -57,7 +57,7 @@ theorem endpointGaussian_mean {x : ι → ℝ} (h2 : ∑j,x j^2=1) :
   unfold endpointGaussian
   have hInt (j : ι) : Integrable (fun g : ι → ℝ => (g j)^2) (standardGaussian ι) := by
     simpa only [pow_one] using standardGaussian_coordinate_even_integrable j 1
-  rw [integral_finset_sum _ (fun j hj =>
+  rw [integral_finsetSum _ (fun j hj =>
     (hInt j).const_mul (x j^2))]
   simp only [integral_const_mul]
   have hj (j : ι) : (∫g : ι → ℝ,(g j)^2 ∂standardGaussian ι)=1 := by

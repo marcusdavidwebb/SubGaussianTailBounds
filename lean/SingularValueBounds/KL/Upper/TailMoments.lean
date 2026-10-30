@@ -39,13 +39,14 @@ theorem tailMomentSeries_succ_le {p : ℕ} (hp : 1 ≤ p) {A s : ℝ}
   have hlast : A^(p-1)/((p-1).factorial : ℝ) ≤ tailMomentSeries p A s := by
     have h := Finset.single_le_sum (f := fun j => A^j*s^(p-1-j)/(j.factorial : ℝ))
       (fun j hj => by positivity) (show p-1 ∈ Finset.range p by simp; omega)
-    simpa using h
+    simpa [tailMomentSeries] using h
   have hf : (p.factorial : ℝ) = (p : ℝ)*((p-1).factorial : ℝ) := by
     exact_mod_cast (Nat.mul_factorial_pred (by omega : p ≠ 0)).symm
   have he : A^p/(p.factorial : ℝ) = (A/p)*(A^(p-1)/((p-1).factorial : ℝ)) := by
-    rw [hf, show p = (p-1)+1 by omega, pow_succ]
+    rw [hf]
+    nth_rw 1 [show p = (p-1)+1 by omega]
+    rw [pow_succ]
     field_simp
-    ring
   rw [tailMomentSeries_succ hp, he]
   nlinarith [mul_le_mul_of_nonneg_left hlast (div_nonneg hA hp0.le)]
 
@@ -97,7 +98,7 @@ theorem tailMomentCoefficient_le {p : ℕ} (hp : 3 ≤ p) :
     have hTT : tailMomentSeries (n+1) (15/2 : ℝ) (20/9) ≤
         (9/2 : ℝ)*tailMomentSeries n (15/2) (20/9) :=
       hT.trans (mul_le_mul_of_nonneg_right hratio hT0)
-    convert add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num : (0 : ℝ) ≤ 3/4))
+    convert! add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num : (0 : ℝ) ≤ 3/4))
       (mul_le_mul_of_nonneg_left hTT (by norm_num : (0 : ℝ) ≤ 1/4)) using 1 <;> ring
   clear hp hp3
   induction p, hp4 using Nat.le_induction with
@@ -137,9 +138,9 @@ theorem integral_monomial_exp_cutoff (n : ℕ) {r A : ℝ} (hr : 0 < r) (hA : 0 
       r*(u^(n+1)*Real.exp (-(r*u)))
     have hd : ∀ u ∈ Ici A, HasDerivAt F (g u) u := by
       intro u hu
-      convert ((hasDerivAt_pow (n+1) u).mul
+      convert! ((hasDerivAt_pow (n+1) u).mul
         (((hasDerivAt_id u).const_mul (-r)).exp)) using 1 <;>
-        simp [F, g, Nat.cast_add, Nat.cast_one] <;> ring
+        (try ext x) <;> simp [F, g, Nat.cast_add, Nat.cast_one, Pi.mul_apply] <;> ring
     have hgi : IntegrableOn g (Ioi A) :=
       ((monomial_exp_integrable n hr hA).const_mul (n+1 : ℝ)).sub
         ((monomial_exp_integrable (n+1) hr hA).const_mul r)
@@ -168,12 +169,12 @@ private theorem cutoff_lintegral_translate (f : ℝ → ℝ≥0∞) (A : ℝ) :
     (∫⁻ u in Ioi 0, f (A+u)) = ∫⁻ u in Ioi A, f u := by
   rw [← lintegral_indicator measurableSet_Ioi, ← lintegral_indicator measurableSet_Ioi]
   have h := lintegral_add_left_eq_self (μ := volume) ((Ioi A).indicator f) A
-  convert h using 1
+  convert! h using 1
   apply lintegral_congr
   intro u
   by_cases hu : 0 < u
   · simp [Set.indicator_of_mem, hu, show A < A+u by linarith]
-  · simp [Set.indicator_of_not_mem, hu, show ¬ A < A+u by linarith]
+  · simp [Set.indicator_of_notMem, hu, show ¬ A < A+u by linarith]
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
 
@@ -207,7 +208,7 @@ theorem first_moment_cutoff [IsProbabilityMeasure μ] {Y : Ω → ℝ} {C r A : 
   have hg : Continuous g := by dsimp [g]; fun_prop
   have hd : ∀ t : ℝ, HasDerivAt F (g t) t := by
     intro t
-    convert (((((hasDerivAt_const t A).add (hasDerivAt_id t)).pow (n+1)).sub_const
+    convert! (((((hasDerivAt_const t A).add (hasDerivAt_id t)).pow (n+1)).sub_const
       (A^(n+1))).sub ((hasDerivAt_id t).const_mul (A^n))) using 1 <;>
       simp [F, g, Nat.cast_add, Nat.cast_one] <;> ring
   have hFi : ∀ t : ℝ, (∫ u in (0 : ℝ)..t, g u) = F t := by
@@ -291,7 +292,7 @@ theorem first_moment_cutoff [IsProbabilityMeasure μ] {Y : Ω → ℝ} {C r A : 
     rw [ofReal_measureReal] at htail'
     calc
       _ ≤ ENNReal.ofReal (C*Real.exp (-(r*(A+t)))) * ENNReal.ofReal (g t) :=
-        mul_le_mul_right' htail' _
+        mul_le_mul_left htail' _
       _ = ENNReal.ofReal (H (A+t)) := by
         rw [← ENNReal.ofReal_mul (by positivity)]
         congr 1
@@ -317,7 +318,7 @@ theorem first_moment_cutoff [IsProbabilityMeasure μ] {Y : Ω → ℝ} {C r A : 
   have hfinal : (∫ ω, Y ω^(n+1) ∂μ) ≤ A^n +
       C/r*Real.exp (-(r*A))*(((n+1).factorial : ℝ)*tailMomentSeries (n+1) A (1/r)-A^n) := by
     nlinarith
-  convert hfinal using 1
+  convert! hfinal using 1
   field_simp [hf.ne']
   <;> ring
 
@@ -350,7 +351,7 @@ theorem tailMomentSeries_ge_leading (n : ℕ) {A s : ℝ} (hA : 0 ≤ A) (hs : 0
   have hlast : A^n/(n.factorial : ℝ) ≤ tailMomentSeries (n+1) A s := by
     have h := Finset.single_le_sum (f := fun j => A^j*s^(n+1-1-j)/(j.factorial : ℝ))
       (fun j hj => by positivity) (show n ∈ Finset.range (n+1) by simp)
-    simpa using h
+    simpa [tailMomentSeries] using h
   apply le_trans _ hlast
   apply div_le_div_of_nonneg_left (pow_nonneg hA _) (by positivity)
   rw [Nat.factorial_succ, Nat.cast_mul, Nat.cast_add, Nat.cast_one]
@@ -370,9 +371,9 @@ theorem cutoff_coefficient_le (n : ℕ) {B s ε : ℝ}
     nlinarith [mul_nonneg (sub_nonneg.mpr hε) (sub_nonneg.mpr hTa)]
   have hT := tailMomentSeries_mono_scale (n+1) (A := (15/2 : ℝ)*B) (by positivity) hs hsB
   rw [tailMomentSeries_scale] at hT
-  have hh := hInterp.trans (add_le_add_left (mul_le_mul_of_nonneg_left hT
+  have hh := hInterp.trans (add_le_add_right (mul_le_mul_of_nonneg_left hT
     (by norm_num : (0 : ℝ) ≤ 1/4)) ((3/4 : ℝ)*a))
-  convert hh using 1 <;> dsimp [a, T, tailMomentCoefficient] <;>
+  convert! hh using 1 <;> dsimp [a, T, tailMomentCoefficient] <;>
     simp only [Nat.add_sub_cancel, mul_pow] <;> ring
 
 /-- The finite Taylor lower bound used in the epsilon estimate. -/
@@ -401,7 +402,7 @@ theorem cutoff_epsilon_identity {K L : ℝ} (hK : 0 < K) (hKL : L = 1+Real.log K
     Real.sqrt 10/(9/(20*K^2))*Real.exp (-((9/(20*K^2))*((15/2)*K^2*L))) =
       (20*Real.sqrt 10/9)*Real.exp (-2-11*L/8) := by
   have hK2 : K^2 ≠ 0 := pow_ne_zero _ hK.ne'
-  have harg : (9/(20*K^2))*((15/2)*K^2*L) = (27/8)*L := by field_simp; ring
+  have harg : (9/(20*K^2))*((15/2)*K^2*L) = (27/8)*L := by field_simp <;> ring
   have hpow : K^2 = Real.exp (2*(L-1)) := by
     rw [show 2*(L-1) = Real.log K+Real.log K by rw [hKL]; ring,
       Real.exp_add, Real.exp_log hK]
@@ -412,7 +413,7 @@ theorem cutoff_epsilon_identity {K L : ℝ} (hK : 0 < K) (hKL : L = 1+Real.log K
     congr 1
     ring
   calc
-    _ = (20*Real.sqrt 10/9)*(K^2*Real.exp (-((27/8)*L))) := by field_simp; ring
+    _ = (20*Real.sqrt 10/9)*(K^2*Real.exp (-((27/8)*L))) := by field_simp <;> ring
     _ = _ := by rw [hm]
 
 /-- Supplementary Lemma S1.11: the complete higher-moment assertion. -/
@@ -432,7 +433,7 @@ theorem upper_tail_higher_moments [IsProbabilityMeasure μ] {Y : Ω → ℝ} {K 
   have ht : ∀ u : ℝ, 0 ≤ u → μ.real {ω | u < Y ω} ≤
       Real.sqrt 10*Real.exp (-((9/(20*K^2))*u)) := by
     intro u hu
-    convert htail u hu using 1 <;> congr 2 <;> ring
+    convert! htail u hu using 1 <;> congr 2 <;> ring
   have hcut := first_moment_cutoff hY hY0 (Real.sqrt_nonneg 10) hr
     (A := (15/2)*K^2*L) (by positivity) ht hmean (p-1)
   have hpEq : p-1+1 = p := by omega
@@ -457,7 +458,7 @@ theorem upper_tail_higher_moments [IsProbabilityMeasure μ] {Y : Ω → ℝ} {K 
   refine ⟨?_, ?_⟩
   · simpa [hpEq] using (exponential_tail_moment hY.aemeasurable hY0
       (Real.sqrt_nonneg 10) hr ht (p-1)).1
-  · convert hmain.trans hfinal using 1
+  · convert! hmain.trans hfinal using 1
     rw [← mul_pow]
     congr 1
     ring
@@ -479,9 +480,10 @@ theorem hasDerivAt_upperSecondMomentCost {L : ℝ} (hL : L ≠ 0) :
   have he2 := (((hasDerivAt_id L).sub_const 1).const_mul (-2 : ℝ)).exp
   have hr := (hasDerivAt_const L (20/9 : ℝ)).div (hasDerivAt_id L) hL
   have ht := (he2.const_mul (1/2 : ℝ)).div (hasDerivAt_id L) hL
-  convert ((hasDerivAt_const L (15/4 : ℝ)).add
+  convert! ((hasDerivAt_const L (15/4 : ℝ)).add
     ((he1.mul ((hasDerivAt_const L (15/4 : ℝ)).add hr)).const_mul (1/4 : ℝ))).sub ht using 1 <;>
-      (try ext x) <;> simp only [upperSecondMomentCost, upperSecondMomentDerivative, id_eq] <;>
+      (try ext x) <;> simp only [upperSecondMomentCost, upperSecondMomentDerivative,
+        Pi.add_apply, Pi.sub_apply, Pi.mul_apply, Pi.div_apply, id_eq] <;>
       field_simp <;> ring
 
 /-- The printed derivative certificate, including its exponential factor. -/
@@ -570,13 +572,13 @@ theorem upper_tail_second_moment [IsProbabilityMeasure μ] {Y : Ω → ℝ} {K L
   have ht : ∀ u : ℝ, 0 ≤ u → μ.real {ω | u < Y ω} ≤
       Real.sqrt 10*Real.exp (-((9/(20*K^2))*u)) := by
     intro u hu
-    convert htail u hu using 1 <;> congr 2 <;> ring
+    convert! htail u hu using 1 <;> congr 2 <;> ring
   have hcut := first_moment_cutoff hY hY0 (Real.sqrt_nonneg 10) hr
     (A := (15/2)*K^2*L) (by positivity) ht hmean 1
   let ε := Real.sqrt 10/(9/(20*K^2))*Real.exp (-((9/(20*K^2))*((15/2)*K^2*L)))
   have hcut' : (∫ ω, Y ω^2 ∂μ)/2 ≤ (15/4)*K^2*L+
       ε*((15/4)*K^2*L+(20/9)*K^2) := by
-    convert hcut using 1 <;>
+    convert! hcut using 1 <;>
       norm_num [tailMomentSeries, Finset.sum_range_succ, ε] <;> field_simp <;> ring
   have hε : ε ≤ (1/4 : ℝ)*Real.exp (-11*(L-1)/8) := by
     dsimp [ε]
@@ -586,7 +588,7 @@ theorem upper_tail_second_moment [IsProbabilityMeasure μ] {Y : Ω → ℝ} {K L
   have hdiv := div_le_div_of_nonneg_right hcut' hB.le
   have hcost : (∫ ω, Y ω^2 ∂μ)/(2*K^2*L)-1/(2*K^2*L) ≤
       15/4+ε*(15/4+(20/9)/L)-(1/2)*(1/K^2)/L := by
-    convert sub_le_sub_right hdiv (1/(2*K^2*L)) using 1 <;>
+    convert! sub_le_sub_right hdiv (1/(2*K^2*L)) using 1 <;>
       field_simp [hK2, hLpos.ne'] <;> ring
   have hpow : K^2 = Real.exp (2*(L-1)) := by
     rw [show 2*(L-1) = Real.log K+Real.log K by rw [hKL]; ring,
@@ -630,7 +632,7 @@ theorem upper_tail_moment_series_summable [IsProbabilityMeasure μ]
     · intro n
       have hm := (upper_tail_higher_moments hY hY0 hK hKL hmean htail (n+3) (by omega)).2
       have hh := mul_le_mul_of_nonneg_right hm (pow_nonneg ht0 (n+3))
-      convert hh using 1
+      convert! hh using 1
       dsimp [v]
       simp only [Nat.add_sub_cancel_right, pow_add, mul_pow]
       ring
@@ -659,8 +661,8 @@ theorem exp_integrable_and_eq_tsum_of_moments {Y : Ω → ℝ} {t : ℝ}
   have hPoint : ∀ ω, HasSum (fun p => F p ω) (Real.exp (t*Y ω)) := by
     intro ω
     have h : HasSum (fun p : ℕ => (t*Y ω)^p/(p.factorial : ℝ)) (Real.exp (t*Y ω)) := by
-      simpa only [Real.exp_eq_exp_ℝ] using NormedSpace.expSeries_div_hasSum_exp ℝ (t*Y ω)
-    convert h using 1
+      simpa only [Real.exp_eq_exp_ℝ] using NormedSpace.expSeries_div_hasSum_exp (t*Y ω)
+    convert! h using 1
     ext p
     dsimp [F]
     rw [mul_pow]
@@ -710,7 +712,7 @@ theorem upper_tail_mgf_integrable_and_eq [IsProbabilityMeasure μ]
       have hr : 0 < (9 : ℝ)/(20*K^2) := by positivity
       apply (exponential_tail_moment hY.aemeasurable hY0 (Real.sqrt_nonneg 10) hr _ n).1
       intro u hu
-      convert htail u hu using 1 <;> congr 2 <;> ring
+      convert! htail u hu using 1 <;> congr 2 <;> ring
   · exact upper_tail_moment_series_summable hY hY0 hK hKL hmean htail ht0 ht
 
 /-- Exponential integrability follows from the upper-tail moment theorem. -/

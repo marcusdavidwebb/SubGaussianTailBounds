@@ -148,7 +148,7 @@ theorem mixed_process_total_cost {a : ℝ} (ha : 0 ≤ a)
     simpa only [mul_comm (Real.sqrt (n : ℝ)) (profileAngularCost h),mul_assoc] using hdimension
   change u+((mixedCorrectionRule ha hc hm h0 hb).process upper R₀ x m).outward ≤ _
   calc
-    _ ≤ u+(g 1-g l/l^2+(∫ y in l..1,2*g y/y^3))/b := add_le_add_left hout u
+    _ ≤ u+(g 1-g l/l^2+(∫ y in l..1,2*g y/y^3))/b := add_le_add_right hout u
     _ = _ := hcancel
     _ ≤ _ := hfinal
 

@@ -22,7 +22,7 @@ theorem RoundedExpConditions.sound {x : ℚ} (h : RoundedExpConditions x) :
   dsimp [expUpperRoundedQ]
   split_ifs with hy
   · have ht := (if_pos hy ▸ h.2)
-    convert exp_neg_upper_of_lower_transcript ht.1 ht.2.1 ht.2.2 using 1 <;> simp
+    convert! exp_neg_upper_of_lower_transcript ht.1 ht.2.1 ht.2.2 using 1 <;> simp
   · exact (if_neg hy ▸ h.2).sound
 
 def UnitLogConditions (x : ℚ) : Prop :=

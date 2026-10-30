@@ -32,7 +32,7 @@ theorem upperShapeMean_ratio_bounds {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   · have hh := Finset.sum_le_sum (s := Finset.univ) (fun j hj =>
       mul_le_mul_of_nonneg_right (upperNormalizedSpectrum_le_ratio hR j) (sq_nonneg (x j)))
     rw [←Finset.mul_sum,hx.2,mul_one] at hh
-    convert hh using 1
+    convert! hh using 1
     unfold upperComparisonShapeMean normalizedUpperMean
     apply Finset.sum_congr rfl
     intro j hj
@@ -177,7 +177,7 @@ theorem upperShift_endpoint_entropy_cost (h : EndpointMeanCertificateConditions)
       have he : upperJointCost q k (∑j,(hR.isHermitian.eigenvalues j/frobenius R)^3)=upperJointCost q k a := rfl
       rw [he] at ht
       apply (hInherit _).trans
-      convert ht using 1
+      convert! ht using 1
       unfold upperJointPrefactor
       rw [←Real.exp_add]
       congr 1

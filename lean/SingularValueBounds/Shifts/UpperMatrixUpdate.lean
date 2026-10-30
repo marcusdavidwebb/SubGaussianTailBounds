@@ -18,7 +18,6 @@ theorem weighted_matrix_cauchy (a x y : ι → ℝ) (ha : ∀ i, 0 < a i) :
     exact mul_nonneg (ha i).le (sq_nonneg _)
   · intro i _
     field_simp [(ha i).ne']
-    ring
 
 omit [DecidableEq ι] in
 theorem outer_quadratic (x y : ι → ℝ) :
@@ -34,9 +33,10 @@ theorem outer_quadratic (x y : ι → ℝ) :
 theorem diagonal_sub_outer_posDef (a x : ι → ℝ) (ha : ∀ i, 0 < a i)
     (hq : (∑ i, x i ^ 2 / a i) < 1) :
     (Matrix.diagonal a - Matrix.vecMulVec x x).PosDef := by
+  apply Matrix.posDef_iff_dotProduct_mulVec.mpr
   refine ⟨(Matrix.PosDef.diagonal ha).isHermitian.sub (outer_posSemidef x).isHermitian, ?_⟩
   intro y hy
-  have hpos := (Matrix.PosDef.diagonal ha).2 y hy
+  have hpos := (Matrix.PosDef.diagonal ha).dotProduct_mulVec_pos hy
   have hdiag : y ⬝ᵥ (Matrix.diagonal a *ᵥ y) = ∑ i, a i * y i ^ 2 := by
     simp only [dotProduct, Matrix.mulVec_diagonal]
     apply Finset.sum_congr rfl
@@ -60,7 +60,7 @@ theorem diagonal_sub_outer_criterion (a x : ι → ℝ) (ha : ∀ i, 0 < a i)
       have hzi := congrFun hz i
       change x i / a i = 0 at hzi
       exact hi ((div_eq_zero_iff).mp hzi |>.resolve_right (ha i).ne')
-    have hp := hG.2 y hy
+    have hp := hG.dotProduct_mulVec_pos hy
     have hsum : (∑ i, x i * y i) = ∑ i, x i ^ 2 / a i := by
       apply Finset.sum_congr rfl
       intro i _
@@ -72,7 +72,6 @@ theorem diagonal_sub_outer_criterion (a x : ι → ℝ) (ha : ∀ i, 0 < a i)
       intro i _
       dsimp [y]
       field_simp [(ha i).ne']
-      ring
     simp only [star_trivial, Matrix.sub_mulVec, dotProduct_sub, hdiag, outer_quadratic, hsum] at hp
     nlinarith [sq_nonneg ((∑ i, x i ^ 2 / a i) - 1)]
 

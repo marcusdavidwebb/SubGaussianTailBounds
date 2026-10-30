@@ -25,7 +25,7 @@ theorem mixed_inverse_triangle_integral {g j f : ℝ → ℝ} {l : ℝ}
   have hswap : (∫ c in Icc (g l) (g 1), ∫ x in Icc l 1, F (c,x)) =
       ∫ x in Icc l 1, ∫ c in Icc (g l) (g 1), F (c,x) := by
     apply integral_integral_swap
-    simpa only [IntegrableOn, ← Measure.prod_restrict] using hF
+    simpa only [IntegrableOn, ← Measure.prod_restrict] using! hF
   have hleft (c : ℝ) (hc : c ∈ Icc (g l) (g 1)) :
       (∫ x in Icc l 1, F (c,x)) = ∫ x in (j c)..1, f x := by
     calc
@@ -94,8 +94,6 @@ theorem mixedInverseWeight_integral {l a : ℝ} (hl : 0 < l) (ha : a ∈ Icc l 1
   rw [integral_zpow (n := (-3:ℤ)) (Or.inr ⟨by norm_num,hz⟩)]
   norm_num [inv_pow]
   ring_nf
-  simp only [inv_pow]
-  rfl
 
 /-- Young's inverse-integral identity, proved by integration over the
 bounded region below the increasing graph. -/
@@ -121,8 +119,11 @@ theorem mixed_inverse_integral {g j : ℝ → ℝ} {l : ℝ}
     (f := fun x => (g x-g l)*mixedInverseWeight l x)
     (g := fun x => g x*mixedInverseWeight l x-g l*mixedInverseWeight l x)
     (fun x _ => by ring)
-  rw [hi,intervalIntegral.integral_sub ((hg.mul hf).intervalIntegrable _ _)
-    ((continuous_const.mul hf).intervalIntegrable _ _),intervalIntegral.integral_const_mul,
+  have hig : IntervalIntegrable (fun x => g x * mixedInverseWeight l x) volume l 1 :=
+    (hg.mul hf).intervalIntegrable _ _
+  have hic : IntervalIntegrable (fun x => g l * mixedInverseWeight l x) volume l 1 :=
+    (continuous_const.mul hf).intervalIntegrable _ _
+  rw [hi,intervalIntegral.integral_sub hig hic,intervalIntegral.integral_const_mul,
     mixedInverseWeight_integral hl ⟨le_rfl,hl1⟩] at htriangle
   have hright : (∫ x in l..1, g x*mixedInverseWeight l x) =
       ∫ x in l..1, 2*g x/x^3 := by

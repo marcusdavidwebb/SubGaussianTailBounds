@@ -43,7 +43,7 @@ theorem hasDerivAt_mixedTracePotential {b top : ℝ} (hb : 0 < b)
     HasDerivAt (mixedTracePotential b top j) (mixedTraceKernel b j τ) τ := by
   have hf : Continuous (fun c => (j c)⁻¹^2) := (hj.inv₀ hj0).pow 2
   have hquot : HasDerivAt (fun t : ℝ => b/t) (-b/τ^2) τ := by
-    convert (hasDerivAt_const τ b).div (hasDerivAt_id τ) hτ.ne' using 1 <;> simp <;> ring
+    convert! (hasDerivAt_const τ b).div (hasDerivAt_id τ) hτ.ne' using 1 <;> simp <;> ring
   have hd := ((intervalIntegral.integral_hasDerivAt_left (hf.intervalIntegrable (b/τ) top)
     hf.stronglyMeasurable.stronglyMeasurableAtFilter hf.continuousAt).comp τ hquot).div_const b
   have he : mixedTracePotential b top j =ᶠ[𝓝 τ]

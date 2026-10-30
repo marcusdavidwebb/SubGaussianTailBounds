@@ -33,7 +33,6 @@ theorem affineIntegerWeight_exact (n : ℕ) (s w d : ℤ) (hd : d ≠ 0)
     have hdq : (d : ℚ) ≠ 0 := by exact_mod_cast hd
     simp only [div_pow]
     field_simp
-    ring
   · rw [Nat.choose_eq_zero_of_lt (Nat.lt_of_not_ge hj)]
     simp [affineIntegerWeight, hj]
 

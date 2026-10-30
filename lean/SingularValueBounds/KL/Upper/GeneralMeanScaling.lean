@@ -38,7 +38,7 @@ theorem generalMean_base_integral_scale {A K L q c : ℝ}
     A*generalMeanExponentialPrimitive (c*K^2*L) (c*K^2*L) (q/(2*K^2))=
       generalMeanRemainder A q c L := by
   have ha : c*K^2*L≠0 := by positivity
-  have harg : q/(2*K^2)*(c*K^2*L)=q*c*L/2 := by field_simp;ring
+  have harg : q/(2*K^2)*(c*K^2*L)=q*c*L/2 := by field_simp <;> ring
   unfold generalMeanExponentialPrimitive generalMeanRemainder
   rw [harg,div_self ha,Real.log_one,add_zero]
   have hdiv : Real.exp (-(q*c*L/2))/(q/(2*K^2))=
@@ -55,9 +55,9 @@ theorem generalMean_continuation_integral_scale {A K L q c s : ℝ}
       generalMeanContinuation A q c s L := by
   have hs : 0<s := hc.trans_le hcs
   have hq0 : 0<q := by linarith
-  have hratio : s*K^2*L/(c*K^2*L)=s/c := by field_simp;ring
-  have harg1 : 1/(2*K^2)*(s*K^2*L)=s*L/2 := by field_simp;ring
-  have hargq : q/(2*K^2)*(s*K^2*L)=q*s*L/2 := by field_simp;ring
+  have hratio : s*K^2*L/(c*K^2*L)=s/c := by field_simp <;> ring
+  have harg1 : 1/(2*K^2)*(s*K^2*L)=s*L/2 := by field_simp <;> ring
+  have hargq : q/(2*K^2)*(s*K^2*L)=q*s*L/2 := by field_simp <;> ring
   unfold generalMeanExponentialPrimitive generalMeanContinuation
   rw [hratio,harg1,hargq]
   have hd1 : Real.exp (-(s*L/2))/(1/(2*K^2))=2*K^2*Real.exp (-s*L/2) := by simp only [div_div,div_eq_mul_inv,inv_inv,mul_inv_rev];ring

@@ -42,7 +42,6 @@ theorem upperFixedEigenvalue_normalized {R : Matrix ι ι ℝ} (hR : R.PosDef) (
     rw [hw]
     unfold upperNormalizedSpectrum
     field_simp [hη.ne']
-    ring
   unfold upperFixedEigenvalue normalizedUpperEigenvalue
   rw [hw, ha]
   change hR.isHermitian.eigenvalues i + _ = frobenius R *
@@ -58,7 +57,6 @@ theorem upperFixedComparison_frobenius_square {R : Matrix ι ι ℝ} (hR : R.Pos
   have hC := upperFixedComparison_posSemidef hR
   have hs := congrArg (fun A : Matrix ι ι ℝ => Matrix.trace (A ^ 2))
     (upperFixedComparison_spectral hR)
-  dsimp only at hs
   simp only [pow_two] at hs
   rw [unitary_conjugate_mul, Matrix.diagonal_mul_diagonal,
     unitary_conjugate_trace, Matrix.trace_diagonal] at hs
@@ -190,7 +188,6 @@ theorem upperComparisonNormalizedGap_spectral {R : Matrix ι ι ℝ} (hR : R.Pos
       dsimp [d]
       rw [upperFixedEigenvalue_normalized hR]
       field_simp [(frobenius_pos hR).ne']
-      ring
     · simp [Matrix.diagonal, Matrix.one_apply, hij]
   rw [hd, Matrix.mul_sub, Matrix.sub_mul, Matrix.mul_smul, Matrix.smul_mul,
     mul_one, U.2.2]

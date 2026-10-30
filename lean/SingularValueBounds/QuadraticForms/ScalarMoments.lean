@@ -28,7 +28,7 @@ theorem scalar_one_le_fourth_moment [IsProbabilityMeasure μ] {Y : Ω → ℝ}
   rw [integral_add (f := fun ω => Y ω ^ 4 - 2 * Y ω ^ 2)
     (h4.sub (h2.const_mul 2)) (integrable_const 1),
     integral_sub h4 (h2.const_mul 2), integral_const_mul, hmean] at hi
-  simp only [integral_const, measureReal_univ_eq_one, smul_eq_mul, one_mul, mul_one] at hi
+  simp only [integral_const, probReal_univ, smul_eq_mul, one_mul, mul_one] at hi
   linarith
 
 /-- A polynomial tangent inequality obtained from Bernoulli's inequality. -/
@@ -78,7 +78,7 @@ theorem scalar_even_moment_lower [IsProbabilityMeasure μ] {Y : Ω → ℝ}
 theorem scalar_cosh_integrable {Y : Ω → ℝ}
     (he : ∀ t : ℝ, Integrable (fun ω => Real.exp (t * Y ω)) μ) (t : ℝ) :
     Integrable (fun ω => Real.cosh (t * Y ω)) μ := by
-  simpa only [Real.cosh_eq, neg_mul] using ((he t).add (he (-t))).div_const 2
+  simpa only [Real.cosh_eq, neg_mul] using! ((he t).add (he (-t))).div_const 2
 
 /-- The cosh moment comparison behind the isotropy-improved fourth moment.
 Only finite partial sums are integrated; their bound passes to the series. -/
@@ -124,7 +124,7 @@ theorem scalar_cosh_fourth_lower [IsProbabilityMeasure μ] {Y : Ω → ℝ}
       rw [integral_div, integral_const_mul]
       have ht : 0 ≤ t ^ (2 * n) / (Nat.factorial (2 * n) : ℝ) := hpos t n
       have hh := mul_le_mul_of_nonneg_left (hmom n) ht
-      convert hh using 1 <;> ring
+      convert! hh using 1 <;> ring
     _ = m * ∫ ω, ∑ n ∈ Finset.range N,
         (t * Y ω) ^ (2 * n) / (Nat.factorial (2 * n) : ℝ) ∂μ := by
       rw [integral_finset_sum _ (fun n _ => hiterm n)]
@@ -143,7 +143,7 @@ theorem scalar_cosh_upper {Y : Ω → ℝ} {K : ℝ}
     (∫ ω, Real.cosh (t * Y ω) ∂μ) ≤ Real.exp (K ^ 2 * t ^ 2 / 2) := by
   have hp := h.mgf_le t
   have hn := h.mgf_le (-t)
-  simp only [mgf, NNReal.coe_mk, neg_sq] at hp hn
+  simp only [mgf, NNReal.toReal, neg_sq] at hp hn
   calc
     (∫ ω, Real.cosh (t * Y ω) ∂μ) =
         ((∫ ω, Real.exp (t * Y ω) ∂μ) + (∫ ω, Real.exp (-t * Y ω) ∂μ)) / 2 := by
@@ -210,8 +210,7 @@ theorem fourth_implicit_bound {m K : ℝ} (hK : 1 ≤ K) (hm : 0 < m)
   have hbase : Real.log (2 * C) < C / (2 * K ^ 2) := by
     have heq : C / (2 * K ^ 2) = (5 / 2 : ℝ) * L := by
       dsimp [C]
-      field_simp [hK0.ne']
-      ring
+      field_simp [hK0.ne'] <;> ring
     rw [heq]
     simpa only [C, show 2 * (5 * K ^ 2 * L) = 10 * K ^ 2 * L by ring] using hlog
   by_contra hmc
@@ -223,14 +222,14 @@ theorem fourth_implicit_bound {m K : ℝ} (hK : 1 ≤ K) (hm : 0 < m)
     apply (le_div_iff₀ (by positivity : 0 < 2 * K ^ 2)).2
     dsimp [C]
     nlinarith [mul_nonneg (sq_nonneg K) (sub_nonneg.mpr hL1)]
-  have hprod : 2 * m = (2 * C) * r := by dsimp [r]; field_simp [hC.ne']; ring
+  have hprod : 2 * m = (2 * C) * r := by dsimp [r]; field_simp [hC.ne'] <;> ring
   have hl : Real.log (2 * m) < m / (2 * K ^ 2) := by
     calc
       Real.log (2 * m) = Real.log (2 * C) + Real.log r := by
         rw [hprod, Real.log_mul (by positivity) hr.ne']
       _ ≤ Real.log (2 * C) + (r - 1) :=
-        add_le_add_left (Real.log_le_sub_one_of_pos hr) _
-      _ < C / (2 * K ^ 2) + (r - 1) := add_lt_add_right hbase _
+        add_le_add_right (Real.log_le_sub_one_of_pos hr) _
+      _ < C / (2 * K ^ 2) + (r - 1) := add_lt_add_left hbase _
       _ ≤ r * (C / (2 * K ^ 2)) := by
         nlinarith [mul_nonneg (sub_nonneg.mpr hr1) (sub_nonneg.mpr hratio)]
       _ = m / (2 * K ^ 2) := by dsimp [r]; field_simp [hC.ne']
@@ -275,7 +274,9 @@ theorem scalar_fourth_unit [IsProbabilityMeasure μ] {Y : Ω → ℝ}
   have hi : ∀ n : ℕ, Integrable (fun ω => Y ω ^ n) μ :=
     fun n => integrable_pow_of_integrable_exp_mul (by norm_num : (1 : ℝ) ≠ 0)
       (h.integrable_exp_mul 1) (h.integrable_exp_mul (-1)) n
-  have hsg : HasSubgaussianMGF Y ⟨(1 : ℝ) ^ 2, sq_nonneg 1⟩ μ := by simpa using h
+  have hsg : HasSubgaussianMGF Y ⟨(1 : ℝ) ^ 2, sq_nonneg 1⟩ μ := by
+    change HasSubgaussianMGF Y (NNReal.mk ((1 : ℝ) ^ 2) _) μ
+    simpa using h
   let m := ∫ ω, Y ω ^ 4 ∂μ
   have hlow : ∀ t : ℝ, 1 + t ^ 2 / 2 + t ^ 4 * m / 24 ≤ Real.exp (t ^ 2 / 2) := by
     intro t
@@ -286,7 +287,7 @@ theorem scalar_fourth_unit [IsProbabilityMeasure μ] {Y : Ω → ℝ}
   have hlim : Filter.Tendsto
       (fun s : ℝ => (Real.exp s - (1 + s + s ^ 2 / 2)) / s ^ 2)
       (nhds 0) (nhds 0) := by
-    convert (Real.exp_sub_sum_range_succ_isLittleO_pow 2).tendsto_div_nhds_zero using 1
+    convert! (Real.exp_sub_sum_range_succ_isLittleO_pow 2).tendsto_div_nhds_zero using 1
     funext s
     norm_num [Finset.sum_range_succ, Nat.factorial]
   have hbound : m / 6 - 1 / 2 ≤ (0 : ℝ) := by

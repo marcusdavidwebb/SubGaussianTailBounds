@@ -29,26 +29,26 @@ theorem gaussian_mgf_moments {Ω : Type*} [MeasurableSpace Ω]
   let f : ℝ → ℝ := fun t => Real.exp (v * t ^ 2 / 2)
   have hmgf : mgf Y μ = f := funext hm
   have hd0 (t : ℝ) : HasDerivAt f (v * t * f t) t := by
-    convert ((((hasDerivAt_id t).pow 2).const_mul v).div_const 2).exp using 1
+    convert! ((((hasDerivAt_id t).pow 2).const_mul v).div_const 2).exp using 1
     dsimp [f]
     ring
   have hd1 (t : ℝ) : HasDerivAt (fun t => v * t * f t)
       ((v + v ^ 2 * t ^ 2) * f t) t := by
-    convert ((hasDerivAt_id t).const_mul v).mul (hd0 t) using 1
-    dsimp only [id]
+    convert! ((hasDerivAt_id t).const_mul v).mul (hd0 t) using 1
+    dsimp only [id, Pi.add_apply, Pi.pow_apply]
     ring
   have hd2 (t : ℝ) : HasDerivAt (fun t => (v + v ^ 2 * t ^ 2) * f t)
       ((3 * v ^ 2 * t + v ^ 3 * t ^ 3) * f t) t := by
-    convert ((hasDerivAt_const t v).add
+    convert! ((hasDerivAt_const t v).add
       (((hasDerivAt_id t).pow 2).const_mul (v ^ 2))).mul (hd0 t) using 1
-    dsimp only [id]
+    dsimp only [id, Pi.add_apply, Pi.pow_apply]
     ring
   have hd3 (t : ℝ) : HasDerivAt
       (fun t => (3 * v ^ 2 * t + v ^ 3 * t ^ 3) * f t)
       ((3 * v ^ 2 + 6 * v ^ 3 * t ^ 2 + v ^ 4 * t ^ 4) * f t) t := by
-    convert (((hasDerivAt_id t).const_mul (3 * v ^ 2)).add
+    convert! (((hasDerivAt_id t).const_mul (3 * v ^ 2)).add
       (((hasDerivAt_id t).pow 3).const_mul (v ^ 3))).mul (hd0 t) using 1
-    dsimp only [id]
+    dsimp only [id, Pi.add_apply, Pi.pow_apply]
     ring
   have h1 : deriv f = fun t => v * t * f t := funext (fun t => (hd0 t).deriv)
   have h2 : deriv (fun t => v * t * f t) = fun t => (v + v ^ 2 * t ^ 2) * f t :=
@@ -98,7 +98,7 @@ theorem standardGaussian_linear_pow_integrable {ι : Type*} [Fintype ι]
 theorem standardGaussian_scalar_moments :
     (∫ x : ℝ, x ^ 2 ∂gaussianReal 0 1) = 1 ∧
       (∫ x : ℝ, x ^ 4 ∂gaussianReal 0 1) = 3 := by
-  simpa only [one_mul, one_pow, mul_one] using
+  simpa only [one_mul, one_pow, mul_one, id_eq] using
     gaussian_mgf_moments (Y := id) 1 standardGaussian_integrable_exp
       (fun t => by simpa using standardGaussian_integral_exp t)
 
@@ -127,11 +127,11 @@ theorem standardGaussian_coordinate_sq_mul_sq {ι : Type*} [Fintype ι]
   · have hv (k : ι) : (∫ x, f k x ∂gaussianReal 0 1) = 1 := by
       by_cases hki : k = i
       · subst k
-        simpa only [f, if_pos rfl, if_neg hij, mul_one] using
+        simpa only [f, if_pos rfl, if_neg hij, ite_true, mul_one] using
           standardGaussian_scalar_moments.1
       · by_cases hkj : k = j
         · subst k
-          simpa only [f, if_neg hki, if_pos rfl, one_mul] using
+          simpa only [f, if_neg hki, if_pos rfl, ite_true, one_mul] using
             standardGaussian_scalar_moments.1
         · simp [f, hki, hkj]
     simp [hv, hij]
@@ -180,7 +180,7 @@ theorem standardGaussian_quadratic_sq_integrable {ι : Type*} [Fintype ι] (b : 
   have hi : ∀ i j, Integrable
       (fun g => (b i * b j) * ((g i) ^ 2 * (g j) ^ 2)) (standardGaussian ι) :=
     fun i j => (standardGaussian_coordinate_sq_mul_sq_integrable i j).const_mul _
-  convert integrable_finset_sum Finset.univ
+  convert! integrable_finset_sum Finset.univ
     (fun i _ => integrable_finset_sum Finset.univ (fun j _ => hi i j)) using 1
   funext g
   simp only [pow_two, Finset.sum_mul, Finset.mul_sum]

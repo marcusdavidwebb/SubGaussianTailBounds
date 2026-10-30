@@ -57,6 +57,14 @@ end SubGaussian.AcceptedConstants
     def test_current_snapshot_is_declarative(self):
         self.check((SOURCE / "lean/SingularValueBounds/Canonical/AcceptedConstants.lean").read_text(), True)
 
+    def test_module_and_import_modifiers_are_rejected(self):
+        for header in ("module\nimport Mathlib.Data.Real.Sqrt", "prelude\nimport Mathlib.Data.Real.Sqrt",
+                       "public import Mathlib.Data.Real.Sqrt", "meta import Mathlib.Data.Real.Sqrt",
+                       "import all Mathlib.Data.Real.Sqrt"):
+            with self.subTest(header=header):
+                self.check(header + "\nnamespace SubGaussian.AcceptedConstants\n"
+                           "def value : Nat := 1\nend SubGaussian.AcceptedConstants\n", False)
+
     def test_guarded_line_comment_stays_a_comment_after_wrapping(self):
         source = ("import Mathlib.Data.Real.Sqrt\r\nnamespace SubGaussian.AcceptedConstants\r\n" +
                   "def value : Nat := 1\r\n-- hidden\u2028" +

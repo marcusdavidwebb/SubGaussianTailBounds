@@ -65,8 +65,8 @@ Paths in this table are relative to `lean/SingularValueBounds/`. Counts are
 
 | Folder | Direct files | Purpose |
 |---|---:|---|
-| [lean/SingularValueBounds/](lean/SingularValueBounds/) | 0 | Container for the 525 maintained mathematical modules. The complete-library umbrella is the sibling file `lean/SingularValueBounds.lean`. |
-| [Canonical/](lean/SingularValueBounds/Canonical/) | 6 | The public interface: general and unit baseline proofs, adapters to the actual root statement, monotonicity, current results/comparisons and exact accepted constants. |
+| [lean/SingularValueBounds/](lean/SingularValueBounds/) | 0 | Container for the 528 maintained mathematical modules. The complete-library umbrella is the sibling file `lean/SingularValueBounds.lean`. |
+| [Canonical/](lean/SingularValueBounds/Canonical/) | 9 | The public interface: general and unit baseline proofs, adapters to the actual root statement, NLA-lib equivalence bridges, monotonicity, current results/comparisons and exact accepted constants. |
 | [Concentration/](lean/SingularValueBounds/Concentration/) | 1 | Integration of a new independent random row against the preceding state, using independence and Fubini. |
 | [Core/](lean/SingularValueBounds/Core/) | 5 | Shared row assumptions, constants, matrix algebra/measurability and scalar tail-to-moment estimates. |
 | [KL/](lean/SingularValueBounds/KL/) | 3 | Internal statement and finite-condition interfaces, row-by-row transfer and analytic theorem assembly. Most of this proof family is in its subfolders. |
@@ -81,6 +81,15 @@ Paths in this table are relative to `lean/SingularValueBounds/`. Counts are
 | [Shifts/](lean/SingularValueBounds/Shifts/) | 7 | Bounds for one-row lower/upper spectral shifts, including root constructions, determinants and rank-one matrix updates. |
 | [Spectral/](lean/SingularValueBounds/Spectral/) | 4 | Resolvent and potential definitions, scalar roots, and construction/continuity of variational spectral bounds. |
 | [SpectralConcentration/](lean/SingularValueBounds/SpectralConcentration/) | 2 | Row independence for Gram matrices and Chernoff optimization turning moment-generating-function bounds into tail probabilities. |
+
+The root statement imports NLA-lib directly.
+[Canonical/NLARows.lean](lean/SingularValueBounds/Canonical/NLARows.lean) relates
+its predicates to the original coordinate and MGF assumptions;
+[Canonical/NLASingularValues.lean](lean/SingularValueBounds/Canonical/NLASingularValues.lean)
+identifies its singular values with the preceding extrema, including zeros.
+[Canonical/StatementEquivalence.lean](lean/SingularValueBounds/Canonical/StatementEquivalence.lean)
+assembles the equivalence for both canonical propositions and all sample-space
+universes.
 
 ### Finite-proof subfolders
 
@@ -184,7 +193,7 @@ reviewable source templates, not separately compiled library modules.
 | [lean/SingularValueBounds.lean](lean/SingularValueBounds.lean) | Umbrella importing every maintained library module for complete verification coverage. |
 | [lean/verify.sh](lean/verify.sh) | Single complete local verification command coordinating the Python helpers and Lean programs. |
 | [lean/setup.sh](lean/setup.sh) | Small wrapper around `scripts/configure_lean.py`; workspace setup alone does not check proofs. |
-| [lean/lean-toolchain](lean/lean-toolchain) | Lean 4.19.0 pin. |
+| [lean/lean-toolchain](lean/lean-toolchain) | Lean 4.33.1 pin, matching the imported NLA-lib version. |
 | [lean/lakefile.toml](lean/lakefile.toml) | Lake configuration template: libraries, actual source roots and compiler settings. |
 | [lean/lake-manifest.json](lean/lake-manifest.json) | Exact dependency revisions; configuration supplies the external package path. |
 | [.github/workflows/ci.yml](.github/workflows/ci.yml) | Administrative checks and isolated commit-status reporting. |
@@ -195,8 +204,8 @@ reviewable source templates, not separately compiled library modules.
 
 ## Proof coverage and further simplification
 
-The umbrella checks all 525 library modules. A static traversal of ordinary
-source `import` lines from `SingularValueBounds.Canonical.Results` reaches 522.
+The umbrella imports all 528 library modules. A static traversal of ordinary
+source `import` lines from `SingularValueBounds.Canonical.Results` reaches 525.
 The three remaining modules expose additional assemblies or helper APIs:
 
 | Module | Present purpose |
@@ -215,9 +224,12 @@ reuse; reducing file count alone does not simplify the mathematical argument.
 `.git/` is Git's local database. Ignored `__pycache__/` and editor directories
 are generated metadata. Neither belongs to the proof inventory.
 
-Toolchains live in `~/.elan`; compatible dependencies in
-`~/Lean/SingularValueBounds/.lake/packages/`; this project's outputs, generated
-checking modules and logs in its own
-`~/Lean/SubGaussianTailBounds/<source-path-digest>/` workspace; and the macOS
-Mathlib cache in `~/Library/Caches/mathlib`. See [Lean setup](lean/README.md).
+Toolchains live in `~/.elan`. This project's Lean 4.33.1 dependencies, outputs,
+generated checking modules and logs live in its own
+`~/Lean/SubGaussianTailBounds/<source-path-digest>/nla-4.33.1/` workspace.
+NLA-lib and Mathlib are stored under that workspace's `.lake/packages/`, with
+no dependency tree or dependency symlink in this checkout. The older
+`~/Lean/SingularValueBounds/.lake/packages/` tree is unchanged and not used by
+this setup. The macOS Mathlib cache remains in `~/Library/Caches/mathlib`.
+See [Lean setup](lean/README.md) for exact pins and current validation scope.
 The removed supplement and retired tools remain accessible through Git history.

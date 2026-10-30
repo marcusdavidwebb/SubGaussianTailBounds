@@ -69,7 +69,7 @@ theorem BernsteinCertificate.nonneg {p : ℚ[X]} {n : ℕ} {b : Fin (n + 1) → 
     (h : BernsteinCertificate p n b) {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) :
     0 ≤ realEval p x := by
   rw [h.identity, realEval_expansion]
-  exact bernstein_sum_nonneg n (fun i => (b i : ℝ)) (fun i => by dsimp; exact_mod_cast h.nonnegative i) hx0 hx1
+  exact bernstein_sum_nonneg n (fun i => (b i : ℝ)) (fun i => by exact_mod_cast h.nonnegative i) hx0 hx1
 
 theorem bernstein_certificate_bounds {p : ℚ[X]} {n : ℕ} {b : Fin (n + 1) → ℚ}
     (hid : p = bernsteinExpansion n b) {lo hi : ℚ}
@@ -101,9 +101,9 @@ theorem realEval_affine_comp (p : ℚ[X]) (a width : ℚ) (x : ℝ)
     realEval (p.comp (affine a width)) ((x - a) / width) = realEval p x := by
   have hw' : (width : ℝ) ≠ 0 := by exact_mod_cast hw
   simp only [realEval, Polynomial.eval₂_comp, affine, Polynomial.eval₂_add,
-    Polynomial.eval₂_C, Polynomial.eval₂_mul, Polynomial.eval₂_X]
+    Polynomial.eval₂_C, Polynomial.eval₂_mul, Polynomial.eval₂_X, Rat.coe_castHom]
   congr 1
-  field_simp
+  field_simp <;> ring
 
 theorem BernsteinCertificate.nonneg_interval {p : ℚ[X]} {n : ℕ}
     {b : Fin (n + 1) → ℚ} {a width : ℚ}
@@ -171,8 +171,8 @@ theorem TensorCertificate.nonneg_rectangle {p : Polynomial (Polynomial ℚ)} {n 
   have hh' : (0 : ℝ) < height := by exact_mod_cast hh
   have hc := h.nonneg (affine_coordinate hw' hx) (affine_coordinate hh' hy)
   rw [realEval₂_affine] at hc
-  have ex : (a : ℝ) + width * ((x - a) / width) = x := by field_simp
-  have ey : (c : ℝ) + height * ((y - c) / height) = y := by field_simp
+  have ex : (a : ℝ) + width * ((x - a) / width) = x := by field_simp <;> ring
+  have ey : (c : ℝ) + height * ((y - c) / height) = y := by field_simp <;> ring
   rwa [ex, ey] at hc
 
 /-- Degree elevation may be checked as finitely many rational basis

@@ -18,7 +18,7 @@ theorem second_moment_good_event {Y T : Ω → ℝ} {E : Set Ω}
     by_cases hω : ω∈E
     · simp only [Set.indicator_of_mem hω]
       linarith [sq_nonneg (T ω)]
-    · simp only [Set.indicator_of_not_mem hω,add_zero]
+    · simp only [Set.indicator_of_notMem hω,add_zero]
       exact pow_le_pow_left₀ (hY0 ω) (hgood ω hω) 2
   have h := integral_mono hY2 (hT2.add (hY2.indicator hE)) hpoint
   change (∫ ω,Y ω^2 ∂μ) ≤ (∫ ω,T ω^2+E.indicator (fun ω=>Y ω^2) ω ∂μ) at h
@@ -28,7 +28,6 @@ theorem second_moment_good_event {Y T : Ω → ℝ} {E : Set Ω}
 theorem upperSquareWeight_trace_square {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     Matrix.trace (upperSquareWeight R^2) = ∑j,upperNormalizedSpectrum R hR j^4 := by
   have h := congrArg (fun P : Matrix ι ι ℝ => Matrix.trace (P^2)) (upperSquareWeight_spectral hR)
-  dsimp only at h
   simp only [pow_two] at h
   rw [unitary_conjugate_mul,Matrix.diagonal_mul_diagonal,unitary_conjugate_trace,Matrix.trace_diagonal] at h
   simp_rw [upperWeight_eq_normalized_square hR] at h
@@ -92,7 +91,7 @@ theorem upperShift_general_rare_second
       apply (div_le_iff₀ hp).2
       nlinarith
     have hh := h.trans (mul_le_mul_of_nonneg_right hs (Real.exp_nonneg _))
-    convert hh using 1 <;> congr 2 <;> ring
+    convert! hh using 1 <;> congr 2 <;> ring
   have hY2 := (exponential_tail_moment hY.aemeasurable hY0 (by norm_num : (0:ℝ)≤177/50)
     (by positivity : 0 < 23/(50*K^2)) hTail 1).1
   have hprob := upperComparison_general_rare_probability hcert hsg hK hd hiso.measurable hR i top hw hcap hκ
@@ -104,7 +103,7 @@ theorem upperShift_general_rare_second
       (endpointRareRow i).probability*Real.exp (-((69/25:ℝ)*d)) := by
     have hh := mul_le_mul_of_nonneg_right (endpoint_row_cutoff i) (Real.exp_nonneg (-((69/25:ℝ)*d)))
     rw [mul_assoc,← Real.exp_add] at hh
-    convert hh using 1
+    convert! hh using 1
     congr 2
     field_simp
     <;> ring

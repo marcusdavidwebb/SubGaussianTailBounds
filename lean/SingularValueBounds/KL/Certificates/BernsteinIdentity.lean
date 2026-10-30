@@ -1,5 +1,5 @@
 import SingularValueBounds.KL.Certificates.Polynomial
-import Mathlib.Algebra.Polynomial.ofFn
+import Mathlib.Algebra.Polynomial.OfFn
 
 /-! Exact Bernstein inversion for every rational polynomial within the degree
 bound. The identity is proved algebraically; concrete coefficient signs remain
@@ -17,7 +17,7 @@ private theorem bernstein_monomial_summand (n k j : ℕ) (hk : k ≤ n) (hj : j 
     exact_mod_cast Nat.ne_of_gt (Nat.choose_pos hk)
   have hmul : (Nat.choose n (k+j) : ℚ) * (Nat.choose (k+j) k : ℚ) =
       (Nat.choose n k : ℚ) * (Nat.choose (n-k) j : ℚ) := by
-    have hnat := Nat.choose_mul (show k+j ≤ n by omega) (show k ≤ k+j by omega)
+    have hnat := Nat.choose_mul (n := n) (show k ≤ k+j by omega)
     exact_mod_cast (by simpa using hnat :
       Nat.choose n (k+j) * Nat.choose (k+j) k = Nat.choose n k * Nat.choose (n-k) j)
   have hc : (Nat.choose (k+j) k : ℚ)/(Nat.choose n k : ℚ) * Nat.choose n (k+j) =

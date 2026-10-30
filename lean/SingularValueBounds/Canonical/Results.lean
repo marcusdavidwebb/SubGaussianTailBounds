@@ -2,6 +2,7 @@ import SingularValueBounds.Canonical.General
 import SingularValueBounds.Canonical.Unit
 import SingularValueBounds.Canonical.Monotonicity
 import SingularValueBounds.Canonical.AcceptedConstants
+import SingularValueBounds.Canonical.StatementEquivalence
 
 /-! Public interface for the single current formalization. The accepted snapshot
 records each jointly proved quartet; the trusted verifier supplies the independent

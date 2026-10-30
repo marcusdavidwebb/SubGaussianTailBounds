@@ -43,13 +43,37 @@ as success. Python prepared rational data whose identities and inequalities
 were proved in Lean; Wolfram MCP supported a small numerical exploration and
 supplied no accepted facts. On 25 October, the remaining unit entropy and
 polynomial families and public result interface were completed. Both canonical
-proofs now include all finite numerical obligations. Supporting Python performs
-administration and supplies no mathematical oracle.
+proofs in that completed formalization included all finite numerical obligations.
+Supporting Python performs administration and supplies no mathematical oracle.
 
 Historical dates, source inventories, timings and earlier conditional results
 remain in the [archived validation records](HISTORY.md#historical-sources).
 Local validation does not imply paper publication, novelty or completion of a
 hosted workflow. Later source hashes do not retroactively alter an earlier run.
+
+## NLA-lib statement imports — 30 October 2026
+
+At Marcus Webb's request, Codex replaced local row predicates and singular-value
+extrema in the canonical statement with actual Lean imports from
+[NLA-lib commit 6491e752](https://github.com/NLA-lib/NLAlib/tree/6491e7528c1b1e68e46301cde6a76ae153e8e834).
+Credit for these definitions and their supporting theorems belongs to NLA-lib's
+contributors. The new compatibility proofs relate its variance proxy `K²`,
+isotropy and ordered singular values to the preceding expanded assumptions
+and extrema. Row measurability remains explicit, and the statement retains
+both sharp quartets, separate non-strict measurable events and arbitrary
+sample-space universes. This imports no replacement proof of the sharp tail
+bounds and makes no new mathematical or novelty claim.
+
+The dependency migration uses separately stored Lean/Mathlib 4.33.1 and NLA-lib
+under `~/Lean/`, preserving the older 4.19.0 environment. NLA-lib retains its
+Apache 2.0 licence; no dependency source is copied into this repository.
+The complete proof library, both sharp canonical results and the full statement
+equivalences compile with the new environment. The generated canonical
+acceptance obligations also compile and pass their supplemental axiom audit.
+Independent kernel replay was explicitly deferred by Marcus Webb. These checks
+do not establish complete verification of the migrated library or change the
+scope of the historical runs. See [HISTORY.md](HISTORY.md) for the validation
+record and [CONTRIBUTIONS.md](../CONTRIBUTIONS.md) for the implementation attribution.
 
 ## Scope and unresolved assessments
 

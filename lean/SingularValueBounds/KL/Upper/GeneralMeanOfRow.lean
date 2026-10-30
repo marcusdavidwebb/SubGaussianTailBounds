@@ -49,7 +49,7 @@ theorem upperShift_general_mean_of_row {r : GeneralMeanRow}
     have ht := upperShift_tail_family hsg hiso.measurable hK hR hTrace hb
       (by norm_num : (0:ℝ)<1/2) (by norm_num : (1/2:ℝ)<1) hu
     apply (hDom u).trans
-    convert ht using 1 <;> congr 2 <;> ring
+    convert! ht using 1 <;> congr 2 <;> ring
   have hCost := generalMean_entropy_cost_of_row hnum hK hL hKL hW hWi hW0 hMean hWE
     (by positivity : 0≤(Real.sqrt (1-(1/2:ℝ)))⁻¹)
     (by positivity : 0<1/(4*K^2)) hGlobal (hTail.mono hDom)

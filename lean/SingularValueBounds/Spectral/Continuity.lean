@@ -22,8 +22,9 @@ theorem symmetric_posDef_iff_sphere (H : SymmetricMatrix ι) :
   constructor
   · intro hH x hx
     have hn : x ≠ 0 := by intro hz; simp [hz] at hx
-    simpa using hH.2 x hn
+    simpa using hH.dotProduct_mulVec_pos hn
   · intro hsphere
+    apply Matrix.posDef_iff_dotProduct_mulVec.mpr
     refine ⟨H.2, ?_⟩
     intro x hx
     have hn : 0 < ‖x‖ := norm_pos_iff.mpr hx

@@ -73,7 +73,7 @@ theorem generalMean_chord {E : ℝ → ℝ} {lo hi el eh L : ℝ}
     (show hi ∈ Icc lo hi from ⟨hlohi.le,le_rfl⟩) ha hb hsum
   simp only [smul_eq_mul,hnode] at hc
   have hh := hc.trans (add_le_add (mul_le_mul_of_nonneg_left hel ha) (mul_le_mul_of_nonneg_left heh hb))
-  convert hh using 1 <;> dsimp [a,b] <;> field_simp [ne_of_gt (sub_pos.mpr hlohi)] <;> ring
+  convert! hh using 1 <;> (try dsimp [a,b]) <;> field_simp [ne_of_gt (sub_pos.mpr hlohi)] <;> ring
 
 /-- The finite minimum comparison certifies an entire real grid interval. -/
 theorem generalMean_chord_cost {E : ℝ → ℝ} {w c J lo hi el eh L : ℝ}

@@ -45,7 +45,7 @@ theorem upperShift_mean_of_entropy_cost
     intro u hu
     have ht := upperShift_tail_family hsg hiso.measurable hK hR htrace hb
       (by norm_num : (0 : ℝ)<1/2) (by norm_num : (1/2 : ℝ)<1) hu
-    convert ht using 1 <;> congr 2 <;> ring
+    convert! ht using 1 <;> congr 2 <;> ring
   have hr : 0<1/(4*K^2) := by positivity
   have hC : 0≤(Real.sqrt (1-(1/2 : ℝ)))⁻¹ := by positivity
   have hYi : Integrable Y μ := by
@@ -99,9 +99,9 @@ theorem upperShift_mean_of_entropy_cost
   have hWZi := integrable_weighted_of_nonneg (Filter.Eventually.of_forall hW0)
     hZ0 hn.1 hWE hExp
   have hWQi : Integrable (fun ω => W ω*Q ω) μ := by
-    convert hWZi.mul_const a using 1
+    convert! hWZi.mul_const a using 1
     ext ω
-    dsimp
+    try dsimp
     field_simp
   have hCost' := hCost W hW hn.1 hW0 hn.2.1 hWY hWE
   have hWQ : (∫ω,W ω*Q ω ∂μ)≤b := by
@@ -120,11 +120,11 @@ theorem upperShift_mean_of_entropy_cost
     apply hwq.trans
     calc
       _ ≤ ((∫ω,W ω*Real.log (W ω) ∂μ)+H)*a :=
-        mul_le_mul_of_nonneg_right (add_le_add_left hGaussian _) ha.le
+        mul_le_mul_of_nonneg_right (add_le_add_right hGaussian _) ha.le
       _ = a*((∫ω,W ω*Real.log (W ω) ∂μ)+H) := by ring
       _ ≤ b := hsum
   have hYQi : Integrable (fun ω => Y ω*Q ω) μ := by
-    convert hWQi.const_mul m using 1
+    convert! hWQi.const_mul m using 1
     ext ω
     dsimp [W]
     field_simp

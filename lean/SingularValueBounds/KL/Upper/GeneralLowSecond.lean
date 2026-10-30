@@ -23,7 +23,7 @@ theorem upper_low_second_of_tail {Y : Ω → ℝ} {K d : ℝ}
   have hA : 0 ≤ A := by dsimp [A]; positivity
   have ht : ∀ u,0 ≤ u → μ.real {ω | u<Y ω} ≤ (46/15:ℝ)*Real.exp (-(rate*u)) := by
     intro u hu
-    convert htail u hu using 1 <;> congr 2 <;> dsimp [rate] <;> ring
+    convert! htail u hu using 1 <;> congr 2 <;> dsimp [rate] <;> ring
   have hcut := first_moment_cutoff hY hY0 (by norm_num : (0:ℝ)≤46/15) hr hA ht hMean 1
   have hi := (exponential_tail_moment hY.aemeasurable hY0 (by norm_num : (0:ℝ)≤46/15) hr ht 1).1
   have hrate : 1/rate=2*K^2 := by dsimp [rate]; field_simp
@@ -61,7 +61,7 @@ theorem upper_low_second_of_tail {Y : Ω → ℝ} {K d : ℝ}
       <;> ring
     have hlast : (Real.exp (-2*d)/(2*(1+d)))*(2*K^2*(1+d)) = 1 := by
       calc
-        _ = Real.exp (-2*d)*K^2 := by field_simp [hd1]; ring
+        _ = Real.exp (-2*d)*K^2 := by field_simp [hd1]
         _ = 1 := heq
     rw [sub_mul,hfirst,hlast]
     exact sub_le_sub_right hh 1

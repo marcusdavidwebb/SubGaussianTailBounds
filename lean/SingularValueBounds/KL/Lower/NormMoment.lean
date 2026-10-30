@@ -42,7 +42,7 @@ theorem unitary_trace_one_exponential {X : Ω → ι → ℝ} {K scale cap : ℝ
     nlinarith [mul_le_mul_of_nonneg_left (hbound i) (by positivity : 0 ≤ 2/scale)]
   have h := unitary_quadratic_exponential_bound hsg hm U b hb t (by dsimp [t]; positivity) hf
   have hlog := Real.log_le_log (integral_exp_pos h.1) h.2
-  rw [Real.log_prod Finset.univ _ (fun i _ => (inv_pos.mpr (Real.sqrt_pos.2 (hf i))).ne')] at hlog
+  rw [Real.log_prod (fun i _ => (inv_pos.mpr (Real.sqrt_pos.2 (hf i))).ne')] at hlog
   simp_rw [Real.log_inv,Real.log_sqrt (hf _).le,hfac] at hlog
   have hs := Finset.sum_le_sum (s:=Finset.univ) (fun i _ =>
     neg_log_secant hcap ⟨hb i,hbound i⟩ (by positivity : 0 ≤ 2/scale) hg)

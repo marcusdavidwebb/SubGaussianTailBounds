@@ -86,7 +86,7 @@ theorem endpointLowerProfile_singularCost_lt : profileSingularCost endpointLower
 theorem generalLowerPolynomial_hasDerivAt (x : ℝ) :
     HasDerivAt generalLowerPolynomial (23/10+(47/10)*x-(9/10)*x^2) x := by
   unfold generalLowerPolynomial
-  convert ((((hasDerivAt_const x (57/40)).add ((hasDerivAt_id x).const_mul (23/10))).add
+  convert! ((((hasDerivAt_const x (57/40)).add ((hasDerivAt_id x).const_mul (23/10))).add
     (((hasDerivAt_id x).pow 2).const_mul (47/20))).sub
     (((hasDerivAt_id x).pow 3).const_mul (3/10))) using 1 <;> simp [id_eq] <;> ring
 

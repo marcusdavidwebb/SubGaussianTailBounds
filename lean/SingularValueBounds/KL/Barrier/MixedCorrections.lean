@@ -63,7 +63,7 @@ lemma mixedCost_le_constant (R : PositiveResolvent ι) {a : ℝ} (ha : 0 ≤ a)
   have hs := spectralRatio_pos_le_one R.2
   have he := hh ⟨hs.1.le,hs.2⟩ ⟨by norm_num,le_rfl⟩ hs.2
   simpa only [mixedCost,regularityCost,Real.sq_sqrt ha,mul_comm (h 1)] using
-    add_le_add_left (mul_le_mul_of_nonneg_left he (frobenius_nonneg R.1)) (a*Matrix.trace R.1)
+    add_le_add_right (mul_le_mul_of_nonneg_left he (frobenius_nonneg R.1)) (a*Matrix.trace R.1)
 
 lemma mixedCost_outward_nonempty (R : PositiveResolvent ι) {a : ℝ} (ha : 0 ≤ a)
     {h : ℝ → ℝ} (hh : MonotoneOn h (Icc (0 : ℝ) 1)) {b : ℝ} (hb : 0 < b) :

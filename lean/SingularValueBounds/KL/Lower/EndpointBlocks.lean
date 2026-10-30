@@ -124,12 +124,11 @@ theorem endpoint_rankone_cost_young (r : ι → ℝ) (top : ι) (A c : ℝ)
         endpointRankOneMajorant r top A c χ := by
   have hy : 2*endpointRestP r top*endpointRestQ r top A c ≤
       χ*endpointRestP r top^2+endpointRestQ r top A c^2/χ := by
-    apply (mul_le_mul_right hχ).mp
+    apply (mul_le_mul_iff_left₀ hχ).mp
     have hs := sq_nonneg (χ*endpointRestP r top-endpointRestQ r top A c)
     have he : (χ*endpointRestP r top^2+endpointRestQ r top A c^2/χ)*χ =
         χ^2*endpointRestP r top^2+endpointRestQ r top A c^2 := by
       field_simp [hχ.ne']
-      ring
     rw [he]
     nlinarith only [hs]
   have hp (x : ℝ) : -c*x^3+χ*x^4+endpointComparisonEigen A c x^2/χ =

@@ -26,7 +26,7 @@ theorem entropyGridBoundQ_rounding_allowance (j0 : ℕ) (B A : ℕ → ℚ) (dec
   have hn : ((8000-j0:ℕ):ℚ) ≤ 8000 := by exact_mod_cast (Nat.sub_le 8000 j0)
   have herror : ((8000-j0:ℕ):ℚ) * ((11 / roundingScale) / 200) ≤ 440 / roundingScale := by
     have h := mul_le_mul_of_nonneg_right hn (show (0:ℚ) ≤ (11 / roundingScale) / 200 by positivity)
-    convert h using 1 <;> ring
+    convert! h using 1 <;> ring
   unfold entropyGridBoundQ
   linarith
 

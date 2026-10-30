@@ -65,7 +65,7 @@ theorem mgf_rare_event_split [IsProbabilityMeasure μ] {Y T : Ω → ℝ}
     by_cases hω : ω∈E
     · simp only [Set.indicator_of_mem hω]
       linarith [exponentialRemainder_nonneg t (T ω)]
-    · simp only [Set.indicator_of_not_mem hω,add_zero]
+    · simp only [Set.indicator_of_notMem hω,add_zero]
       exact exponentialRemainder_mono ht (hY0 ω) (hGood ω hω)
   have hi := integral_mono hRY (hRT.add (hRY.indicator hE)) hpoint
   change (∫ ω, exponentialRemainder t (Y ω) ∂μ)≤
@@ -75,7 +75,7 @@ theorem mgf_rare_event_split [IsProbabilityMeasure μ] {Y T : Ω → ℝ}
     (fun ω : Ω => t*Y ω)) ω ∂μ)≤_ at hi
   rw [integral_sub' (hYE.sub (integrable_const 1)) (hYi.const_mul t),
     integral_sub' hYE (integrable_const 1),integral_const_mul] at hi
-  simp only [integral_const,measureReal_univ_eq_one,one_smul] at hi
+  simp only [integral_const,probReal_univ,one_smul] at hi
   nlinarith
 
 /-- Combining an event bound and an unrestricted exponential tail. -/
@@ -132,7 +132,7 @@ theorem finite_measure_cutoff_moment [IsFiniteMeasure μ]
     (hUi (n-j)).const_mul _
   have hSumInt : Integrable (fun ω => (A+U ω)^n) μ := by
     simp_rw [hsum]
-    exact integrable_finset_sum _ (fun j hj => hcoeff j)
+    exact integrable_finsetSum _ (fun j hj => hcoeff j)
   have hpoint : ∀ ω, Y ω^n ≤ (A+U ω)^n := by
     intro ω
     apply pow_le_pow_left₀ (hY0 ω)
@@ -141,7 +141,7 @@ theorem finite_measure_cutoff_moment [IsFiniteMeasure μ]
     linarith
   have hbound := integral_mono hYi hSumInt hpoint
   simp_rw [hsum] at hbound
-  rw [integral_finset_sum _ (fun j hj => hcoeff j)] at hbound
+  rw [integral_finsetSum _ (fun j hj => hcoeff j)] at hbound
   simp_rw [integral_const_mul] at hbound
   have hterms : (∑ j ∈ Finset.range (n+1), (n.choose j : ℝ)*A^j*(∫ ω, U ω^(n-j) ∂μ)) ≤
       (n.factorial : ℝ)*(p*tailMomentSeries (n+1) A (1/r)) := by

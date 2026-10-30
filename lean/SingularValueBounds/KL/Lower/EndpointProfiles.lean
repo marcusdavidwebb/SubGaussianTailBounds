@@ -34,7 +34,7 @@ theorem endpoint_profile_convex {k A₁ A₂ c₁ c₂ θ : ℝ}
   intro z hz0 hz1
   have hs := add_le_add (mul_le_mul_of_nonneg_left (h1 z hz0 hz1) hθ0)
     (mul_le_mul_of_nonneg_left (h2 z hz0 hz1) (sub_nonneg.mpr hθ1))
-  convert hs using 1 <;> ring
+  convert! hs using 1 <;> ring
 
 theorem endpoint_canonical_profile (k : ℝ) : LowerComparisonProfile k k 1 := by
   intro z _ _

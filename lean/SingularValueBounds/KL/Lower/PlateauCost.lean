@@ -67,7 +67,6 @@ theorem plateau_cost_of_taylor {u w C E d : ℝ} (hu : 0 < u) (hw : 0 < w)
     apply (div_le_iff₀ (show 0 < 3*u*w by positivity)).mpr
     have heq : (C-4/u)*Real.sqrt d*(3*u*w)=3*w*(u*C-4)*Real.sqrt d := by
       field_simp [hu.ne']
-      ring
     rw [heq]
     exact hroot
   linarith
@@ -150,9 +149,9 @@ theorem plateau_entropy_expression_bound {K u v w k d ζ : ℝ}
     rw [he,Real.exp_sub,Real.exp_add,Real.exp_log hratio,Real.exp_log (Real.sqrt_pos.mpr hd)]
   rw [hExp] at hEL
   rw [add_assoc] at hb
-  have hbound := hb.trans (add_le_add_left hEL (2*L))
+  have hbound := hb.trans (add_le_add_right hEL (2*L))
   change Real.log ((5/3)*K^2*L*(1+2*ζ))+v-w*ζ-G/2 ≤ _
-  convert hbound using 1
+  convert! hbound using 1
   dsimp [L]
   field_simp [hu.ne',hw.ne',(Real.sqrt_pos.mpr hd).ne']
   ring
@@ -235,7 +234,7 @@ theorem normalized_plateau_log_mgf {X : Ω → ι → ℝ} {K : ℝ}
   have hgap' : (1-(2*K^2*lam) • B).PosDef := by rw [hscale]; exact hgap
   have hi := (quadratic_exponential_det_bound hsg hm B hP lam (by dsimp [lam]; positivity) hgap').1
   have hl := quadratic_log_mgf_le_logdet hsg hm B hP lam (by dsimp [lam]; positivity) hgap'
-  rw [hscale,hdet,Real.log_prod Finset.univ _ (fun i _ => (hd i).ne')] at hl
+  rw [hscale,hdet,Real.log_prod (fun i _ => (hd i).ne')] at hl
   obtain ⟨top,_,htop⟩ := Finset.exists_mem_eq_sup' (s := Finset.univ) Finset.univ_nonempty r
   have hr2 : ∑ i,r i^2=1 := by rw [← real_spectral_trace_square hR.isHermitian]; exact normalized_trace_square hR hF
   have hs := plateau_retained_logdet r top hr2 (fun i =>
@@ -338,7 +337,7 @@ theorem normalized_plateau_mixed_cost {X : Ω → ι → ℝ} {K C : ℝ}
   have hExp := normalized_plateau_log_mgf hsg hiso.measurable hK0 hR hF hu hprofile hscalar
   have hWZ : Integrable (fun ω => quadraticForm P X ω*(lam*(quadraticForm B X ω-K^2*Matrix.trace R))) μ := by
     have hi := ((hT.integrable_mul hQ).sub (hTi.mul_const (K^2*Matrix.trace R))).const_mul lam
-    convert hi using 1
+    convert! hi using 1
     ext ω
     simp only [Pi.sub_apply,Pi.mul_apply]
     ring
@@ -367,9 +366,9 @@ theorem normalized_plateau_mixed_cost {X : Ω → ι → ℝ} {K C : ℝ}
     nlinarith only [hD,hExp.2,hopt,hscalarcost]
   have hfinal := h.trans hright
   have hpos : 0 < lam := by dsimp [lam]; positivity
-  have heq : lam*(C*K^2*logParameter K)=(u/2)*C*logParameter K := by dsimp [lam]; field_simp; ring
+  have heq : lam*(C*K^2*logParameter K)=(u/2)*C*logParameter K := by dsimp [lam]; field_simp
   rw [← heq] at hfinal
-  exact (mul_le_mul_left hpos).mp hfinal
+  exact (mul_le_mul_iff_right₀ hpos).mp hfinal
 
 /-- The complete concentrated-spectrum comparison in the printed plateau lemma.
 Only the explicit finite rational certificate conditions remain external. -/
