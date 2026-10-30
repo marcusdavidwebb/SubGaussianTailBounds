@@ -7,27 +7,26 @@ matrices with independent sub-Gaussian rows.
 
 Let $A$ be a random real $m \times n$ matrix on any probability space, with
 integer dimensions $m \ge n \ge 1$. Write $a_i \in \mathbb{R}^n$ for its rows.
-Assume:
+Assume the rows are measurable and mutually independent. They need not have the
+same distribution, and coordinates within a row may be dependent.
 
-- The rows are measurable and mutually independent. They need not have the same
-  distribution, and coordinates within a row may be dependent.
-- Each row has mean zero and identity covariance: for every row $i$ and
-  coordinates $j,k$,
+Each row has mean zero and identity covariance: for every row $i$ and
+coordinates $j,k$,
 
-  $$
-  \mathbb{E}[A_{ij}] = 0,
-  \qquad
-  \mathbb{E}[A_{ij}A_{ik}] =
-  \begin{cases}1 & j=k,\\ 0 & j\ne k.\end{cases}
-  $$
+```math
+\mathbb{E}[A_{ij}] = 0,
+\qquad
+\mathbb{E}[A_{ij}A_{ik}] =
+\begin{cases}1 & j=k,\\ 0 & j\ne k.\end{cases}
+```
 
-- For a common parameter $K \ge 1$, every row satisfies the following
-  **sub-Gaussian bound**, for every $v \in \mathbb{R}^n$ and $\theta \in \mathbb{R}$:
+For a common parameter $K \ge 1$, assume every row satisfies the following
+**sub-Gaussian bound**, for every $v \in \mathbb{R}^n$ and $\theta \in \mathbb{R}$:
 
-  $$
-  \mathbb{E}\!\left[\exp\!\left(\theta\langle a_i,v\rangle\right)\right]
-  \le \exp\!\left(\frac{K^2\theta^2\lVert v\rVert_2^2}{2}\right).
-  $$
+```math
+\mathbb{E}\!\left[\exp\!\left(\theta\langle a_i,v\rangle\right)\right]
+\le \exp\!\left(\frac{K^2\theta^2\lVert v\rVert_2^2}{2}\right).
+```
 
 The coordinates, their pairwise products within each row, and the exponentials
 above are assumed integrable. Here $\lVert\cdot\rVert_2$ is the Euclidean norm.
@@ -39,31 +38,31 @@ Then, for every $t \ge 0$, the smallest singular value is unlikely to fall far
 below $\sqrt m-K\sqrt n$, and the largest is unlikely to lie far above
 $\sqrt m+K\sqrt n$. Specifically,
 
-$$
+```math
 \mathbb{P}\!\left(\sigma_{\min}(A) \le
 \sqrt m-K\sqrt n-3.84\,KL-1.58\,K\sqrt L\,t\right)
 \le e^{-t^2/2},
-$$
+```
 
-$$
+```math
 \mathbb{P}\!\left(\sigma_{\max}(A) \ge
 \sqrt m+K\sqrt n+2.35\,KL+1.5\,K\sqrt L\,t\right)
 \le e^{-t^2/2}.
-$$
+```
 
 **When $K=1$, sharper bounds hold under the same assumptions:**
 
-$$
+```math
 \mathbb{P}\!\left(\sigma_{\min}(A) \le
 \sqrt m-\sqrt n-1.32-1.12\,t\right)
 \le e^{-t^2/2},
-$$
+```
 
-$$
+```math
 \mathbb{P}\!\left(\sigma_{\max}(A) \ge
 \sqrt m+\sqrt n+2.32+\sqrt{2}\,t\right)
 \le e^{-t^2/2}.
-$$
+```
 
 Each displayed tail event is measurable and has its own probability bound.
 The inequalities include equality at the thresholds and apply also at $t=0$.
