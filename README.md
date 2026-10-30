@@ -104,10 +104,11 @@ checks repository administration only. A green CI status is not proof verificati
 
 The root statement is immutable, including its comments and imports. This is its
 complete annotated source. The hypotheses and both non-strict tail bounds are
-part of the propositions being proved.
+part of the propositions being proved. The tail probabilities are real-valued
+under the explicit probability-measure assumption.
 
-The statement imports `NLAlib.IsSubgaussianVector`, `NLAlib.IsIsotropic` and
-`NLAlib.singularValues` directly from the pinned
+The statement uses `NLAlib.IsSubgaussianVector`, `NLAlib.IsIsotropic` and
+`NLAlib.singularValues` from the pinned
 [NLA-lib dependency](https://github.com/NLA-lib/NLAlib/tree/6491e7528c1b1e68e46301cde6a76ae153e8e834).
 Its variance proxy is `K²`; mean zero and the required integrability follow from
 the imported predicates. Row measurability remains explicit.
@@ -123,7 +124,6 @@ not in this repository.
 <!-- canonical-statement:start -->
 ```lean
 import NLAlib.Probability.SubGaussianVector.Basic
-import NLAlib.Probability.Isotropic
 import NLAlib.Matrix.Spectral.SingularValues
 
 /-!
@@ -146,7 +146,6 @@ These definitions name propositions; they do not assume the desired results.
 -/
 
 open MeasureTheory ProbabilityTheory
-open scoped ENNReal
 
 namespace SubGaussian
 universe u
@@ -154,21 +153,14 @@ universe u
 /-- Both non-strict tail events are measurable, and each has probability at most
 `exp (-t² / 2)`. This retains the equality cases at both thresholds. -/
 def SingularValueTails {Ω : Type u} [MeasurableSpace Ω] {m n : ℕ}
-    (μ : Measure Ω) (_hn : 1 ≤ n) (A : Ω → Matrix (Fin m) (Fin n) ℝ)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] (A : Ω → Matrix (Fin m) (Fin n) ℝ)
     (lower upper t : ℝ) : Prop :=
   let lowerTail := {ω | NLAlib.singularValues (A ω) (n - 1) ≤ lower}
   let upperTail := {ω | NLAlib.singularValues (A ω) 0 ≥ upper}
   (MeasurableSet lowerTail ∧
-    μ lowerTail ≤ ENNReal.ofReal (Real.exp (-(t ^ 2) / 2))) ∧
+    (μ lowerTail).toReal ≤ Real.exp (-(t ^ 2) / 2)) ∧
   (MeasurableSet upperTail ∧
-    μ upperTail ≤ ENNReal.ofReal (Real.exp (-(t ^ 2) / 2)))
-
-/-! ## The two statements
-
-The four positive constants are fixed before the dimensions and probability
-space. `α, β` control the lower tail; `γ, δ` control the upper tail.
-Both statements include `t = 0` and all dimensions `m ≥ n ≥ 1`.
--/
+    (μ upperTail).toReal ≤ Real.exp (-(t ^ 2) / 2))
 
 /-- General case: independent centred isotropic rows with MGF parameter `K ≥ 1`. -/
 def GeneralSingularValueTailBound (α β γ δ : ℝ) : Prop :=
@@ -182,7 +174,7 @@ def GeneralSingularValueTailBound (α β γ δ : ℝ) : Prop :=
     (∀ i, NLAlib.IsIsotropic (fun ω => A ω i) μ) →
     ∀ (t : ℝ), 0 ≤ t →
     let L := Real.log (Real.exp 1 * K)
-    SingularValueTails μ hn A
+    SingularValueTails μ A
       (√m - K * √n - α * K * L - β * K * √L * t)
       (√m + K * √n + γ * K * L + δ * K * √L * t) t
 
@@ -197,7 +189,7 @@ def UnitSingularValueTailBound (α β γ δ : ℝ) : Prop :=
     (∀ i, NLAlib.IsSubgaussianVector (fun ω => A ω i) 1 μ) →
     (∀ i, NLAlib.IsIsotropic (fun ω => A ω i) μ) →
     ∀ (t : ℝ), 0 ≤ t →
-    SingularValueTails μ hn A
+    SingularValueTails μ A
       (√m - √n - α - β * t)
       (√m + √n + γ + δ * t) t
 

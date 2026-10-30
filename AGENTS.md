@@ -15,7 +15,7 @@ Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
   Report mathematical or compatibility problems precisely without changing
   the canonical source or weakening the required theorem.
 - The observed SHA-256 is
-  `e62053135682c168816033858a78828abbf34fe47c3b2f9e9db44f6d6fb828b5`.
+  `be2804e4ca5ef33015df07e84f0544540f36c69f1be7bb4503c3363cb105f3a3`.
   Compare bytes before and after work. A digest detects drift; it is not a
   mathematical proof. The README copy must match the full annotated source.
 - Inventory repository-local AI instructions, including hidden/editor files,

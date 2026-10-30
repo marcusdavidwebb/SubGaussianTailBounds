@@ -65,8 +65,8 @@ Paths in this table are relative to `lean/SingularValueBounds/`. Counts are
 
 | Folder | Direct files | Purpose |
 |---|---:|---|
-| [lean/SingularValueBounds/](lean/SingularValueBounds/) | 0 | Container for the 528 maintained mathematical modules. The complete-library umbrella is the sibling file `lean/SingularValueBounds.lean`. |
-| [Canonical/](lean/SingularValueBounds/Canonical/) | 9 | The public interface: general and unit baseline proofs, adapters to the actual root statement, NLA-lib equivalence bridges, monotonicity, current results/comparisons and exact accepted constants. |
+| [lean/SingularValueBounds/](lean/SingularValueBounds/) | 0 | Container for the 529 maintained mathematical modules. The complete-library umbrella is the sibling file `lean/SingularValueBounds.lean`. |
+| [Canonical/](lean/SingularValueBounds/Canonical/) | 10 | The public interface: general and unit baseline proofs, adapters to the actual root statement, NLA-lib equivalence bridges, monotonicity, current results/comparisons and exact accepted constants. |
 | [Concentration/](lean/SingularValueBounds/Concentration/) | 1 | Integration of a new independent random row against the preceding state, using independence and Fubini. |
 | [Core/](lean/SingularValueBounds/Core/) | 5 | Shared row assumptions, constants, matrix algebra/measurability and scalar tail-to-moment estimates. |
 | [KL/](lean/SingularValueBounds/KL/) | 3 | Internal statement and finite-condition interfaces, row-by-row transfer and analytic theorem assembly. Most of this proof family is in its subfolders. |
@@ -87,6 +87,9 @@ The root statement imports NLA-lib directly.
 its predicates to the original coordinate and MGF assumptions;
 [Canonical/NLASingularValues.lean](lean/SingularValueBounds/Canonical/NLASingularValues.lean)
 identifies its singular values with the preceding extrema, including zeros.
+[Canonical/TailEquivalence.lean](lean/SingularValueBounds/Canonical/TailEquivalence.lean)
+relates the real-valued and extended-nonnegative-real probability bounds under a
+probability measure.
 [Canonical/StatementEquivalence.lean](lean/SingularValueBounds/Canonical/StatementEquivalence.lean)
 assembles the equivalence for both canonical propositions and all sample-space
 universes.
@@ -204,8 +207,8 @@ reviewable source templates, not separately compiled library modules.
 
 ## Proof coverage and further simplification
 
-The umbrella imports all 528 library modules. A static traversal of ordinary
-source `import` lines from `SingularValueBounds.Canonical.Results` reaches 525.
+The umbrella imports all 529 library modules. A static traversal of ordinary
+source `import` lines from `SingularValueBounds.Canonical.Results` reaches 526.
 The three remaining modules expose additional assemblies or helper APIs:
 
 | Module | Present purpose |

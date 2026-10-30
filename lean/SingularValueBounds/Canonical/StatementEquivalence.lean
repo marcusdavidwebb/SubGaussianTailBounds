@@ -1,4 +1,4 @@
-import MainTheoremStatement
+import SingularValueBounds.Canonical.TailEquivalence
 import SingularValueBounds.Canonical.NLARows
 import SingularValueBounds.Canonical.NLASingularValues
 
@@ -86,14 +86,16 @@ theorem general_iff_previous (α β γ δ : ℝ) :
       fun i => isSubgaussianVector_iff_previous.mpr (hsg i)
     have hiso : ∀ i, NLAlib.IsIsotropic (fun ω => A ω i) μ :=
       fun i => isIsotropic_of_previous (hsub i) ⟨hm i, hc i, hi i⟩
-    simpa only [SingularValueTails, Previous.smallestSingularValue_eq_nla,
+    simpa only [SingularValueTails, probability_toReal_le_exp_iff,
+      Previous.smallestSingularValue_eq_nla,
       Previous.largestSingularValue_eq_nla] using
       h μ m n hn A K hnm hK hm hind hsub hiso t ht
   · rintro ⟨hpos, h⟩
     refine ⟨hpos, ?_⟩
     intro Ω _ μ _ m n hn A K hnm hK hm hind hsub hiso t ht
     have hrows := fun i => previousIsCentredIsotropic_of_nla (hm i) (hsub i) (hiso i)
-    simpa only [SingularValueTails, Previous.smallestSingularValue_eq_nla,
+    simpa only [SingularValueTails, probability_toReal_le_exp_iff,
+      Previous.smallestSingularValue_eq_nla,
       Previous.largestSingularValue_eq_nla] using
       h μ m n hn A K hnm hK hm hind (fun i => (hrows i).centred)
         (fun i => (hrows i).isotropic)
@@ -121,7 +123,8 @@ theorem unit_iff_previous (α β γ δ : ℝ) :
         NLAlib.IsSubgaussianVector (fun ω => A ω i) c μ) hproxy).mp (hsub' i)
     have hiso : ∀ i, NLAlib.IsIsotropic (fun ω => A ω i) μ :=
       fun i => isIsotropic_of_previous (hsub' i) ⟨hm i, hc i, hi i⟩
-    simpa only [SingularValueTails, Previous.smallestSingularValue_eq_nla,
+    simpa only [SingularValueTails, probability_toReal_le_exp_iff,
+      Previous.smallestSingularValue_eq_nla,
       Previous.largestSingularValue_eq_nla] using h μ m n hn A hnm hm hind hsub hiso t ht
   · rintro ⟨hpos, h⟩
     refine ⟨hpos, ?_⟩
@@ -139,7 +142,8 @@ theorem unit_iff_previous (α β γ δ : ℝ) :
       intro i
       simpa only [PreviousIsSubgaussianVector, one_pow, one_mul] using
         isSubgaussianVector_iff_previous.mp (hsub' i)
-    simpa only [SingularValueTails, Previous.smallestSingularValue_eq_nla,
+    simpa only [SingularValueTails, probability_toReal_le_exp_iff,
+      Previous.smallestSingularValue_eq_nla,
       Previous.largestSingularValue_eq_nla] using
       h μ m n hn A hnm hm hind (fun i => (hrows i).centred)
         (fun i => (hrows i).isotropic) hsg t ht

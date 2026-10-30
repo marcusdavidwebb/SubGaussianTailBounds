@@ -150,8 +150,34 @@ obligations also compile and pass their supplemental axiom audit. Marcus Webb
 explicitly deferred independent kernel replay, so no complete verification of
 this dependency migration is claimed. Validation is recorded in
 [HISTORY.md](docs/HISTORY.md). This presentation and compatibility revision makes
-no new bound or novelty claim, and has not been recorded as an accepted
-contribution or published PR.
+no new bound or novelty claim and has not been accepted. It is included in
+[draft PR #4](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/4).
+
+## Real-valued tail probabilities — 30 October 2026
+
+At Marcus Webb's explicit request and authorization, Codex revised the canonical
+`SingularValueTails` to require a probability measure and express both probability
+bounds in `ℝ`. [TailEquivalence.lean](lean/SingularValueBounds/Canonical/TailEquivalence.lean)
+relates these bounds to the previous `ENNReal.ofReal` form under the
+probability-measure assumption. No extra finite-measure assumption, new constants
+or new bounds are introduced; the measurable non-strict events and arbitrary
+sample-space universes are retained.
+This is an implementation and statement-presentation change, with no novelty
+claim. The earlier migration's compilation and audit record applies to its
+original source and does not by itself verify this revision; see
+[HISTORY.md](docs/HISTORY.md). Future unauthorized changes to the canonical
+root remain prohibited.
+
+## Canonical helper simplification — 30 October 2026
+
+Marcus Webb removed an unused scope opening and an explanatory comment; at his
+request, Codex removed an unused helper proof argument and a direct import
+already supplied transitively. Both theorem statements retain their dimension
+hypothesis and all other hypotheses and bounds. A temporary Lean variant proved
+the previous and simplified helper and complete propositions equivalent by
+`Iff.rfl` at arbitrary sample-space universes. The helper's Lean interface changes;
+this is a presentation change, with no new bound or novelty claim. The
+canonical file remains protected against future unauthorized changes.
 
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet

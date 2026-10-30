@@ -48,6 +48,17 @@ universe, source-coverage, replay and axiom requirements are retained.
 Compilation and selected checks during this migration do not constitute a
 complete verification run; the maintainer explicitly deferred kernel replay.
 
+The separately authorized real-probability statement revision also changes the
+canonical source digest and the exact expected tail types. Its equivalence to
+the preceding `ENNReal` bounds is proved in
+[TailEquivalence.lean](../lean/SingularValueBounds/Canonical/TailEquivalence.lean)
+under a probability measure. The maintainer’s authorization of this precise
+statement change does not waive independent replay or authorize later canonical
+changes; an accepted checkout with the earlier digest will reject this revision
+until the reviewed policy is adopted. A later explicitly requested helper and
+import simplification likewise changes the canonical digest without waiving any
+of these checks.
+
 ## Lean interface
 
 <a id="prepared-complete-lean-acceptance"></a>

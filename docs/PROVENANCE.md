@@ -75,6 +75,28 @@ do not establish complete verification of the migrated library or change the
 scope of the historical runs. See [HISTORY.md](HISTORY.md) for the validation
 record and [CONTRIBUTIONS.md](../CONTRIBUTIONS.md) for the implementation attribution.
 
+## Real-valued probability formulation — 30 October 2026
+
+Marcus Webb explicitly authorized this canonical statement change, implemented
+with Codex assistance. Under a probability-measure instance the real-valued
+tail inequalities are equivalent to the preceding `ENNReal` inequalities;
+the separate equivalence module records the formal bridge. This does not claim
+a new bound or resolve earlier attribution or novelty questions. The validation
+of the earlier NLA-lib source does not establish validation of this revision.
+The authorization is specific to this change; future unauthorized canonical
+changes remain prohibited.
+
+## Canonical helper simplification — 30 October 2026
+
+At Marcus Webb's request, Codex removed the unused dimension proof parameter
+from the tail helper and an import already available transitively. Marcus Webb
+also removed an unused scope opening and explanatory comment. The dimension
+hypothesis remains in both theorem statements, and a temporary Lean check
+established definitional equivalence of both full propositions. This makes no
+new mathematical or novelty claim and does not resolve earlier assessments.
+This authorization is specific; future unauthorized canonical changes remain
+prohibited.
+
 ## Scope and unresolved assessments
 
 The formalization proves the two canonical singular-value tail propositions,

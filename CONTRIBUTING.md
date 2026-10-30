@@ -17,8 +17,8 @@ SubGaussian.UnitSingularValueTailBound.{u} α β γ δ
 ```
 
 Preserve every hypothesis, positivity, both non-strict tail events and endpoints,
-event measurability and `ℝ≥0∞` probability bounds. All numerical obligations must
-be proved in Lean; no conditional certificate or analytic premise may remain.
+event measurability and real-valued probability bounds under a probability measure.
+All numerical obligations must be proved in Lean; no conditional certificate or analytic premise may remain.
 
 Prove all four componentwise comparisons against both the original baseline
 and the current accepted quartet of the same regime:

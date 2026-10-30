@@ -93,9 +93,19 @@ kernel replay still runs afresh in dependency order. See
 
 Proof changes and new constants follow [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-The root statement directly imports NLA-lib's `IsSubgaussianVector`,
-`IsIsotropic` and `singularValues`. Its sub-Gaussian argument is the variance
-proxy `K²`; row measurability remains explicit. The bridges in
+`SingularValueTails` requires `IsProbabilityMeasure μ` and states its bounds
+as real-valued inequalities using `ENNReal.toReal`. Its probability-measure
+instance implies finiteness; no separate finite-measure hypothesis is required.
+The preceding extended-nonnegative-real inequalities are equivalent under this
+instance by [TailEquivalence.lean](SingularValueBounds/Canonical/TailEquivalence.lean).
+The migration compilation described above predates this revision and is not
+evidence that the revised sources have passed the complete verifier.
+
+The root statement imports NLA-lib's `IsSubgaussianVector` and `singularValues`;
+the pinned sub-Gaussian module supplies `IsIsotropic` transitively. Its
+sub-Gaussian argument is the variance proxy `K²`; row measurability remains
+explicit. The tail helper takes no dimension proof, but both theorem statements
+retain the `1 ≤ n` hypothesis. The bridges in
 [NLARows.lean](SingularValueBounds/Canonical/NLARows.lean),
 [NLASingularValues.lean](SingularValueBounds/Canonical/NLASingularValues.lean)
 and [StatementEquivalence.lean](SingularValueBounds/Canonical/StatementEquivalence.lean)

@@ -1,5 +1,4 @@
 import NLAlib.Probability.SubGaussianVector.Basic
-import NLAlib.Probability.Isotropic
 import NLAlib.Matrix.Spectral.SingularValues
 
 /-!
@@ -22,7 +21,6 @@ These definitions name propositions; they do not assume the desired results.
 -/
 
 open MeasureTheory ProbabilityTheory
-open scoped ENNReal
 
 namespace SubGaussian
 universe u
@@ -30,21 +28,14 @@ universe u
 /-- Both non-strict tail events are measurable, and each has probability at most
 `exp (-t² / 2)`. This retains the equality cases at both thresholds. -/
 def SingularValueTails {Ω : Type u} [MeasurableSpace Ω] {m n : ℕ}
-    (μ : Measure Ω) (_hn : 1 ≤ n) (A : Ω → Matrix (Fin m) (Fin n) ℝ)
+    (μ : Measure Ω) [IsProbabilityMeasure μ] (A : Ω → Matrix (Fin m) (Fin n) ℝ)
     (lower upper t : ℝ) : Prop :=
   let lowerTail := {ω | NLAlib.singularValues (A ω) (n - 1) ≤ lower}
   let upperTail := {ω | NLAlib.singularValues (A ω) 0 ≥ upper}
   (MeasurableSet lowerTail ∧
-    μ lowerTail ≤ ENNReal.ofReal (Real.exp (-(t ^ 2) / 2))) ∧
+    (μ lowerTail).toReal ≤ Real.exp (-(t ^ 2) / 2)) ∧
   (MeasurableSet upperTail ∧
-    μ upperTail ≤ ENNReal.ofReal (Real.exp (-(t ^ 2) / 2)))
-
-/-! ## The two statements
-
-The four positive constants are fixed before the dimensions and probability
-space. `α, β` control the lower tail; `γ, δ` control the upper tail.
-Both statements include `t = 0` and all dimensions `m ≥ n ≥ 1`.
--/
+    (μ upperTail).toReal ≤ Real.exp (-(t ^ 2) / 2))
 
 /-- General case: independent centred isotropic rows with MGF parameter `K ≥ 1`. -/
 def GeneralSingularValueTailBound (α β γ δ : ℝ) : Prop :=
@@ -58,7 +49,7 @@ def GeneralSingularValueTailBound (α β γ δ : ℝ) : Prop :=
     (∀ i, NLAlib.IsIsotropic (fun ω => A ω i) μ) →
     ∀ (t : ℝ), 0 ≤ t →
     let L := Real.log (Real.exp 1 * K)
-    SingularValueTails μ hn A
+    SingularValueTails μ A
       (√m - K * √n - α * K * L - β * K * √L * t)
       (√m + K * √n + γ * K * L + δ * K * √L * t) t
 
@@ -73,7 +64,7 @@ def UnitSingularValueTailBound (α β γ δ : ℝ) : Prop :=
     (∀ i, NLAlib.IsSubgaussianVector (fun ω => A ω i) 1 μ) →
     (∀ i, NLAlib.IsIsotropic (fun ω => A ω i) μ) →
     ∀ (t : ℝ), 0 ≤ t →
-    SingularValueTails μ hn A
+    SingularValueTails μ A
       (√m - √n - α - β * t)
       (√m + √n + γ + δ * t) t
 

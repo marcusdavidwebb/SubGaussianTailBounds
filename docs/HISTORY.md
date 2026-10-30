@@ -116,7 +116,7 @@ The original root SHA-256 was
 `eb24daadaf9c0aaac3bea45128a08b81ba5492183bcbb6eb03b62c3245c2701c`.
 The intermediate local-definition rewrite had SHA-256
 `8527f13f9a79531eb226f1ce276b000fa780955a54b91d352a0e5845ed8aa760`.
-The current imported canonical root SHA-256 is
+The imported canonical root SHA-256 before the probability-bound revision was
 `e62053135682c168816033858a78828abbf34fe47c3b2f9e9db44f6d6fb828b5`.
 The digest detects drift; it is not mathematical evidence. Its complete
 annotated README presentation is checked against the root bytes.
@@ -163,3 +163,48 @@ must repeat that prohibition without an exception.
 The 30 October inventory again included hidden and ignored/editor paths and
 found only root `AGENTS.md`. Its observed digest now identifies the revised
 canonical source; its protection applies to that revised source.
+
+## Real-valued probability bounds — 30 October 2026
+
+At Marcus Webb's explicit request and authorization for this change,
+`SingularValueTails` now takes an `IsProbabilityMeasure μ` instance and states
+each probability bound using `(μ event).toReal`. No separate finite-measure
+assumption is added: the probability-measure instance supplies it. A separate
+[Lean equivalence](../lean/SingularValueBounds/Canonical/TailEquivalence.lean)
+connects these real inequalities with the preceding `ENNReal.ofReal` inequalities
+under that instance. Both measurable non-strict
+events, thresholds, constants and arbitrary sample-space universes remain.
+
+The probability-bound revision initially had canonical root SHA-256
+`7f2bef4ec5acf22cb8898fc6552e68c8a64901a944e4526ca952af08ffbee906`.
+This digest detects byte drift, not mathematical correctness. The earlier
+compilation and audits above apply to the earlier source, not this revision;
+they do not establish complete verification of either revision. This one
+explicit authorization does not permit future unauthorized changes to the root.
+
+## Canonical helper simplification — 30 October 2026
+
+Marcus Webb subsequently removed the unused `open scoped ENNReal` and an
+explanatory comment from the canonical source. At his request, Codex then
+removed the unused `SingularValueTails` proof argument and its two call-site
+arguments, retaining the `1 ≤ n` hypothesis in both full theorem statements.
+The direct `Isotropic` import was also removed because the pinned sub-Gaussian
+import supplies it transitively. The helper's Lean API changes; the theorem
+hypotheses, tail bounds and arbitrary sample-space universes do not. A temporary
+Lean variant established equivalence of the prior and simplified helper and
+both full propositions by `Iff.rfl`.
+
+The maintainer-edited intermediate source had SHA-256
+`509c3f4dedb627edb14c2d43801be99ef9b8a43c8dbb4244420176c1c5d65193`.
+The simplified root has SHA-256
+`be2804e4ca5ef33015df07e84f0544540f36c69f1be7bb4503c3363cb105f3a3`.
+The authorization is specific to these changes; the prohibition on future
+unauthorized canonical changes remains in force. The interrupted full verifier
+from before the maintainer edit did not complete independent kernel replay.
+
+For the simplified source, Lean 4.33.1 compiled the canonical statement,
+probability and statement equivalences, adapters and public results. The
+canonical source guard and the Python regression suite passed (118 tests run,
+40 skipped). The complete verifier was started and stopped at the maintainer’s
+request before independent kernel replay. The preceding trusted checkout rejects
+the new digest, so the policy change still requires separate adoption.
