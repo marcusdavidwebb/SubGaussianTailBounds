@@ -179,6 +179,36 @@ the previous and simplified helper and complete propositions equivalent by
 this is a presentation change, with no new bound or novelty claim. The
 canonical file remains protected against future unauthorized changes.
 
+## Proof-checking simplification — 30 October 2026
+
+At Marcus Webb's request, Codex and parallel agents simplified the proof
+implementation in [PR #4](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/4).
+The canonical root's bytes, both jointly proved quartets, hypotheses, endpoints
+and sample-space universes are unchanged. No new bound or novelty is claimed;
+Marcus Webb retains the acceptance decision.
+
+Balanced integer matrix lookup, shared coefficient tables and checked logarithm
+lookups reduce repeated finite arithmetic. Integer exponential, logarithm and
+resolvent evaluators are proved equal to their original rational specifications,
+retaining every rounding step and all finite truncation orders. Closed proof data omit
+unused executable code while preserving their kernel definitions. Smaller
+imports, shared analytic lemmas, structural polynomial identities and three
+small module consolidations remove duplicated work. Pure polynomial certificates,
+lookup/grid definitions and rational row data have separate modules from analytic
+soundness. Existing Mathlib results supply the elementary square-root,
+trigonometric, order and integration steps. The underlying Taylor, rounding,
+Bernstein and KL arguments retain their existing attribution.
+
+Python prepared proposed finite values and benchmark inputs; Lean checks the
+exact equalities and all finite obligations. Wolfram MCP supported limited
+algebraic exploration and supplied no accepted mathematical fact. Model review
+is not independent human review. This revision preserves the preceding human
+and model credit and the unresolved assessments in
+[PROVENANCE.md](docs/PROVENANCE.md). Iterations, measurements and verification
+attempts are recorded in [HISTORY.md](docs/HISTORY.md); focused checks alone
+are not complete verification. No verification policy or dependency pin is
+changed by this proof-simplification revision.
+
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet
 or implementation change, explanation and attribution, supersession, and

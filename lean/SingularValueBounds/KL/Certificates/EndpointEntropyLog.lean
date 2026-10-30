@@ -1,3 +1,5 @@
+import Mathlib.Data.Fintype.Basic
+import Mathlib.Tactic.FinCases
 import SingularValueBounds.KL.Certificates.EndpointEntropyLogRows.Block00
 import SingularValueBounds.KL.Certificates.EndpointEntropyLogRows.Block01
 import SingularValueBounds.KL.Certificates.EndpointEntropyLogRows.Block02

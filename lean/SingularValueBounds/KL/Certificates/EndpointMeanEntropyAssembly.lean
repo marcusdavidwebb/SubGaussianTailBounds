@@ -7,6 +7,43 @@ import SingularValueBounds.KL.Certificates.EndpointEntropyRounding
 namespace SingularValueBounds.KL.Certificates
 set_option maxHeartbeats 0
 
+/-- Reuse a corner value after checking the rate/value correspondence. Keeping
+this transfer abstract avoids elaborating the same argument in every box. -/
+theorem endpointPrefactorValues_of_sharedCorner
+    {k a k' a' : ℚ} {rs ss : List EndpointRateRun} {p p' : ℕ → ℤ}
+    (hk : k = k') (ha : a = a')
+    (hp : ∀ s ∈ ss, endpointJointPrefactorQ k' a' ((s.rate : ℚ)/100) =
+      fixedQ (p' s.rate))
+    (hb : ∀ r ∈ rs, ∃ s ∈ ss, s.rate = r.rate ∧ p' s.rate = p r.rate) :
+    ∀ r ∈ rs, endpointJointPrefactorQ k a ((r.rate : ℚ)/100) =
+      fixedQ (p r.rate) := by
+  intro r hr
+  obtain ⟨s, hs, hrate, hvalue⟩ := hb r hr
+  calc
+    _ = endpointJointPrefactorQ k' a' ((s.rate : ℚ)/100) := by rw [hk, ha, hrate]
+    _ = fixedQ (p' s.rate) := hp s hs
+    _ = _ := congrArg fixedQ hvalue
+
+
+/-- Project either checked prefactor correspondence from a shared rate search. -/
+theorem endpointPrefactorBridge_left {rs ss : List EndpointRateRun}
+    {p p' q q' : ℕ → ℤ}
+    (h : ∀ r ∈ rs, ∃ s ∈ ss, s.rate = r.rate ∧
+      p' s.rate = p r.rate ∧ q' s.rate = q r.rate) :
+    ∀ r ∈ rs, ∃ s ∈ ss, s.rate = r.rate ∧ p' s.rate = p r.rate := by
+  intro r hr
+  obtain ⟨s, hs, he, hp, _⟩ := h r hr
+  exact ⟨s, hs, he, hp⟩
+
+theorem endpointPrefactorBridge_right {rs ss : List EndpointRateRun}
+    {p p' q q' : ℕ → ℤ}
+    (h : ∀ r ∈ rs, ∃ s ∈ ss, s.rate = r.rate ∧
+      p' s.rate = p r.rate ∧ q' s.rate = q r.rate) :
+    ∀ r ∈ rs, ∃ s ∈ ss, s.rate = r.rate ∧ q' s.rate = q r.rate := by
+  intro r hr
+  obtain ⟨s, hs, he, _, hq⟩ := h r hr
+  exact ⟨s, hs, he, hq⟩
+
  theorem endpointMeanNumericCorner_le_of_runs (ki : Fin 60) (ai : Fin 42)
     (hact : endpointMeanActive ki ai) (rs : List EndpointRateRun) (p : Fin 4 → ℕ → ℤ)
     (hc : EndpointRunsCover (endpointMeanCutoff ki ai) 8000 rs)

@@ -75,6 +75,13 @@ def endpointRareRow (i : Fin 3) : EndpointRareRow :=
   else if i=1 then ⟨7/160,239/25,(19/20 : ℝ)^4+(1-(19/20 : ℝ)^2)^2⟩
   else ⟨19/500,10,1⟩
 
+/-- The three rare-event rows have positive probabilities, nonnegative cutoffs
+at most ten, and nonnegative fourth-moment parameters. -/
+theorem endpointRareRow_bounds (i : Fin 3) :
+    0 < (endpointRareRow i).probability ∧ 0 ≤ (endpointRareRow i).cutoff ∧
+      (endpointRareRow i).cutoff ≤ 10 ∧ 0 ≤ (endpointRareRow i).zeta := by
+  fin_cases i <;> norm_num [endpointRareRow]
+
 def endpointRareCoefficient (i : Fin 3) (p : ℕ) : ℝ :=
   (if p=2 then 1/2+(endpointRareRow i).zeta else gaussianSquareCoefficient p)+
     (endpointRareRow i).probability*shiftedExponentialCoefficient p
@@ -94,9 +101,9 @@ theorem endpointRareCoefficient_higher (i : Fin 3) {p : ℕ} (hp : 3≤p) :
   by_cases h5 : p<5
   · exact hbase p (by omega)
   have hp5 : 5≤p := by omega
-  have hr0 : 0≤(endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
-  have hA0 : 0≤(endpointRareRow i).cutoff := by fin_cases i <;> norm_num [endpointRareRow]
-  have hA10 : (endpointRareRow i).cutoff≤10 := by fin_cases i <;> norm_num [endpointRareRow]
+  have hr0 : 0≤(endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
+  have hA0 : 0≤(endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
+  have hA10 : (endpointRareRow i).cutoff≤10 := (endpointRareRow_bounds i).2.2.1
   have hstep (n : ℕ) (hn : 5≤n) : endpointRareCoefficient i (n+1) ≤ 4*endpointRareCoefficient i n := by
     have hn5 : (5 : ℝ)≤n := by exact_mod_cast hn
     have hg := gaussianSquareCoefficient_step n

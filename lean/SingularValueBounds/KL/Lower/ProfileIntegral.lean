@@ -55,7 +55,6 @@ theorem profile_sin_moments (t : ℝ) :
     (∫ θ in (0:ℝ)..t, Real.sin θ^3) = 2/3-Real.cos t+(Real.cos t)^3/3 ∧
     (∫ θ in (0:ℝ)..t, Real.sin θ^4) =
       3*t/8-Real.sin t*Real.cos t*(3+2*Real.sin t^2)/8 := by
-  have hs := Real.sin_sq_add_cos_sq t
   constructor
   · simpa using integral_sin (a := (0:ℝ)) (b := t)
   constructor
@@ -68,7 +67,7 @@ theorem profile_sin_moments (t : ℝ) :
     ring
   · rw [show (4:ℕ)=2+2 by norm_num,integral_sin_pow,integral_sin_sq]
     norm_num
-    nlinarith [mul_eq_mul_left_iff.mp (show Real.sin t*Real.cos t*(Real.sin t^2+Real.cos t^2)=Real.sin t*Real.cos t*1 by rw [hs])]
+    ring
 
 /-- A derivative comparison anchored at zero, used for alternating sine bounds. -/
 theorem profile_nonneg_of_deriv {f f' : ℝ → ℝ}
@@ -82,13 +81,7 @@ theorem profile_nonneg_of_deriv {f f' : ℝ → ℝ}
   exact h0.trans (hm (by simp) hx hx)
 
 theorem profile_sin_lower3 {x : ℝ} (hx : 0 ≤ x) : x-x^3/6 ≤ Real.sin x := by
-  have hh := profile_nonneg_of_deriv
-    (f := fun x => Real.sin x-x+x^3/6)
-    (f' := fun x => Real.cos x-1+x^2/2) (by fun_prop)
-    (by intro x; convert! (((Real.hasDerivAt_sin x).sub (hasDerivAt_id x)).add
-      (((hasDerivAt_id x).pow 3).div_const 6)) using 1 <;> simp [id_eq] <;> ring)
-    (by norm_num) (fun x _ => by linarith [Real.one_sub_sq_div_two_le_cos (x := x)]) hx
-  linarith
+  exact Real.sin_ge_sub_cube hx
 
 theorem profile_cos_upper4 {x : ℝ} (hx : 0 ≤ x) :
     Real.cos x ≤ 1-x^2/2+x^4/24 := by
@@ -182,7 +175,7 @@ theorem general_profile_polynomial_integral (t : ℝ) :
   have hm := profile_sin_moments t
   rw [hm.1,hm.2.1,hm.2.2.1,hm.2.2.2]
   have hs := congrArg (fun u : ℝ => u*Real.cos t) (Real.sin_sq_add_cos_sq t)
-  nlinarith only [hs]
+  linear_combination (47 / 60 : ℝ) * hs
 
 theorem generalLowerProfile_small_majorant {k : ℝ} (hk : k ∈ Icc (0:ℝ) 1) :
     generalLowerProfile k ≤ generalLowerPolynomial k+3/40 := by

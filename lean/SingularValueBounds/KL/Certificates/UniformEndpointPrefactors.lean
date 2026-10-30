@@ -22,7 +22,9 @@ private lemma logUnitPowerUpper_le_linear {x : ℚ} (hx : 1 ≤ x) (h2 : x ≤ 2
     (j : ℕ) : logUnitPowerUpper x j ≤ logUnitZUpper x + j / roundingScale := by
   have hr : logUnitZ2Upper x ≤ 1 := (logUnitZ2Upper_le_half hx h2).trans (by norm_num)
   induction j with
-  | zero => simp [logUnitPowerUpper, logPowerUpperQ]
+  | zero =>
+    change logUnitZUpper x ≤ logUnitZUpper x + (0 : ℚ) / roundingScale
+    simp only [zero_div, add_zero, le_refl]
   | succ j ih =>
     have hp := logUnitPowerUpper_nonneg hx j
     have hm := mul_le_mul_of_nonneg_left hr hp

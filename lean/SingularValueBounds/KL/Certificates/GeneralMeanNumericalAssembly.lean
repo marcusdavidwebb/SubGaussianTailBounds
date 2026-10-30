@@ -1,8 +1,13 @@
+import SingularValueBounds.KL.Upper.GeneralMeanNumerics
 import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanSmall
 
 /-! Uniform assembly of finite general upper-mean scalar margins and rounded transcripts. -/
 namespace SingularValueBounds.KL.Certificates
 set_option maxHeartbeats 0
+
+/-- The final grid node is the endpoint used by every numerical row. -/
+theorem generalMeanGrid_last : generalMeanGrid (120 : Fin 121).val = (4 : ℚ) := by
+  norm_num [generalMeanGrid]
 
 /-- The inexpensive scalar domains needed by every numerical row. -/
 def GeneralMeanBasicDomains (r : GeneralMeanRow) : Prop :=

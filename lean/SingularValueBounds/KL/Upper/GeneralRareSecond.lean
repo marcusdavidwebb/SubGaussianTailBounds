@@ -95,9 +95,9 @@ theorem upperShift_general_rare_second
   have hY2 := (exponential_tail_moment hY.aemeasurable hY0 (by norm_num : (0:ℝ)≤177/50)
     (by positivity : 0 < 23/(50*K^2)) hTail 1).1
   have hprob := upperComparison_general_rare_probability hcert hsg hK hd hiso.measurable hR i top hw hcap hκ
-  have hp0 : 0 ≤ (endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
+  have hp0 : 0 ≤ (endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
   have hA0 : 0 ≤ (endpointRareRow i).cutoff+6*d := by
-    have hh : 0 ≤ (endpointRareRow i).cutoff := by fin_cases i <;> norm_num [endpointRareRow]
+    have hh : 0 ≤ (endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
     linarith
   have hcut : (177/50:ℝ)*Real.exp (-((23/(50*K^2))*(K^2*((endpointRareRow i).cutoff+6*d)))) ≤
       (endpointRareRow i).probability*Real.exp (-((69/25:ℝ)*d)) := by

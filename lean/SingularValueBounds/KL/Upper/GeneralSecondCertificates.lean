@@ -1,3 +1,5 @@
+import SingularValueBounds.KL.Upper.GeneralFourth
+import SingularValueBounds.KL.Upper.EndpointCoefficients
 import SingularValueBounds.KL.Upper.GeneralSecondData
 
 /-! # Continuous consequences of the general upper second-moment certificates
@@ -152,7 +154,8 @@ lemma generalRareNumerator_nonpos (i : Fin 3) {d : ℝ} (hd : 0 ≤ d) :
   have h2 := mul_nonpos_of_nonpos_of_nonneg hc.2.2 (sq_nonneg d)
   have h3 := pow_nonneg hd 3
   dsimp [generalRareNumerator]
-  linarith
+  exact sub_nonpos.mpr ((add_nonpos (add_nonpos hc.1 h1) h2).trans
+    (mul_nonneg (by norm_num) h3))
 
 lemma hasDerivAt_generalRareR (i : Fin 3) {d : ℝ} (hd : 0 ≤ d) :
     HasDerivAt (generalRareR i)
@@ -172,7 +175,7 @@ lemma hasDerivAt_generalRareR (i : Fin 3) {d : ℝ} (hd : 0 ≤ d) :
     dsimp [generalRareR,generalRareP0,generalRareP1,p]
     ring
   · simp only [id_eq, Pi.mul_apply]
-    dsimp [generalRareP0,generalRareP1,generalRareNumerator,p]
+    dsimp [generalRareNumerator,p]
     field_simp
     ring
 
@@ -185,14 +188,14 @@ theorem generalRareR_antitone (i : Fin 3) : AntitoneOn (generalRareR i) (Ici (0 
     exact (hasDerivAt_generalRareR i hd.le).hasDerivWithinAt
   · intro d hd
     rw [interior_Ici] at hd
-    have hp : 0 ≤ (endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
+    have hp : 0 ≤ (endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
     exact mul_nonpos_of_nonneg_of_nonpos (by positivity) (generalRareNumerator_nonpos i hd.le)
 
 lemma generalRareR_upper_at_rational (i : Fin 3) {d : ℚ} (hd : 0 ≤ d) (hd50 : -(19/25)*d > -50) :
     generalRareR i (d:ℝ) ≤
       ((secondRarePQ i*secondExpUpperQ (-(19/25)*d)*secondRarePolyQ i d/(1+d):ℚ):ℝ) := by
-  have hp : 0 ≤ (endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
-  have hA : 0 ≤ (endpointRareRow i).cutoff := by fin_cases i <;> norm_num [endpointRareRow]
+  have hp : 0 ≤ (endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
+  have hA : 0 ≤ (endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
   have hdR : (0:ℝ) ≤ d := by exact_mod_cast hd
   have hdomain : -50 < -(19/25)*d ∧ -(19/25)*d < 50 := ⟨hd50,by linarith⟩
   have he := (second_exp_enclosure hdomain).2
@@ -224,8 +227,8 @@ def generalSecondScalar (i : Fin 3) (m d : ℝ) : ℝ :=
   m*Real.exp (-2*d)*(1+2*(endpointRareRow i).zeta)/(6*(1+d))+generalRareR i d-
     Real.exp (-2*d)/(2*(1+d))
 
-lemma second_zeta_nonneg (i : Fin 3) : 0 ≤ (endpointRareRow i).zeta := by
-  fin_cases i <;> norm_num [endpointRareRow]
+lemma second_zeta_nonneg (i : Fin 3) : 0 ≤ (endpointRareRow i).zeta :=
+  (endpointRareRow_bounds i).2.2.2
 
 lemma generalSecondScalar_eq (i : Fin 3) (m d : ℝ) :
     generalSecondScalar i m d =

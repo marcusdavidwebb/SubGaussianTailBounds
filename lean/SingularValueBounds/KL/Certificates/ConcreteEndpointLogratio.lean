@@ -9,7 +9,7 @@ open Certificates
 set_option maxHeartbeats 0
 set_option maxRecDepth 10000
 
-private def endpointLogratioCoefficients (k : Fin 7) (l : Fin 19) : ℚ :=
+private noncomputable def endpointLogratioCoefficients (k : Fin 7) (l : Fin 19) : ℚ :=
   (![
     ![0, 0, 0, 0, 0, 0, 0],
     ![0, 0, 0, 0, 0, 0, 0],
@@ -50,7 +50,7 @@ theorem endpointLogratioCertificateConditions : EndpointLogratioCertificateCondi
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointLogratioCoefficients, endpointLogratioBox,
+    simp [endpointLogratioCoefficients, endpointLogratioBox,
       Fin.sum_univ_succ, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
       Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
     ring

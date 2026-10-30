@@ -54,7 +54,7 @@ theorem endpointMeanPolynomial_identity_0 (d : Fin 4 → ℚ) :
   simp only [endpointMeanPolynomial, show (0 : Fin 7) ≠ 3 by decide, if_false]
   apply tensor_eq_of_eval
   intro a b
-  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
     majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients0, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -88,7 +88,7 @@ theorem endpointMeanPolynomial_identity_1 (d : Fin 4 → ℚ) :
   simp only [endpointMeanPolynomial, show (1 : Fin 7) ≠ 3 by decide, if_false]
   apply tensor_eq_of_eval
   intro a b
-  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
     majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients1, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -122,7 +122,7 @@ theorem endpointMeanPolynomial_identity_2 (d : Fin 4 → ℚ) :
   simp only [endpointMeanPolynomial, show (2 : Fin 7) ≠ 3 by decide, if_false]
   apply tensor_eq_of_eval
   intro a b
-  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
     majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients2, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -141,7 +141,7 @@ theorem endpointMeanPolynomial_identity_3 (d : Fin 4 → ℚ) :
     endpointMeanPolynomial 3 d = tensorOfFn 4 1 (endpointMeanPolynomialCoefficients3 d) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
     majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients3, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -175,7 +175,7 @@ theorem endpointMeanPolynomial_identity_4 (d : Fin 4 → ℚ) :
   simp only [endpointMeanPolynomial, show (4 : Fin 7) ≠ 3 by decide, if_false]
   apply tensor_eq_of_eval
   intro a b
-  norm_num [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
+  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
     majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients4, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,

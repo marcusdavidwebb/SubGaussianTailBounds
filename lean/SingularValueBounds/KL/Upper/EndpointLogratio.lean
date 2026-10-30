@@ -43,21 +43,26 @@ theorem endpointLogratioCleared_eval (A x : ℝ) :
     Polynomial.eval₂_natCast,Polynomial.coe_eval₂RingHom]
   norm_num [endpointLogratioZ,upperPadeD,upperPadeN]
 
+/-- The normalized comparison cubic is increasing throughout the small-coordinate interval. -/
+theorem upper_comparison_cubic_monotone {A : ℝ} (hA : 0≤A) :
+    MonotoneOn (fun x : ℝ => x+A*x^2-2*x^3) (Icc 0 (7/20)) := by
+  apply monotoneOn_of_deriv_nonneg (convex_Icc _ _)
+  · fun_prop
+  · fun_prop
+  · intro x hx
+    have hx' : x∈Icc (0 : ℝ) (7/20) := interior_subset hx
+    have hd : HasDerivAt (fun x : ℝ => x+A*x^2-2*x^3) (1+2*A*x-6*x^2) x := by
+      convert! ((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
+        (((hasDerivAt_id x).pow 3).const_mul 2) using 1 <;> simp only [id_eq] <;> ring
+    rw [hd.deriv]
+    have hx2 := pow_le_pow_left₀ hx'.1 hx'.2 2
+    nlinarith [mul_nonneg hA hx'.1]
+
 theorem endpointLogratioZ_bounds {A x : ℝ} (hA : A∈Icc (1/2 : ℝ) 1)
     (hx : x∈Icc (0 : ℝ) (7/20)) :
     0≤endpointLogratioZ A x ∧ endpointLogratioZ A x<1 := by
-  have hmono : MonotoneOn (fun x : ℝ => x+A*x^2-2*x^3) (Icc 0 (7/20)) := by
-    apply monotoneOn_of_deriv_nonneg (convex_Icc _ _)
-    · fun_prop
-    · fun_prop
-    · intro y hy
-      have hy' : y∈Icc (0 : ℝ) (7/20) := interior_subset hy
-      have hd : HasDerivAt (fun x : ℝ => x+A*x^2-2*x^3) (1+2*A*y-6*y^2) y := by
-        convert! ((hasDerivAt_id y).add (((hasDerivAt_id y).pow 2).const_mul A)).sub
-          (((hasDerivAt_id y).pow 3).const_mul 2) using 1 <;> simp only [id_eq] <;> ring
-      rw [hd.deriv]
-      have hy2 := pow_le_pow_left₀ hy'.1 hy'.2 2
-      nlinarith [mul_nonneg (show 0≤A by linarith [hA.1]) hy'.1]
+  have hmono := upper_comparison_cubic_monotone
+    (show 0 ≤ A from (by norm_num : (0 : ℝ) ≤ 1/2).trans hA.1)
   have hl := hmono ⟨le_rfl,by norm_num⟩ hx hx.1
   have hh := hmono hx ⟨by norm_num,le_rfl⟩ hx.2
   norm_num at hl hh

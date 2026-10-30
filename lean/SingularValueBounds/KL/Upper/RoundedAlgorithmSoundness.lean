@@ -1,4 +1,5 @@
 import SingularValueBounds.KL.Upper.RoundedAlgorithm
+import SingularValueBounds.KL.Upper.RoundedArithmetic
 
 /-! The finite rational predicates connect the printed fixed-point algorithm to
 the real exponential and logarithm. No analytic assertion is a certificate field. -/

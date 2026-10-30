@@ -137,161 +137,20 @@ private theorem endpoint_mean_box_56_40 :
   · simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
     decide +kernel
 
+private theorem endpointMeanPolynomialActiveIndices56 : ∀ ai : Fin 42, endpointMeanActive 56 ai → ai ∈
+    ([36, 37, 38, 39, 40] : List (Fin 42)) := by
+  simp only [endpointMeanActive]
+  decide +kernel
+
 theorem endpointMeanPolynomial_row56 (ai : Fin 42) :
     endpointMeanActive 56 ai → ∃ n m, BoxCertificate (endpointMeanTestQ 56 ai) n m (endpointMeanBox 56 ai) := by
-  fin_cases ai
-  · intro h
-    have hn : ¬ endpointMeanActive 56 0 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 1 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 2 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 3 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 4 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 5 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 6 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 7 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 8 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 9 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 10 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 11 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 12 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 13 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 14 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 15 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 16 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 17 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 18 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 19 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 20 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 21 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 22 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 23 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 24 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 25 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 26 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 27 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 28 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 29 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 30 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 31 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 32 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 33 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 34 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · intro h
-    have hn : ¬ endpointMeanActive 56 35 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
-  · exact fun _ => ⟨4, 1, endpoint_mean_box_56_36⟩
-  · exact fun _ => ⟨4, 1, endpoint_mean_box_56_37⟩
-  · exact fun _ => ⟨4, 1, endpoint_mean_box_56_38⟩
-  · exact fun _ => ⟨4, 1, endpoint_mean_box_56_39⟩
-  · exact fun _ => ⟨4, 1, endpoint_mean_box_56_40⟩
-  · intro h
-    have hn : ¬ endpointMeanActive 56 41 := by
-      norm_num [endpointMeanActive, endpointMeanBox, endpointMeanAPoint, Fin.coe_ofNat_eq_mod]
-    exact (hn h).elim
+  intro hactive
+  have hi := endpointMeanPolynomialActiveIndices56 ai hactive
+  fin_cases hi
+  · exact ⟨4, 1, endpoint_mean_box_56_36⟩
+  · exact ⟨4, 1, endpoint_mean_box_56_37⟩
+  · exact ⟨4, 1, endpoint_mean_box_56_38⟩
+  · exact ⟨4, 1, endpoint_mean_box_56_39⟩
+  · exact ⟨4, 1, endpoint_mean_box_56_40⟩
 
 end SingularValueBounds.KL.Certificates

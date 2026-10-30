@@ -95,17 +95,12 @@ def upperComparisonZ (a x : ℝ) : ℝ := 2 * (x+a*x^2-2*x^3)
 theorem upperComparisonZ_lt_one {a x : ℝ} (ha : a ≤ 5/6) (hx : 0 ≤ x) (hx1 : x ≤ 1) :
     upperComparisonZ a x < 1 := by
   have hax := mul_nonneg (sub_nonneg.mpr ha) (sq_nonneg x)
-  have hf : x+(5/6)*x^2-2*x^3 ≤ 17/36 := by
-    by_cases hh : x ≤ 1/2
-    · have hx2 : x^2 ≤ 1/4 := by nlinarith
-      have hb : 0 ≤ 11/12-x/6-2*x^2 := by nlinarith
-      have hp := mul_nonneg (show 0 ≤ 1/2-x by linarith) hb
-      nlinarith
-    · have hu : 0 ≤ x-1/2 := by linarith
-      have hcube : 0 ≤ (x-1/2)^3 := pow_nonneg hu _
-      nlinarith [sq_nonneg (x-1/2-1/12),sq_nonneg (x-1/2)]
+  -- The cubic gap is a sum of squares:
+  -- 17/36 - (x+(5/6)*x^2-2*x^3) =
+  --   2*x*(x-7/12)^2 + (3/2)*(x-121/216)^2 + 47/31104.
   unfold upperComparisonZ
-  nlinarith
+  nlinarith only [hax, mul_nonneg hx (sq_nonneg (x - 7/12)),
+    sq_nonneg (x - 121/216)]
 
 /-- The six coefficient functions `B_i`. -/
 def upperMajorantB (i : Fin 6) (a : ℝ) : ℝ :=

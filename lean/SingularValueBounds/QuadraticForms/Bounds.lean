@@ -4,8 +4,9 @@ import SingularValueBounds.QuadraticForms.GaussianMoments
 # Quadratic-form moment bounds from the original hypotheses
 
 This file derives the fourth-moment and endpoint variance conclusions of
-Lemma 4.2 by averaging the proved directional moment bound over an explicit
-independent standard Gaussian vector.
+Lemma 4.2 by averaging a homogeneous directional moment bound over an explicit
+independent standard Gaussian vector. The general averaging lemmas are shared
+with the KL proof; isotropy is needed only to supply its directional bound.
 -/
 
 open MeasureTheory ProbabilityTheory
@@ -65,17 +66,17 @@ theorem directional_fourth (hsg : SubGaussianMGF μ X K)
 set_option maxHeartbeats 800000 in
 /-- Gaussian averaging gives the stronger diagonal quadratic moment bound,
 which retains the sum of squared eigenvalues needed at the endpoint. -/
-theorem diagonal_quadratic_second_strong (hsg : SubGaussianMGF μ X K)
-    (hiso : CentredIsotropic μ X) (hK : 1 ≤ K)
+theorem diagonal_quadratic_second_of_directional_fourth (hsg : SubGaussianMGF μ X K)
+    (hm : Measurable X) {m4 : ℝ} (hm4 : 0 ≤ m4)
+    (hfourth : ∀ u : ι → ℝ, (∫ ω, (u ⬝ᵥ X ω) ^ 4 ∂μ) ≤ m4 * (u ⬝ᵥ u) ^ 2)
     (b : ι → ℝ) (hb : ∀ i, 0 ≤ b i) :
     3 * (∫ ω, (∑ i, b i * (X ω i) ^ 2) ^ 2 ∂μ) ≤
-      fourthMomentConstant K * ((∑ i, b i) ^ 2 + 2 * ∑ i, (b i) ^ 2) := by
+      m4 * ((∑ i, b i) ^ 2 + 2 * ∑ i, (b i) ^ 2) := by
   classical
   let a : ι → ℝ := fun i => Real.sqrt (b i)
   have ha : ∀ i, (a i) ^ 2 = b i := fun i => Real.sq_sqrt (hb i)
   let F : Ω → (ι → ℝ) → ℝ := fun ω g => (∑ i, a i * g i * X ω i) ^ 4
   have hF : Measurable (Function.uncurry F) := by
-    have hm := hiso.measurable
     dsimp [F, Function.uncurry]
     fun_prop
   have hid (ω : Ω) : (∫⁻ g, ENNReal.ofReal (F ω g) ∂standardGaussian ι) =
@@ -93,18 +94,17 @@ theorem diagonal_quadratic_second_strong (hsg : SubGaussianMGF μ X K)
       (standardGaussian_linear_moments (fun i => a i * X ω i)).2]
     simp only [mul_pow, ha]
   have hinner (g : ι → ℝ) : (∫⁻ ω, ENNReal.ofReal (F ω g) ∂μ) ≤
-      ENNReal.ofReal (fourthMomentConstant K * (∑ i, b i * (g i) ^ 2) ^ 2) := by
+      ENNReal.ofReal (m4 * (∑ i, b i * (g i) ^ 2) ^ 2) := by
     have hi : Integrable (F · g) μ := by
       simpa only [F, dotProduct] using hsg.directional_integrable_pow (fun i => a i * g i) 4
     rw [← ofReal_integral_eq_lintegral_ofReal hi
       (Filter.Eventually.of_forall (fun _ => by dsimp [F]; positivity))]
     apply ENNReal.ofReal_le_ofReal
-    have h := directional_fourth hsg hiso hK (fun i => a i * g i)
+    have h := hfourth (fun i => a i * g i)
     simpa only [F, dotProduct, ← sq, mul_pow, ha] using h
-  have hM : 0 ≤ fourthMomentConstant K := (fourthMomentConstant_pos hK).le
   have hbound :
       (∫⁻ ω, ENNReal.ofReal (3 * (∑ i, b i * (X ω i) ^ 2) ^ 2) ∂μ) ≤
-        ENNReal.ofReal (fourthMomentConstant K *
+        ENNReal.ofReal (m4 *
           ((∑ i, b i) ^ 2 + 2 * ∑ i, (b i) ^ 2)) := by
     calc
       _ = ∫⁻ ω, ∫⁻ g, ENNReal.ofReal (F ω g) ∂standardGaussian ι ∂μ := by
@@ -113,12 +113,12 @@ theorem diagonal_quadratic_second_strong (hsg : SubGaussianMGF μ X K)
         exact (hid ω).symm
       _ = ∫⁻ g, ∫⁻ ω, ENNReal.ofReal (F ω g) ∂μ ∂standardGaussian ι :=
         lintegral_lintegral_swap hF.ennreal_ofReal.aemeasurable
-      _ ≤ ∫⁻ g, ENNReal.ofReal (fourthMomentConstant K *
+      _ ≤ ∫⁻ g, ENNReal.ofReal (m4 *
           (∑ i, b i * (g i) ^ 2) ^ 2) ∂standardGaussian ι := lintegral_mono hinner
       _ = _ := by
         rw [← ofReal_integral_eq_lintegral_ofReal
-          ((standardGaussian_quadratic_sq_integrable b).const_mul (fourthMomentConstant K))
-          (Filter.Eventually.of_forall (fun _ => mul_nonneg hM (sq_nonneg _))),
+          ((standardGaussian_quadratic_sq_integrable b).const_mul (m4))
+          (Filter.Eventually.of_forall (fun _ => mul_nonneg hm4 (sq_nonneg _))),
           integral_const_mul, standardGaussian_quadratic_second]
   have hint : Integrable (fun ω => (∑ i, b i * (X ω i) ^ 2) ^ 2) μ := by
     have h := (hsg.quadratic_memLp_two (Matrix.diagonal b)).integrable_sq
@@ -133,15 +133,26 @@ theorem diagonal_quadratic_second_strong (hsg : SubGaussianMGF μ X K)
     (Filter.Eventually.of_forall (fun _ => by positivity)), integral_const_mul] at hbound
   exact (ENNReal.ofReal_le_ofReal_iff (by positivity)).1 hbound
 
+/-- The shared Gaussian averaging bound specialized to the directional
+fourth moment supplied by centering, isotropy and the MGF assumption. -/
+theorem diagonal_quadratic_second_strong (hsg : SubGaussianMGF μ X K)
+    (hiso : CentredIsotropic μ X) (hK : 1 ≤ K)
+    (b : ι → ℝ) (hb : ∀ i, 0 ≤ b i) :
+    3 * (∫ ω, (∑ i, b i * (X ω i) ^ 2) ^ 2 ∂μ) ≤
+      fourthMomentConstant K * ((∑ i, b i) ^ 2 + 2 * ∑ i, (b i) ^ 2) := by
+  exact diagonal_quadratic_second_of_directional_fourth hsg hiso.measurable
+    (fourthMomentConstant_pos hK).le (directional_fourth hsg hiso hK) b hb
+
 variable [DecidableEq ι]
 
 /-- The stronger quadratic moment inequality underlying both moment
 conclusions of Lemma 4.2. -/
-theorem quadratic_second_strong (hsg : SubGaussianMGF μ X K)
-    (hiso : CentredIsotropic μ X) (hK : 1 ≤ K)
+theorem quadratic_second_of_directional_fourth (hsg : SubGaussianMGF μ X K)
+    (hm : Measurable X) {m4 : ℝ} (hm4 : 0 ≤ m4)
+    (hfourth : ∀ u : ι → ℝ, (∫ ω, (u ⬝ᵥ X ω) ^ 4 ∂μ) ≤ m4 * (u ⬝ᵥ u) ^ 2)
     (B : Matrix ι ι ℝ) (hB : B.PosSemidef) :
     3 * (∫ ω, quadraticForm B X ω ^ 2 ∂μ) ≤
-      fourthMomentConstant K * ((Matrix.trace B) ^ 2 + 2 * Matrix.trace (B ^ 2)) := by
+      m4 * ((Matrix.trace B) ^ 2 + 2 * Matrix.trace (B ^ 2)) := by
   let U := hB.isHermitian.eigenvectorUnitary
   let b := hB.isHermitian.eigenvalues
   have hq : quadraticForm B X = fun ω =>
@@ -150,12 +161,31 @@ theorem quadratic_second_strong (hsg : SubGaussianMGF μ X K)
     change X ω ⬝ᵥ (B *ᵥ X ω) = _
     rw [real_spectral_decomposition hB.isHermitian, quadratic_conjugate_diagonal]
     simp only [U, b, mul_comm]
-  have h := diagonal_quadratic_second_strong (hsg.unitary U) (hiso.unitary U) hK b
-    hB.eigenvalues_nonneg
+  have hm' : Measurable (fun ω => star (U : Matrix ι ι ℝ) *ᵥ X ω) := by
+    change Measurable (fun ω i => ∑ j, (star (U : Matrix ι ι ℝ)) i j * X ω j)
+    fun_prop
+  have hf' : ∀ u : ι → ℝ,
+      (∫ ω, (u ⬝ᵥ (star (U : Matrix ι ι ℝ) *ᵥ X ω)) ^ 4 ∂μ) ≤
+        m4 * (u ⬝ᵥ u) ^ 2 := by
+    intro u
+    simpa only [dot_unitary_star_mulVec, unitary_mulVec_dot] using
+      hfourth ((U : Matrix ι ι ℝ) *ᵥ u)
+  have h := diagonal_quadratic_second_of_directional_fourth (hsg.unitary U)
+    hm' hm4 hf' b hB.eigenvalues_nonneg
   simp_rw [← show ∀ ω, quadraticForm B X ω =
     ∑ i, b i * ((star (U : Matrix ι ι ℝ) *ᵥ X ω) i) ^ 2 from fun ω => congrFun hq ω] at h
   simpa only [real_spectral_trace hB.isHermitian,
     real_spectral_trace_square hB.isHermitian, b] using h
+
+/-- The stronger quadratic moment inequality underlying both moment
+conclusions of Lemma 4.2. -/
+theorem quadratic_second_strong (hsg : SubGaussianMGF μ X K)
+    (hiso : CentredIsotropic μ X) (hK : 1 ≤ K)
+    (B : Matrix ι ι ℝ) (hB : B.PosSemidef) :
+    3 * (∫ ω, quadraticForm B X ω ^ 2 ∂μ) ≤
+      fourthMomentConstant K * ((Matrix.trace B) ^ 2 + 2 * Matrix.trace (B ^ 2)) := by
+  exact quadratic_second_of_directional_fourth hsg hiso.measurable
+    (fourthMomentConstant_pos hK).le (directional_fourth hsg hiso hK) B hB
 
 theorem quadratic_second_moment (hsg : SubGaussianMGF μ X K)
     (hiso : CentredIsotropic μ X) (hK : 1 ≤ K)

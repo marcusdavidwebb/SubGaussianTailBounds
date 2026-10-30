@@ -1,3 +1,4 @@
+import SingularValueBounds.KL.Certificates.EntropyLookup
 import SingularValueBounds.KL.Certificates.IntegerRoundedExp
 import SingularValueBounds.KL.Certificates.IntegerRoundedLog
 import SingularValueBounds.KL.Upper.EndpointRoundedEval
@@ -10,14 +11,6 @@ namespace SingularValueBounds.KL.Certificates
 set_option maxHeartbeats 0
 set_option maxRecDepth 100000
 
-inductive EntropyLookup (α : Type) where
-  | leaf : α → EntropyLookup α
-  | branch : EntropyLookup α → EntropyLookup α → EntropyLookup α
-
-def EntropyLookup.get {α : Type} : EntropyLookup α → ℕ → α
-  | .leaf a, _ => a
-  | .branch l r, j => if j % 2 = 0 then l.get (j/2) else r.get (j/2)
-
 structure EndpointEntropyState where
   decay : ℤ
   mass : ℤ
@@ -25,7 +18,26 @@ structure EndpointEntropyState where
   deriving DecidableEq
 
 def endpointEntropyInitial : EndpointEntropyState := ⟨fixedScaleNat,0,0⟩
-def endpointDecayStepInt (b v : ℤ) : ℤ := -(-(v*b)/(fixedScaleNat:ℤ))
+-- Nonnegative states use natural arithmetic; all other inputs retain the reference rule.
+private theorem endpointDecayCeilNat_eq (n : ℕ) :
+    (((n + fixedScaleNat - 1) / fixedScaleNat : ℕ) : ℤ) =
+      -(-(n : ℤ)/(fixedScaleNat : ℤ)) := by
+  norm_num only [fixedScaleNat]
+  omega
+
+def endpointDecayStepInt : ℤ → ℤ → ℤ
+  | .ofNat b, .ofNat v => ((v*b+fixedScaleNat-1)/fixedScaleNat : ℕ)
+  | b, v => -(-(v*b)/(fixedScaleNat:ℤ))
+
+private theorem endpointDecayStepInt_eq_reference (b v : ℤ) :
+    endpointDecayStepInt b v = -(-(v*b)/(fixedScaleNat:ℤ)) := by
+  cases b with
+  | ofNat b =>
+    cases v with
+    | ofNat v => exact endpointDecayCeilNat_eq (v*b)
+    | negSucc v => rfl
+  | negSucc b => cases v <;> rfl
+
 def endpointEntropyAdvance (b : ℤ) (up : ℕ → ℤ) (j : ℕ)
     (v : EndpointEntropyState) : EndpointEntropyState :=
   ⟨endpointDecayStepInt b v.decay, v.mass+v.decay,
@@ -62,7 +74,7 @@ theorem endpointEntropyState_decay {qi : ℕ} {b : ℤ} (up : ℕ → ℤ)
     rw [endpointDecayQ, ih, hb]
     change roundUpQ (fixedQ (endpointEntropyState b up j).decay*fixedQ b) =
       fixedQ (endpointDecayStepInt b (endpointEntropyState b up j).decay)
-    simpa [endpointDecayStepInt] using
+    simpa [endpointDecayStepInt_eq_reference] using
       roundUpQ_fixed_mul_div (endpointEntropyState b up j).decay b 1
 
 theorem endpointEntropyState_mass (b : ℤ) (up : ℕ → ℤ) (j : ℕ) :

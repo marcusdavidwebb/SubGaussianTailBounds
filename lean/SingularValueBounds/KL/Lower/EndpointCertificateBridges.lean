@@ -27,35 +27,69 @@ def endpointNScalar (i : Fin 2) (k x : ℝ) : ℝ :=
 
 lemma endpointAPoly_eval (i : Fin 2) (k : ℝ) :
     realEval (endpointAPoly i) k = endpointTableA i k := by
-  fin_cases i <;> norm_num [realEval, endpointAPoly, endpointTableA, endpointTheta] <;> ring
+  simp only [realEval, endpointAPoly, Polynomial.eval₂_add, Polynomial.eval₂_mul,
+    Polynomial.eval₂_C, Polynomial.eval₂_X, Rat.coe_castHom, endpointTableA]
+  push_cast
+  rfl
 
 lemma endpointGPoly_eval (i : Fin 2) (k x : ℝ) :
     realEval₂ (endpointGPoly i) k x =
       endpointG (endpointTableA i k) (endpointC i) (endpointXi i) x := by
-  fin_cases i <;> norm_num [realEval₂, endpointGPoly, endpointAPoly, endpointTableA,
-    endpointG, endpointTheta, endpointC, endpointXi, Polynomial.coe_eval₂RingHom,
-    Polynomial.eval₂_pow, Polynomial.eval₂_sub] <;> ring
+  simp only [realEval₂, endpointGPoly, Polynomial.eval₂_add, Polynomial.eval₂_sub,
+    Polynomial.eval₂_mul, Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.coe_eval₂RingHom, Rat.coe_castHom]
+  rw [show Polynomial.eval₂ (Rat.castHom ℝ) k (endpointAPoly i) =
+    endpointTableA i k from endpointAPoly_eval i k]
+  push_cast
+  dsimp only [endpointG]
+  ring
 
 lemma endpointNPoly_eval (i : Fin 2) (k x : ℝ) :
     realEval₂ (endpointNPoly i) k x =
       endpointN (endpointTableA i k) (endpointC i) (endpointChi i) x := by
-  fin_cases i <;> norm_num [realEval₂, endpointNPoly, endpointAPoly, endpointTableA,
-    endpointN, endpointTheta, endpointC, endpointChi, Polynomial.coe_eval₂RingHom,
-    Polynomial.eval₂_pow, Polynomial.eval₂_sub] <;> ring
+  simp only [realEval₂, endpointNPoly, Polynomial.eval₂_add, Polynomial.eval₂_sub,
+    Polynomial.eval₂_mul, Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.coe_eval₂RingHom, Rat.coe_castHom]
+  rw [show Polynomial.eval₂ (Rat.castHom ℝ) k (endpointAPoly i) =
+    endpointTableA i k from endpointAPoly_eval i k]
+  push_cast
+  dsimp only [endpointN]
+  ring
+
+private lemma realEval_diagonal (p : Polynomial (Polynomial ℚ)) (k : ℝ) :
+    realEval (p.eval X) k = realEval₂ p k k := by
+  let e := Polynomial.eval₂RingHom (Rat.castHom ℝ) k
+  simpa only [realEval, realEval₂, e, Polynomial.coe_eval₂RingHom, Polynomial.eval₂_X] using
+    (Polynomial.eval₂_hom (p := p) (f := e) X).symm
 
 lemma endpointOPoly_eval (i : Fin 2) (k x : ℝ) :
     realEval₂ (endpointOPoly i) k x = endpointOScalar i k x := by
-  fin_cases i <;> norm_num [realEval₂, endpointOPoly, endpointGPoly, endpointAPoly,
-    endpointOScalar, endpointTableA, endpointG, endpointTheta, endpointC, endpointXi,
-    Polynomial.coe_eval₂RingHom, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-    Polynomial.eval_pow, Polynomial.eval_sub] <;> ring
+  simp only [realEval₂, endpointOPoly, Polynomial.eval₂_add, Polynomial.eval₂_sub,
+    Polynomial.eval₂_mul, Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.eval₂_one, Polynomial.coe_eval₂RingHom, Rat.coe_castHom]
+  rw [show Polynomial.eval₂ (Rat.castHom ℝ) k (endpointAPoly i) =
+      endpointTableA i k from endpointAPoly_eval i k,
+    show Polynomial.eval₂ (Rat.castHom ℝ) k ((endpointGPoly i).eval X) =
+      endpointG (endpointTableA i k) (endpointC i) (endpointXi i) k from
+        (realEval_diagonal _ _).trans (endpointGPoly_eval i k k),
+    show Polynomial.eval₂ (Polynomial.eval₂RingHom (Rat.castHom ℝ) k) x (endpointGPoly i) =
+      endpointG (endpointTableA i k) (endpointC i) (endpointXi i) x from endpointGPoly_eval i k x]
+  push_cast
+  dsimp only [endpointOScalar]
 
 lemma endpointNMajorantPoly_eval (i : Fin 2) (k x : ℝ) :
     realEval₂ (endpointNMajorantPoly i) k x = endpointNScalar i k x := by
-  fin_cases i <;> norm_num [realEval₂, endpointNMajorantPoly, endpointNPoly, endpointAPoly,
-    endpointNScalar, endpointTableA, endpointN, endpointComparisonEigen,
-    endpointTheta, endpointC, endpointChi, Polynomial.coe_eval₂RingHom,
-    Polynomial.eval₂_pow, Polynomial.eval₂_sub] <;> ring
+  simp only [realEval₂, endpointNMajorantPoly, Polynomial.eval₂_add, Polynomial.eval₂_sub,
+    Polynomial.eval₂_mul, Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Polynomial.eval₂_one, Polynomial.eval₂_ofNat, Polynomial.coe_eval₂RingHom,
+    Rat.coe_castHom]
+  rw [show Polynomial.eval₂ (Rat.castHom ℝ) k (endpointAPoly i) =
+      endpointTableA i k from endpointAPoly_eval i k,
+    show Polynomial.eval₂ (Polynomial.eval₂RingHom (Rat.castHom ℝ) k) x (endpointNPoly i) =
+      endpointN (endpointTableA i k) (endpointC i) (endpointChi i) x from endpointNPoly_eval i k x]
+  push_cast
+  dsimp only [endpointNScalar, endpointComparisonEigen]
+  ring
 
 lemma endpointMarginPoly_eval (i : Fin 2) (k x : ℝ) :
     realEval₂ (endpointMarginPoly i) k x =
@@ -170,13 +204,19 @@ lemma endpointG_far_eq (x : ℝ) : endpointG (5/4) (7/4) (8/5) x = endpointFarSc
   ring
 
 lemma endpointFarG_eval (x : ℝ) : realEval endpointFarG x = endpointFarScalar x := by
-  norm_num [realEval, endpointFarG, endpointFarScalar, Polynomial.eval₂_pow,
-    Polynomial.eval₂_sub]
+  simp only [realEval, endpointFarG, Polynomial.eval₂_add, Polynomial.eval₂_sub,
+    Polynomial.eval₂_mul, Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Rat.coe_castHom]
+  push_cast
+  dsimp only [endpointFarScalar]
   ring
 
 lemma endpointFarDerivative_eval (k : ℝ) :
     realEval endpointFarDerivative k = 7/50-3*k/32-1849*k^2/320+1995*k^3/128-735*k^4/128 := by
-  norm_num [realEval, endpointFarDerivative, Polynomial.eval₂_pow, Polynomial.eval₂_sub]
+  simp only [realEval, endpointFarDerivative, Polynomial.eval₂_add, Polynomial.eval₂_sub,
+    Polynomial.eval₂_mul, Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
+    Rat.coe_castHom]
+  push_cast
   ring
 
 lemma hasDerivAt_endpointFarJ (k : ℝ) :

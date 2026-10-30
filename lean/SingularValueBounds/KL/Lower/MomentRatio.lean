@@ -87,8 +87,8 @@ theorem real_power_exponential_ratio_bound {p c : ℝ} (hp : 1 < p)
 theorem moment_threshold_exponential {p : ℝ} (hp : (19:ℝ)/4 ≤ p) :
     20*p < Real.exp (p-1/20) := by
   have hbase : (95:ℝ) < Real.exp (47/10) := by
-    have hs := Real.sum_le_exp_of_nonneg (by norm_num : (0:ℝ) ≤ 47/10) 25
-    have hn : (95:ℝ) < ∑ i ∈ Finset.range 25,(47/10:ℝ)^i/(Nat.factorial i:ℝ) := by
+    have hs := Real.sum_le_exp_of_nonneg (by norm_num : (0:ℝ) ≤ 47/10) 8
+    have hn : (95:ℝ) < ∑ i ∈ Finset.range 8,(47/10:ℝ)^i/(Nat.factorial i:ℝ) := by
       norm_num [Finset.sum_range_succ,Nat.factorial]
     exact hn.trans_le hs
   have ht : 0 ≤ p-19/4 := by linarith

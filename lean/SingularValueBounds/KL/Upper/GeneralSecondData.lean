@@ -1,5 +1,3 @@
-import SingularValueBounds.KL.Upper.GeneralFourth
-import SingularValueBounds.KL.Upper.EndpointCoefficients
 import SingularValueBounds.KL.Certificates.Enclosures
 
 /-! # Finite rational witnesses for the general upper second moment

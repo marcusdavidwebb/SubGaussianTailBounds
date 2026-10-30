@@ -7,7 +7,7 @@ open scoped BigOperators
 namespace SingularValueBounds.KL.Certificates.MajorantRow5
 set_option maxRecDepth 10000
 set_option maxHeartbeats 5000000
-def baseCoefficients : Fin 9 → Fin 14 → ℚ :=
+noncomputable def baseCoefficients : Fin 9 → Fin 14 → ℚ :=
   fun k l => (![![(3102951/8000000), (-2879237/1000000), (548663/50000), (-12199/2500), (18903/250), (0/1), (0/1), (0/1), (0/1)],
       ![(-26486393/8400000), (51228857/3500000), (-12334153/175000), (-466421/8750), (-302448/875), (0/1), (0/1), (0/1), (0/1)],
       ![(136167863/10500000), (-12690103/350000), (39219027/218750), (5731934/21875), (2365952/4375), (-302448/875), (0/1), (0/1), (0/1)],
@@ -27,7 +27,7 @@ theorem quotient_identity : majorantQuotient 5 = tensorOfFn 8 13 baseCoefficient
   rw [← majorant_cleared_factorization]
   apply tensor_eq_of_eval
   intro a b
-  norm_num [majorantCleared, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
+  simp [majorantCleared, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
     comparisonZQ, tensorOfFn, baseCoefficients, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,

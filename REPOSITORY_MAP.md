@@ -65,15 +65,15 @@ Paths in this table are relative to `lean/SingularValueBounds/`. Counts are
 
 | Folder | Direct files | Purpose |
 |---|---:|---|
-| [lean/SingularValueBounds/](lean/SingularValueBounds/) | 0 | Container for the 529 maintained mathematical modules. The complete-library umbrella is the sibling file `lean/SingularValueBounds.lean`. |
+| [lean/SingularValueBounds/](lean/SingularValueBounds/) | 0 | Container for the 566 maintained mathematical modules. The complete-library umbrella is the sibling file `lean/SingularValueBounds.lean`. |
 | [Canonical/](lean/SingularValueBounds/Canonical/) | 10 | The public interface: general and unit baseline proofs, adapters to the actual root statement, NLA-lib equivalence bridges, monotonicity, current results/comparisons and exact accepted constants. |
 | [Concentration/](lean/SingularValueBounds/Concentration/) | 1 | Integration of a new independent random row against the preceding state, using independence and Fubini. |
 | [Core/](lean/SingularValueBounds/Core/) | 5 | Shared row assumptions, constants, matrix algebra/measurability and scalar tail-to-moment estimates. |
 | [KL/](lean/SingularValueBounds/KL/) | 3 | Internal statement and finite-condition interfaces, row-by-row transfer and analytic theorem assembly. Most of this proof family is in its subfolders. |
 | [KL/Barrier/](lean/SingularValueBounds/KL/Barrier/) | 20 | Spectral shifts, the measurable adaptive row process, and the accumulated correction budgets used for lower and upper bounds. |
-| [KL/Certificates/](lean/SingularValueBounds/KL/Certificates/) | 73 | Concrete finite numerical proofs and shared arithmetic/polynomial lemmas, plus modules assembling the families below. “Certificate” here means a Lean proof, not an external result accepted on trust. |
-| [KL/Lower/](lean/SingularValueBounds/KL/Lower/) | 42 | Lower-tail/smallest-singular-value analysis: moments, covariance, spectral profiles, parameter coverage, scalar costs and the final lower-tail transfer. |
-| [KL/Upper/](lean/SingularValueBounds/KL/Upper/) | 75 | Upper-tail/largest-singular-value analysis: determinant and decay-rate estimates, upper means, entropy integration, moment-generating functions and the finite-condition interfaces. |
+| [KL/Certificates/](lean/SingularValueBounds/KL/Certificates/) | 80 | Concrete finite numerical proofs and shared arithmetic/polynomial lemmas, plus modules assembling the families below. “Certificate” here means a Lean proof, not an external result accepted on trust. |
+| [KL/Lower/](lean/SingularValueBounds/KL/Lower/) | 41 | Lower-tail/smallest-singular-value analysis: moments, covariance, spectral profiles, parameter coverage, scalar costs and the final lower-tail transfer. |
+| [KL/Upper/](lean/SingularValueBounds/KL/Upper/) | 74 | Upper-tail/largest-singular-value analysis: determinant and decay-rate estimates, upper means, entropy integration, moment-generating functions and the finite-condition interfaces. |
 | [KL/Weighted/](lean/SingularValueBounds/KL/Weighted/) | 4 | Weighted entropy, Gaussian determinant comparison and integration lemmas supporting the KL argument. |
 | [Main/](lean/SingularValueBounds/Main/) | 3 | Shared internal singular-value notation, passage from spectral bounds to singular values, and parameter optimization. Despite the historical name, the current public results are in `Canonical/Results.lean`. |
 | [QuadraticForms/](lean/SingularValueBounds/QuadraticForms/) | 6 | Integrability, means and higher moments of quadratic forms, using isotropy, sub-Gaussian assumptions and Gaussian comparison. |
@@ -112,6 +112,7 @@ Again, counts exclude subfolders.
 | [EndpointEntropyLogRows/](lean/SingularValueBounds/KL/Certificates/EndpointEntropyLogRows/) | 32 | Exact rounded-logarithm values on the shared endpoint grid, split into manageable blocks. |
 | [EndpointMeanEntropyRows/](lean/SingularValueBounds/KL/Certificates/EndpointMeanEntropyRows/) | 60 | Entropy bounds for unit-case upper-mean boxes, sharing corner evaluations between adjacent boxes. These complement the separate polynomial proofs. |
 | [EndpointSmallEntropyRows/](lean/SingularValueBounds/KL/Certificates/EndpointSmallEntropyRows/) | 5 | Entropy bounds for the small-shape part of the unit-case calculation. |
+| [GeneralMeanCriticalLogs/](lean/SingularValueBounds/KL/Certificates/GeneralMeanCriticalLogs/) | 32 | Checked upper-logarithm values shared by the general critical-margin proofs, split into bounded independent chunks. |
 | [GeneralMeanDecayTables/](lean/SingularValueBounds/KL/Certificates/GeneralMeanDecayTables/) | 28 | Shared exact rounded-exponential evaluations reused by the general entropy rows, avoiding repeated arithmetic proofs. |
 
 The numerous row/block files divide expensive exact computations into smaller
@@ -119,6 +120,19 @@ compilation and replay units. Combining them would reduce file count, but would
 not automatically reduce mathematical work and could increase peak memory.
 Shared logarithm and decay tables factor repeated work rather than provide
 alternative versions of the same overall proof.
+
+The generic polynomial certificates live in
+[Polynomial.lean](lean/SingularValueBounds/KL/Certificates/Polynomial.lean);
+their calculus and root helpers live in
+[PolynomialAnalysis.lean](lean/SingularValueBounds/KL/Certificates/PolynomialAnalysis.lean).
+[GeneralMeanRowData.lean](lean/SingularValueBounds/KL/Upper/GeneralMeanRowData.lean)
+contains the rational row record, grid and prefactor input, separately from
+numerical soundness.
+[EntropyLookup.lean](lean/SingularValueBounds/KL/Certificates/EntropyLookup.lean)
+contains the generic lookup used by endpoint grid data. The parent certificate
+folder also contains
+[GeneralMeanPrefactorLogs.lean](lean/SingularValueBounds/KL/Certificates/GeneralMeanPrefactorLogs.lean),
+the checked lower-logarithm lookup shared by prefactor and domain checks.
 
 ## Every Python file
 

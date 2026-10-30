@@ -97,6 +97,26 @@ new mathematical or novelty claim and does not resolve earlier assessments.
 This authorization is specific; future unauthorized canonical changes remain
 prohibited.
 
+## Proof-checking simplification — 30 October 2026
+
+At Marcus Webb's request, Codex and parallel agents simplified the proof
+implementation in [PR #4](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/4)
+while preserving the canonical source, both quartets
+and the mathematical contract. Shared checked arithmetic, smaller lookup and
+polynomial terms, existing Mathlib lemmas, narrower imports and omission of
+unused executable table code reduce repeated work. These are implementation
+changes using the existing methods, with no new singular-value bound or novelty
+claim.
+
+Python prepared proposed values and measurements. Wolfram MCP supported
+limited algebraic exploration, including sum-of-squares and polynomial Bézout
+identities; all retained identities and finite facts are proved in Lean.
+Model review is not independent human review. Marcus Webb retains the acceptance
+decision, and the preceding human mathematical work, historical model roles,
+responsibility and unresolved assessments remain unchanged. The separate
+[validation record](HISTORY.md#proof-checking-simplification--30-october-2026)
+distinguishes focused experiments from attempts to complete the verification gate.
+
 ## Scope and unresolved assessments
 
 The formalization proves the two canonical singular-value tail propositions,

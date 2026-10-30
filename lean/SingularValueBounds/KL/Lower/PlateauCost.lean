@@ -1,3 +1,4 @@
+import SingularValueBounds.KL.Lower.PlateauGeometry
 import SingularValueBounds.KL.Lower.PlateauCostData
 import SingularValueBounds.KL.Lower.HigherEntropy
 
@@ -14,6 +15,22 @@ def plateauRealPsi (u v w k : ℝ) : ℝ := u*k+2*v*k^2-2*w*k^4
 def plateauRealG (u A v w c k : ℝ) : ℝ :=
   plateauRealPsi u v w k+Real.log (plateauRealD u A c k)
 def plateauRealE (u v w k : ℝ) : ℝ := v*(1-k^2)-4+w/2-u*k/2+w*k^4
+
+private theorem plateauCostA_eval (i : Fin 2) (k : ℝ) :
+    realEval (plateauCostA i) k = if i = 0 then plateauA k else 74 / 55 := by
+  by_cases hi : i = 0 <;> norm_num [realEval, plateauCostA, plateauA, hi,
+    Polynomial.eval₂_pow, Polynomial.eval₂_sub] <;> ring
+
+private theorem plateauCostV_eval (i : Fin 2) (k : ℝ) :
+    realEval (plateauCostV i) k = if i = 0 then plateauV (plateauA k) else 27 / 16 := by
+  have ha := plateauCostA_eval i k
+  by_cases hi : i = 0
+  · simp only [if_pos hi, realEval] at ha
+    simp only [plateauCostV, if_pos hi, realEval, Polynomial.eval₂_add,
+      Polynomial.eval₂_mul, Polynomial.eval₂_sub, Polynomial.eval₂_C]
+    rw [ha]
+    norm_num [plateauV]
+  · norm_num [realEval, plateauCostV, hi]
 
 theorem plateauCostD_eval (i : Fin 2) (k : ℝ) :
     realEval (plateauCostD i) k = plateauRealD (plateauCostU i)
@@ -60,7 +77,7 @@ theorem plateau_cost_of_taylor {u w C E d : ℝ} (hu : 0 < u) (hw : 0 < w)
       have hp := (div_le_iff₀ (show 0 < 9*w^2*(u*C-4)^2 by positivity)).mp hp
       simp only [mul_pow,hs]
       nlinarith only [hp]
-    nlinarith [Real.exp_pos E,Real.sqrt_pos.mpr hd,mul_pos hden (Real.sqrt_pos.mpr hd)]
+    exact (sq_le_sq₀ (by positivity) (by positivity)).mp hsq
   have hterm : 20/(3*u*w)*Real.exp E/Real.sqrt d ≤ C-4/u := by
     apply (div_le_iff₀ (Real.sqrt_pos.mpr hd)).mpr
     rw [div_mul_eq_mul_div]
@@ -263,36 +280,18 @@ theorem plateau_near_cost (h : PlateauCostCertificateConditions) {k : ℝ}
       Real.exp (plateauRealE (1207/1000) (plateauV (plateauA k)) (26/25) k)/
       Real.sqrt (plateauRealD (1207/1000) (plateauA k) (17/10) k) ≤ (4137/1000 : ℝ) := by
   have hh := plateau_whole_interval_cost h (0 : Fin 2) (by simpa [plateauCostLo,plateauCostHi] using hk)
-  have hE : realEval (plateauCostE (0 : Fin 2)) k =
-      plateauRealE (1207/1000) (plateauV (plateauA k)) (26/25) k := by
-    norm_num [realEval,plateauCostE,plateauCostV,plateauCostA,plateauCostU,plateauCostW,
-      plateauRealE,plateauA,plateauV,Polynomial.eval₂_pow,Polynomial.eval₂_sub]
-    ring
-  have hD : realEval (plateauCostD (0 : Fin 2)) k =
-      plateauRealD (1207/1000) (plateauA k) (17/10) k := by
-    norm_num [realEval,plateauCostD,plateauCostA,plateauCostU,plateauCostC,
-      plateauRealD,plateauA,Polynomial.eval₂_pow,Polynomial.eval₂_sub]
-    all_goals try ring
-    all_goals simp_all
-  norm_num [plateauCostU,plateauCostW] at hh ⊢
-  rwa [hE,hD] at hh
+  rw [plateauCostE_eval, plateauCostD_eval, plateauCostV_eval, plateauCostA_eval] at hh
+  norm_num [plateauCostU, plateauCostW, plateauCostC] at hh ⊢
+  exact hh
 
 theorem plateau_far_cost (h : PlateauCostCertificateConditions) {k : ℝ}
     (hk : k ∈ Icc (147/200 : ℝ) 1) :
     4/(6/5)+20/(3*(6/5)*(21/20))*Real.exp (plateauRealE (6/5) (27/16) (21/20) k)/
       Real.sqrt (plateauRealD (6/5) (74/55) (19/10) k) ≤ (4137/1000 : ℝ) := by
   have hh := plateau_whole_interval_cost h (1 : Fin 2) (by simpa [plateauCostLo,plateauCostHi] using hk)
-  have hE : realEval (plateauCostE (1 : Fin 2)) k = plateauRealE (6/5) (27/16) (21/20) k := by
-    norm_num [realEval,plateauCostE,plateauCostV,plateauCostA,plateauCostU,plateauCostW,
-      plateauRealE,Polynomial.eval₂_pow,Polynomial.eval₂_sub]
-    ring
-  have hD : realEval (plateauCostD (1 : Fin 2)) k = plateauRealD (6/5) (74/55) (19/10) k := by
-    norm_num [realEval,plateauCostD,plateauCostA,plateauCostU,plateauCostC,
-      plateauRealD,Polynomial.eval₂_pow,Polynomial.eval₂_sub]
-    all_goals try ring
-    all_goals simp_all
-  norm_num [plateauCostU,plateauCostW] at hh ⊢
-  rwa [hE,hD] at hh
+  rw [plateauCostE_eval, plateauCostD_eval, plateauCostV_eval, plateauCostA_eval] at hh
+  norm_num [plateauCostU, plateauCostW, plateauCostC] at hh ⊢
+  exact hh
 
 /-- The actual plateau comparison matrix satisfies its mixed-cost bound. -/
 theorem normalized_plateau_mixed_cost {X : Ω → ι → ℝ} {K C : ℝ}

@@ -8,6 +8,18 @@ open scoped ENNReal
 
 namespace SingularValueBounds
 
+/-- Every natural-number power times a decaying exponential is integrable
+on a nonnegative half-line. This is shared by the tail and resolvent arguments. -/
+theorem integrableOn_pow_mul_exp_neg_mul_Ioi (n : ℕ) {r A : ℝ}
+    (hr : 0 < r) (hA : 0 ≤ A) :
+    IntegrableOn (fun u : ℝ => u ^ n * Real.exp (-(r * u))) (Ioi A) := by
+  have hi := integrableOn_rpow_mul_exp_neg_mul_rpow
+    (s := (n : ℝ)) (p := 1) (b := r)
+    (by have := Nat.cast_nonneg (α := ℝ) n; linarith) (by norm_num) hr
+  have h0 : IntegrableOn (fun u : ℝ => u ^ n * Real.exp (-(r * u))) (Ioi 0) := by
+    simpa only [Real.rpow_one, Real.rpow_natCast, neg_mul] using hi
+  exact h0.mono_set (Ioi_subset_Ioi hA)
+
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsFiniteMeasure μ]
 
 /-- A nonnegative random variable with an exponential tail has all positive
@@ -20,11 +32,8 @@ theorem exponential_tail_moment {Y : Ω → ℝ} {C r : ℝ}
     Integrable (fun ω => Y ω ^ (n + 1)) μ ∧
       (∫ ω, Y ω ^ (n + 1) ∂μ) ≤ C * ((n + 1).factorial : ℝ) / r ^ (n + 1) := by
   let g : ℝ → ℝ := fun x => x ^ n * Real.exp (-(r * x))
-  have hg : IntegrableOn g (Ioi 0) := by
-    have hi := integrableOn_rpow_mul_exp_neg_mul_rpow
-      (s := (n : ℝ)) (p := 1) (b := r)
-      (by have hn : (0 : ℝ) ≤ n := Nat.cast_nonneg n; linarith) (by norm_num) hr
-    simpa only [Real.rpow_one, Real.rpow_natCast, neg_mul] using hi
+  have hg : IntegrableOn g (Ioi 0) :=
+    integrableOn_pow_mul_exp_neg_mul_Ioi n hr le_rfl
   have hg0 : ∀ᵐ x ∂volume.restrict (Ioi 0), 0 ≤ g x := by
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with x hx
     have hx0 : 0 ≤ x := le_of_lt hx

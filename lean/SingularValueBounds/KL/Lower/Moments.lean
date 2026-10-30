@@ -20,29 +20,26 @@ noncomputable section
 
 private theorem offset_log_first : Real.log (1996 / 99 : ℝ) < 751 / 250 := by
   apply (Real.log_lt_iff_lt_exp (by norm_num : (0 : ℝ) < 1996 / 99)).2
-  have hs := Real.sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 751 / 250) 25
+  have hs := Real.sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 751 / 250) 12
   have hn : (1996 / 99 : ℝ) <
-      ∑ i ∈ Finset.range 25, (751 / 250 : ℝ) ^ i / (Nat.factorial i : ℝ) := by
+      ∑ i ∈ Finset.range 12, (751 / 250 : ℝ) ^ i / (Nat.factorial i : ℝ) := by
     norm_num [Finset.sum_range_succ, Nat.factorial]
   exact hn.trans_le hs
 
 private theorem offset_log_second : Real.log (499 / 20 : ℝ) < 259 / 80 := by
   apply (Real.log_lt_iff_lt_exp (by norm_num : (0 : ℝ) < 499 / 20)).2
-  have hs := Real.sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 259 / 80) 25
+  have hs := Real.sum_le_exp_of_nonneg (by norm_num : (0 : ℝ) ≤ 259 / 80) 8
   have hn : (499 / 20 : ℝ) <
-      ∑ i ∈ Finset.range 25, (259 / 80 : ℝ) ^ i / (Nat.factorial i : ℝ) := by
+      ∑ i ∈ Finset.range 8, (259 / 80 : ℝ) ^ i / (Nat.factorial i : ℝ) := by
     norm_num [Finset.sum_range_succ, Nat.factorial]
   exact hn.trans_le hs
 
 private theorem offset_exp_three : Real.exp 3 < 21 := by
-  have h := Real.exp_one_lt_d9
-  have hpos := Real.exp_pos 1
+  have h : Real.exp 1 < (11/4 : ℝ) := Real.exp_one_lt_d9.trans (by norm_num)
   have he : Real.exp 3 = Real.exp 1 ^ 3 := by
     simpa using Real.exp_nat_mul (1 : ℝ) 3
   rw [he]
-  nlinarith [sq_nonneg (Real.exp 1 - 2.7182818286),
-    mul_nonneg (sub_nonneg.mpr h.le) (sq_nonneg (Real.exp 1)),
-    mul_nonneg (sub_nonneg.mpr h.le) (show 0 ≤ (2.7182818286 : ℝ) * Real.exp 1 by positivity)]
+  exact (pow_lt_pow_left₀ h (Real.exp_nonneg 1) (by decide : 3 ≠ 0)).trans (by norm_num)
 
 /-- The real interval estimate in the offset fourth-moment argument. -/
 theorem fourth_offset_base {K : ℝ} (hK : 1 ≤ K) :

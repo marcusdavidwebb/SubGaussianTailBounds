@@ -65,65 +65,69 @@ namespace SingularValueBounds.KL.Certificates
 theorem endpointMean_jointCorners (ki : Fin 60) (ai : Fin 42)
     (hactive : endpointMeanActive ki ai) (h : Fin 4) :
     endpointMeanNumericCorner ki ai h ≤ endpointMeanCorner ki ai h := by
-  fin_cases ki
-  · exact endpointMeanEntropyRow00 ai hactive h
-  · exact endpointMeanEntropyRow01 ai hactive h
-  · exact endpointMeanEntropyRow02 ai hactive h
-  · exact endpointMeanEntropyRow03 ai hactive h
-  · exact endpointMeanEntropyRow04 ai hactive h
-  · exact endpointMeanEntropyRow05 ai hactive h
-  · exact endpointMeanEntropyRow06 ai hactive h
-  · exact endpointMeanEntropyRow07 ai hactive h
-  · exact endpointMeanEntropyRow08 ai hactive h
-  · exact endpointMeanEntropyRow09 ai hactive h
-  · exact endpointMeanEntropyRow10 ai hactive h
-  · exact endpointMeanEntropyRow11 ai hactive h
-  · exact endpointMeanEntropyRow12 ai hactive h
-  · exact endpointMeanEntropyRow13 ai hactive h
-  · exact endpointMeanEntropyRow14 ai hactive h
-  · exact endpointMeanEntropyRow15 ai hactive h
-  · exact endpointMeanEntropyRow16 ai hactive h
-  · exact endpointMeanEntropyRow17 ai hactive h
-  · exact endpointMeanEntropyRow18 ai hactive h
-  · exact endpointMeanEntropyRow19 ai hactive h
-  · exact endpointMeanEntropyRow20 ai hactive h
-  · exact endpointMeanEntropyRow21 ai hactive h
-  · exact endpointMeanEntropyRow22 ai hactive h
-  · exact endpointMeanEntropyRow23 ai hactive h
-  · exact endpointMeanEntropyRow24 ai hactive h
-  · exact endpointMeanEntropyRow25 ai hactive h
-  · exact endpointMeanEntropyRow26 ai hactive h
-  · exact endpointMeanEntropyRow27 ai hactive h
-  · exact endpointMeanEntropyRow28 ai hactive h
-  · exact endpointMeanEntropyRow29 ai hactive h
-  · exact endpointMeanEntropyRow30 ai hactive h
-  · exact endpointMeanEntropyRow31 ai hactive h
-  · exact endpointMeanEntropyRow32 ai hactive h
-  · exact endpointMeanEntropyRow33 ai hactive h
-  · exact endpointMeanEntropyRow34 ai hactive h
-  · exact endpointMeanEntropyRow35 ai hactive h
-  · exact endpointMeanEntropyRow36 ai hactive h
-  · exact endpointMeanEntropyRow37 ai hactive h
-  · exact endpointMeanEntropyRow38 ai hactive h
-  · exact endpointMeanEntropyRow39 ai hactive h
-  · exact endpointMeanEntropyRow40 ai hactive h
-  · exact endpointMeanEntropyRow41 ai hactive h
-  · exact endpointMeanEntropyRow42 ai hactive h
-  · exact endpointMeanEntropyRow43 ai hactive h
-  · exact endpointMeanEntropyRow44 ai hactive h
-  · exact endpointMeanEntropyRow45 ai hactive h
-  · exact endpointMeanEntropyRow46 ai hactive h
-  · exact endpointMeanEntropyRow47 ai hactive h
-  · exact endpointMeanEntropyRow48 ai hactive h
-  · exact endpointMeanEntropyRow49 ai hactive h
-  · exact endpointMeanEntropyRow50 ai hactive h
-  · exact endpointMeanEntropyRow51 ai hactive h
-  · exact endpointMeanEntropyRow52 ai hactive h
-  · exact endpointMeanEntropyRow53 ai hactive h
-  · exact endpointMeanEntropyRow54 ai hactive h
-  · exact endpointMeanEntropyRow55 ai hactive h
-  · exact endpointMeanEntropyRow56 ai hactive h
-  · exact endpointMeanEntropyRow57 ai hactive h
-  · exact endpointMeanEntropyRow58 ai hactive h
-  · exact endpointMeanEntropyRow59 ai hactive h
+  revert ki ai hactive h
+  exact Fin.cases (motive := fun ki => ∀ ai : Fin 42, endpointMeanActive ki ai →
+      ∀ h : Fin 4, endpointMeanNumericCorner ki ai h ≤ endpointMeanCorner ki ai h)
+    endpointMeanEntropyRow00 <|
+    Fin.cases endpointMeanEntropyRow01 <|
+    Fin.cases endpointMeanEntropyRow02 <|
+    Fin.cases endpointMeanEntropyRow03 <|
+    Fin.cases endpointMeanEntropyRow04 <|
+    Fin.cases endpointMeanEntropyRow05 <|
+    Fin.cases endpointMeanEntropyRow06 <|
+    Fin.cases endpointMeanEntropyRow07 <|
+    Fin.cases endpointMeanEntropyRow08 <|
+    Fin.cases endpointMeanEntropyRow09 <|
+    Fin.cases endpointMeanEntropyRow10 <|
+    Fin.cases endpointMeanEntropyRow11 <|
+    Fin.cases endpointMeanEntropyRow12 <|
+    Fin.cases endpointMeanEntropyRow13 <|
+    Fin.cases endpointMeanEntropyRow14 <|
+    Fin.cases endpointMeanEntropyRow15 <|
+    Fin.cases endpointMeanEntropyRow16 <|
+    Fin.cases endpointMeanEntropyRow17 <|
+    Fin.cases endpointMeanEntropyRow18 <|
+    Fin.cases endpointMeanEntropyRow19 <|
+    Fin.cases endpointMeanEntropyRow20 <|
+    Fin.cases endpointMeanEntropyRow21 <|
+    Fin.cases endpointMeanEntropyRow22 <|
+    Fin.cases endpointMeanEntropyRow23 <|
+    Fin.cases endpointMeanEntropyRow24 <|
+    Fin.cases endpointMeanEntropyRow25 <|
+    Fin.cases endpointMeanEntropyRow26 <|
+    Fin.cases endpointMeanEntropyRow27 <|
+    Fin.cases endpointMeanEntropyRow28 <|
+    Fin.cases endpointMeanEntropyRow29 <|
+    Fin.cases endpointMeanEntropyRow30 <|
+    Fin.cases endpointMeanEntropyRow31 <|
+    Fin.cases endpointMeanEntropyRow32 <|
+    Fin.cases endpointMeanEntropyRow33 <|
+    Fin.cases endpointMeanEntropyRow34 <|
+    Fin.cases endpointMeanEntropyRow35 <|
+    Fin.cases endpointMeanEntropyRow36 <|
+    Fin.cases endpointMeanEntropyRow37 <|
+    Fin.cases endpointMeanEntropyRow38 <|
+    Fin.cases endpointMeanEntropyRow39 <|
+    Fin.cases endpointMeanEntropyRow40 <|
+    Fin.cases endpointMeanEntropyRow41 <|
+    Fin.cases endpointMeanEntropyRow42 <|
+    Fin.cases endpointMeanEntropyRow43 <|
+    Fin.cases endpointMeanEntropyRow44 <|
+    Fin.cases endpointMeanEntropyRow45 <|
+    Fin.cases endpointMeanEntropyRow46 <|
+    Fin.cases endpointMeanEntropyRow47 <|
+    Fin.cases endpointMeanEntropyRow48 <|
+    Fin.cases endpointMeanEntropyRow49 <|
+    Fin.cases endpointMeanEntropyRow50 <|
+    Fin.cases endpointMeanEntropyRow51 <|
+    Fin.cases endpointMeanEntropyRow52 <|
+    Fin.cases endpointMeanEntropyRow53 <|
+    Fin.cases endpointMeanEntropyRow54 <|
+    Fin.cases endpointMeanEntropyRow55 <|
+    Fin.cases endpointMeanEntropyRow56 <|
+    Fin.cases endpointMeanEntropyRow57 <|
+    Fin.cases endpointMeanEntropyRow58 <|
+    Fin.cases endpointMeanEntropyRow59 <|
+    fun ki => Fin.elim0 ki
+
 end SingularValueBounds.KL.Certificates

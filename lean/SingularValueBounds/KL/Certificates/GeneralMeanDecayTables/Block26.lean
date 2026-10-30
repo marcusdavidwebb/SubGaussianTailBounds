@@ -1,6 +1,6 @@
 import SingularValueBounds.KL.Certificates.IntegerLookupTree
 import SingularValueBounds.KL.Certificates.IntegerRoundedExp
-import SingularValueBounds.KL.Upper.GeneralMeanNumerics
+import SingularValueBounds.KL.Upper.GeneralMeanRowData
 
 set_option Elab.async false
 

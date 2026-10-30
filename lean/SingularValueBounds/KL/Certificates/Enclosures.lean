@@ -1,6 +1,15 @@
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.Analysis.SpecialFunctions.Exponential
-import Mathlib.Tactic
+import Mathlib.Tactic.Ext
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.NormNum
+import Mathlib.Tactic.NormNum.BigOperators
+import Mathlib.Tactic.NormNum.NatFactorial
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Positivity
+import Mathlib.Tactic.Ring
 
 /-!
 # Analytic rules for the exact Python certificates (supplementary S1.2)

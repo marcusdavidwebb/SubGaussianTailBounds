@@ -18,17 +18,7 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 theorem one_sub_sum_le_product (s : Finset ι) {p : ι → ℝ}
     (hp : ∀ i∈s, 0≤p i) (hp1 : ∀ i∈s, p i≤1) :
     1-∑ i∈s,p i ≤ ∏ i∈s,(1-p i) := by
-  induction s using Finset.induction_on with
-  | empty => simp
-  | @insert i s hi ih =>
-    have hi0 := hp i (Finset.mem_insert_self _ _)
-    have hi1 := hp1 i (Finset.mem_insert_self _ _)
-    have hps : ∀ j∈s,0≤p j := fun j hj => hp j (Finset.mem_insert_of_mem hj)
-    have hp1s : ∀ j∈s,p j≤1 := fun j hj => hp1 j (Finset.mem_insert_of_mem hj)
-    have hh := mul_le_mul_of_nonneg_left (ih hps hp1s) (sub_nonneg.mpr hi1)
-    rw [Finset.sum_insert hi,Finset.prod_insert hi]
-    have hsum : 0≤∑j∈s,p j := Finset.sum_nonneg hps
-    nlinarith [mul_nonneg hi0 hsum]
+  exact one_sub_sum_le_prod_one_sub s p hp hp1
 
 /-- A normalized vector with one sufficiently large coordinate obeys the
 two-weight determinant estimate without any iteration or limiting argument. -/
@@ -84,7 +74,7 @@ theorem endpoint_capped_weight_log_bound {p : ι → ℝ}
     have hs := Finset.sum_le_sum (s := Finset.univ) (fun i hi => hlog i)
     rw [Finset.sum_neg_distrib,← Finset.mul_sum,hsum,mul_one] at hs
     have he : Real.exp (1 : ℝ)≤(46/15 : ℝ) := by
-      have hh := Certificates.exp_le_expTaylorUpper 8 (x := (1 : ℝ)) (by norm_num) (by norm_num)
+      have hh := Certificates.exp_le_expTaylorUpper 0 (x := (1 : ℝ)) (by norm_num) (by norm_num)
       norm_num [Certificates.expTaylorUpper,Certificates.expTaylor,Finset.sum_range_succ] at hh ⊢
       linarith
     have hl := Real.log_le_log (Real.exp_pos 1) he

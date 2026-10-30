@@ -114,12 +114,7 @@ theorem tailMomentCoefficient_le {p : ℕ} (hp : 3 ≤ p) :
 
 private theorem monomial_exp_integrable (n : ℕ) {r A : ℝ} (hr : 0 < r) (hA : 0 ≤ A) :
     IntegrableOn (fun u : ℝ => u^n*Real.exp (-(r*u))) (Ioi A) := by
-  have hi := integrableOn_rpow_mul_exp_neg_mul_rpow
-    (s := (n : ℝ)) (p := 1) (b := r)
-    (by have := Nat.cast_nonneg (α := ℝ) n; linarith) (by norm_num) hr
-  have h0 : IntegrableOn (fun u : ℝ => u^n*Real.exp (-(r*u))) (Ioi 0) := by
-    simpa [Real.rpow_natCast] using hi
-  exact h0.mono_set (Ioi_subset_Ioi hA)
+  exact integrableOn_pow_mul_exp_neg_mul_Ioi n hr hA
 
 /-- Exact incomplete factorial integral, proved by integration by parts. -/
 theorem integral_monomial_exp_cutoff (n : ℕ) {r A : ℝ} (hr : 0 < r) (hA : 0 ≤ A) :
@@ -378,7 +373,7 @@ theorem cutoff_coefficient_le (n : ℕ) {B s ε : ℝ}
 
 /-- The finite Taylor lower bound used in the epsilon estimate. -/
 theorem exp_twenty_seven_eighths_lower : (146/5 : ℝ) < Real.exp (27/8) := by
-  have h := Certificates.expTaylor_le_exp 14 (x := (27/8 : ℝ)) (by norm_num)
+  have h := Certificates.expTaylor_le_exp 10 (x := (27/8 : ℝ)) (by norm_num)
   norm_num [Certificates.expTaylor, Finset.sum_range_succ] at h ⊢
   linarith
 
@@ -532,19 +527,19 @@ theorem upperSecondMomentCost_antitone : AntitoneOn upperSecondMomentCost (Ici 1
 
 /-- The finite Taylor check at the printed second-moment endpoint. -/
 theorem upperSecondMomentCost_five_quarters : upperSecondMomentCost (5/4) < (9/2 : ℝ) := by
-  have h11 := Certificates.expTaylor_le_exp 24 (x := (11/32 : ℝ)) (by norm_num)
-  have hhalf := Certificates.exp_le_expTaylorUpper 24 (x := (1/2 : ℝ))
+  have h11 := Certificates.expTaylor_le_exp 2 (x := (11/32 : ℝ)) (by norm_num)
+  have hhalf := Certificates.exp_le_expTaylorUpper 2 (x := (1/2 : ℝ))
     (by norm_num) (by norm_num)
-  have hlo : (0 : ℝ) < Certificates.expTaylor 24 (11/32) := by
+  have hlo : (0 : ℝ) < Certificates.expTaylor 2 (11/32) := by
     norm_num [Certificates.expTaylor, Finset.sum_range_succ]
-  have hup : (0 : ℝ) < Certificates.expTaylorUpper 24 (1/2) := by
+  have hup : (0 : ℝ) < Certificates.expTaylorUpper 2 (1/2) := by
     norm_num [Certificates.expTaylorUpper, Certificates.expTaylor, Finset.sum_range_succ]
   have h11' := Certificates.exp_neg_le_reciprocal hlo h11
-  have hhalf' : 1/Certificates.expTaylorUpper 24 (1/2) ≤ Real.exp (-(1/2 : ℝ)) := by
+  have hhalf' : 1/Certificates.expTaylorUpper 2 (1/2) ≤ Real.exp (-(1/2 : ℝ)) := by
     rw [Real.exp_neg, ← one_div]
     exact one_div_le_one_div_of_le (Real.exp_pos _) hhalf
-  have hbound : (15/4 : ℝ)+(1/4)*(1/Certificates.expTaylor 24 (11/32))*(15/4+16/9) -
-      (2/5)*(1/Certificates.expTaylorUpper 24 (1/2)) < 9/2 := by
+  have hbound : (15/4 : ℝ)+(1/4)*(1/Certificates.expTaylor 2 (11/32))*(15/4+16/9) -
+      (2/5)*(1/Certificates.expTaylorUpper 2 (1/2)) < 9/2 := by
     norm_num [Certificates.expTaylorUpper, Certificates.expTaylor, Finset.sum_range_succ]
   norm_num [upperSecondMomentCost] at *
   nlinarith

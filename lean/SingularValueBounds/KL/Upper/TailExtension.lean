@@ -114,7 +114,11 @@ theorem upperRateF_le_of_numerator {v C theta : ‚Ñù} (hv : 1 < v) (htheta : 1 ‚â
   rw [show 1+(theta-1) = theta by ring] at ht
   rw [ht]
   simp only [show 1+(theta-1) = theta by ring] at hi hn
-  linarith
+  -- The numerator identity already contains the entire algebraic calculation.
+  apply (sub_le_iff_le_add).2
+  apply hl.trans
+  apply sub_nonneg.mp
+  rwa [hi]
 
 /-- Derivative of the rate-rescaled correction: this sign is uniform on the
 whole interval used to compare rates. -/

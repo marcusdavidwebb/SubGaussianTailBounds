@@ -1,4 +1,6 @@
-import SingularValueBounds.KL.Upper.RoundedArithmetic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Data.Rat.Floor
+import Mathlib.Data.Nat.Log
 
 /-! # Rational fixed-point algorithms for the entropy certificates
 The functions mirror supplementary/check_main_constants.py exactly. Their

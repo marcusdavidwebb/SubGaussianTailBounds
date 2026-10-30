@@ -26,6 +26,17 @@ deferred independent kernel replay, so this is not a completed verification run.
 The complete requirements above remain in place;
 [HISTORY.md](../docs/HISTORY.md) records the checks performed.
 
+The subsequent four-hour proof simplification on 30 October 2026 preserved the
+canonical source, dependency pins and checking policy. Its final complete
+attempt compiled all 568 source modules and elaborated 22 acceptance obligations,
+then failed during replay planning on `Lean.Data.NameMap.AdditionalOperations`.
+The unchanged generated acceptance checker imports split Lean modules outside
+its trusted-base inventory. Three focused checks of the corrected proof modules
+passed the unchanged kernel/axiom worker, but the complete gate did not pass.
+[HISTORY.md](../docs/HISTORY.md#proof-checking-simplification--30-october-2026)
+records the exact attempts and the pre-existing compatibility issue. No checking
+requirement was weakened to bypass it.
+
 ## Pinned environment and storage
 
 Reuse Lean **4.33.1** and the exact dependency revisions in

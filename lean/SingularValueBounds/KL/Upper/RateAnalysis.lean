@@ -22,21 +22,20 @@ private theorem factor_derivatives {q x : ℝ} (hx : 0 ≤ x) (hd : (q-1)*x < 1)
   have hd2 := (hasDerivAt_const x (1:ℝ)).sub ((hasDerivAt_id x).const_mul (q-1))
   refine ⟨?_,?_,?_⟩
   · convert! ((hd1.log h1).sub (hd2.log h2)).sub ((hasDerivAt_id x).const_mul q) using 1 <;>
-      simp [upperFactorF,upperFactorF1]
+      simp [upperFactorF1]
     ring
-  · convert! (((hasDerivAt_const x (1:ℝ)).div hd1 h1).add
-      ((hasDerivAt_const x (q-1)).div hd2 h2)).sub_const q using 1
-    simp only [id_eq, Pi.add_apply, Pi.sub_apply, Pi.pow_apply]
-    unfold upperFactorF2
-    field_simp [h1,h2]
-    ring
-  · convert! (((hasDerivAt_const x (-1:ℝ)).div (hd1.pow 2) (pow_ne_zero 2 h1)).add
-      ((hasDerivAt_const x ((q-1)^2)).div (hd2.pow 2) (pow_ne_zero 2 h2))) using 1
-    simp only [id_eq, Pi.add_apply, Pi.sub_apply, Pi.pow_apply]
-    unfold upperFactorF3
-    field_simp (disch := first | assumption | (convert! h2 using 1 <;> ring) |
-      (convert! neg_ne_zero.mpr h2 using 1 <;> ring)) [h1,h2]
-    ring
+  · convert! ((hd1.inv h1).add ((hd2.inv h2).const_mul (q-1))).sub_const q using 1 <;>
+      (try ext t) <;>
+      simp only [upperFactorF1, upperFactorF2, id_eq, Pi.add_apply, Pi.sub_apply,
+        Pi.inv_apply, div_eq_mul_inv, ← inv_pow, sub_mul, one_mul, mul_one,
+        zero_add, zero_sub] <;> ring
+  · convert! (((hd1.inv h1).pow 2).neg.add
+      (((hd2.inv h2).pow 2).const_mul ((q-1)^2))) using 1 <;>
+      (try ext t) <;>
+      simp only [upperFactorF2, upperFactorF3, id_eq, Pi.add_apply, Pi.sub_apply,
+        Pi.pow_apply, Pi.neg_apply, Pi.inv_apply, div_eq_mul_inv, ← inv_pow,
+        sub_mul, mul_one,
+        one_mul, zero_add, zero_sub, Nat.cast_ofNat, Nat.reduceSub, pow_one] <;> ring
 
 /-- The rescaling estimate for the first determinant factors, on the full
 positive-denominator domain, without assuming a finite certificate. -/

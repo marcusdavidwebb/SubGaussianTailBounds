@@ -30,7 +30,7 @@ theorem generalMeanPolynomial_identity_0 (J : ℚ) :
     generalMeanJointCleared J 0 = tensorOfFn 6 15 (generalMeanCoefficients0 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients0, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -63,7 +63,7 @@ theorem generalMeanPolynomial_identity_1 (J : ℚ) :
     generalMeanJointCleared J 1 = tensorOfFn 6 15 (generalMeanCoefficients1 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients1, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -96,7 +96,7 @@ theorem generalMeanPolynomial_identity_2 (J : ℚ) :
     generalMeanJointCleared J 2 = tensorOfFn 6 15 (generalMeanCoefficients2 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients2, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -129,7 +129,7 @@ theorem generalMeanPolynomial_identity_3 (J : ℚ) :
     generalMeanJointCleared J 3 = tensorOfFn 6 15 (generalMeanCoefficients3 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients3, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -162,7 +162,7 @@ theorem generalMeanPolynomial_identity_4 (J : ℚ) :
     generalMeanJointCleared J 4 = tensorOfFn 6 15 (generalMeanCoefficients4 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients4, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -195,7 +195,7 @@ theorem generalMeanPolynomial_identity_5 (J : ℚ) :
     generalMeanJointCleared J 5 = tensorOfFn 8 15 (generalMeanCoefficients5 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients5, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -213,7 +213,7 @@ theorem generalMeanPolynomial_identity_6 (J : ℚ) :
     C (C J-generalMeanNormQ (671/100)) = tensorOfFn 4 0 (generalMeanCoefficients6 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients6, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
@@ -231,7 +231,7 @@ theorem generalMeanPolynomial_identity_7 (J : ℚ) :
     C (C J-generalMeanNormQ (563/100)) = tensorOfFn 4 0 (generalMeanCoefficients7 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients7, Polynomial.ofFn_eq_sum_monomial,
     Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,

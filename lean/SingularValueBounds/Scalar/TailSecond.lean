@@ -25,7 +25,7 @@ theorem scalar_tail_coefficient {K : ℝ} (hK : 1 ≤ K) :
     dsimp [logParameter]
     ring
   have he11 : (13 : ℝ) ≤ Real.exp (8 / 3 : ℝ) := by
-    have hh := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 8 / 3 by norm_num) 7
+    have hh := Real.sum_le_exp_of_nonneg (show (0 : ℝ) ≤ 8 / 3 by norm_num) 6
     norm_num [Finset.sum_range_succ] at hh
     linarith
   have hneg : Real.exp (-(8 / 3 : ℝ)) ≤ (1 / 13 : ℝ) := by

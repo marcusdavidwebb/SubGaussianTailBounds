@@ -1,3 +1,4 @@
+import SingularValueBounds.KL.Certificates.EndpointEntropyEvaluation
 import SingularValueBounds.KL.Certificates.EndpointEntropyLogData
 
 /-! Checkpointed decay and two exact prefix moments, checked by the Lean kernel. -/

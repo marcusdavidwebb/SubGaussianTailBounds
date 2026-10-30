@@ -34,26 +34,27 @@ lemma roundUpQ_nonpos {x : ℚ} (hx : x ≤ 0) : roundUpQ x ≤ 0 := by
 
 lemma expTermLowerQ_nonneg {x : ℚ} (hx : 0 ≤ x) (j : ℕ) : 0 ≤ expTermLowerQ x j := by
   induction j with
-  | zero => norm_num [expTermLowerQ]
+  | zero => change (0 : ℚ) ≤ 1; norm_num
   | succ j ih =>
     exact roundDownQ_nonneg (div_nonneg (mul_nonneg ih hx) (by positivity))
 
 lemma expLowerSumQ_pos {x : ℚ} (hx : 0 ≤ x) : 0 < expLowerSumQ x := by
   have h : (1 : ℚ) ≤ expLowerSumQ x := by
-    simpa only [expLowerSumQ, expTermLowerQ] using
-      (Finset.single_le_sum (fun j _ => expTermLowerQ_nonneg hx j)
-        (show 0 ∈ Finset.range 81 by decide))
+    change expTermLowerQ x 0 ≤ ∑ j ∈ Finset.range 81, expTermLowerQ x j
+    exact Finset.single_le_sum (fun j _ => expTermLowerQ_nonneg hx j)
+      (show 0 ∈ Finset.range 81 by decide)
   exact lt_of_lt_of_le (by norm_num) h
 
 theorem expLowerTranscript (x : ℚ) (hx : 0 ≤ x) :
     ExpLowerTranscript 80 x (expLowerSumQ x) (expTermLowerQ x) := by
-  refine ⟨hx, by simp [expTermLowerQ], ?_, le_rfl⟩
+  refine ⟨hx, by change (1 : ℚ) ≤ 1; exact le_rfl, ?_, le_rfl⟩
   intro j _
   exact roundDownQ_le _
 
 theorem expUpperTranscript (x : ℚ) (hx : 0 ≤ x) (hdom : x < 82) :
     ExpUpperTranscript 80 x (expPositiveUpperQ x) (expTermUpperQ x) := by
-  refine ⟨hx, by norm_num; exact hdom, by simp [expTermUpperQ], ?_, ?_⟩
+  refine ⟨hx, by norm_num; exact hdom,
+    by change (1 : ℚ) ≤ 1; exact le_rfl, ?_, ?_⟩
   · intro j _
     exact le_roundUpQ _
   · unfold expPositiveUpperQ

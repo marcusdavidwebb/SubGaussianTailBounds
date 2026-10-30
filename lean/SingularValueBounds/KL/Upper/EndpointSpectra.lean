@@ -60,17 +60,7 @@ theorem spectralComplementMoment_monotone :
 
 theorem endpoint_cubic_monotone {A : ℝ} (hA : 0≤A) :
     MonotoneOn (fun x : ℝ => x+A*x^2-2*x^3) (Icc 0 (7/20)) := by
-  apply monotoneOn_of_deriv_nonneg (convex_Icc _ _)
-  · fun_prop
-  · fun_prop
-  · intro x hx
-    have hx' : x∈Icc (0 : ℝ) (7/20) := interior_subset hx
-    have hd : HasDerivAt (fun x : ℝ => x+A*x^2-2*x^3) (1+2*A*x-6*x^2) x := by
-      convert! ((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
-        (((hasDerivAt_id x).pow 3).const_mul 2) using 1 <;> simp only [id_eq] <;> ring
-    rw [hd.deriv]
-    have hx2 := pow_le_pow_left₀ hx'.1 hx'.2 2
-    nlinarith [mul_nonneg hA hx'.1]
+  exact upper_comparison_cubic_monotone hA
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
 
@@ -95,15 +85,13 @@ theorem endpoint_spectral_row_bounds (i : Fin 3) {x : ι → ℝ}
   have hmA : (1/2 : ℝ)≤row.meanBound := by fin_cases i <;> norm_num [row,endpointSpectralRow]
   have heps : 0≤1-(x top)^2 := by
     have hs := normalized_upper_coordinate_le_one hx h2 top
-    nlinarith [hx top]
+    exact sub_nonneg.mpr (by simpa only [one_pow] using pow_le_pow_left₀ (hx top) hs 2)
   have hepslo : 1-(x top)^2≤1-row.lo^2 := by
-    have hlo0 : 0≤row.lo := by linarith
+    have hlo0 : 0≤row.lo := (by norm_num : (0 : ℝ) ≤ 9/10).trans hrowLo
     have hh := pow_le_pow_left₀ hlo0 hκ.1 2
-    linarith
-  have hrest : Real.sqrt (1-(x top)^2)≤row.radius := by
-    have hs := Real.sq_sqrt heps
-    have hs0 := Real.sqrt_nonneg (1-(x top)^2)
-    nlinarith
+    exact sub_le_sub_left hh 1
+  have hrest : Real.sqrt (1-(x top)^2)≤row.radius :=
+    Real.sqrt_le_iff.mpr ⟨hr0, hepslo.trans hr2⟩
   have haComplement := normalized_upper_mean_le_complement hx h2 top
   have hA : normalizedUpperMean x≤row.meanBound := by
     by_cases hiLast : i=2
@@ -113,21 +101,21 @@ theorem endpoint_spectral_row_bounds (i : Fin 3) {x : ι → ℝ}
         ⟨hrowLo.trans hκ.1,hκ.2.trans hrowHi⟩ ⟨hrowLo.trans (hκ.1.trans hκ.2),hrowHi⟩ hκ.2
       have hhi0 : 0≤1-row.hi^2 := by
         have hh : 0≤row.hi := (hx top).trans hκ.2
-        nlinarith
+        exact sub_nonneg.mpr (by simpa only [one_pow] using pow_le_pow_left₀ hh hrowHi 2)
       have hS := Real.sq_sqrt hhi0
-      have hS0 := Real.sqrt_nonneg (1-row.hi^2)
       have hnumeric : row.hi^3+(1-row.hi^2)*
           (if i=0 then (171/500 : ℝ) else 5/16)≤row.meanBound := by
-        fin_cases i <;> norm_num [row,endpointSpectralRow] at *
+        fin_cases i <;> norm_num [row,endpointSpectralRow]
       have hSupper : Real.sqrt (1-row.hi^2)≤
           (if i=0 then (171/500 : ℝ) else 5/16) := by
-        fin_cases i <;> norm_num [row,endpointSpectralRow] at * <;> nlinarith
+        rw [Real.sqrt_le_iff]
+        fin_cases i <;> norm_num [row,endpointSpectralRow]
       have hcube : Real.sqrt (1-row.hi^2)^3≤(1-row.hi^2)*
           (if i=0 then (171/500 : ℝ) else 5/16) := by
         rw [pow_succ,hS]
         exact mul_le_mul_of_nonneg_left hSupper hhi0
       dsimp [spectralComplementMoment] at hmono
-      linarith
+      exact haComplement.trans (hmono.trans ((add_le_add le_rfl hcube).trans hnumeric))
   have htop : normalizedUpperEigenvalue x top≤row.topBound := by
     have hcomp : normalizedUpperEigenvalue x top≤
         x top*(1-(x top)^2)^2+(x top)^2*(1-(x top)^2)*Real.sqrt (1-(x top)^2) := by
@@ -136,7 +124,7 @@ theorem endpoint_spectral_row_bounds (i : Fin 3) {x : ι → ℝ}
       have hc : Real.sqrt (1-(x top)^2)^3=(1-(x top)^2)*Real.sqrt (1-(x top)^2) := by
         rw [pow_succ,Real.sq_sqrt heps]
       rw [hc] at hh
-      nlinarith
+      nlinarith only [hh]
     have hκ0 := hx top
     have hhi0 : 0≤row.hi := hκ0.trans hκ.2
     have heps0 : 0≤1-row.lo^2 := heps.trans hepslo
@@ -146,28 +134,28 @@ theorem endpoint_spectral_row_bounds (i : Fin 3) {x : ι → ℝ}
       heps (sq_nonneg row.hi)) hrest (Real.sqrt_nonneg _) (by positivity : 0≤row.hi^2*(1-row.lo^2))
     have hnumeric : row.hi*(1-row.lo^2)^2+row.hi^2*(1-row.lo^2)*row.radius≤row.topBound := by
       fin_cases i <;> norm_num [row,endpointSpectralRow]
-    linarith
+    exact hcomp.trans ((add_le_add hfirst hsecond).trans hnumeric)
   have hsumErase : (∑j∈Finset.univ.erase top,x j^2)=1-(x top)^2 := by
     rw [Finset.sum_erase_eq_sub (Finset.mem_univ top),h2]
   have hrestj (j : ι) (hj : j≠top) : x j≤row.radius := by
     have hs := Finset.single_le_sum (s := Finset.univ.erase top)
       (fun k hk => sq_nonneg (x k)) (show j∈Finset.univ.erase top by simp [hj])
     rw [hsumErase] at hs
-    nlinarith [hx j]
+    exact (sq_le_sq₀ (hx j) hr0).mp (hs.trans (hepslo.trans hr2))
   refine ⟨hA,htop,hrestj,?_,?_,?_,?_⟩
   · rw [hsumErase]
     exact hepslo.trans hr2
   · intro j hj
     have hh := mul_le_mul_of_nonneg_right hA (sq_nonneg (x j))
     dsimp [normalizedUpperEigenvalue]
-    linarith
+    exact sub_le_sub_right (add_le_add le_rfl hh) _
   · fin_cases i <;> norm_num [row,endpointSpectralRow]
   · have hc : (x top)^3≤normalizedUpperMean x :=
       Finset.single_le_sum (s := Finset.univ) (fun j hj => pow_nonneg (hx j) _) (Finset.mem_univ top)
     have hlo0 : 0≤row.lo := by linarith
     have hp := pow_le_pow_left₀ hlo0 hκ.1 3
     have hn : row.gap≤23/10+row.lo^3 := by fin_cases i <;> norm_num [row,endpointSpectralRow]
-    linarith
+    exact hn.trans (add_le_add le_rfl (hp.trans hc))
 
 end
 end SingularValueBounds.KL

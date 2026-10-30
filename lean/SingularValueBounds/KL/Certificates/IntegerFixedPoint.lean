@@ -55,4 +55,16 @@ theorem roundUpQ_fixed_div (n : ℤ) (j : ℕ) :
   rw [he, Rat.floor_intCast_div_natCast]
   simp only [Int.cast_neg]
 
+/-- Natural ceiling division agrees with signed integer ceiling division. -/
+theorem natCeil_cast_eq_neg_ediv (n d : ℕ) (hd : 0 < d) :
+    (match n with | 0 => (0 : ℤ) | k+1 => ((k/d+1 : ℕ) : ℤ)) =
+      -(-(n : ℤ)/(d : ℤ)) := by
+  cases n with
+  | zero => simp
+  | succ n =>
+    have he : -((n+1 : ℕ) : ℤ) = Int.negSucc n := by rfl
+    rw [he, Int.negSucc_ediv n (by exact_mod_cast hd)]
+    simp
+    rfl
+
 end SingularValueBounds.KL.Certificates

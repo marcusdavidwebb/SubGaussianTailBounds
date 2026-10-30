@@ -1,3 +1,4 @@
+import Mathlib.LinearAlgebra.Matrix.Notation
 import SingularValueBounds.KL.Upper.CertificateData
 open Polynomial
 open scoped BigOperators

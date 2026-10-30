@@ -16,7 +16,7 @@ set_option maxHeartbeats 1200000
 
 theorem endpoint_cutoff_epsilon :
     (46/15 : ℝ)/(1/2)*Real.exp (-((1/2 : ℝ)*(13/2)))≤5/21 := by
-  have he := Certificates.expTaylor_le_exp 24 (x := (13/4 : ℝ)) (by norm_num)
+  have he := Certificates.expTaylor_le_exp 10 (x := (13/4 : ℝ)) (by norm_num)
   have hnum : (644/25 : ℝ)≤Real.exp (13/4) := by
     norm_num [Certificates.expTaylor,Finset.sum_range_succ] at he
     linarith
@@ -117,8 +117,8 @@ theorem endpoint_mgf_of_rare_gaussian
     have h := hRem.1.add (integrable_const (1 : ℝ))
     exact h.congr (Filter.Eventually.of_forall fun ω => by
       simp only [Pi.add_apply,one_mul,zero_mul,sub_zero,sub_add_cancel])
-  have hr0 : 0≤(endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
-  have hA0 : 0≤(endpointRareRow i).cutoff := by fin_cases i <;> norm_num [endpointRareRow]
+  have hr0 : 0≤(endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
+  have hA0 : 0≤(endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
   have hRare (p : ℕ) := rare_event_moment hY hY0 hE hr0
     (by norm_num : (0 : ℝ)≤177/50) (by norm_num : (0 : ℝ)<23/50)
     hA0 hProb hTail hCut p

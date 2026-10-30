@@ -16,8 +16,9 @@ interface in [VERIFICATION.md](VERIFICATION.md), and credit in
 | 26–27 October 2026 | Uniform bounds, shared integer evaluations, bounded proof blocks and polynomial degree/evaluation arguments simplified the finite proofs without changing constants or numerical specifications. Detailed measurements and limitations remain in the archived record below. |
 | 28 October 2026 | Full local verification passed: 528 replayed modules, 22 targets, 75,610 audited declarations / 135,921 visited constants; 1,674.25 seconds with 28 build / 32 replay workers. All 146 then-current tests passed, including 39 Lean fixtures. |
 | 29 October 2026 | Lean checking moved out of CI at the maintainer's request. A fresh full local run passed on revision `73aa7fe4db3d982d446e292d82a34b6af784238b`: the same 528 modules and 22 targets, in 1,656.75 seconds with 28 build / 32 replay workers. Administrative CI also passed. |
+| 30 October 2026 | Four-hour proof simplification preserved canonical bytes and checking policy. The final complete attempt compiled all 568 source modules and elaborated 22 acceptance obligations, then stopped during replay planning on an unsupported split Lean module imported by the unchanged generated checker. This is not complete verification; the fixes, focused kernel checks and exact failure are recorded below. |
 
-These full local timings use current compiled source traces followed by fresh
+The successful full local timings use current compiled source traces followed by fresh
 independent replay. They are not cold-build measurements or runtime bounds.
 Only `propext`, `Classical.choice` and `Quot.sound` were permitted. Historical
 results never skip a later check. The initial policy-adoption runs used
@@ -208,3 +209,189 @@ canonical source guard and the Python regression suite passed (118 tests run,
 40 skipped). The complete verifier was started and stopped at the maintainer’s
 request before independent kernel replay. The preceding trusted checkout rejects
 the new digest, so the policy change still requires separate adoption.
+
+## Proof-checking simplification — 30 October 2026
+
+Marcus Webb requested four hours of iterative simplification in
+[PR #4](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/4), prioritizing
+checking time and deferring the complete verifier until that work period ended.
+The work period started at 16:42:23 UTC; the complete check must not start before
+20:42:23 UTC. Focused module checks and paired experiments were used during the
+iterations. They are not a complete canonical verification run.
+
+The canonical root retains SHA-256
+`be2804e4ca5ef33015df07e84f0544540f36c69f1be7bb4503c3363cb105f3a3`, its exact
+location and annotated README copy. Both quartets, hypotheses, arbitrary
+sample-space universes, MGF normalization, non-strict events and endpoints are
+unchanged. This revision changes no verification policy, checking program,
+dependency pin or Lake configuration.
+
+The retained implementation changes include:
+
+- Exact rounded-logarithm lookups, integer resolvent evaluation and exact
+  exponential shortcuts. Every lookup value is checked in Lean; missing keys
+  use the original evaluator. Universal equivalences preserve the original
+  rational algorithms and every rounding step, including the 18 logarithm
+  terms and 80 exponential terms. Nonnegative endpoint decay updates use a
+  universally equivalent natural-number path, with the original rule retained
+  for other integer inputs. Exponential and upper-logarithm steps also use
+  natural arithmetic for nonnegative inputs, sharing one proved ceiling
+  identity; signed and zero-denominator fallbacks remain exact. All 39 explicitly
+  declared pre-existing API types and universe lists in these three arithmetic
+  modules were compared exactly.
+- Balanced row/column lookup for literal integer coefficient matrices and
+  shared affine/Bernstein weight tables. Lean compared all 1,598,089 original
+  entries in 12,438 general/endpoint matrices, plus all 386 shared Bernstein
+  weights. All 75 affected polynomial leaf sources compiled in focused checks.
+- Explicit `noncomputable` annotations on closed proof tables, omitting unused
+  executable code while retaining their kernel definitions. Exact record
+  comparisons cover the 1,421 general-cell records, seven endpoint-data records,
+  and 936 records in 21 further coefficient modules. These comparisons concern
+  the annotation-only variants, before any later changes to proof bodies.
+- Smaller symbolic polynomial expansions, shared analytic arguments, scoped
+  arithmetic, and three small module consolidations. Existing Mathlib results
+  supply the elementary analytic steps. Smaller sufficient Taylor orders are
+  used in auxiliary analytic estimates; the finite evaluators' truncation
+  orders and all required inequalities remain unchanged. The four calculus/root
+  helpers move to `PolynomialAnalysis`; the rational row record and prefactor
+  input move to `GeneralMeanRowData`. Across these moves, all 206 polynomial and
+  85 numerical declaration types and universe lists remain exact. One auxiliary
+  mod-70 proof in the data module is re-elaborated with the ordinary Nat ordered
+  instance; every data definition is unchanged.
+- Both endpoint polynomial and entropy dispatchers use checked lists of the
+  837 active indices in the 2,520-index grid. All 60 coverage checks in each
+  family passed in Lean. The polynomial dispatch revision preserves 16,497
+  compared existing records and all public target types and universes. The two
+  reused entropy corners now share each rate-correspondence search; all 766
+  paired finite obligations passed in 60 focused row chunks. Standard `Fin.cases`
+  also replaces large outer assembly proofs; their timing is effectively neutral,
+  with compiled proof sizes falling from 694,928 to 208,496 bytes and from
+  604,912 to 201,688 bytes.
+- Narrower tactic imports and separation of pure rational rounding definitions
+  from real-analysis soundness. For the shared rounded-log cache, the actual
+  import environment falls from 3,678 to 2,433 modules, including 1,883 to 705
+  Mathlib modules. Its measured peak RSS falls from 2.32 to 1.53 GB. Separating
+  row data from numerics, with the pure polynomial core held fixed, reduces the
+  cell-data import environment from 4,718 to 2,965 modules (2,894 to 1,237
+  Mathlib modules), and peak RSS from 2.94 to 1.87 GB.
+- The generic endpoint lookup moves unchanged to `EntropyLookup`, allowing the
+  grid logarithm data and its 32 checking blocks to avoid real-analysis imports.
+  A log-leaf import probe falls from 4,722 to 2,376 modules (2,894 to 648 Mathlib
+  modules), with peak RSS falling from 2.94 to 1.49 GB. All 35 log-data records
+  and 964 records across the 44 affected leaves remain strictly identical.
+  Fifteen of the 100 moved generic records change only generated local binder
+  names carrying the old/new module path; binder annotations, global names,
+  universes and proof/definition structure remain identical. The pure grid
+  definition also moves to row data: all 85 previous row-data/numerics records
+  remain exact, and all 28 decay-table source checks pass. A representative
+  decay-table import change reduces peak RSS from 3.36 to 1.86 GB.
+
+Representative paired measurements on the installed Lean 4.33.1 environment are
+below. Each row compares its own frozen inputs; these are staged experiments,
+not percentages that can be multiplied or a complete-run speedup measurement.
+
+| Focused comparison | Before | After |
+|---|---:|---:|
+| General polynomial block 00, row/column lookup: compilation CPU | 85.14 s | 70.23 s |
+| Same block, isolated kernel checking | 53.97 s | 38.12 s |
+| Endpoint polynomial row 00, active-index dispatch: CPU | 19.28 s | 12.48 s |
+| General entropy block 00, shared upper logs/integer evaluation: user CPU | 269.76 s | 171.15 s |
+| Later matched block 00, lower cache/grid/bounded GCD: user CPU | 167.89 s | 149.20 s |
+| Later matched block 00, natural arithmetic steps: CPU | 178.57 s | 149.13 s |
+| Endpoint row 00, paired correspondence searches: CPU | 55.89 s | 53.47 s |
+| Endpoint row 30, natural-number decay path: CPU | 110.73 s | 108.44 s |
+| 21 symbolic identity prefixes, `norm_num` to `simp`: CPU | 103.85 s | 85.21 s |
+| General-cell table artifact, annotation-only change | 17,173,400 B | 2,271,600 B |
+| Endpoint table artifact, annotation-only change | 18,962,448 B | 1,908,808 B |
+
+The shared upper-log cache has a separately measured upfront checking cost of
+253.41 user CPU seconds across its 32 leaves and assembly module, amortized over
+19 consumers. The smaller lower-prefactor cache costs 3.89 user CPU seconds to
+check; its domain-check pilot alone improves from 19.96 to 11.43 seconds.
+Measurements vary with startup, cache state and background work. In particular,
+earlier full-block bounded-GCD pairs showed smaller gains; the later combined
+comparison is recorded alongside those earlier results in the retained logs.
+
+Trials that increased work or added data without a useful checking-time gain
+were discarded, including balanced row-record replacement, linear logarithm
+folding, forced cache inputs, extra entropy-moment tables, Boolean lookup guards,
+consuming two lookup levels at once, and lifting unique coefficient tables to
+extra global definitions. A final shared ceiling-function trial was also
+discarded: it reduced source duplication but made three lower-log cache samples
+5–11% slower and slowed decay totals. The retained arithmetic shares its ceiling
+proof while keeping those hot calculations inline. Successful local equivalence
+checks do not make discarded trials part of the implementation.
+Read-only row/column compression inventories also found no repeated rows,
+repeated columns or globally zero columns in the 12,438 original matrix uses;
+those proposed shortcuts therefore received no source change.
+
+Codex and parallel agents implemented and reviewed these changes. Python
+prepared proposed data and measurements; Lean checks the exact finite facts and
+proof terms. Wolfram MCP supported limited algebraic exploration, including
+sum-of-squares and polynomial Bézout identities; the resulting facts were proved
+in Lean. No external mathematical certificate is accepted, and no novelty or
+new singular-value bound is claimed.
+
+Builds and logs remain outside the checkout in the existing central workspace,
+principally `validation/20261030-proof-simplification/` and
+`validation/proof-simplification-20261030/performance-audit/`. An editor-started
+Lake server used an unresolved template path; task-started servers were stopped
+and duplicate dependency/build artifacts were removed. The pinned central
+dependencies and the older Lean 4.19.0 workspace were not replaced or updated.
+
+The administrative regression suite passed during this work (118 tests run,
+40 optional Lean tests skipped). A read-only written-signature audit compared
+71 handwritten modules against the starting commit: all 502 prior explicit
+theorem/lemma signatures and their variable/universe contexts remain unchanged,
+including all twelve moved theorem/lemma declarations. The final focused
+integration compiled eleven current-source producers/consumers and independently replayed the current
+evaluator, endpoint row 30 and general entropy block 00 with the unchanged
+starting-PR worker and axiom allowlist. These checks are preparatory, not the
+complete canonical gate.
+
+The first complete verifier started at 20:43:18 UTC, after the four-hour work
+period. Its build found three executable rate-run declarations depending on
+the newly noncomputable endpoint data. Adding explicit `noncomputable` modifiers
+to the two wrappers and their decidability instance fixes code generation;
+all seven kernel records remain exactly identical. Normal Lake code generation
+then passed.
+
+The second complete attempt started at 21:05:36 UTC. All 568 source modules
+built and 22 acceptance obligations elaborated, but replay planning failed at
+21:31:29 UTC because `Polynomial` locally regenerated the protected Mathlib
+helper `Rat.castHom.congr_simp`. A follow-up collision diagnostic found three
+non-identical lazy `eq_def` records in `ConcreteRounded` and
+`UniformEndpointPrefactors`. One precise import of the pinned helper's owner,
+`Mathlib.Algebra.Order.Ring.Archimedean`, and direct base-case reductions remove
+all four collisions. The polynomial proof bodies and all existing theorem
+signatures remain unchanged. Normal Lake builds and three independent focused
+checks using the unchanged starting-PR kernel/axiom worker passed. A complete
+read-only collision scan found no remaining protected-base, local or differing
+project records; that metadata diagnostic is not a kernel verification run.
+
+The third complete attempt ran from 21:35:57 to 22:04:26 UTC (1,707.47 seconds,
+28 build / 32 replay workers). All 568 module builds passed and all 22 acceptance
+obligations elaborated. It exited with status 1 during replay planning:
+`Split project module artifacts are not supported by single-file replay:
+Lean.Data.NameMap.AdditionalOperations`. The full independent kernel replay and
+final canonical audit did not complete; no complete verification is claimed.
+All 571 Lean source-file hashes were unchanged throughout this attempt, and the
+immutable root retained its recorded digest. All post-failure proof edits were
+finished before this attempt began. The one-hour fix deadline remained
+22:01:59 UTC, measured from the first observed failure; the final read-only check
+finished afterwards without further proof changes.
+
+The remaining failure is a pre-existing acceptance-layer compatibility issue.
+The proof roots contribute exactly 568 nontrusted ordinary modules. The generated
+`CanonicalAcceptance` adds itself and exactly 515 split Lean modules through its
+explicit `import Lean`, outside the Mathlib/expected-base inventory. The compiled
+import records and a root-set comparison isolate that entire extra closure to
+the generated checker. Its generator and checking policy are byte-identical to
+the starting PR. No checking policy, trusted inventory, split-module rule,
+source-coverage requirement or axiom allowlist was relaxed to bypass the failure.
+The compatibility issue requires separate verification-policy review.
+
+These attempts use the unchanged checking policy from starting PR commit
+`2299f469f9d6ee039dc048883b42e9314b2950e0`, saved outside the checkout. This is a
+starting-PR policy comparison, not independent adoption of that PR's preceding
+canonical/toolchain migration against an older accepted base.
