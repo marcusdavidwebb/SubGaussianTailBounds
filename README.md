@@ -1,7 +1,11 @@
 # SubGaussianTailBounds
 
-Complete Lean proofs of explicit tail bounds for the extreme singular values of
-matrices with independent sub-Gaussian rows.
+This repository accompanies the paper *Sharp tail bounds for the extreme singular
+values of sub-Gaussian matrices*, by Marcus Webb and Morgan Lynch-Davies
+(in preparation).
+
+It contains complete Lean proofs of explicit tail bounds for the extreme singular
+values of matrices with independent sub-Gaussian rows.
 
 ## Theorem
 
