@@ -34,39 +34,38 @@ Let $\sigma_{\min}(A)$ and $\sigma_{\max}(A)$ denote the smallest and largest si
 values of $A$, including zero singular values, and put $L=\log(eK)$, using the
 natural logarithm.
 
-Then, for every $t \ge 0$, the smallest singular value is unlikely to fall far
-below $\sqrt m-K\sqrt n$, and the largest is unlikely to lie far above
-$\sqrt m+K\sqrt n$. Specifically,
+Choose the positive constants $(\alpha,\beta,\gamma,\delta)$ from the table below
+for the applicable regime. Then, for every $t \ge 0$, the smallest singular value
+is unlikely to fall far below $\sqrt m-K\sqrt n$, and the largest is unlikely to
+lie far above $\sqrt m+K\sqrt n$. Specifically,
 
 ```math
 \mathbb{P}\!\left(\sigma_{\min}(A) \le
-\sqrt m-K\sqrt n-3.84\,KL-1.58\,K\sqrt L\,t\right)
+\sqrt m-K\sqrt n-\alpha KL-\beta K\sqrt L\,t\right)
 \le e^{-t^2/2},
 ```
 
 ```math
 \mathbb{P}\!\left(\sigma_{\max}(A) \ge
-\sqrt m+K\sqrt n+2.35\,KL+1.5\,K\sqrt L\,t\right)
-\le e^{-t^2/2}.
-```
-
-**When $K=1$, sharper bounds hold under the same assumptions:**
-
-```math
-\mathbb{P}\!\left(\sigma_{\min}(A) \le
-\sqrt m-\sqrt n-1.32-1.12\,t\right)
-\le e^{-t^2/2},
-```
-
-```math
-\mathbb{P}\!\left(\sigma_{\max}(A) \ge
-\sqrt m+\sqrt n+2.32+\sqrt{2}\,t\right)
+\sqrt m+K\sqrt n+\gamma KL+\delta K\sqrt L\,t\right)
 \le e^{-t^2/2}.
 ```
 
 Each displayed tail event is measurable and has its own probability bound.
 The inequalities include equality at the thresholds and apply also at $t=0$.
-All decimal constants are exact.
+
+### Constants proved so far
+
+| Regime | $\alpha$ | $\beta$ | $\gamma$ | $\delta$ |
+|---|---:|---:|---:|---:|
+| $K = 1$ | 1.32 | 1.12 | 2.32 | $\sqrt{2}$ |
+| $K \gt 1$ | 3.84 | 1.58 | 2.35 | 1.5 |
+
+Each row is one jointly proved quartet, valid for every admissible matrix in
+that regime. All decimal constants are exact. The general-case quartet in the
+second row also holds at $K=1$; the first row gives the sharper constants proved
+for that case. When $K=1$, $L=1$, so the additional lower- and upper-tail shifts
+simplify to $\alpha+\beta t$ and $\gamma+\delta t$, respectively.
 
 Both proofs cover arbitrary sample-space universes and all finite numerical
 obligations. The public results are `SubGaussian.Current.general` and
