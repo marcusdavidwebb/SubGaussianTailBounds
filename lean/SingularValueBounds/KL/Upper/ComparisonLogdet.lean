@@ -27,7 +27,7 @@ theorem upperComparisonMatrixLogdet_eq_normalized {R : Matrix ι ι ℝ} (hR : R
     linarith
   unfold upperComparisonMatrixLogdet normalizedLogdet
   rw [upperComparisonNormalizedGap_det hR,
-    Real.log_prod Finset.univ _ (fun i _ => (hfactor i).ne'),
+    Real.log_prod (fun i _ => (hfactor i).ne'),
     trace_div_frobenius_eq_normalized_sum hR, Finset.sum_neg_distrib]
 
 /-- The general norm-based `J₀` bound, with the finite numerical premise

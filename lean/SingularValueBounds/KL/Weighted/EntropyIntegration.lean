@@ -32,7 +32,7 @@ theorem entropy_integrable_of_second_moment [IsFiniteMeasure μ] {W : Ω → ℝ
   apply ((integrable_const (1 : ℝ)).add hW2).mono'
   · exact (Real.continuous_mul_log.measurable.comp_aemeasurable hW).aestronglyMeasurable
   · exact Filter.Eventually.of_forall (fun ω => by
-      simpa only [Real.norm_eq_abs] using abs_mul_log_le_one_add_sq (hW0 ω))
+      simpa only [Real.norm_eq_abs, Pi.add_apply] using abs_mul_log_le_one_add_sq (hW0 ω))
 
 /-- Exponential tails imply the finite entropy needed by weighted entropy. -/
 theorem entropy_integrable_of_exponential_tail [IsFiniteMeasure μ]
@@ -105,9 +105,8 @@ theorem upper_mean_of_entropy [IsProbabilityMeasure μ]
   have hWZi := integrable_weighted_of_nonneg (Filter.Eventually.of_forall hW0)
     hZ0 hn.1 hWE hExp
   have hWQi : Integrable (fun ω => W ω * Q ω) μ := by
-    convert hWZi.mul_const a using 1
+    convert! hWZi.mul_const a using 1
     ext ω
-    dsimp
     field_simp
   have hWQ : (∫ ω, W ω * Q ω ∂μ) ≤ b := by
     have hid : (∫ ω, W ω * (Q ω / a) ∂μ) = (∫ ω, W ω * Q ω ∂μ) / a := by
@@ -120,7 +119,7 @@ theorem upper_mean_of_entropy [IsProbabilityMeasure μ]
   have hid : (∫ ω, Y ω * Q ω ∂μ) = m * (∫ ω, W ω * Q ω ∂μ) := by
     rw [← integral_const_mul]
     apply integral_congr_ae
-    exact Filter.Eventually.of_forall fun ω => by dsimp [W]; field_simp <;> ring
+    exact Filter.Eventually.of_forall fun ω => by dsimp [W]; field_simp
   rw [hid] at hFixed
   have hprod := mul_le_mul_of_nonneg_left hWQ hm.le
   change m ≤ 1-b+m*(∫ ω, W ω * Q ω ∂μ) at hFixed
@@ -132,12 +131,12 @@ private theorem tail_integral_translate (f : ℝ → ℝ) (c : ℝ) :
     (∫ u in Ioi 0, f (c+u)) = ∫ u in Ioi c, f u := by
   rw [← integral_indicator measurableSet_Ioi, ← integral_indicator measurableSet_Ioi]
   have h := integral_add_left_eq_self (μ := volume) ((Ioi c).indicator f) c
-  convert h using 1
+  convert! h using 1
   apply integral_congr_ae
   exact Filter.Eventually.of_forall fun u => by
     by_cases hu : 0 < u
     · simp [Set.indicator_of_mem, hu, show c < c+u by linarith]
-    · simp [Set.indicator_of_not_mem, hu, show ¬ c < c+u by linarith]
+    · simp [Set.indicator_of_notMem, hu, show ¬ c < c+u by linarith]
 
 /-- The entropy tail integral in supplementary equation
 `eq:app-up-entropy-integration`. Finiteness of the tail integral follows from
@@ -173,8 +172,8 @@ theorem entropy_tail_integral [IsProbabilityMeasure μ] {W : Ω → ℝ} {c : �
     intro t ht
     have hct : c+t ≠ 0 := ne_of_gt (by linarith)
     have hlin := (hasDerivAt_const t c).add (hasDerivAt_id t)
-    convert hlin.mul (hlin.log hct |>.sub_const (Real.log c)) using 1 <;>
-      dsimp [F, g] <;> simp only [zero_add, id_eq, one_div] <;> field_simp <;> ring
+    convert! hlin.mul (hlin.log hct |>.sub_const (Real.log c)) using 1 <;>
+      dsimp [F, g] <;> simp only [zero_add, one_div] <;> field_simp <;> ring
   have hFi : ∀ t : ℝ, 0 ≤ t → (∫ u in (0 : ℝ)..t, g u) = F t := by
     intro t ht
     have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt
@@ -224,7 +223,7 @@ theorem entropy_tail_integral [IsProbabilityMeasure μ] {W : Ω → ℝ} {c : �
     intro u hu
     ext ω
     dsimp [U]
-    simp only [Set.mem_setOf_eq, lt_max_iff]
+    simp only [lt_max_iff]
     constructor
     · rintro (h | h)
       · linarith
@@ -245,7 +244,7 @@ theorem entropy_tail_integral [IsProbabilityMeasure μ] {W : Ω → ℝ} {c : �
     apply lintegral_congr_ae
     filter_upwards [ae_restrict_mem measurableSet_Ioi] with u hu
     rw [htail u hu]
-  simp only [Function.comp_def] at hreal
+  simp only [Function.comp_def, Pi.mul_apply] at hreal
   rw [hLayer', ENNReal.toReal_ofReal (integral_nonneg fun ω => hFn _ (hU0 ω))] at hreal
   have hprod : (∫ u in Ioi 0, (1+Real.log ((c+u)/c))*μ.real {ω | c+u < W ω}) =
       ∫ ω, F (U ω) ∂μ := by

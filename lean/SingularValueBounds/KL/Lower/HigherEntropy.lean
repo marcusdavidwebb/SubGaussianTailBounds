@@ -64,7 +64,7 @@ theorem normalized_lower_mixed_of_entropy_bound {X : Ω → ι → ℝ} {K C : �
   have hWZ : Integrable (fun ω => quadraticForm P X ω*
       (lam*(quadraticForm B X ω-K^2*Matrix.trace R))) μ := by
     have hi := ((hT.integrable_mul hQ).sub ((hT.integrable (by norm_num)).mul_const (K^2*Matrix.trace R))).const_mul lam
-    convert hi using 1
+    convert! hi using 1
     ext ω
     simp only [Pi.sub_apply,Pi.mul_apply]
     ring
@@ -79,13 +79,13 @@ theorem normalized_lower_mixed_of_entropy_bound {X : Ω → ι → ℝ} {K C : �
     rw [integral_const_mul,integral_sub (f:=fun ω=>quadraticForm P X ω*quadraticForm B X ω) (hT.integrable_mul hQ)
       ((hT.integrable (by norm_num)).mul_const _),integral_mul_const,hMean,one_mul]
   rw [hi] at h
-  have hh := h.trans (add_le_add_left hExp.2 _)
+  have hh := h.trans (add_le_add_right hExp.2 _)
   have hh' := hh.trans hEntropy
   dsimp [lam] at hh'
   have hpos : 0 < u/(2*K^2) := by positivity
-  have hid : (u/(2*K^2))*(C*K^2*logParameter K) = (u/2)*C*logParameter K := by field_simp; ring
+  have hid : (u/(2*K^2))*(C*K^2*logParameter K) = (u/2)*C*logParameter K := by field_simp
   rw [← hid] at hh'
-  exact (mul_le_mul_left hpos).1 hh'
+  exact (mul_le_mul_iff_right₀ hpos).1 hh'
 
 end
 end SingularValueBounds.KL

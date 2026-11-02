@@ -1,3 +1,4 @@
+import SingularValueBounds.KL.Lower.PlateauGeometry
 import SingularValueBounds.KL.Lower.PlateauCostData
 import SingularValueBounds.KL.Lower.HigherEntropy
 
@@ -14,6 +15,22 @@ def plateauRealPsi (u v w k : ℝ) : ℝ := u*k+2*v*k^2-2*w*k^4
 def plateauRealG (u A v w c k : ℝ) : ℝ :=
   plateauRealPsi u v w k+Real.log (plateauRealD u A c k)
 def plateauRealE (u v w k : ℝ) : ℝ := v*(1-k^2)-4+w/2-u*k/2+w*k^4
+
+private theorem plateauCostA_eval (i : Fin 2) (k : ℝ) :
+    realEval (plateauCostA i) k = if i = 0 then plateauA k else 74 / 55 := by
+  by_cases hi : i = 0 <;> norm_num [realEval, plateauCostA, plateauA, hi,
+    Polynomial.eval₂_pow, Polynomial.eval₂_sub] <;> ring
+
+private theorem plateauCostV_eval (i : Fin 2) (k : ℝ) :
+    realEval (plateauCostV i) k = if i = 0 then plateauV (plateauA k) else 27 / 16 := by
+  have ha := plateauCostA_eval i k
+  by_cases hi : i = 0
+  · simp only [if_pos hi, realEval] at ha
+    simp only [plateauCostV, if_pos hi, realEval, Polynomial.eval₂_add,
+      Polynomial.eval₂_mul, Polynomial.eval₂_sub, Polynomial.eval₂_C]
+    rw [ha]
+    norm_num [plateauV]
+  · norm_num [realEval, plateauCostV, hi]
 
 theorem plateauCostD_eval (i : Fin 2) (k : ℝ) :
     realEval (plateauCostD i) k = plateauRealD (plateauCostU i)
@@ -33,7 +50,7 @@ theorem plateauCostMargin_eval (i : Fin 2) (k : ℝ) :
   simp only [realEval,plateauCostMargin,Polynomial.eval₂_sub,Polynomial.eval₂_mul,Polynomial.eval₂_C]
   rw [show Polynomial.eval₂ (Rat.castHom ℝ) k (polynomialExpTaylor 24 (-C 2*plateauCostE i)) =
       expTaylor 24 (realEval (-C 2*plateauCostE i) k) from polynomialExpTaylor_eval _ _ _]
-  simp [realEval,Polynomial.eval₂_mul,Polynomial.eval₂_neg,Polynomial.eval₂_C,Polynomial.eval₂_pow]
+  simp [realEval,Polynomial.eval₂_mul,Polynomial.eval₂_neg,Polynomial.eval₂_C]
 
 /-- The final exponential-over-square-root cost follows from a finite Taylor
 polynomial lower bound. Every real-variable implication is proved here. -/
@@ -60,14 +77,13 @@ theorem plateau_cost_of_taylor {u w C E d : ℝ} (hu : 0 < u) (hw : 0 < w)
       have hp := (div_le_iff₀ (show 0 < 9*w^2*(u*C-4)^2 by positivity)).mp hp
       simp only [mul_pow,hs]
       nlinarith only [hp]
-    nlinarith [Real.exp_pos E,Real.sqrt_pos.mpr hd,mul_pos hden (Real.sqrt_pos.mpr hd)]
+    exact (sq_le_sq₀ (by positivity) (by positivity)).mp hsq
   have hterm : 20/(3*u*w)*Real.exp E/Real.sqrt d ≤ C-4/u := by
     apply (div_le_iff₀ (Real.sqrt_pos.mpr hd)).mpr
     rw [div_mul_eq_mul_div]
     apply (div_le_iff₀ (show 0 < 3*u*w by positivity)).mpr
     have heq : (C-4/u)*Real.sqrt d*(3*u*w)=3*w*(u*C-4)*Real.sqrt d := by
       field_simp [hu.ne']
-      ring
     rw [heq]
     exact hroot
   linarith
@@ -150,9 +166,9 @@ theorem plateau_entropy_expression_bound {K u v w k d ζ : ℝ}
     rw [he,Real.exp_sub,Real.exp_add,Real.exp_log hratio,Real.exp_log (Real.sqrt_pos.mpr hd)]
   rw [hExp] at hEL
   rw [add_assoc] at hb
-  have hbound := hb.trans (add_le_add_left hEL (2*L))
+  have hbound := hb.trans (add_le_add_right hEL (2*L))
   change Real.log ((5/3)*K^2*L*(1+2*ζ))+v-w*ζ-G/2 ≤ _
-  convert hbound using 1
+  convert! hbound using 1
   dsimp [L]
   field_simp [hu.ne',hw.ne',(Real.sqrt_pos.mpr hd).ne']
   ring
@@ -174,6 +190,7 @@ theorem plateau_retained_logdet {ι : Type*} [Fintype ι] (r : ι → ℝ) (top 
 variable {Ω ι : Type*} [MeasurableSpace Ω] [Fintype ι] [DecidableEq ι] [Nonempty ι]
 variable {μ : Measure Ω} [IsProbabilityMeasure μ]
 
+omit [Nonempty ι] in
 theorem plateau_normalized_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (hF : frobenius R=1) (A c : ℝ) :
     lowerComparison R A c = (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ)*
@@ -188,6 +205,7 @@ theorem plateau_normalized_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     ring
   · simp [Matrix.diagonal,hij]
 
+omit [Nonempty ι] in
 theorem plateau_weight_fourth_trace {R : Matrix ι ι ℝ} (hR : R.PosDef) (hF : frobenius R=1) :
     Matrix.trace ((lowerWeight R)^2)=∑ i,hR.isHermitian.eigenvalues i^4 := by
   simp only [lowerWeight,normalized_trace_square hR hF,inv_one,one_smul]
@@ -223,7 +241,7 @@ theorem normalized_plateau_log_mgf {X : Ω → ι → ℝ} {K : ℝ}
     rw [show Matrix.diagonal (fun i => plateauRealD u A c (r i)) =
         1-u • Matrix.diagonal (fun i => r i+A*r i^2-c*r i^3) by
       ext i j
-      by_cases hij : i=j <;> simp [Matrix.diagonal,plateauRealD,hij] <;> ring]
+      by_cases hij : i=j <;> simp [Matrix.diagonal,plateauRealD,hij]]
     rw [Matrix.mul_sub,Matrix.sub_mul,Matrix.mul_one,U.2.2,Matrix.mul_smul,
       smul_mul_assoc,← plateau_normalized_spectral hR hF]
   have hgap : (1-u • B).PosDef := by
@@ -235,7 +253,7 @@ theorem normalized_plateau_log_mgf {X : Ω → ι → ℝ} {K : ℝ}
   have hgap' : (1-(2*K^2*lam) • B).PosDef := by rw [hscale]; exact hgap
   have hi := (quadratic_exponential_det_bound hsg hm B hP lam (by dsimp [lam]; positivity) hgap').1
   have hl := quadratic_log_mgf_le_logdet hsg hm B hP lam (by dsimp [lam]; positivity) hgap'
-  rw [hscale,hdet,Real.log_prod Finset.univ _ (fun i _ => (hd i).ne')] at hl
+  rw [hscale,hdet,Real.log_prod (fun i _ => (hd i).ne')] at hl
   obtain ⟨top,_,htop⟩ := Finset.exists_mem_eq_sup' (s := Finset.univ) Finset.univ_nonempty r
   have hr2 : ∑ i,r i^2=1 := by rw [← real_spectral_trace_square hR.isHermitian]; exact normalized_trace_square hR hF
   have hs := plateau_retained_logdet r top hr2 (fun i =>
@@ -264,36 +282,18 @@ theorem plateau_near_cost (h : PlateauCostCertificateConditions) {k : ℝ}
       Real.exp (plateauRealE (1207/1000) (plateauV (plateauA k)) (26/25) k)/
       Real.sqrt (plateauRealD (1207/1000) (plateauA k) (17/10) k) ≤ (4137/1000 : ℝ) := by
   have hh := plateau_whole_interval_cost h (0 : Fin 2) (by simpa [plateauCostLo,plateauCostHi] using hk)
-  have hE : realEval (plateauCostE (0 : Fin 2)) k =
-      plateauRealE (1207/1000) (plateauV (plateauA k)) (26/25) k := by
-    norm_num [realEval,plateauCostE,plateauCostV,plateauCostA,plateauCostU,plateauCostW,
-      plateauRealE,plateauA,plateauV,Polynomial.eval₂_pow,Polynomial.eval₂_sub]
-    ring
-  have hD : realEval (plateauCostD (0 : Fin 2)) k =
-      plateauRealD (1207/1000) (plateauA k) (17/10) k := by
-    norm_num [realEval,plateauCostD,plateauCostA,plateauCostU,plateauCostC,
-      plateauRealD,plateauA,Polynomial.eval₂_pow,Polynomial.eval₂_sub]
-    all_goals try ring
-    all_goals simp_all
-  norm_num [plateauCostU,plateauCostW] at hh ⊢
-  rwa [hE,hD] at hh
+  rw [plateauCostE_eval, plateauCostD_eval, plateauCostV_eval, plateauCostA_eval] at hh
+  norm_num [plateauCostU, plateauCostW, plateauCostC] at hh ⊢
+  exact hh
 
 theorem plateau_far_cost (h : PlateauCostCertificateConditions) {k : ℝ}
     (hk : k ∈ Icc (147/200 : ℝ) 1) :
     4/(6/5)+20/(3*(6/5)*(21/20))*Real.exp (plateauRealE (6/5) (27/16) (21/20) k)/
       Real.sqrt (plateauRealD (6/5) (74/55) (19/10) k) ≤ (4137/1000 : ℝ) := by
   have hh := plateau_whole_interval_cost h (1 : Fin 2) (by simpa [plateauCostLo,plateauCostHi] using hk)
-  have hE : realEval (plateauCostE (1 : Fin 2)) k = plateauRealE (6/5) (27/16) (21/20) k := by
-    norm_num [realEval,plateauCostE,plateauCostV,plateauCostA,plateauCostU,plateauCostW,
-      plateauRealE,Polynomial.eval₂_pow,Polynomial.eval₂_sub]
-    ring
-  have hD : realEval (plateauCostD (1 : Fin 2)) k = plateauRealD (6/5) (74/55) (19/10) k := by
-    norm_num [realEval,plateauCostD,plateauCostA,plateauCostU,plateauCostC,
-      plateauRealD,Polynomial.eval₂_pow,Polynomial.eval₂_sub]
-    all_goals try ring
-    all_goals simp_all
-  norm_num [plateauCostU,plateauCostW] at hh ⊢
-  rwa [hE,hD] at hh
+  rw [plateauCostE_eval, plateauCostD_eval, plateauCostV_eval, plateauCostA_eval] at hh
+  norm_num [plateauCostU, plateauCostW, plateauCostC] at hh ⊢
+  exact hh
 
 /-- The actual plateau comparison matrix satisfies its mixed-cost bound. -/
 theorem normalized_plateau_mixed_cost {X : Ω → ι → ℝ} {K C : ℝ}
@@ -338,7 +338,7 @@ theorem normalized_plateau_mixed_cost {X : Ω → ι → ℝ} {K C : ℝ}
   have hExp := normalized_plateau_log_mgf hsg hiso.measurable hK0 hR hF hu hprofile hscalar
   have hWZ : Integrable (fun ω => quadraticForm P X ω*(lam*(quadraticForm B X ω-K^2*Matrix.trace R))) μ := by
     have hi := ((hT.integrable_mul hQ).sub (hTi.mul_const (K^2*Matrix.trace R))).const_mul lam
-    convert hi using 1
+    convert! hi using 1
     ext ω
     simp only [Pi.sub_apply,Pi.mul_apply]
     ring
@@ -367,9 +367,9 @@ theorem normalized_plateau_mixed_cost {X : Ω → ι → ℝ} {K C : ℝ}
     nlinarith only [hD,hExp.2,hopt,hscalarcost]
   have hfinal := h.trans hright
   have hpos : 0 < lam := by dsimp [lam]; positivity
-  have heq : lam*(C*K^2*logParameter K)=(u/2)*C*logParameter K := by dsimp [lam]; field_simp; ring
+  have heq : lam*(C*K^2*logParameter K)=(u/2)*C*logParameter K := by dsimp [lam]; field_simp
   rw [← heq] at hfinal
-  exact (mul_le_mul_left hpos).mp hfinal
+  exact (mul_le_mul_iff_right₀ hpos).mp hfinal
 
 /-- The complete concentrated-spectrum comparison in the printed plateau lemma.
 Only the explicit finite rational certificate conditions remain external. -/

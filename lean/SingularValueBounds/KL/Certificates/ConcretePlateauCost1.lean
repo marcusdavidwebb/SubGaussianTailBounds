@@ -305,7 +305,7 @@ private theorem plateauCost_1_2 :
       Polynomial.eval_C, polynomialExpTaylor_eval_rat, plateauCostD, plateauCostE,
       plateauCostA, plateauCostV, plateauCostU, plateauCostW, plateauCostC,
       Polynomial.eval_add, Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_one,
-      Polynomial.eval_neg, ite_true, ite_false,
+      Polynomial.eval_neg,
       if_neg (show (1 : Fin 2) ≠ 0 by decide)]
     simp only [NumericalCertificateConditions.expTaylorQ_eq_integer]
     decide +kernel

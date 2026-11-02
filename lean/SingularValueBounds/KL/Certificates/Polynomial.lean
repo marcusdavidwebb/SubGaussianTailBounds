@@ -1,8 +1,14 @@
-import SingularValueBounds.KL.Statement
-import Mathlib.Analysis.SpecialFunctions.Bernstein
-import Mathlib.Analysis.Calculus.Deriv.Polynomial
-import Mathlib.Analysis.Calculus.Deriv.MeanValue
-import Mathlib.Topology.Order.IntermediateValue
+import Mathlib.Algebra.Order.Ring.Archimedean
+import Mathlib.Algebra.CharZero.Infinite
+import Mathlib.Algebra.Polynomial.Roots
+import Mathlib.Algebra.Polynomial.Inductions
+import Mathlib.Data.Real.Basic
+import Mathlib.RingTheory.Polynomial.Bernstein
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.NormNum
+import Mathlib.Tactic.Positivity
+import Mathlib.Tactic.Ring
 
 /-!
 # Finite polynomial certificates imply whole-domain bounds (P08)
@@ -27,9 +33,10 @@ theorem bernsteinWeight_nonneg (n i : ℕ) {u : ℝ} (hu0 : 0 ≤ u) (hu1 : u �
   exact mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (pow_nonneg hu0 _))
     (pow_nonneg (sub_nonneg.mpr hu1) _)
 
-theorem bernsteinWeight_sum (n : ℕ) {u : ℝ} (hu0 : 0 ≤ u) (hu1 : u ≤ 1) :
+theorem bernsteinWeight_sum (n : ℕ) {u : ℝ} :
     ∑ i : Fin (n + 1), bernsteinWeight n i u = 1 := by
-  simpa only [bernstein_apply, bernsteinWeight] using bernstein.probability n ⟨u, hu0, hu1⟩
+  simpa [Finset.sum_range, bernsteinPolynomial, bernsteinWeight] using
+    congrArg (Polynomial.aeval u) (bernsteinPolynomial.sum ℝ n)
 
 theorem bernstein_sum_nonneg (n : ℕ) (b : Fin (n + 1) → ℝ)
     (hb : ∀ i, 0 ≤ b i) {u : ℝ} (hu0 : 0 ≤ u) (hu1 : u ≤ 1) :
@@ -40,7 +47,7 @@ theorem bernstein_sum_bounds (n : ℕ) (b : Fin (n + 1) → ℝ) {lo hi u : ℝ}
     (hb : ∀ i, lo ≤ b i ∧ b i ≤ hi) (hu0 : 0 ≤ u) (hu1 : u ≤ 1) :
     lo ≤ ∑ i, b i * bernsteinWeight n i u ∧
       ∑ i, b i * bernsteinWeight n i u ≤ hi := by
-  have hs := bernsteinWeight_sum n hu0 hu1
+  have hs := bernsteinWeight_sum n (u := u)
   constructor
   · calc lo = ∑ i : Fin (n + 1), lo * bernsteinWeight n i u := by rw [← Finset.mul_sum, hs, mul_one]
          _ ≤ _ := Finset.sum_le_sum fun i _ =>
@@ -69,7 +76,7 @@ theorem BernsteinCertificate.nonneg {p : ℚ[X]} {n : ℕ} {b : Fin (n + 1) → 
     (h : BernsteinCertificate p n b) {x : ℝ} (hx0 : 0 ≤ x) (hx1 : x ≤ 1) :
     0 ≤ realEval p x := by
   rw [h.identity, realEval_expansion]
-  exact bernstein_sum_nonneg n (fun i => (b i : ℝ)) (fun i => by dsimp; exact_mod_cast h.nonnegative i) hx0 hx1
+  exact bernstein_sum_nonneg n (fun i => (b i : ℝ)) (fun i => by exact_mod_cast h.nonnegative i) hx0 hx1
 
 theorem bernstein_certificate_bounds {p : ℚ[X]} {n : ℕ} {b : Fin (n + 1) → ℚ}
     (hid : p = bernsteinExpansion n b) {lo hi : ℚ}
@@ -101,9 +108,9 @@ theorem realEval_affine_comp (p : ℚ[X]) (a width : ℚ) (x : ℝ)
     realEval (p.comp (affine a width)) ((x - a) / width) = realEval p x := by
   have hw' : (width : ℝ) ≠ 0 := by exact_mod_cast hw
   simp only [realEval, Polynomial.eval₂_comp, affine, Polynomial.eval₂_add,
-    Polynomial.eval₂_C, Polynomial.eval₂_mul, Polynomial.eval₂_X]
+    Polynomial.eval₂_C, Polynomial.eval₂_mul, Polynomial.eval₂_X, Rat.coe_castHom]
   congr 1
-  field_simp
+  field_simp <;> ring
 
 theorem BernsteinCertificate.nonneg_interval {p : ℚ[X]} {n : ℕ}
     {b : Fin (n + 1) → ℚ} {a width : ℚ}
@@ -155,7 +162,7 @@ theorem realEval₂_affine (p : Polynomial (Polynomial ℚ)) (a width c height :
       (Polynomial.compRingHom (affine a width)) =
         Polynomial.eval₂RingHom (Rat.castHom ℝ) ((a : ℝ) + width * x) := by
     ext q <;> simp [Polynomial.coe_eval₂RingHom, Polynomial.coe_compRingHom,
-      RingHom.comp_apply, affine, Polynomial.eval₂_comp]
+      RingHom.comp_apply, affine]
   simp only [realEval₂, tensorAffine, Polynomial.eval₂_comp, Polynomial.eval₂_add,
     Polynomial.eval₂_C, Polynomial.eval₂_mul, Polynomial.eval₂_X, Polynomial.eval₂_map]
   rw [he]
@@ -171,8 +178,8 @@ theorem TensorCertificate.nonneg_rectangle {p : Polynomial (Polynomial ℚ)} {n 
   have hh' : (0 : ℝ) < height := by exact_mod_cast hh
   have hc := h.nonneg (affine_coordinate hw' hx) (affine_coordinate hh' hy)
   rw [realEval₂_affine] at hc
-  have ex : (a : ℝ) + width * ((x - a) / width) = x := by field_simp
-  have ey : (c : ℝ) + height * ((y - c) / height) = y := by field_simp
+  have ex : (a : ℝ) + width * ((x - a) / width) = x := by field_simp <;> ring
+  have ey : (c : ℝ) + height * ((y - c) / height) = y := by field_simp <;> ring
   rwa [ex, ey] at hc
 
 /-- Degree elevation may be checked as finitely many rational basis
@@ -389,32 +396,6 @@ theorem finite_cover_transfer {ι : Type*} (cells : Finset ι) (domain : Set (�
   obtain ⟨i, hi, hzi⟩ := Set.mem_iUnion₂.mp (hcover hz)
   exact hcell i hi z hzi
 
-theorem polynomial_monotone {p : ℝ[X]} {a b : ℝ}
-    (hd : ∀ x ∈ Icc a b, 0 ≤ p.derivative.eval x) : MonotoneOn p.eval (Icc a b) := by
-  apply monotoneOn_of_deriv_nonneg (convex_Icc a b) p.continuous.continuousOn
-    (fun _ _ => p.differentiableAt.differentiableWithinAt)
-  intro x hx
-  rw [interior_Icc] at hx
-  simpa only [p.deriv] using hd x ⟨hx.1.le, hx.2.le⟩
-
-theorem polynomial_strictMono {p : ℝ[X]} {a b : ℝ}
-    (hd : ∀ x ∈ Icc a b, 0 < p.derivative.eval x) : StrictMonoOn p.eval (Icc a b) := by
-  apply strictMonoOn_of_deriv_pos (convex_Icc a b) p.continuous.continuousOn
-  intro x hx
-  rw [interior_Icc] at hx
-  simpa only [p.deriv] using hd x ⟨hx.1.le, hx.2.le⟩
-
-/-- The root-finding implication uses IVT and a proved derivative sign;
-no numerical root finder is trusted as an analytic assertion. -/
-theorem polynomial_unique_root {p : ℝ[X]} {a b : ℝ} (hab : a ≤ b)
-    (ha : p.eval a ≤ 0) (hb : 0 ≤ p.eval b)
-    (hd : ∀ x ∈ Icc a b, 0 < p.derivative.eval x) :
-    ∃! r, r ∈ Icc a b ∧ p.eval r = 0 := by
-  obtain ⟨r, hr, he⟩ := intermediate_value_Icc hab p.continuous.continuousOn ⟨ha, hb⟩
-  refine ⟨r, ⟨hr, he⟩, ?_⟩
-  intro s hs
-  exact (polynomial_strictMono hd).injOn hs.1 hr (hs.2.trans he.symm)
-
 /-- A critical-point argument only needs three monotonic pieces. This is
 the printed lower-plateau minimum test, allowing the two roots to be isolated
 by finite derivative certificates rather than trusting a root finder. -/
@@ -440,31 +421,6 @@ theorem polynomial_bounds_interval {p : ℚ[X]} {n : ℕ} {b : Fin (n + 1) → �
   have h := bernstein_certificate_bounds hid hb hc
   rwa [realEval_affine_comp p a width x (ne_of_gt hw)] at h
 
-theorem rational_polynomial_unique_root {p : ℚ[X]} {a width ε : ℚ}
-    {n : ℕ} {b : Fin (n + 1) → ℚ} (hw : 0 < width) (hε : 0 < ε)
-    (hid : p.derivative.comp (affine a width) = bernsteinExpansion n b)
-    (hb : ∀ i, ε ≤ b i ∧ b i ≤ b 0 + ∑ j, |b j|)
-    (ha : p.eval a ≤ 0) (hc : 0 ≤ p.eval (a + width)) :
-    ∃! r, r ∈ Icc (a : ℝ) ((a : ℝ) + width) ∧ realEval p r = 0 := by
-  have hwidth : (0 : ℝ) < width := by exact_mod_cast hw
-  have hr := polynomial_unique_root (p := p.map (Rat.castHom ℝ))
-    (a := (a : ℝ)) (b := (a : ℝ) + width)
-    (le_add_of_nonneg_right hwidth.le)
-  have he (x : ℝ) : (p.map (Rat.castHom ℝ)).eval x = realEval p x := by
-    simp [realEval, Polynomial.eval_map]
-  simp_rw [← he]
-  apply hr
-  · rw [he, realEval_rat]
-    exact_mod_cast ha
-  · rw [he, ← Rat.cast_add, realEval_rat]
-    exact_mod_cast hc
-  · intro x hx
-    have h := (polynomial_bounds_interval hid hb hw hx).1
-    have hε' : (0 : ℝ) < ε := by exact_mod_cast hε
-    have he' : (p.map (Rat.castHom ℝ)).derivative.eval x = realEval p.derivative x := by
-      simp [realEval, Polynomial.derivative_map, Polynomial.eval_map]
-    rw [he']
-    exact hε'.trans_le h
 
 end
 end SingularValueBounds.KL.Certificates

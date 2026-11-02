@@ -1,3 +1,5 @@
+import SingularValueBounds.KL.Upper.GeneralFourth
+import SingularValueBounds.KL.Upper.EndpointCoefficients
 import SingularValueBounds.KL.Upper.GeneralSecondData
 
 /-! # Continuous consequences of the general upper second-moment certificates
@@ -23,7 +25,7 @@ lemma one_le_expTaylor (N : ℕ) {x : ℝ} (hx : 0 ≤ x) : 1 ≤ expTaylor N x 
   have h := Finset.single_le_sum (s := Finset.range (N+1))
     (f := fun j => x^j/(j.factorial:ℝ)) (fun j _ => by positivity)
     (show 0 ∈ Finset.range (N+1) by simp)
-  simpa only [pow_zero,Nat.factorial_zero,Nat.cast_one,div_one] using h
+  simpa only [expTaylor, pow_zero,Nat.factorial_zero,Nat.cast_one,div_one] using h
 
 lemma second_exp_enclosure {x : ℚ} (hx : -50 < x ∧ x < 50) :
     (secondExpLowerQ x : ℝ) ≤ Real.exp (x:ℝ) ∧ Real.exp (x:ℝ) ≤ (secondExpUpperQ x:ℝ) := by
@@ -109,7 +111,7 @@ lemma fourth_exclusion_of_certificate {m E x : ℚ} (h : FourthExclusionCertific
     have hh : (0:ℝ) ≤ secondCoshLowerQ x := by exact_mod_cast h.cosh_nonneg
     positivity
   have hargle : 1+(secondCoshLowerQ x:ℝ)/(m:ℝ) ≤ 1+(Real.cosh (x:ℝ)-1)/(m:ℝ) :=
-    add_le_add_left (div_le_div_of_nonneg_right hc hm.le) 1
+    add_le_add_right (div_le_div_of_nonneg_right hc hm.le) 1
   push_cast at hl
   have hlog := hl.trans (Real.log_le_log harg hargle)
   have hmul := mul_le_mul_of_nonneg_left hlog hm.le
@@ -152,7 +154,8 @@ lemma generalRareNumerator_nonpos (i : Fin 3) {d : ℝ} (hd : 0 ≤ d) :
   have h2 := mul_nonpos_of_nonpos_of_nonneg hc.2.2 (sq_nonneg d)
   have h3 := pow_nonneg hd 3
   dsimp [generalRareNumerator]
-  linarith
+  exact sub_nonpos.mpr ((add_nonpos (add_nonpos hc.1 h1) h2).trans
+    (mul_nonneg (by norm_num) h3))
 
 lemma hasDerivAt_generalRareR (i : Fin 3) {d : ℝ} (hd : 0 ≤ d) :
     HasDerivAt (generalRareR i)
@@ -161,18 +164,18 @@ lemma hasDerivAt_generalRareR (i : Fin 3) {d : ℝ} (hd : 0 ≤ d) :
   let A := (endpointRareRow i).cutoff
   have hP : HasDerivAt (fun x : ℝ => generalRareP0 i+generalRareP1 i*x+18*x^2)
       (generalRareP1 i+36*d) d := by
-    convert ((hasDerivAt_const d (generalRareP0 i)).add
+    convert! ((hasDerivAt_const d (generalRareP0 i)).add
       ((hasDerivAt_id d).const_mul (generalRareP1 i))).add
         (((hasDerivAt_id d).pow 2).const_mul 18) using 1 <;> simp <;> ring
   have hExp := ((hasDerivAt_id d).const_mul (-(19/25 : ℝ))).exp
   have hden : 1+d ≠ 0 := by positivity
   have h := (((hExp.const_mul p).mul hP).div ((hasDerivAt_id d).const_add 1) hden)
-  convert h using 1
+  convert! h using 1
   · funext x
     dsimp [generalRareR,generalRareP0,generalRareP1,p]
     ring
-  · simp only [id_eq]
-    dsimp [generalRareP0,generalRareP1,generalRareNumerator,p]
+  · simp only [id_eq, Pi.mul_apply]
+    dsimp [generalRareNumerator,p]
     field_simp
     ring
 
@@ -185,14 +188,14 @@ theorem generalRareR_antitone (i : Fin 3) : AntitoneOn (generalRareR i) (Ici (0 
     exact (hasDerivAt_generalRareR i hd.le).hasDerivWithinAt
   · intro d hd
     rw [interior_Ici] at hd
-    have hp : 0 ≤ (endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
+    have hp : 0 ≤ (endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
     exact mul_nonpos_of_nonneg_of_nonpos (by positivity) (generalRareNumerator_nonpos i hd.le)
 
 lemma generalRareR_upper_at_rational (i : Fin 3) {d : ℚ} (hd : 0 ≤ d) (hd50 : -(19/25)*d > -50) :
     generalRareR i (d:ℝ) ≤
       ((secondRarePQ i*secondExpUpperQ (-(19/25)*d)*secondRarePolyQ i d/(1+d):ℚ):ℝ) := by
-  have hp : 0 ≤ (endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
-  have hA : 0 ≤ (endpointRareRow i).cutoff := by fin_cases i <;> norm_num [endpointRareRow]
+  have hp : 0 ≤ (endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
+  have hA : 0 ≤ (endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
   have hdR : (0:ℝ) ≤ d := by exact_mod_cast hd
   have hdomain : -50 < -(19/25)*d ∧ -(19/25)*d < 50 := ⟨hd50,by linarith⟩
   have he := (second_exp_enclosure hdomain).2
@@ -204,7 +207,7 @@ lemma generalRareR_upper_at_rational (i : Fin 3) {d : ℚ} (hd : 0 ≤ d) (hd50 
   have hden : 0 ≤ 1+(d:ℝ) := by positivity
   have h := div_le_div_of_nonneg_right ht' hden
   simp only [generalRareR,div_mul_eq_mul_div]
-  convert h using 1
+  convert! h using 1
   all_goals push_cast
   all_goals try simp only [(second_row_cast i).1,secondRarePoly_cast]
   all_goals ring
@@ -224,8 +227,8 @@ def generalSecondScalar (i : Fin 3) (m d : ℝ) : ℝ :=
   m*Real.exp (-2*d)*(1+2*(endpointRareRow i).zeta)/(6*(1+d))+generalRareR i d-
     Real.exp (-2*d)/(2*(1+d))
 
-lemma second_zeta_nonneg (i : Fin 3) : 0 ≤ (endpointRareRow i).zeta := by
-  fin_cases i <;> norm_num [endpointRareRow]
+lemma second_zeta_nonneg (i : Fin 3) : 0 ≤ (endpointRareRow i).zeta :=
+  (endpointRareRow_bounds i).2.2.2
 
 lemma generalSecondScalar_eq (i : Fin 3) (m d : ℝ) :
     generalSecondScalar i m d =
@@ -298,7 +301,7 @@ theorem general_second_small_bound (h : GeneralSecondCertificateConditions) (i :
     have hh' := (exp_decay_ratio_antitone (by norm_num : (0:ℝ)≤2)) hd.1
       (show (0:ℝ)≤1/50 by norm_num) hd.2
     norm_num at hh'
-    convert hh.trans hh' using 1 <;> norm_num <;> ring
+    convert! hh.trans hh' using 1 <;> norm_num
   have hd0 : 0 ≤ d := hd.1
   have hfirst := (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hm hq)
       (show 0 ≤ Real.exp (-2*d)/(1+d) by exact div_nonneg (Real.exp_nonneg _) (by linarith))).trans

@@ -15,7 +15,7 @@ lemma generalMeanJointCleared_eval (J : ℚ) (i : Fin 6) (a k : ℝ) :
   have hD : realEval₂ (padeDQ comparisonZQ) a k=upperPadeD (upperComparisonZ a k) := by
     simp only [realEval₂,padeDQ,comparisonZQ,Polynomial.eval₂_mul,Polynomial.eval₂_add,
       Polynomial.eval₂_sub,Polynomial.eval₂_C,Polynomial.eval₂_X,Polynomial.eval₂_pow,
-      Polynomial.eval₂_one,Polynomial.eval₂_natCast,Polynomial.coe_eval₂RingHom]
+      Polynomial.eval₂_one,Polynomial.coe_eval₂RingHom]
     norm_num [upperPadeD,upperComparisonZ]
   change realEval₂ (C (C J-majorantBQ i)*padeDQ comparisonZQ+majorantCleared i) a k=_
   simp only [realEval₂,Polynomial.eval₂_add,Polynomial.eval₂_mul,Polynomial.eval₂_C,
@@ -62,7 +62,7 @@ theorem general_mean_row_logdet (hmajor : MajorantCertificateConditions)
         have hz := hzall i
         rw [hz,Rat.cast_zero]
         exact (spectralRatio_pos_le_one hR).1.le,hk⟩)
-    have hz := upperComparisonZ_lt_one hak.1 hak.2.1 hak.2.2
+    have hz := upperComparisonZ_lt_one hak.1 hak.2.1
     have hD := upperPadeD_pos hz
     have hdiv : upperPadeN (upperComparisonZ a k)/upperPadeD (upperComparisonZ a k)≤
         (r.J:ℝ)-upperMajorantB i a+upperMajorantH i a k :=
@@ -75,7 +75,6 @@ theorem general_mean_row_logdet (hmajor : MajorantCertificateConditions)
     rcases hrest.1 with ⟨h6,hlo⟩|⟨h7,hlo⟩
     · norm_num [h6] at hp
       have hJ := upperComparisonMatrixLogdet_J0 hnorm hR
-      norm_num only [Rat.cast_div,Rat.cast_ofNat] at hp
       linarith
     · have hne : ¬r.majorant.val=6 := by omega
       simp only [if_neg hne] at hp

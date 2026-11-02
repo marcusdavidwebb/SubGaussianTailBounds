@@ -5,7 +5,6 @@ namespace SingularValueBounds.KL.Certificates
 open scoped BigOperators
 
 theorem entropyGridBoundQ_rounding_allowance (j0 : ℕ) (B A : ℕ → ℚ) (decay : ℚ)
-    (_hj0 : 0 < j0) (_hjEnd : j0 ≤ 8000)
     (hBA : ∀ j ∈ Finset.Ico j0 8000, B j ≤ A j + 1 / roundingScale)
     (hK : ∀ j ∈ Finset.Ico j0 8000, 0 ≤ entropyGridKernelQ j0 j ∧
       entropyGridKernelQ j0 j ≤ 11) :
@@ -26,7 +25,7 @@ theorem entropyGridBoundQ_rounding_allowance (j0 : ℕ) (B A : ℕ → ℚ) (dec
   have hn : ((8000-j0:ℕ):ℚ) ≤ 8000 := by exact_mod_cast (Nat.sub_le 8000 j0)
   have herror : ((8000-j0:ℕ):ℚ) * ((11 / roundingScale) / 200) ≤ 440 / roundingScale := by
     have h := mul_le_mul_of_nonneg_right hn (show (0:ℚ) ≤ (11 / roundingScale) / 200 by positivity)
-    convert h using 1 <;> ring
+    convert! h using 1 <;> ring
   unfold entropyGridBoundQ
   linarith
 

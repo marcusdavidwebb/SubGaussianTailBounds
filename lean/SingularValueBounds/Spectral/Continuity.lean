@@ -22,13 +22,14 @@ theorem symmetric_posDef_iff_sphere (H : SymmetricMatrix ι) :
   constructor
   · intro hH x hx
     have hn : x ≠ 0 := by intro hz; simp [hz] at hx
-    simpa using hH.2 x hn
+    simpa using hH.dotProduct_mulVec_pos hn
   · intro hsphere
+    apply Matrix.posDef_iff_dotProduct_mulVec.mpr
     refine ⟨H.2, ?_⟩
     intro x hx
     have hn : 0 < ‖x‖ := norm_pos_iff.mpr hx
     let y := ‖x‖⁻¹ • x
-    have hy : ‖y‖ = 1 := by simp [y, norm_smul, abs_of_pos hn, hn.ne']
+    have hy : ‖y‖ = 1 := by simp [y, norm_smul, hn.ne']
     have hq := hsphere y hy
     have hid : y ⬝ᵥ H.1 *ᵥ y = (‖x‖⁻¹) ^ 2 * (x ⬝ᵥ H.1 *ᵥ x) := by
       simp only [y, Matrix.mulVec_smul, dotProduct_smul, smul_dotProduct, smul_eq_mul]
@@ -36,6 +37,7 @@ theorem symmetric_posDef_iff_sphere (H : SymmetricMatrix ι) :
     rw [hid] at hq
     simpa using (mul_pos_iff_of_pos_left (pow_pos (inv_pos.mpr hn) 2)).mp hq
 
+omit [DecidableEq ι] [Nonempty ι] in
 theorem isOpen_symmetric_posDef : IsOpen {H : SymmetricMatrix ι | H.1.PosDef} := by
   let S := Metric.sphere (0 : ι → ℝ) 1
   have hs : IsCompact S := isCompact_sphere _ _
@@ -67,7 +69,7 @@ theorem isOpen_symmetric_posDef : IsOpen {H : SymmetricMatrix ι | H.1.PosDef} :
       have hn : ‖x.1‖ = 1 := by simpa [S, Metric.mem_sphere, dist_zero_right] using x.2
       exact (not_le_of_gt (h x.1 hn)) hx
     · intro h x hx
-      have hxS : x ∈ S := by simp [S, Metric.mem_sphere, dist_zero_right, hx]
+      have hxS : x ∈ S := by simp [S, hx]
       exact lt_of_not_ge (fun hle => h ⟨⟨x, hxS⟩, hle⟩)
   rw [heq]
   exact himage.isOpen_compl
@@ -86,6 +88,7 @@ theorem continuousAt_resolvent (H : SymmetricMatrix ι) {u : ℝ}
     (show ContinuousAt (fun G : SymmetricMatrix ι => G.gap u) H from
     (continuous_const.sub continuous_subtype_val).continuousAt)
 
+omit [Nonempty ι] in
 theorem eventually_gap_posDef (H : SymmetricMatrix ι) {u : ℝ}
     (hu : (H.gap u).PosDef) :
     ∀ᶠ G : SymmetricMatrix ι in 𝓝 H, (G.gap u).PosDef := by
@@ -95,6 +98,7 @@ theorem eventually_gap_posDef (H : SymmetricMatrix ι) {u : ℝ}
   have hf : Continuous f := (continuous_const.sub continuous_subtype_val).subtype_mk _
   exact hf.continuousAt (isOpen_symmetric_posDef.mem_nhds hu)
 
+omit [Nonempty ι] in
 theorem continuousAt_resolvent_powerTrace (H : SymmetricMatrix ι) {u : ℝ}
     (hu : (H.gap u).PosDef) (p : ℕ) :
     ContinuousAt (fun G : SymmetricMatrix ι => Matrix.trace (G.resolvent u ^ p)) H :=

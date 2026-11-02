@@ -27,19 +27,22 @@ theorem centeredQuadratic_memLp (hsg : SubGaussianMGF μ X 1)
     (A : Matrix ι ι ℝ) : MemLp (centeredQuadratic A X) 2 μ :=
   (hsg.quadratic_memLp_two A).sub (memLp_const _)
 
+omit [DecidableEq ι] [IsProbabilityMeasure μ] in
 theorem quadraticCovariance_comm (A B : Matrix ι ι ℝ) :
     quadraticCovariance μ X A B = quadraticCovariance μ X B A := by
   simp only [quadraticCovariance, mul_comm]
 
+omit [DecidableEq ι] [IsProbabilityMeasure μ] in
 theorem quadraticCovariance_self_nonneg (A : Matrix ι ι ℝ) :
     0 ≤ quadraticCovariance μ X A A := by
   exact integral_nonneg fun ω => mul_self_nonneg _
 
+omit [MeasurableSpace Ω] [DecidableEq ι] in
 lemma centeredQuadratic_add_smul (A B : Matrix ι ι ℝ) (s t : ℝ) (ω : Ω) :
     centeredQuadratic (s • A + t • B) X ω =
       s * centeredQuadratic A X ω + t * centeredQuadratic B X ω := by
   simp only [centeredQuadratic, quadraticForm, Matrix.add_mulVec,
-    Matrix.smul_mulVec_assoc, dotProduct_add, dotProduct_smul,
+    Matrix.smul_mulVec, dotProduct_add, dotProduct_smul,
     Matrix.trace_add, Matrix.trace_smul, smul_eq_mul]
   ring
 
@@ -97,7 +100,7 @@ theorem quadraticCovariance_eq_mixed (hsg : SubGaussianMGF μ X 1)
       (hab.sub (ha.const_mul _)) (hb.const_mul _),
     integral_sub (f := fun ω => quadraticForm A X ω * quadraticForm B X ω)
       (g := fun ω => Matrix.trace B * quadraticForm A X ω) hab (ha.const_mul _)]
-  simp only [integral_const_mul, integral_const, measureReal_univ_eq_one,
+  simp only [integral_const_mul, integral_const, probReal_univ,
     smul_eq_mul, one_mul, hiso.quadratic_mean]
   ring
 
@@ -107,21 +110,23 @@ theorem quadraticCovariance_self_le (hsg : SubGaussianMGF μ X 1)
   simpa only [quadraticCovariance, centeredQuadratic, ← pow_two] using
     quadratic_endpoint_variance hsg hiso A hA
 
+omit [DecidableEq ι] in
 lemma endpoint_psd_smul (A : Matrix ι ι ℝ) (hA : A.PosSemidef)
     {s : ℝ} (hs : 0 ≤ s) : (s • A).PosSemidef := by
+  apply Matrix.posSemidef_iff_dotProduct_mulVec.mpr
   refine ⟨?_, ?_⟩
   · change (s • A)ᴴ = s • A
     simp only [Matrix.conjTranspose_smul, star_trivial, hA.isHermitian.eq]
   ·
     intro x
-    simp only [Matrix.smul_mulVec_assoc, dotProduct_smul, smul_eq_mul]
-    exact mul_nonneg hs (hA.2 x)
+    simp only [Matrix.smul_mulVec, dotProduct_smul, smul_eq_mul]
+    exact mul_nonneg hs (hA.dotProduct_mulVec_nonneg x)
 
 lemma trace_square_add_smul (A B : Matrix ι ι ℝ) (s t : ℝ) :
     Matrix.trace ((s • A + t • B) ^ 2) = s ^ 2 * Matrix.trace (A ^ 2) +
       2 * s * t * Matrix.trace (A * B) + t ^ 2 * Matrix.trace (B ^ 2) := by
   simp only [pow_two, Matrix.add_mul, Matrix.mul_add, Matrix.smul_mul,
-    Matrix.mul_smul, smul_smul, Matrix.trace_add, Matrix.trace_smul, smul_eq_mul]
+    Matrix.mul_smul, Matrix.trace_add, Matrix.trace_smul, smul_eq_mul]
   rw [Matrix.trace_mul_comm B A]
   ring
 
@@ -142,6 +147,7 @@ theorem endpoint_covariance_scaled (hsg : SubGaussianMGF μ X 1)
   rw [quadraticCovariance_add_smul hsg, trace_square_add_smul] at hu
   nlinarith
 
+omit [DecidableEq ι] in
 lemma frobenius_eq_zero_iff (A : Matrix ι ι ℝ) : frobenius A = 0 ↔ A = 0 := by
   constructor
   · intro ha
@@ -183,7 +189,7 @@ theorem endpoint_covariance_le (hsg : SubGaussianMGF μ X 1)
     rw [trace_square_eq_sum_sq hB.isHermitian, frobenius_sq]
   rw [hfa, hfb] at h
   have hp : 0 < 4 * frobenius B * frobenius A := by positivity
-  apply (mul_le_mul_left hp).mp
+  apply (mul_le_mul_iff_right₀ hp).mp
   nlinarith only [h]
 
 end

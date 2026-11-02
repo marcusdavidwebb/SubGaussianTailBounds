@@ -41,9 +41,9 @@ theorem endpointLowCoefficient_higher {p : ℕ} (hp : 3 ≤ p) :
       have he : (13/2 : ℝ)^n/((n+1).factorial : ℝ) =
           ((13/2 : ℝ)/(n+1))*((13/2 : ℝ)^(n-1)/(n.factorial : ℝ)) := by
         rw [Nat.factorial_succ,Nat.cast_mul,Nat.cast_add,Nat.cast_one]
-        rw [show n=(n-1)+1 by omega,pow_succ]
+        nth_rw 1 [show n=(n-1)+1 by omega]
+        rw [pow_succ]
         field_simp
-        <;> ring
       rw [he]
       apply mul_le_mul_of_nonneg_right _ (by positivity)
       apply (div_le_iff₀ (by positivity : (0 : ℝ)<n+1)).2
@@ -52,7 +52,7 @@ theorem endpointLowCoefficient_higher {p : ℕ} (hp : 3 ≤ p) :
     dsimp [endpointLowCoefficient]
     have h := add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num : (0 : ℝ)≤16/21))
       (mul_le_mul_of_nonneg_left hTT (by norm_num : (0 : ℝ)≤5/21))
-    convert h using 1 <;> ring
+    convert! h using 1 <;> ring
   clear hp hp3 hbase3
   induction p,hp4 using Nat.le_induction with
   | base => simpa using hbase4
@@ -74,6 +74,13 @@ def endpointRareRow (i : Fin 3) : EndpointRareRow :=
   else if i=1 then ⟨7/160,239/25,(19/20 : ℝ)^4+(1-(19/20 : ℝ)^2)^2⟩
   else ⟨19/500,10,1⟩
 
+/-- The three rare-event rows have positive probabilities, nonnegative cutoffs
+at most ten, and nonnegative fourth-moment parameters. -/
+theorem endpointRareRow_bounds (i : Fin 3) :
+    0 < (endpointRareRow i).probability ∧ 0 ≤ (endpointRareRow i).cutoff ∧
+      (endpointRareRow i).cutoff ≤ 10 ∧ 0 ≤ (endpointRareRow i).zeta := by
+  fin_cases i <;> norm_num [endpointRareRow]
+
 def endpointRareCoefficient (i : Fin 3) (p : ℕ) : ℝ :=
   (if p=2 then 1/2+(endpointRareRow i).zeta else gaussianSquareCoefficient p)+
     (endpointRareRow i).probability*shiftedExponentialCoefficient p
@@ -93,9 +100,9 @@ theorem endpointRareCoefficient_higher (i : Fin 3) {p : ℕ} (hp : 3≤p) :
   by_cases h5 : p<5
   · exact hbase p (by omega)
   have hp5 : 5≤p := by omega
-  have hr0 : 0≤(endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
-  have hA0 : 0≤(endpointRareRow i).cutoff := by fin_cases i <;> norm_num [endpointRareRow]
-  have hA10 : (endpointRareRow i).cutoff≤10 := by fin_cases i <;> norm_num [endpointRareRow]
+  have hr0 : 0≤(endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
+  have hA0 : 0≤(endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
+  have hA10 : (endpointRareRow i).cutoff≤10 := (endpointRareRow_bounds i).2.2.1
   have hstep (n : ℕ) (hn : 5≤n) : endpointRareCoefficient i (n+1) ≤ 4*endpointRareCoefficient i n := by
     have hn5 : (5 : ℝ)≤n := by exact_mod_cast hn
     have hg := gaussianSquareCoefficient_step n
@@ -110,7 +117,7 @@ theorem endpointRareCoefficient_higher (i : Fin 3) {p : ℕ} (hp : 3≤p) :
     have hSS := hS.trans (mul_le_mul_of_nonneg_right hratio hS0)
     have hh := add_le_add hg4 (mul_le_mul_of_nonneg_left hSS hr0)
     simp only [endpointRareCoefficient,show n≠2 by omega,show n+1≠2 by omega,if_false]
-    convert hh using 1 <;> ring
+    convert! hh using 1 <;> ring
   clear hp h5
   induction p,hp5 using Nat.le_induction with
   | base => exact hbase 5 (Or.inr (Or.inr rfl))

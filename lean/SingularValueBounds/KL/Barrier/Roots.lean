@@ -1,4 +1,4 @@
-import Mathlib.Topology.Compactness.PseudometrizableLindelof
+import Mathlib.Topology.Metrizable.Basic
 import SingularValueBounds.Spectral.Continuity
 import SingularValueBounds.Shifts.UpperMatrixUpdate
 
@@ -100,12 +100,13 @@ theorem trace_pos {R : Matrix ι ι ℝ} (hR : R.PosDef) : 0 < Matrix.trace R :=
   rw [real_spectral_trace hR.isHermitian]
   exact Finset.sum_pos (fun i _ => hR.eigenvalues_pos i) Finset.univ_nonempty
 
+omit [Nonempty ι] in
 /-- Sherman--Morrison with the original resolvent as base. -/
 theorem rankOne_inverse {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     (R⁻¹ + Matrix.vecMulVec x x)⁻¹ =
       R - (1 + x ⬝ᵥ (R *ᵥ x))⁻¹ • Matrix.vecMulVec (R *ᵥ x) (R *ᵥ x) := by
   have hunit := (Matrix.isUnit_iff_isUnit_det _).mp hR.isUnit
-  have hq : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.2 x
+  have hq : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.dotProduct_mulVec_nonneg x
   have hd : 1 + x ⬝ᵥ (R *ᵥ x) ≠ 0 := by positivity
   have hs : x ᵥ* R = R *ᵥ x := by
     have ht : R.transpose = R := by
@@ -122,6 +123,7 @@ theorem rankOne_inverse {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) 
   field_simp [hd]
   ring
 
+omit [Nonempty ι] in
 /-- The trace drop is the positive rank-one quadratic ratio. -/
 theorem rankOne_trace {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     Matrix.trace (R⁻¹ + Matrix.vecMulVec x x)⁻¹ =
@@ -174,7 +176,7 @@ theorem lowerShift_nonneg {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ
     rw [real_spectral_square hR.isHermitian, quadratic_conjugate_diagonal]
     exact Finset.sum_nonneg (fun i _ => mul_nonneg (sq_nonneg _) (sq_nonneg _))
   have hden : 0 < 1 + x ⬝ᵥ (R *ᵥ x) := by
-    have : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.2 x
+    have : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.dotProduct_mulVec_nonneg x
     linarith
   have ht : Matrix.trace (H.resolvent 0) ≤ Matrix.trace R := by
     change Matrix.trace (H.gap 0)⁻¹ ≤ _
@@ -223,7 +225,7 @@ theorem lowerShift_pos {R : Matrix ι ι ℝ} (hR : R.PosDef)
       (Finset.single_le_sum (fun j _ => mul_nonneg (sq_nonneg _) (sq_nonneg _))
         (Finset.mem_univ i))
   have hd : 0 < 1 + x ⬝ᵥ (R *ᵥ x) := by
-    have : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.2 x
+    have : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.dotProduct_mulVec_nonneg x
     linarith
   apply lt_of_le_of_ne (lowerShift_nonneg hR x)
   intro hz

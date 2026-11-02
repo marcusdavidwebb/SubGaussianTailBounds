@@ -30,15 +30,14 @@ theorem generalMeanPolynomial_identity_0 (J : ℚ) :
     generalMeanJointCleared J 0 = tensorOfFn 6 15 (generalMeanCoefficients0 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients0, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def generalMeanCoefficients1 (J : ℚ) : Fin 7 → Fin 16 → ℚ :=
@@ -63,15 +62,14 @@ theorem generalMeanPolynomial_identity_1 (J : ℚ) :
     generalMeanJointCleared J 1 = tensorOfFn 6 15 (generalMeanCoefficients1 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients1, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def generalMeanCoefficients2 (J : ℚ) : Fin 7 → Fin 16 → ℚ :=
@@ -96,15 +94,14 @@ theorem generalMeanPolynomial_identity_2 (J : ℚ) :
     generalMeanJointCleared J 2 = tensorOfFn 6 15 (generalMeanCoefficients2 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients2, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def generalMeanCoefficients3 (J : ℚ) : Fin 7 → Fin 16 → ℚ :=
@@ -129,15 +126,14 @@ theorem generalMeanPolynomial_identity_3 (J : ℚ) :
     generalMeanJointCleared J 3 = tensorOfFn 6 15 (generalMeanCoefficients3 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients3, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def generalMeanCoefficients4 (J : ℚ) : Fin 7 → Fin 16 → ℚ :=
@@ -162,15 +158,14 @@ theorem generalMeanPolynomial_identity_4 (J : ℚ) :
     generalMeanJointCleared J 4 = tensorOfFn 6 15 (generalMeanCoefficients4 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients4, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def generalMeanCoefficients5 (J : ℚ) : Fin 9 → Fin 16 → ℚ :=
@@ -195,15 +190,14 @@ theorem generalMeanPolynomial_identity_5 (J : ℚ) :
     generalMeanJointCleared J 5 = tensorOfFn 8 15 (generalMeanCoefficients5 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
+  simp [generalMeanJointCleared, majorantCleared, majorantHQ,
     majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
     generalMeanCoefficients5, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def generalMeanCoefficients6 (J : ℚ) : Fin 5 → Fin 1 → ℚ :=
@@ -213,15 +207,12 @@ theorem generalMeanPolynomial_identity_6 (J : ℚ) :
     C (C J-generalMeanNormQ (671/100)) = tensorOfFn 4 0 (generalMeanCoefficients6 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
-    majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+  simp [generalMeanNormQ, tensorOfFn,
     generalMeanCoefficients6, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
-    Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.eval₂_pow, Polynomial.eval₂_C,
+    Polynomial.coe_evalRingHom, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
   ring
 
 def generalMeanCoefficients7 (J : ℚ) : Fin 5 → Fin 1 → ℚ :=
@@ -231,15 +222,12 @@ theorem generalMeanPolynomial_identity_7 (J : ℚ) :
     C (C J-generalMeanNormQ (563/100)) = tensorOfFn 4 0 (generalMeanCoefficients7 J) := by
   apply tensor_eq_of_eval
   intro a b
-  norm_num [generalMeanJointCleared, generalMeanNormQ, majorantCleared, majorantHQ,
-    majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+  simp [generalMeanNormQ, tensorOfFn,
     generalMeanCoefficients7, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
-    Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.eval₂_pow, Polynomial.eval₂_C,
+    Polynomial.coe_evalRingHom, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
   ring
 
 end SingularValueBounds.KL.Certificates

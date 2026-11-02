@@ -38,14 +38,14 @@ theorem endpointLogExcess_monotone : MonotoneOn endpointLogExcess (Ico 0 1) := b
     have hd := (((hasDerivAt_const z 1).sub (hasDerivAt_id z)).log
       (ne_of_gt (show 0<1-z by linarith [hz'.2]))).neg.sub (hasDerivAt_id z)
     have hd' : HasDerivAt endpointLogExcess (z/(1-z)) z := by
-      convert hd using 1
-      simp only [zero_sub,neg_div,neg_neg,id_eq]
+      convert! hd using 1
+      simp only [zero_sub,neg_div,neg_neg,id_eq,Pi.sub_apply]
       field_simp [show 1-z≠0 by linarith [hz'.2]]
       <;> ring
     rw [hd'.deriv]
     exact div_nonneg hz'.1 (by linarith [hz'.2])
 
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 theorem endpoint_spectral_logdet (hcert : EndpointLogratioCertificateConditions)
     (i : Fin 3) {x : ι → ℝ} (hx : ∀j,0<x j) (h2 : ∑j,x j^2=1)

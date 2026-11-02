@@ -10,7 +10,7 @@ open scoped Matrix BigOperators
 namespace SingularValueBounds.KL
 noncomputable section
 set_option maxHeartbeats 1500000
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 def endpointGaussian (x : ι → ℝ) (g : ι → ℝ) : ℝ := ∑j,x j^2*(g j)^2
 
@@ -22,16 +22,16 @@ theorem spectralSquareMass_monotone :
   · intro k hk
     have hk' : k∈Icc (9/10 : ℝ) 1 := interior_subset hk
     have hd : HasDerivAt (fun k : ℝ => k^4+(1-k^2)^2) (4*k*(2*k^2-1)) k := by
-      convert ((hasDerivAt_id k).pow 4).add
+      convert! ((hasDerivAt_id k).pow 4).add
         (((hasDerivAt_const k 1).sub ((hasDerivAt_id k).pow 2)).pow 2) using 1 <;>
-        simp only [id_eq] <;> ring
+        simp only [Pi.sub_apply, Pi.pow_apply, id_eq] <;> ring
     rw [hd.deriv]
     have hk0 : 0≤k := by linarith [hk'.1]
     have hh : 0≤2*k^2-1 := by nlinarith [hk'.1]
     positivity
 
 theorem endpoint_spectral_fourth_mass (i : Fin 3) {x : ι → ℝ}
-    (hx : ∀j,0≤x j) (h2 : ∑j,x j^2=1) (top : ι)
+    (h2 : ∑j,x j^2=1) (top : ι)
     (hκ : x top∈Icc (endpointSpectralRow i).lo (endpointSpectralRow i).hi) :
     (∑j,x j^4)≤(endpointRareRow i).zeta := by
   have he2 : (∑j∈Finset.univ.erase top,x j^2)=1-(x top)^2 := by
@@ -57,7 +57,7 @@ theorem endpointGaussian_mean {x : ι → ℝ} (h2 : ∑j,x j^2=1) :
   unfold endpointGaussian
   have hInt (j : ι) : Integrable (fun g : ι → ℝ => (g j)^2) (standardGaussian ι) := by
     simpa only [pow_one] using standardGaussian_coordinate_even_integrable j 1
-  rw [integral_finset_sum _ (fun j hj =>
+  rw [integral_finsetSum _ (fun j hj =>
     (hInt j).const_mul (x j^2))]
   simp only [integral_const_mul]
   have hj (j : ι) : (∫g : ι → ℝ,(g j)^2 ∂standardGaussian ι)=1 := by
@@ -66,18 +66,20 @@ theorem endpointGaussian_mean {x : ι → ℝ} (h2 : ∑j,x j^2=1) :
   exact h2
 
 theorem endpointGaussian_second (i : Fin 3) {x : ι → ℝ}
-    (hx : ∀j,0≤x j) (h2 : ∑j,x j^2=1) (top : ι)
+    (h2 : ∑j,x j^2=1) (top : ι)
     (hκ : x top∈Icc (endpointSpectralRow i).lo (endpointSpectralRow i).hi) :
     (∫g,endpointGaussian x g^2 ∂standardGaussian ι)/2≤1/2+(endpointRareRow i).zeta := by
   change (∫g,(∑j,x j^2*(g j)^2)^2 ∂standardGaussian ι)/2≤_
   rw [standardGaussian_quadratic_second,h2]
-  have hh := endpoint_spectral_fourth_mass i hx h2 top hκ
+  have hh := endpoint_spectral_fourth_mass i h2 top hκ
   have he : (∑j,(x j^2)^2)=∑j,x j^4 := by
     apply Finset.sum_congr rfl
     intro j hj
     ring
   rw [he]
   linarith
+
+variable [Nonempty ι]
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
 

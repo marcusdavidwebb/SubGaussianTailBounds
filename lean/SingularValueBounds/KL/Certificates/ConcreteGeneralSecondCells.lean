@@ -39,8 +39,8 @@ theorem secondSmallUpperQ_lt (i : Fin 3) : secondSmallUpperQ i < 9/2 := by
       secondExpLowerQ, secondDownQ, expTaylorUpperQ, expTaylorQ, Finset.sum_range_succ]
 
 private def secondPrimary (j : ℕ) : Prop :=
-  FourthExclusionCertificate (secondCellM (Fin.ofNat' 334 j))
-    (secondCellE (Fin.ofNat' 334 j)) (secondCellX (Fin.ofNat' 334 j))
+  FourthExclusionCertificate (secondCellM (Fin.ofNat 334 j))
+    (secondCellE (Fin.ofNat 334 j)) (secondCellX (Fin.ofNat 334 j))
 
 private theorem secondPrimary_block00 : ∀ i : Fin 32,
     0 * 32 + i.val < 334 → secondPrimary (0 * 32 + i.val) := by
@@ -161,7 +161,7 @@ theorem secondCellConditions (j : Fin 334) :
     (secondCell_basicConditions j).2.2.1, (secondCell_basicConditions j).2.2.2.1,
     (secondCell_basicConditions j).2.2.2.2.1, (secondCell_basicConditions j).2.2.2.2.2, ?_⟩
   have h := secondPrimary_all j
-  have hj : Fin.ofNat' 334 j.val = j := by
+  have hj : Fin.ofNat 334 j.val = j := by
     apply Fin.ext
     exact Nat.mod_eq_of_lt j.isLt
   simpa only [secondPrimary, hj] using h

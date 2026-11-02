@@ -69,12 +69,12 @@ theorem momentLogM_antitone {p : ℝ} (hp : (19:ℝ)/4 ≤ p) :
       HasDerivAt (fun k => momentLogM k p)
         ((2*x^2*(p-4*x^2)-momentD x p*Real.log (momentD x p))/(x^3*momentD x p)) x := by
     have hd : HasDerivAt (fun k => momentD k p) (4*p*x-16*x^3) x := by
-      convert ((hasDerivAt_const x 1).add (((hasDerivAt_id x).pow 2).const_mul (2*p))).sub
-        (((hasDerivAt_id x).pow 4).const_mul 4) using 1 <;> simp [momentD] <;> ring
+      convert! ((hasDerivAt_const x 1).add (((hasDerivAt_id x).pow 2).const_mul (2*p))).sub
+        (((hasDerivAt_id x).pow 4).const_mul 4) using 1 <;> simp <;> ring
     have h := (hd.log (hD x hx).ne').div (((hasDerivAt_id x).pow 2).const_mul 2)
       (mul_ne_zero (by norm_num) (pow_ne_zero 2 hx.1.ne'))
-    convert h using 1
-    simp only [id_eq,Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one]
+    convert! h using 1
+    simp only [Pi.pow_apply,id_eq,Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one]
     field_simp [hx.1.ne',(hD x hx).ne']
     <;> ring
   refine antitoneOn_of_deriv_nonpos (convex_Ioc _ _) ?_ ?_ ?_

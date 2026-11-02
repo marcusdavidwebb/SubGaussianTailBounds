@@ -8,7 +8,7 @@ namespace SingularValueBounds.KL.Certificates
 set_option maxHeartbeats 0
 set_option maxRecDepth 10000
 
-private def endpointTableCoefficients00 (k : Fin 7) (l : Fin 5) : ℚ :=
+private noncomputable def endpointTableCoefficients00 (k : Fin 7) (l : Fin 5) : ℚ :=
   (![
     ![(858489265666197/320000000000000000), (-45699504752733/80000000000000000), (14254784790679/16000000000000000), (80723023241/2000000000000000), (3054635951/4000000000000000), (23301587/5000000000000000), (-31827/5000000000000000)],
     ![(1258605621/64000000000), (-60233229/32000000000), (383607/16000000000), (4473/8000000000), 0, 0, 0],
@@ -36,9 +36,8 @@ private theorem endpointTableBox00 :
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointTableCoefficients00, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp [endpointTableCoefficients00, endpointBox, endpointKLo, endpointKHi,
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -48,7 +47,7 @@ private theorem endpointTableBox00 :
     simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
     decide +kernel
 
-private def endpointTableCoefficients01 (k : Fin 7) (l : Fin 5) : ℚ :=
+private noncomputable def endpointTableCoefficients01 (k : Fin 7) (l : Fin 5) : ℚ :=
   (![
     ![(13042387002963663/1280000000000000000), (-145871907138733/80000000000000000), (29853533280583/32000000000000000), (82128165791/2000000000000000), (12225588779/16000000000000000), (23301587/5000000000000000), (-31827/5000000000000000)],
     ![(-4670241434271/5120000000000000), (-1057602835667/1280000000000000), (8795077319/160000000000000), (262616067/320000000000000), (281799/320000000000000), 0, 0],
@@ -76,9 +75,8 @@ private theorem endpointTableBox01 :
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointTableCoefficients01, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp [endpointTableCoefficients01, endpointBox, endpointKLo, endpointKHi,
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -88,7 +86,7 @@ private theorem endpointTableBox01 :
     simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
     decide +kernel
 
-private def endpointTableCoefficients02 (k : Fin 7) (l : Fin 5) : ℚ :=
+private noncomputable def endpointTableCoefficients02 (k : Fin 7) (l : Fin 5) : ℚ :=
   (![
     ![(66359635429221/10000000000000000), (-202058568961983/80000000000000000), (15875439799729/16000000000000000), (20976088679/500000000000000), (1530840463/2000000000000000), (23301587/5000000000000000), (-31827/5000000000000000)],
     ![(-2128656867561/512000000000000), (-54093411211/80000000000000), (19206541991/320000000000000), (7441371/8000000000000), (281799/160000000000000), 0, 0],
@@ -116,9 +114,8 @@ private theorem endpointTableBox02 :
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointTableCoefficients02, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp [endpointTableCoefficients02, endpointBox, endpointKLo, endpointKHi,
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -128,7 +125,7 @@ private theorem endpointTableBox02 :
     simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
     decide +kernel
 
-private def endpointTableCoefficients03 (k : Fin 7) (l : Fin 5) : ℚ :=
+private noncomputable def endpointTableCoefficients03 (k : Fin 7) (l : Fin 5) : ℚ :=
   (![
     ![(5433924910053663/1280000000000000000), (-8161908718269/2500000000000000), (33511470688883/32000000000000000), (171494963857/4000000000000000), (12281948579/16000000000000000), (23301587/5000000000000000), (-31827/5000000000000000)],
     ![(-1485028978209/5120000000000000), (-1015259095431/1280000000000000), (15321799647/320000000000000), (284036319/320000000000000), (845397/320000000000000), 0, 0],
@@ -156,9 +153,8 @@ private theorem endpointTableBox03 :
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointTableCoefficients03, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp [endpointTableCoefficients03, endpointBox, endpointKLo, endpointKHi,
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -168,7 +164,7 @@ private theorem endpointTableBox03 :
     simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
     decide +kernel
 
-private def endpointTableCoefficients10 (k : Fin 7) (l : Fin 5) : ℚ :=
+private noncomputable def endpointTableCoefficients10 (k : Fin 7) (l : Fin 5) : ℚ :=
   (![
     ![(57419581/38063308800), (72870749/3806330880), (9043874963/3083128012800), (31538527/210213273600), (93350203/27748152115200), (2729809/124866684518400), (-10609/83244456345600)],
     ![(454867/18022400), (-1361003/486604800), (-3437/486604800), (497/716636160), 0, 0, 0],
@@ -196,9 +192,8 @@ private theorem endpointTableBox10 :
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointTableCoefficients10, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp [endpointTableCoefficients10, endpointBox, endpointKLo, endpointKHi,
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -208,7 +203,7 @@ private theorem endpointTableBox10 :
     simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
     decide +kernel
 
-private def endpointTableCoefficients11 (k : Fin 7) (l : Fin 5) : ℚ :=
+private noncomputable def endpointTableCoefficients11 (k : Fin 7) (l : Fin 5) : ℚ :=
   (![
     ![(358180237929/31719424000000), (39512102581/2230272000000), (11419685528267/3853910016000000), (48071839/318504960000), (3361028267/998933476147200), (2729809/124866684518400), (-10609/83244456345600)],
     ![(-21611155657/15859712000000), (-96395489491/214106112000000), (55075597507/963477504000000), (67379921/63063982080000), (3479/4127824281600), 0, 0],
@@ -236,9 +231,8 @@ private theorem endpointTableBox11 :
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointTableCoefficients11, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp [endpointTableCoefficients11, endpointBox, endpointKLo, endpointKHi,
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -248,7 +242,7 @@ private theorem endpointTableBox11 :
     simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
     decide +kernel
 
-private def endpointTableCoefficients12 (k : Fin 7) (l : Fin 5) : ℚ :=
+private noncomputable def endpointTableCoefficients12 (k : Fin 7) (l : Fin 5) : ℚ :=
   (![
     ![(11379221089/1982464000000), (209603680867/11894784000000), (5841768624301/1926955008000000), (24978869/164229120000), (420286393/124866684518400), (2729809/124866684518400), (-10609/83244456345600)],
     ![(-56255753743/7929856000000), (760393879/26763264000000), (70523028611/963477504000000), (607243/492687360000), (3479/2063912140800), 0, 0],
@@ -276,9 +270,8 @@ private theorem endpointTableBox12 :
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointTableCoefficients12, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp [endpointTableCoefficients12, endpointBox, endpointKLo, endpointKHi,
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -288,7 +281,7 @@ private theorem endpointTableBox12 :
     simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero, Nat.choose_eq_fast_choose]
     decide +kernel
 
-private def endpointTableCoefficients13 (k : Fin 7) (l : Fin 5) : ℚ :=
+private noncomputable def endpointTableCoefficients13 (k : Fin 7) (l : Fin 5) : ℚ :=
   (![
     ![(70175992987/95158272000000), (623294321671/35684352000000), (11944545247567/3853910016000000), (268590169/1751777280000), (124607257/36997536153600), (2729809/124866684518400), (-10609/83244456345600)],
     ![(-30525174799/15859712000000), (-88124867887/214106112000000), (522935903/8921088000000), (6797959/5733089280000), (3479/1375941427200), 0, 0],
@@ -316,9 +309,8 @@ private theorem endpointTableBox13 :
       Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
-    norm_num [endpointTableCoefficients13, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+    simp [endpointTableCoefficients13, endpointBox, endpointKLo, endpointKHi,
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]

@@ -42,7 +42,6 @@ theorem upperFixedEigenvalue_normalized {R : Matrix ι ι ℝ} (hR : R.PosDef) (
     rw [hw]
     unfold upperNormalizedSpectrum
     field_simp [hη.ne']
-    ring
   unfold upperFixedEigenvalue normalizedUpperEigenvalue
   rw [hw, ha]
   change hR.isHermitian.eigenvalues i + _ = frobenius R *
@@ -58,7 +57,6 @@ theorem upperFixedComparison_frobenius_square {R : Matrix ι ι ℝ} (hR : R.Pos
   have hC := upperFixedComparison_posSemidef hR
   have hs := congrArg (fun A : Matrix ι ι ℝ => Matrix.trace (A ^ 2))
     (upperFixedComparison_spectral hR)
-  dsimp only at hs
   simp only [pow_two] at hs
   rw [unitary_conjugate_mul, Matrix.diagonal_mul_diagonal,
     unitary_conjugate_trace, Matrix.trace_diagonal] at hs
@@ -78,6 +76,7 @@ theorem upperFixedComparison_frobenius_bound {R : Matrix ι ι ℝ} (hR : R.PosD
   obtain ⟨hx, h2⟩ := upperNormalizedSpectrum_properties hR
   exact mul_le_mul_of_nonneg_left (normalized_upper_frobenius_bound hx h2) (sq_nonneg _)
 
+omit [Nonempty ι] in
 /-- A scalar strict bound on every comparison eigenvalue gives a positive gap. -/
 lemma upperFixedComparison_gap_posDef {R : Matrix ι ι ℝ} (hR : R.PosDef) {b : ℝ}
     (hb : ∀ i, upperFixedEigenvalue hR.isHermitian.eigenvalues i < b) :
@@ -164,6 +163,7 @@ theorem upperFixedComparison_normalized_spectral {R : Matrix ι ι ℝ} (hR : R.
     · simp [Matrix.diagonal, hij]
   rw [hd, Matrix.mul_smul, Matrix.smul_mul]
 
+omit [Nonempty ι] in
 theorem trace_div_frobenius_eq_normalized_sum {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     Matrix.trace R / frobenius R = ∑ i, upperNormalizedSpectrum R hR i := by
   rw [real_spectral_trace hR.isHermitian, Finset.sum_div]
@@ -190,8 +190,7 @@ theorem upperComparisonNormalizedGap_spectral {R : Matrix ι ι ℝ} (hR : R.Pos
       dsimp [d]
       rw [upperFixedEigenvalue_normalized hR]
       field_simp [(frobenius_pos hR).ne']
-      ring
-    · simp [Matrix.diagonal, Matrix.one_apply, hij]
+    · simp [Matrix.diagonal, hij]
   rw [hd, Matrix.mul_sub, Matrix.sub_mul, Matrix.mul_smul, Matrix.smul_mul,
     mul_one, U.2.2]
   exact congrArg (fun A : Matrix ι ι ℝ => (1 : Matrix ι ι ℝ) - (2 / frobenius R) • A)

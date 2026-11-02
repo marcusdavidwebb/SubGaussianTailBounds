@@ -42,7 +42,7 @@ private lemma clipped_rate_bounds (k u : ℚ) (opt : ℤ) (hk : 0 < k) (hk1 : k 
     have hm : (margin : ℚ) ≤ 100+100*(58/25)/(u*k) := by
       dsimp [margin]
       push_cast
-      exact add_le_add_left (Int.floor_le _) _
+      exact add_le_add_right (Int.floor_le (100 * (58 / 25) / (u * k))) 100
     have h90 : (90:ℚ) ≤ 100+100*(58/25)/(u*k) := by
       have : (0:ℚ) ≤ 100*(58/25)/(u*k) := by positivity
       linarith
@@ -58,7 +58,7 @@ theorem endpointMean_jointRates (ki : Fin 60) (ai : Fin 42)
     90 ≤ endpointMeanRate ki ai j ∧ endpointMeanRate ki ai j ≤ 200 ∧
     q * (endpointMeanBox ki ai).top^2 < 1 ∧
     (j : ℚ) / 200 * (endpointMeanBox ki ai).top * (q - 1) ≤ 58 / 25 := by
-  have hbox := endpointMean_jointBoxes ki ai hactive
+  have hbox := endpointMean_jointBoxes ki ai
   have hcut := endpointMean_jointCutoff ki ai hactive
   have hjpos : 0 < j := lt_of_lt_of_le hcut.1 (Finset.mem_Ico.mp hj).1
   exact clipped_rate_bounds _ _ _ (hbox.2.1.trans hbox.2.2.1)

@@ -27,7 +27,7 @@ theorem endpointMeanCertificateConditions_of_finite_bounds
   smallNumerical := hsmall
   smallTotal := endpointMean_smallTotal
   jointCutoff := endpointMean_jointCutoff
-  jointBoxes := endpointMean_jointBoxes
+  jointBoxes := fun ki ai _ => endpointMean_jointBoxes ki ai
   jointRates := endpointMean_jointRates
   jointPrefactors := endpointMean_jointPrefactors
   jointCorners := hcorners

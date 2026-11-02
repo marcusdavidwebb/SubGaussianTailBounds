@@ -141,14 +141,13 @@ theorem endpoint_lower_mixed_cap_of_certificates (hsg : SubGaussianMGF μ X 1)
   have hqP (ω : Ω) : quadraticForm (lowerWeight R) X ω =
       diagonalQuadratic (fun j => r j^2) XR ω := by
     dsimp only [lowerWeight,quadraticForm]
-    simp only [Matrix.smul_mulVec_assoc,dotProduct_smul,smul_eq_mul]
+    simp only [Matrix.smul_mulVec,dotProduct_smul,smul_eq_mul]
     rw [← hf, real_spectral_square hR.isHermitian,quadratic_conjugate_diagonal]
     rw [Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro j _
     dsimp [diagonalQuadratic,r,upperNormalizedSpectrum,XR,U]
     field_simp [hη.ne']
-    ring
   have hqB (ω : Ω) : quadraticForm (lowerComparison R A c) X ω =
       frobenius R * diagonalQuadratic (fun j => endpointComparisonEigen A c (r j)) XR ω := by
     dsimp only [quadraticForm]

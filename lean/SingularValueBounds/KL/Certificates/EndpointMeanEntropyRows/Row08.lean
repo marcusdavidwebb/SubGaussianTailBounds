@@ -1,3 +1,4 @@
+import SingularValueBounds.KL.Certificates.RoundedLogCache
 import SingularValueBounds.KL.Certificates.EndpointMeanEntropyAssembly
 import SingularValueBounds.KL.Certificates.EndpointPrefactorEvaluation
 
@@ -7,6 +8,27 @@ set_option Elab.async false
 /-! Exact integer entropy certificates, independently checked by Lean's kernel.
 Each corner is checked separately. Adjacent boxes reuse their shared vertices after
 checking that the previous rate table contains the same prefactor values. -/
+namespace SingularValueBounds.KL.Certificates
+-- Each shared logarithm is checked once; missing inputs retain the exact evaluator.
+set_option maxHeartbeats 0
+set_option maxRecDepth 100000
+private noncomputable def endpointRowLogCache : RoundedLogCache :=
+(.node (653/800:ℚ) (-203034598391513:ℤ) (.node (31229/40000:ℚ) (-247532303824749:ℤ) (.node (24431/32000:ℚ) (-269883085089081:ℤ) (.node (482733/640000:ℚ) (-282004470579721:ℤ) (.node (238423/320000:ℚ) (-294274588746086:ℤ) (.node (474323/640000:ℚ) (-299579652130638:ℤ) (.node (472641/640000:ℚ) (-303132061237735:ℤ) (.node (2359/3200:ℚ) (-304913009380158:ℤ) .empty .empty) (.node (236741/320000:ℚ) (-301354279233708:ℤ) .empty .empty)) (.node (95201/128000:ℚ) (-296039817975800:ℤ) (.node (118791/160000:ℚ) (-297808168750804:ℤ) .empty .empty) .empty)) (.node (48021/64000:ℚ) (-287244668127016:ℤ) (.node (7477/10000:ℚ) (-290753450976282:ℤ) (.node (477687/640000:ℚ) (-292512470060584:ℤ) .empty .empty) (.node (479369/640000:ℚ) (-288997520607804:ℤ) .empty .empty)) (.node (120473/160000:ℚ) (-283748153799798:ℤ) (.node (481051/640000:ℚ) (-285494882762632:ℤ) .empty .empty) .empty))) (.node (30347/40000:ℚ) (-276181788281589:ℤ) (.node (96883/128000:ℚ) (-278526199010555:ℤ) (.node (241787/320000:ℚ) (-280263822499262:ℤ) (.node (151/200:ℚ) (-281037529733126:ℤ) .empty .empty) (.node (30249/40000:ℚ) (-279416328034765:ℤ) .empty .empty)) (.node (60657/80000:ℚ) (-276791589620624:ℤ) (.node (15149/20000:ℚ) (-277797750377820:ℤ) .empty .empty) .empty)) (.node (6089/8000:ℚ) (-272957677053415:ℤ) (.node (7599/10000:ℚ) (-274568433306413:ℤ) (.node (486097/640000:ℚ) (-275059983891004:ℤ) .empty .empty) (.node (243469/320000:ℚ) (-273331371437360:ℤ) .empty .empty)) (.node (15247/20000:ℚ) (-271349511164237:ℤ) (.node (487779/640000:ℚ) (-271605741929115:ℤ) .empty .empty) .empty)))) (.node (15443/20000:ℚ) (-258576447313143:ℤ) (.node (491143/640000:ℚ) (-264732848599513:ℤ) (.node (30641/40000:ℚ) (-266540472698422:ℤ) (.node (489461/640000:ℚ) (-268163390693094:ℤ) (.node (30543/40000:ℚ) (-269743927320783:ℤ) .empty .empty) (.node (478/625:ℚ) (-268140917244960:ℤ) .empty .empty)) (.node (3069/4000:ℚ) (-264942585482309:ℤ) (.node (245151/320000:ℚ) (-266446648569643:ℤ) .empty .empty) .empty)) (.node (19713/25600:ℚ) (-261314034901693:ℤ) (.node (30749/40000:ℚ) (-263021980715426:ℤ) (.node (30739/40000:ℚ) (-263347247437002:ℤ) .empty .empty) (.node (7697/10000:ℚ) (-261754450441882:ℤ) .empty .empty)) (.node (246833/320000:ℚ) (-259609001193848:ℤ) (.node (30837/40000:ℚ) (-260164186415058:ℤ) .empty .empty) .empty))) (.node (49703/64000:ℚ) (-252817789905791:ℤ) (.node (3873/5000:ℚ) (-255408511901502:ℤ) (.node (6187/8000:ℚ) (-256991225131000:ℤ) (.node (494507/640000:ℚ) (-257906869678315:ℤ) .empty .empty) (.node (123837/160000:ℚ) (-256207630492053:ℤ) .empty .empty)) (.node (31033/40000:ℚ) (-253828299695288:ℤ) (.node (496189/640000:ℚ) (-254511273822209:ℤ) .empty .empty) .empty)) (.node (62339/80000:ℚ) (-249439401528494:ℤ) (.node (497871/640000:ℚ) (-251127169029315:ℤ) (.node (15541/20000:ℚ) (-252250580620531:ℤ) .empty .empty) (.node (31131/40000:ℚ) (-250675346822701:ℤ) .empty .empty)) (.node (499553/640000:ℚ) (-247754477787875:ℤ) (.node (1559/2000:ℚ) (-249102590484321:ℤ) .empty .empty) .empty))))) (.node (511327/640000:ℚ) (-224458869090513:ℤ) (.node (3159/4000:ℚ) (-236038839299959:ℤ) (.node (1257/1600:ℚ) (-241275699637642:ℤ) (.node (100247/128000:ℚ) (-244393123367754:ℤ) (.node (15639/20000:ℚ) (-245964479099929:ℤ) (.node (250197/320000:ℚ) (-246072388240535:ℤ) .empty .empty) (.node (31327/40000:ℚ) (-244399108602180:ℤ) .empty .empty)) (.node (125519/160000:ℚ) (-242716673698674:ℤ) (.node (1961/2500:ℚ) (-242836184659960:ℤ) .empty .empty) .empty)) (.node (31523/40000:ℚ) (-238162015988405:ℤ) (.node (15737/20000:ℚ) (-239717645935279:ℤ) (.node (502917/640000:ℚ) (-241043029809991:ℤ) .empty .empty) (.node (251879/320000:ℚ) (-239372182325640:ℤ) .empty .empty)) (.node (7893/10000:ℚ) (-236608802267795:ℤ) (.node (504599/640000:ℚ) (-237704121916476:ℤ) .empty .empty) .empty))) (.node (3971/5000:ℚ) (-230419960285003:ℤ) (.node (253561/320000:ℚ) (-232716570545878:ℤ) (.node (506281/640000:ℚ) (-234376325239843:ℤ) (.node (31621/40000:ℚ) (-235057997279255:ℤ) .empty .empty) (.node (3167/4000:ℚ) (-233509593563403:ℤ) .empty .empty)) (.node (507963/640000:ℚ) (-231059566073492:ℤ) (.node (31719/40000:ℚ) (-231963583695453:ℤ) .empty .empty) .empty)) (.node (15933/20000:ℚ) (-227339843445636:ℤ) (.node (31817/40000:ℚ) (-228878715975819:ℤ) (.node (127201/160000:ℚ) (-229405302723503:ℤ) .empty .empty) (.node (101929/128000:ℚ) (-227753771441806:ℤ) .empty .empty)) (.node (6383/8000:ℚ) (-225803335405931:ℤ) (.node (255243/320000:ℚ) (-226104963219086:ℤ) .empty .empty) .empty)))) (.node (32307/40000:ℚ) (-213595529099099:ℤ) (.node (10277/12800:ℚ) (-219536782282652:ℤ) (.node (16031/20000:ℚ) (-221207925846471:ℤ) (.node (64021/80000:ℚ) (-222815480135459:ℤ) (.node (7991/10000:ℚ) (-224269184601734:ℤ) .empty .empty) (.node (32013/40000:ℚ) (-222737383811414:ℤ) .empty .empty)) (.node (32111/40000:ℚ) (-219680803551339:ℤ) (.node (513009/640000:ℚ) (-221174787477205:ℤ) .empty .empty) .empty)) (.node (128883/160000:ℚ) (-216268799168630:ℤ) (.node (514691/640000:ℚ) (-217901455762031:ℤ) (.node (201/250:ℚ) (-218156009803187:ℤ) .empty .empty) (.node (32209/40000:ℚ) (-216633537511717:ℤ) .empty .empty)) (.node (516373/640000:ℚ) (-214638803798507:ℤ) (.node (16129/20000:ℚ) (-215113379618961:ℤ) .empty .empty) .empty))) (.node (519737/640000:ℚ) (-208145261953430:ℤ) (.node (6481/8000:ℚ) (-210566722234273:ℤ) (.node (8089/10000:ℚ) (-212079978958247:ℤ) (.node (258607/320000:ℚ) (-213011460990213:ℤ) .empty .empty) (.node (103611/128000:ℚ) (-211386762124517:ℤ) .empty .empty)) (.node (16227/20000:ℚ) (-209055751996607:ℤ) (.node (32431/40000:ℚ) (-209764698624128:ℤ) .empty .empty) .empty)) (.node (521419/640000:ℚ) (-204914235165371:ℤ) (.node (260289/320000:ℚ) (-206528443618204:ℤ) (.node (32503/40000:ℚ) (-207547061346045:ℤ) .empty .empty) (.node (4069/5000:ℚ) (-206040643414564:ℤ) .empty .empty)) (.node (26113/32000:ℚ) (-203302628182715:ℤ) (.node (32601/40000:ℚ) (-204536491365128:ℤ) .empty .empty) .empty)))))) (.node (34071/40000:ℚ) (-160432871536334:ℤ) (.node (267017/320000:ℚ) (-181008669008428:ℤ) (.node (528147/640000:ℚ) (-192093522305182:ℤ) (.node (16423/20000:ℚ) (-197049482198584:ℤ) (.node (8187/10000:ℚ) (-200037562599752:ℤ) (.node (32699/40000:ℚ) (-201534957718110:ℤ) (.node (523101/640000:ℚ) (-201693614298630:ℤ) .empty .empty) (.node (261971/320000:ℚ) (-200087185181853:ℤ) .empty .empty)) (.node (524783/640000:ℚ) (-198483332541212:ℤ) (.node (32797/40000:ℚ) (-198542406321522:ℤ) .empty .empty) .empty)) (.node (2059/2500:ℚ) (-194070303828518:ℤ) (.node (6579/8000:ℚ) (-195558783575993:ℤ) (.node (65703/80000:ℚ) (-196882048125360:ℤ) .empty .empty) (.node (105293/128000:ℚ) (-195283323722522:ℤ) .empty .empty)) (.node (32993/40000:ℚ) (-192584036360480:ℤ) (.node (263653/320000:ℚ) (-193687151160257:ℤ) .empty .empty) .empty))) (.node (33189/40000:ℚ) (-186660958393071:ℤ) (.node (529829/640000:ℚ) (-188913863376971:ℤ) (.node (132247/160000:ℚ) (-190502429062747:ℤ) (.node (16521/20000:ℚ) (-191099974605554:ℤ) .empty .empty) (.node (33091/40000:ℚ) (-189618112026610:ℤ) .empty .empty)) (.node (53067/64000:ℚ) (-187327817230208:ℤ) (.node (1657/2000:ℚ) (-188138442115536:ℤ) .empty .empty) .empty)) (.node (33287/40000:ℚ) (-183712523740112:ℤ) (.node (16619/20000:ℚ) (-185185654408621:ℤ) (.node (531511/640000:ℚ) (-185744282642902:ℤ) .empty .empty) (.node (4159/5000:ℚ) (-184163251673344:ℤ) .empty .empty)) (.node (4167/5000:ℚ) (-182241559993801:ℤ) (.node (533193/640000:ℚ) (-182584716417428:ℤ) .empty .empty) .empty)))) (.node (527/625:ℚ) (-170551101195056:ℤ) (.node (536557/640000:ℚ) (-176295375751282:ℤ) (.node (133929/160000:ℚ) (-177864006449712:ℤ) (.node (4279/5120:ℚ) (-179435101616754:ℤ) (.node (6677/8000:ℚ) (-180772756804120:ℤ) .empty .empty) (.node (16717/20000:ℚ) (-179306107833514:ℤ) .empty .empty)) (.node (8383/10000:ℚ) (-176379247338343:ℤ) (.node (33483/40000:ℚ) (-177841606772265:ℤ) .empty .empty) .empty)) (.node (538239/640000:ℚ) (-173165476918184:ℤ) (.node (268699/320000:ℚ) (-174729201801897:ℤ) (.node (33581/40000:ℚ) (-174919023277228:ℤ) .empty .empty) (.node (3363/4000:ℚ) (-173460928361774:ℤ) .empty .empty)) (.node (13477/16000:ℚ) (-171604193452777:ℤ) (.node (33679/40000:ℚ) (-172004956392022:ℤ) .empty .empty) .empty))) (.node (135611/160000:ℚ) (-165383322073721:ℤ) (.node (16913/20000:ℚ) (-167649716562103:ℤ) (.node (33777/40000:ℚ) (-169099356624849:ℤ) (.node (539921/640000:ℚ) (-170045343794056:ℤ) .empty .empty) (.node (270381/320000:ℚ) (-168488920365959:ℤ) .empty .empty)) (.node (271/320:ℚ) (-166202174914088:ℤ) (.node (541603/640000:ℚ) (-166934915627729:ℤ) .empty .empty) .empty)) (.node (272063/320000:ℚ) (-162287338669959:ℤ) (.node (108657/128000:ℚ) (-163834132233164:ℤ) (.node (8481/10000:ℚ) (-164756725614499:ℤ) .empty .empty) (.node (33973/40000:ℚ) (-163313362623298:ℤ) .empty .empty)) (.node (544967/640000:ℚ) (-160742933982458:ℤ) (.node (17011/20000:ℚ) (-161872079926564:ℤ) .empty .empty) .empty))))) (.node (556741/640000:ℚ) (-139368035591640:ℤ) (.node (275427/320000:ℚ) (-149998375089079:ℤ) (.node (34267/40000:ℚ) (-154696662181852:ℤ) (.node (34169/40000:ℚ) (-157560653852511:ℤ) (.node (853/1000:ℚ) (-158995731490475:ℤ) (.node (34113/40000:ℚ) (-159200910803257:ℤ) .empty .empty) (.node (546649/640000:ℚ) (-157661261798978:ℤ) .empty .empty)) (.node (54749/64000:ℚ) (-156123979670065:ℤ) (.node (17109/20000:ℚ) (-156127632711496:ℤ) .empty .empty) .empty)) (.node (6873/8000:ℚ) (-151840849540382:ℤ) (.node (8579/10000:ℚ) (-153267736403233:ℤ) (.node (548331/640000:ℚ) (-154589057150572:ℤ) .empty .empty) (.node (137293/160000:ℚ) (-153056487007968:ℤ) .empty .empty)) (.node (17207/20000:ℚ) (-150415995782986:ℤ) (.node (550013/640000:ℚ) (-151526262042915:ℤ) .empty .empty) .empty))) (.node (3461/4000:ℚ) (-144736796466701:ℤ) (.node (69067/80000:ℚ) (-146949586713501:ℤ) (.node (110339/128000:ℚ) (-148472819012920:ℤ) (.node (34463/40000:ℚ) (-148993169345527:ℤ) .empty .empty) (.node (2157/2500:ℚ) (-147572364467151:ℤ) .empty .empty)) (.node (553377/640000:ℚ) (-145428671122281:ℤ) (.node (34561/40000:ℚ) (-146153575411528:ℤ) .empty .empty) .empty)) (.node (8677/10000:ℚ) (-141909246182710:ℤ) (.node (34659/40000:ℚ) (-143322021944961:ℤ) (.node (277109/320000:ℚ) (-143910065202927:ℤ) .empty .empty) (.node (555059/640000:ℚ) (-142393761951108:ℤ) .empty .empty)) (.node (34757/40000:ℚ) (-140498463540311:ℤ) (.node (5559/6400:ℚ) (-140879754394309:ℤ) .empty .empty) .empty)))) (.node (35149/40000:ℚ) (-129283285764108:ℤ) (.node (17477/20000:ℚ) (-134846542769785:ℤ) (.node (558423/640000:ℚ) (-136351436642071:ℤ) (.node (278791/320000:ℚ) (-137858598633633:ℤ) (.node (17403/20000:ℚ) (-139089668401971:ℤ) .empty .empty) (.node (6971/8000:ℚ) (-137682855175590:ℤ) .empty .empty)) (.node (34953/40000:ℚ) (-134875152208040:ℤ) (.node (4363/5000:ℚ) (-136278018292644:ℤ) .empty .empty) .empty)) (.node (280473/320000:ℚ) (-131843532148502:ℤ) (.node (112021/128000:ℚ) (-133343910200468:ℤ) (.node (17501/20000:ℚ) (-133474251399989:ℤ) .empty .empty) (.node (35051/40000:ℚ) (-132075310369874:ℤ) .empty .empty)) (.node (561787/640000:ℚ) (-130345401858764:ℤ) (.node (351/400:ℚ) (-130678323642134:ℤ) .empty .empty) .empty))) (.node (7069/8000:ℚ) (-123722514491036:ℤ) (.node (35247/40000:ℚ) (-126499034860409:ℤ) (.node (17599/20000:ℚ) (-127890191305935:ℤ) (.node (140657/160000:ℚ) (-128849512606442:ℤ) .empty .empty) (.node (563469/640000:ℚ) (-127355857696862:ℤ) .empty .empty)) (.node (1103/1250:ℚ) (-125109811042861:ℤ) (.node (56431/64000:ℚ) (-125864430465304:ℤ) .empty .empty) .empty)) (.node (8873/10000:ℚ) (-119572135140862:ℤ) (.node (35443/40000:ℚ) (-120953681846824:ℤ) (.node (17697/20000:ℚ) (-122337139864960:ℤ) .empty .empty) .empty) (.node (3559/4000:ℚ) (-116814754591851:ℤ) (.node (35541/40000:ℚ) (-118192494473223:ℤ) .empty .empty) .empty)))))))
+private theorem endpointRowLogCache_valid : endpointRowLogCache.valid false = true := by
+  decide +kernel
+
+private noncomputable def endpointRowPrefactor (k a q : ℚ) : ℚ :=
+  integerExpUpper (roundUpQ (q / 2) + roundUpQ
+    (a * (-endpointRowLogCache.get false (1 - q * k ^ 2) - roundDownQ (q * k ^ 2)) /
+      (2 * k ^ 3)))
+
+private theorem endpointJointPrefactorQ_eq_rowCache (k a q : ℚ) :
+    endpointJointPrefactorQ k a q = endpointRowPrefactor k a q := by
+  rw [endpointJointPrefactorQ_eq_integer]
+  simp only [integerEndpointJointPrefactor, endpointRowPrefactor,
+    integerLog_lower_eq_cache endpointRowLogCache endpointRowLogCache_valid]
+end SingularValueBounds.KL.Certificates
+
 namespace SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01
 open SingularValueBounds.KL.Certificates
 set_option maxHeartbeats 0
@@ -34,25 +56,25 @@ private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 1 r := by decide 
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 1 (0 : Fin 4)) (endpointMeanCornerA 8 1 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 1 (1 : Fin 4)) (endpointMeanCornerA 8 1 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 1 (2 : Fin 4)) (endpointMeanCornerA 8 1 (2 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 1 (3 : Fin 4)) (endpointMeanCornerA 8 1 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -98,25 +120,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 2) 8000 runs := 
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 2 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 2 (0 : Fin 4)) (endpointMeanCornerA 8 2 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 2 (0 : Fin 4) = endpointMeanCornerK 8 1 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 2 (0 : Fin 4) = endpointMeanCornerA 8 1 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 2 (1 : Fin 4)) (endpointMeanCornerA 8 2 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -124,20 +143,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 2 (2 : Fin 4) = endpointMeanCornerK 8 1 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 2 (2 : Fin 4) = endpointMeanCornerA 8 1 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_01.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 2 (3 : Fin 4)) (endpointMeanCornerA 8 2 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -183,25 +196,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 3) 8000 runs := 
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 3 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 3 (0 : Fin 4)) (endpointMeanCornerA 8 3 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 3 (0 : Fin 4) = endpointMeanCornerK 8 2 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 3 (0 : Fin 4) = endpointMeanCornerA 8 2 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 3 (1 : Fin 4)) (endpointMeanCornerA 8 3 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -209,20 +219,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 3 (2 : Fin 4) = endpointMeanCornerK 8 2 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 3 (2 : Fin 4) = endpointMeanCornerA 8 2 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_02.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 3 (3 : Fin 4)) (endpointMeanCornerA 8 3 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -268,25 +272,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 4) 8000 runs := 
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 4 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 4 (0 : Fin 4)) (endpointMeanCornerA 8 4 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 4 (0 : Fin 4) = endpointMeanCornerK 8 3 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 4 (0 : Fin 4) = endpointMeanCornerA 8 3 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 4 (1 : Fin 4)) (endpointMeanCornerA 8 4 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -294,20 +295,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 4 (2 : Fin 4) = endpointMeanCornerK 8 3 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 4 (2 : Fin 4) = endpointMeanCornerA 8 3 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_03.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 4 (3 : Fin 4)) (endpointMeanCornerA 8 4 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -353,25 +348,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 5) 8000 runs := 
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 5 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 5 (0 : Fin 4)) (endpointMeanCornerA 8 5 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 5 (0 : Fin 4) = endpointMeanCornerK 8 4 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 5 (0 : Fin 4) = endpointMeanCornerA 8 4 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 5 (1 : Fin 4)) (endpointMeanCornerA 8 5 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -379,20 +371,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 5 (2 : Fin 4) = endpointMeanCornerK 8 4 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 5 (2 : Fin 4) = endpointMeanCornerA 8 4 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_04.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 5 (3 : Fin 4)) (endpointMeanCornerA 8 5 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -438,25 +424,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 6) 8000 runs := 
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 6 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 6 (0 : Fin 4)) (endpointMeanCornerA 8 6 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 6 (0 : Fin 4) = endpointMeanCornerK 8 5 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 6 (0 : Fin 4) = endpointMeanCornerA 8 5 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 6 (1 : Fin 4)) (endpointMeanCornerA 8 6 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -464,20 +447,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 6 (2 : Fin 4) = endpointMeanCornerK 8 5 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 6 (2 : Fin 4) = endpointMeanCornerA 8 5 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_05.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 6 (3 : Fin 4)) (endpointMeanCornerA 8 6 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -523,25 +500,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 7) 8000 runs := 
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 7 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 7 (0 : Fin 4)) (endpointMeanCornerA 8 7 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 7 (0 : Fin 4) = endpointMeanCornerK 8 6 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 7 (0 : Fin 4) = endpointMeanCornerA 8 6 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 7 (1 : Fin 4)) (endpointMeanCornerA 8 7 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -549,20 +523,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 7 (2 : Fin 4) = endpointMeanCornerK 8 6 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 7 (2 : Fin 4) = endpointMeanCornerA 8 6 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_06.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 7 (3 : Fin 4)) (endpointMeanCornerA 8 7 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -608,25 +576,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 8) 8000 runs := 
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 8 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 8 (0 : Fin 4)) (endpointMeanCornerA 8 8 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 8 (0 : Fin 4) = endpointMeanCornerK 8 7 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 8 (0 : Fin 4) = endpointMeanCornerA 8 7 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 8 (1 : Fin 4)) (endpointMeanCornerA 8 8 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -634,20 +599,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 8 (2 : Fin 4) = endpointMeanCornerK 8 7 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 8 (2 : Fin 4) = endpointMeanCornerA 8 7 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_07.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 8 (3 : Fin 4)) (endpointMeanCornerA 8 8 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -693,25 +652,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 9) 8000 runs := 
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 9 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 9 (0 : Fin 4)) (endpointMeanCornerA 8 9 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 9 (0 : Fin 4) = endpointMeanCornerK 8 8 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 9 (0 : Fin 4) = endpointMeanCornerA 8 8 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 9 (1 : Fin 4)) (endpointMeanCornerA 8 9 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -719,20 +675,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 9 (2 : Fin 4) = endpointMeanCornerK 8 8 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 9 (2 : Fin 4) = endpointMeanCornerA 8 8 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_08.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 9 (3 : Fin 4)) (endpointMeanCornerA 8 9 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -778,25 +728,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 10) 8000 runs :=
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 10 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 10 (0 : Fin 4)) (endpointMeanCornerA 8 10 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 10 (0 : Fin 4) = endpointMeanCornerK 8 9 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 10 (0 : Fin 4) = endpointMeanCornerA 8 9 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 10 (1 : Fin 4)) (endpointMeanCornerA 8 10 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -804,20 +751,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 10 (2 : Fin 4) = endpointMeanCornerK 8 9 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 10 (2 : Fin 4) = endpointMeanCornerA 8 9 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_09.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 10 (3 : Fin 4)) (endpointMeanCornerA 8 10 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -863,25 +804,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 11) 8000 runs :=
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 11 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 11 (0 : Fin 4)) (endpointMeanCornerA 8 11 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 11 (0 : Fin 4) = endpointMeanCornerK 8 10 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 11 (0 : Fin 4) = endpointMeanCornerA 8 10 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 11 (1 : Fin 4)) (endpointMeanCornerA 8 11 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -889,20 +827,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 11 (2 : Fin 4) = endpointMeanCornerK 8 10 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 11 (2 : Fin 4) = endpointMeanCornerA 8 10 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_10.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 11 (3 : Fin 4)) (endpointMeanCornerA 8 11 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -948,25 +880,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 12) 8000 runs :=
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 12 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 12 (0 : Fin 4)) (endpointMeanCornerA 8 12 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 12 (0 : Fin 4) = endpointMeanCornerK 8 11 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 12 (0 : Fin 4) = endpointMeanCornerA 8 11 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 12 (1 : Fin 4)) (endpointMeanCornerA 8 12 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -974,20 +903,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 12 (2 : Fin 4) = endpointMeanCornerK 8 11 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 12 (2 : Fin 4) = endpointMeanCornerA 8 11 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_11.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 12 (3 : Fin 4)) (endpointMeanCornerA 8 12 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -1033,25 +956,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 13) 8000 runs :=
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 13 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 13 (0 : Fin 4)) (endpointMeanCornerA 8 13 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 13 (0 : Fin 4) = endpointMeanCornerK 8 12 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 13 (0 : Fin 4) = endpointMeanCornerA 8 12 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 13 (1 : Fin 4)) (endpointMeanCornerA 8 13 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -1059,20 +979,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 13 (2 : Fin 4) = endpointMeanCornerK 8 12 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 13 (2 : Fin 4) = endpointMeanCornerA 8 12 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_12.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 13 (3 : Fin 4)) (endpointMeanCornerA 8 13 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -1118,25 +1032,22 @@ private theorem cover : EndpointRunsCover (endpointMeanCutoff 8 14) 8000 runs :=
 private theorem domains : ∀ r ∈ runs,
     90 ≤ r.rate ∧ r.rate ≤ 200 ∧ r.start ≤ r.stop ∧ r.stop ≤ 8000 := by decide +kernel
 private theorem rates : ∀ r ∈ runs, EndpointRateRunValid 8 14 r := by decide +kernel
+private theorem sharedPrefactorBridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.runs,
+      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
+
 private theorem prefactorValues0 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 14 (0 : Fin 4)) (endpointMeanCornerA 8 14 (0 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (0 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 14 (0 : Fin 4) = endpointMeanCornerK 8 13 (1 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 14 (0 : Fin 4) = endpointMeanCornerA 8 13 (1 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactors (1 : Fin 4) s.rate = prefactors (0 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactorValues1 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactors (1 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_left sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactorValues1 bridge
 
 private theorem prefactorValues1 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 14 (1 : Fin 4)) (endpointMeanCornerA 8 14 (1 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (1 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues2 : ∀ r ∈ runs,
@@ -1144,20 +1055,14 @@ private theorem prefactorValues2 : ∀ r ∈ runs,
       ((r.rate:ℚ)/100) = fixedQ (prefactors (2 : Fin 4) r.rate) := by
   have hk : endpointMeanCornerK 8 14 (2 : Fin 4) = endpointMeanCornerK 8 13 (3 : Fin 4) := by decide +kernel
   have ha : endpointMeanCornerA 8 14 (2 : Fin 4) = endpointMeanCornerA 8 13 (3 : Fin 4) := by decide +kernel
-  have bridge : ∀ r ∈ runs, ∃ s ∈ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.runs,
-      s.rate = r.rate ∧ SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactors (3 : Fin 4) s.rate = prefactors (2 : Fin 4) r.rate := by decide +kernel
-  intro r hr
-  obtain ⟨s, hs, hrate, hvalue⟩ := bridge r hr
-  have hp := SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactorValues3 s hs
-  rw [hk, ha]
-  calc
-    _ = fixedQ (SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactors (3 : Fin 4) s.rate) := by simpa only [hrate] using hp
-    _ = _ := congrArg fixedQ hvalue
+  have bridge := endpointPrefactorBridge_right sharedPrefactorBridge
+  exact endpointPrefactorValues_of_sharedCorner hk ha
+    SingularValueBounds.KL.Certificates.EndpointEntropyBox08_13.prefactorValues3 bridge
 
 private theorem prefactorValues3 : ∀ r ∈ runs,
     endpointJointPrefactorQ (endpointMeanCornerK 8 14 (3 : Fin 4)) (endpointMeanCornerA 8 14 (3 : Fin 4))
       ((r.rate:ℚ)/100) = fixedQ (prefactors (3 : Fin 4) r.rate) := by
-  simp only [endpointJointPrefactorQ_eq_integer]
+  simp only [endpointJointPrefactorQ_eq_rowCache]
   decide +kernel
 
 private theorem prefactorValues : ∀ h : Fin 4, ∀ r ∈ runs,
@@ -1180,11 +1085,16 @@ theorem numerical : ∀ h : Fin 4,
 end SingularValueBounds.KL.Certificates.EndpointEntropyBox08_14
 
 namespace SingularValueBounds.KL.Certificates
+private theorem activeIndices08 : ∀ ai : Fin 42, endpointMeanActive 8 ai → ai ∈
+    ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] : List (Fin 42)) := by
+  unfold endpointMeanActive
+  decide +kernel
+
 theorem endpointMeanEntropyRow08 (ai : Fin 42)
     (hactive : endpointMeanActive 8 ai) (h : Fin 4) :
     endpointMeanNumericCorner 8 ai h ≤ endpointMeanCorner 8 ai h := by
-  fin_cases ai
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 0) hactive)
+  have hi := activeIndices08 ai hactive
+  fin_cases hi
   · exact EndpointEntropyBox08_01.numerical h
   · exact EndpointEntropyBox08_02.numerical h
   · exact EndpointEntropyBox08_03.numerical h
@@ -1199,31 +1109,5 @@ theorem endpointMeanEntropyRow08 (ai : Fin 42)
   · exact EndpointEntropyBox08_12.numerical h
   · exact EndpointEntropyBox08_13.numerical h
   · exact EndpointEntropyBox08_14.numerical h
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 15) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 16) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 17) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 18) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 19) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 20) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 21) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 22) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 23) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 24) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 25) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 26) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 27) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 28) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 29) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 30) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 31) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 32) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 33) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 34) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 35) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 36) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 37) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 38) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 39) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 40) hactive)
-  · exact False.elim ((by unfold endpointMeanActive; decide +kernel : ¬ endpointMeanActive 8 41) hactive)
+
 end SingularValueBounds.KL.Certificates

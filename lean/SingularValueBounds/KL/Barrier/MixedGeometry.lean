@@ -28,10 +28,10 @@ theorem continuous_spectralMaximum :
     obtain ⟨x,hx,hq⟩ := spectralMaximum_attained R.2
     have hc : Continuous (fun H : SymmetricMatrix ι => (x : ι → ℝ) ⬝ᵥ (H.1 *ᵥ (x : ι → ℝ))) := by
       dsimp [dotProduct, Matrix.mulVec]
-      apply continuous_finset_sum
+      apply continuous_finsetSum
       intro i _
       apply continuous_const.mul
-      apply continuous_finset_sum
+      apply continuous_finsetSum
       intro j _
       have hm : Continuous (fun H : SymmetricMatrix ι => H.1) := continuous_subtype_val
       have hij : Continuous (fun H : SymmetricMatrix ι => H.1 i j) :=
@@ -109,6 +109,7 @@ theorem outward_spectralMaximum {R : Matrix ι ι ℝ} (hR : R.PosDef) {ω : ℝ
     (outwardBase R hR).resolvent_spectral
       (((outwardBase R hR).gap_posDef_iff ω).mpr (outwardBase_above hR hω))
 
+omit [DecidableEq ι] in
 lemma reciprocal_shape_antitone (e : ι → ℝ) (top : ι)
     (htop : ∀ i, e i ≤ e top) {x y : ℝ} (hx : ∀ i, e i < x) (hxy : x ≤ y) :
     (y-e top)⁻¹ / Real.sqrt (∑ i, ((y-e i)⁻¹)^2) ≤
@@ -144,6 +145,7 @@ lemma reciprocal_shape_antitone (e : ι → ℝ) (top : ι)
 def outwardState (R : PositiveResolvent ι) (ω : ℝ) : PositiveResolvent ι :=
   ⟨outwardResolvent R.1 (max ω 0), outwardResolvent_posDef R.2 (le_max_right _ _)⟩
 
+omit [Nonempty ι] in
 lemma outwardState_of_nonneg (R : PositiveResolvent ι) {ω : ℝ} (hω : 0 ≤ ω) :
     (outwardState R ω).1 = outwardResolvent R.1 ω := by simp [outwardState,max_eq_left hω]
 
@@ -175,6 +177,7 @@ theorem outward_spectralRatio_antitone (R : PositiveResolvent ι) :
   exact reciprocal_shape_antitone (outwardBase R.1 hR).2.eigenvalues top ht
     (outwardBase_above hR hx) hxy
 
+omit [Nonempty ι] in
 /-- The precise Cauchy--Schwarz remainder after removing a largest coordinate. -/
 theorem spectral_remainder_cauchy (r : ι → ℝ) (top : ι) :
     ((∑ i, r i) - r top)^2 ≤ ((Fintype.card ι : ℝ)-1) * ((∑ i, r i^2)-r top^2) := by

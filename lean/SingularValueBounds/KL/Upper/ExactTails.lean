@@ -23,6 +23,7 @@ def upperTailMatrix (R : Matrix ι ι ℝ) (h : ℝ) : Matrix ι ι ℝ :=
 def upperTailWeight (r : ι → ℝ) (h : ℝ) (i : ι) : ℝ :=
   (r i ^ 2 / (1 + h * r i)) / (∑ j, r j ^ 2 / (1 + h * r j))
 
+omit [Nonempty ι] in
 theorem upperTailDenominator_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {h : ℝ} (hh : 0 ≤ h) :
     upperTailDenominator R h =
@@ -58,7 +59,7 @@ theorem upperTailMatrix_eq_smul_criterion {R : Matrix ι ι ℝ} (hR : R.PosDef)
 theorem upperShift_tail_event {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (x : ι → ℝ) {h : ℝ} (hh : 0 < h) :
     h < upperShift R hR x ↔ h < x ⬝ᵥ (upperTailMatrix R h *ᵥ x) := by
-  rw [upperTailMatrix_eq_smul_criterion hR hh, Matrix.smul_mulVec_assoc, dotProduct_smul]
+  rw [upperTailMatrix_eq_smul_criterion hR hh, Matrix.smul_mulVec, dotProduct_smul]
   simp only [smul_eq_mul]
   rw [upperShift_lt_iff hR x hh]
   constructor <;> intro hq <;> nlinarith
@@ -70,8 +71,9 @@ theorem upperShift_tail_equation {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι 
   · subst x
     simp [upperShift_zero]
   · rw [upperTailMatrix_eq_smul_criterion hR (upperShift_pos hR hx),
-      Matrix.smul_mulVec_assoc, dotProduct_smul, upperShift_equation hR hx, smul_eq_mul, mul_one]
+      Matrix.smul_mulVec, dotProduct_smul, upperShift_equation hR hx, smul_eq_mul, mul_one]
 
+omit [DecidableEq ι] in
 /-- Every tail weight is positive, their sum is one, and each is at most one. -/
 theorem upperTailWeight_properties {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     {h : ℝ} (hh : 0 ≤ h) :
@@ -87,6 +89,7 @@ theorem upperTailWeight_properties {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     exact Finset.single_le_sum (fun j _ => div_nonneg (sq_nonneg _) (hd j).le)
       (Finset.mem_univ i)
 
+omit [DecidableEq ι] in
 /-- Spectral-shape bound for the time-dependent weights. -/
 theorem upperTailWeight_le_shape {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     {h M : ℝ} (hh : 0 ≤ h) (hM : ∀ i, r i ≤ M) (i : ι) :
@@ -133,18 +136,18 @@ def upperTailEigenvalue (r : ι → ℝ) (h : ℝ) (i : ι) : ℝ :=
 
 /-- The logarithmic chord estimate used for the spectral-shape refinement. -/
 theorem upper_log_chord {p q s : ℝ} (hp : 0 ≤ p) (hps : p ≤ s)
-    (hs : 0 < s) (hq : 0 ≤ q) (hqs : q*s < 1) :
+    (hs : 0 < s) (hqs : q*s < 1) :
     (p/s)*Real.log (1-q*s) ≤ Real.log (1-q*p) := by
   have hw : p/s ≤ 1 := (div_le_one hs).2 hps
   have hc := strictConcaveOn_log_Ioi.concaveOn.2 (show (1:ℝ) ∈ Set.Ioi 0 by norm_num)
     (show 1-q*s ∈ Set.Ioi 0 by change 0 < 1-q*s; linarith)
     (show 0 ≤ 1-p/s by linarith) (div_nonneg hp hs.le) (by ring : (1-p/s)+p/s = 1)
   simp only [smul_eq_mul,Real.log_one,mul_zero,zero_add] at hc
-  convert hc using 1
+  convert! hc using 1
   congr 1
-  field_simp
-  ring
+  field_simp [hs.ne'] <;> ring
 
+omit [DecidableEq ι] [Nonempty ι] in
 /-- A bound on the sum and maximum of positive weights gives a determinant
 bound. This includes the endpoint `q=1` whenever the shape is strictly below one. -/
 theorem upper_weight_product_shape {p : ι → ℝ} {q s : ℝ}
@@ -154,7 +157,7 @@ theorem upper_weight_product_shape {p : ι → ℝ} {q s : ℝ}
   have hpos : ∀ i,0 < 1-q*p i := fun i => by
     have hm := mul_le_mul_of_nonneg_left (hps i) hq
     linarith
-  have hl := Finset.sum_le_sum (s := Finset.univ) (fun i _ => upper_log_chord (hp i) (hps i) hs hq hqs)
+  have hl := Finset.sum_le_sum (s := Finset.univ) (fun i _ => upper_log_chord (hp i) (hps i) hs hqs)
   have he : (∑ i,(p i/s)*Real.log (1-q*s)) = (∑ i,p i)/s*Real.log (1-q*s) := by
     rw [← Finset.sum_mul, ← Finset.sum_div]
   rw [he] at hl
@@ -182,6 +185,7 @@ theorem upper_first_factor_exp_rate {r h q : ℝ} (hr : 0 < r)
   nlinarith
 
 
+omit [DecidableEq ι] in
 /-- Spectral determinant estimate with the full shape parameter. -/
 theorem upper_tail_spectral_shape {r : ι → ℝ} (hr : ∀ i,0 < r i)
     {h q s : ℝ} (hh : 0 ≤ h) (hq : 0 < q) (hq1 : q ≤ 1)
@@ -212,8 +216,7 @@ theorem upper_tail_spectral_shape {r : ι → ℝ} (hr : ∀ i,0 < r i)
     dsimp [upperTailEigenvalue,f,v]
     have hd : 1+(1-q)*h*r i ≠ 0 := by linarith [hden i]
     have hdr : 1+h*r i ≠ 0 := (add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh (hr i).le)).ne'
-    field_simp only [hd,hdr]
-    ring
+    field_simp (disch := nlinarith [hden i, mul_nonneg hh (hr i).le]) <;> ring
   constructor
   · intro i
     rw [hfac]
@@ -225,7 +228,7 @@ theorem upper_tail_spectral_shape {r : ι → ℝ} (hr : ∀ i,0 < r i)
     have hp := Finset.prod_le_prod (s := Finset.univ)
       (fun i _ => (Real.exp_pos (-(q*h*r i))).le) (fun i _ => hf i)
     rw [← Real.exp_sum] at hp
-    convert hp using 1
+    convert! hp using 1
     congr 1
     rw [Finset.sum_neg_distrib, ← Finset.mul_sum]
 
@@ -251,9 +254,9 @@ theorem upperTailMatrix_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
   have hi : 1+h*hR.isHermitian.eigenvalues i ≠ 0 :=
     (add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh.le (hR.eigenvalues_pos i).le)).ne'
   unfold upperTailEigenvalue upperTailWeight
-  field_simp only [hh.ne',hd.ne',hi]
-  ring
+  field_simp [hh.ne',hd.ne',hi]
 
+omit [DecidableEq ι] [Nonempty ι] in
 private theorem upper_prod_inv_sqrt_log {a : ι → ℝ} (ha : ∀ i,0 < a i) :
     (∏ i,(Real.sqrt (a i))⁻¹) = Real.exp (-(∑ i,Real.log (a i))/2) := by
   have he (i : ι) : (Real.sqrt (a i))⁻¹ = Real.exp (-Real.log (a i)/2) := by
@@ -281,7 +284,7 @@ theorem upperShift_tail_family {X : Ω → ι → ℝ} {K b q u : ℝ}
   have hh := upperShift_tail hsg hm hK hR ht (by rw [hid]; linarith)
     (by positivity : 0 < q / 2) (by linarith : q / 2 < 1 / 2) u hu
   rw [hid] at hh
-  convert hh using 1 <;> congr 2 <;> ring
+  convert! hh using 1 <;> congr 2 <;> ring
 /-- Chernoff interpretation of a proved scalar spectral log-determinant bound.
 This is an analytic helper; numerical certificates contain no such premise. -/
 theorem upperShift_tail_of_spectral_logdet {X : Ω → ι → ℝ} {K h q A : ℝ}
@@ -356,7 +359,7 @@ theorem upperShift_tail_shape {X : Ω → ι → ℝ} {K b q s u : ℝ}
     Finset.prod_pos (fun i _ => hgap i)
   have hl := Real.log_le_log (mul_pos (Real.exp_pos _) (Real.exp_pos _)) hdet
   rw [Real.log_mul (Real.exp_pos _).ne' (Real.exp_pos _).ne',Real.log_exp,Real.log_exp,
-    Real.log_prod _ _ (fun i _ => (hgap i).ne')] at hl
+    Real.log_prod (fun i _ => (hgap i).ne')] at hl
   have htr := real_spectral_trace hR.isHermitian
   have hlog : -(∑ i,Real.log (1-q*upperTailEigenvalue hR.isHermitian.eigenvalues h i)) ≤
       q*h*Matrix.trace R-Real.log (1-q*s)/s := by rw [htr];linarith
@@ -375,7 +378,7 @@ theorem upperShift_tail_shape {X : Ω → ι → ℝ} {K b q s u : ℝ}
   have hdiv := div_le_div_of_nonneg_right hmul (show 0 ≤ 2*K^2 by positivity)
   rw [he] at hdiv
   have hdiv' : q*u/(2*K^2) ≤ q*h*(1-K^2*Matrix.trace R)/(2*K^2) := by
-    convert hdiv using 1 <;> ring
+    convert! hdiv using 1 <;> ring
   have heq : -(Real.log (1-q*s)/s)/2 = -Real.log (1-q*s)/(2*s) := by ring
   rw [heq]
   linarith

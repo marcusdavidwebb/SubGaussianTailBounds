@@ -10,20 +10,22 @@ one-dimensional zero case.
 open scoped Matrix BigOperators
 namespace SingularValueBounds.KL
 noncomputable section
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 def normalizedUpperMean (x : ι → ℝ) : ℝ := ∑ i, x i ^ 3
 
 def normalizedUpperEigenvalue (x : ι → ℝ) (i : ι) : ℝ :=
   x i + normalizedUpperMean x * x i ^ 2 - 2 * x i ^ 3
 
+omit [DecidableEq ι] in
 lemma normalized_upper_coordinate_le_one {x : ι → ℝ}
     (hx : ∀ i, 0 ≤ x i) (h2 : ∑ i, x i ^ 2 = 1) (i : ι) : x i ≤ 1 := by
   have hs := Finset.single_le_sum (s := Finset.univ) (fun j _ => sq_nonneg (x j))
     (Finset.mem_univ i)
   rw [h2] at hs
-  nlinarith [hx i]
+  exact (sq_le_sq₀ (hx i) zero_le_one).mp (by simpa only [one_pow] using hs)
 
+omit [DecidableEq ι] in
 lemma normalized_upper_mean_bounds {x : ι → ℝ} (hx : ∀ i, 0 ≤ x i)
     (h2 : ∑ i, x i ^ 2 = 1) :
     0 ≤ normalizedUpperMean x ∧ normalizedUpperMean x ≤ 1 := by
@@ -32,8 +34,9 @@ lemma normalized_upper_mean_bounds {x : ι → ℝ} (hx : ∀ i, 0 ≤ x i)
     normalizedUpperMean x ≤ ∑ i, x i ^ 2 := by
       apply Finset.sum_le_sum
       intro i _
-      nlinarith [mul_le_mul_of_nonneg_left (normalized_upper_coordinate_le_one hx h2 i)
-        (sq_nonneg (x i))]
+      simpa only [← pow_succ, mul_one] using
+        mul_le_mul_of_nonneg_left (normalized_upper_coordinate_le_one hx h2 i)
+          (sq_nonneg (x i))
     _ = 1 := h2
 
 lemma upper_norm_polynomial_antitone :
@@ -44,7 +47,7 @@ lemma upper_norm_polynomial_antitone :
   · intro u hu
     have hd : HasDerivAt (fun u : ℝ => 1 - 2 * u ^ 2 - u ^ 4 + 2 * u ^ 3)
         (-2 * u * (2 - 3 * u + 2 * u ^ 2)) u := by
-      convert ((hasDerivAt_const u (1 : ℝ)).sub
+      convert! ((hasDerivAt_const u (1 : ℝ)).sub
         ((hasDerivAt_id u).pow 2 |>.const_mul 2)).sub
           ((hasDerivAt_id u).pow 4) |>.add
             ((hasDerivAt_id u).pow 3 |>.const_mul 2) using 1 <;> simp only [id_eq] <;> ring
@@ -145,27 +148,30 @@ theorem normalized_upper_frobenius_bound {x : ι → ℝ} (hx : ∀ i, 0 ≤ x i
       s2 ≤ ∑ i, p i := by
         apply Finset.sum_le_sum
         intro i _
-        nlinarith [hp0 i, hp1 i]
+        simpa only [pow_two, mul_one] using
+          mul_le_mul_of_nonneg_left (hp1 i) (hp0 i)
       _ = 1 := hpSum
   let u := Real.sqrt s2
   have hu0 : 0 ≤ u := Real.sqrt_nonneg _
   have hu2 : u ^ 2 = s2 := Real.sq_sqrt hs20
-  have hu1 : u ≤ 1 := by nlinarith
+  have hu1 : u ≤ 1 :=
+    (sq_le_sq₀ hu0 zero_le_one).mp (by simpa only [hu2, one_pow] using hs21)
   have hpU : ∀ i, p i ≤ u := by
     intro i
     have hi := Finset.single_le_sum (s := Finset.univ) (fun j _ => sq_nonneg (p j))
       (Finset.mem_univ i)
     change p i ^ 2 ≤ s2 at hi
-    nlinarith [hp0 i]
+    exact (sq_le_sq₀ (hp0 i) hu0).mp (hi.trans_eq hu2.symm)
   have hs3 : s3 ≤ u ^ 3 := by
     have hs : s3 ≤ u * s2 := by
       calc
         s3 ≤ ∑ i, u * p i ^ 2 := by
           apply Finset.sum_le_sum
           intro i _
-          nlinarith [mul_le_mul_of_nonneg_right (hpU i) (sq_nonneg (p i))]
+          simpa only [pow_succ'] using
+            mul_le_mul_of_nonneg_right (hpU i) (sq_nonneg (p i))
         _ = u * s2 := by rw [← Finset.mul_sum]
-    nlinarith
+    simpa only [← hu2, ← pow_succ'] using hs
   have ha := normalized_upper_mean_bounds hx h2
   have hac : normalizedUpperMean x ^ 2 ≤ s2 := by
     have hc : (∑ i, x i * p i) ^ 2 ≤ (∑ i, x i ^ 2) * (∑ i, p i ^ 2) :=
@@ -177,11 +183,12 @@ theorem normalized_upper_frobenius_bound {x : ι → ℝ} (hx : ∀ i, 0 ≤ x i
       ring
     rw [he, h2, one_mul] at hc
     exact hc
-  have hau : normalizedUpperMean x ≤ u := by nlinarith
+  have hau : normalizedUpperMean x ≤ u :=
+    (sq_le_sq₀ ha.1 hu0).mp (hac.trans_eq hu2.symm)
   have hmono := upper_norm_polynomial_antitone ⟨ha.1, ha.2⟩ ⟨hu0, hu1⟩ hau
   dsimp only at hmono
   have hu4 : u ^ 4 = s2 ^ 2 := by nlinarith [congrArg (fun a : ℝ => a ^ 2) hu2]
-  nlinarith
+  nlinarith only [hsum, hs3, hmono, hu2, hu4]
 
 private def goldenUpperPolynomial (r u : ℝ) : ℝ :=
   (47 + 29 * r) + (152 + 94 * r) * u + (354 + 248 * r) * u ^ 2 +
@@ -192,13 +199,11 @@ private def goldenUpperPolynomial (r u : ℝ) : ℝ :=
 private lemma golden_upper_factor (u r : ℝ) (hr : r ^ 2 + r = 1) :
     125 * (((18 + 11 * r) / 125) * (1 + u ^ 2) ^ 5 - u ^ 2 * (1 + u) ^ 2) =
       (u - r) ^ 2 * goldenUpperPolynomial r u := by
-  have hr2 : r ^ 2 = 1 - r := by linarith
-  have hr3 : r ^ 3 = 2 * r - 1 := by
-    nlinarith [congrArg (fun a : ℝ => a * r) hr2]
-  unfold goldenUpperPolynomial
-  ring_nf
-  rw [hr3, hr2]
-  ring
+  linear_combination (norm := (simp only [goldenUpperPolynomial]; ring))
+    ((2 * u + 1) *
+      (29 + 94 * u + 248 * u ^ 2 + 212 * u ^ 3 + 175 * u ^ 4 +
+        82 * u ^ 5 + 67 * u ^ 6 + 14 * u ^ 7 + 11 * u ^ 8) -
+      goldenUpperPolynomial r u) * hr
 
 /-- The rational function majorizing a single normalized eigenvalue has the
 stated strict rational bound. The maximum certificate is a polynomial square
@@ -294,7 +299,7 @@ theorem normalized_upper_eigenvalue_lt {x : ι → ℝ} (hx : ∀ i, 0 ≤ x i)
   rw [← hid] at hmax
   have hf0 : 0 ≤ v * y ^ 3 * (v + y) := by positivity
   have hrat : (1241 : ℝ) / 6250 < ((223 : ℝ) / 500) ^ 2 := by norm_num
-  nlinarith
+  exact hb.trans_lt ((sq_lt_sq₀ hf0 (by norm_num)).mp (hmax.trans hrat))
 
 /-- A large coordinate forces all normalized comparison eigenvalues below
 `21/50`; a largest-coordinate hypothesis is unnecessary. -/
@@ -320,16 +325,19 @@ theorem normalized_upper_eigenvalue_le_of_concentrated {x : ι → ℝ}
     have he := Finset.sum_erase_add (Finset.univ : Finset ι) (fun j => x j ^ 2)
       (Finset.mem_univ i)
     rw [h2] at he
-    dsimp only at he
     linarith
-  have hsmall : x i ≤ (381 : ℝ) / 1000 := by nlinarith [hx i, hx k]
-  have hsquare : x i ^ 2 ≤ ((381 : ℝ) / 1000) ^ 2 := by nlinarith [hx i]
-  have hcross : x i * ((381 : ℝ) / 1000) ≤ ((381 : ℝ) / 1000) ^ 2 := by nlinarith
+  have hsmall : x i ≤ (381 : ℝ) / 1000 := by
+    nlinarith only [hpair, hk, hx i, hx k]
+  have hsquare : x i ^ 2 ≤ ((381 : ℝ) / 1000) ^ 2 :=
+    pow_le_pow_left₀ (hx i) hsmall 2
+  have hcross : x i * ((381 : ℝ) / 1000) ≤ ((381 : ℝ) / 1000) ^ 2 := by
+    simpa only [pow_two] using mul_le_mul_of_nonneg_right hsmall
+      (by norm_num : (0 : ℝ) ≤ 381 / 1000)
   have hbracket : 0 ≤ 1 + ((381 : ℝ) / 1000 + x i) -
       2 * (((381 : ℝ) / 1000) ^ 2 + ((381 : ℝ) / 1000) * x i + x i ^ 2) := by
-    nlinarith [hx i]
+    nlinarith only [hsquare, hcross, hx i]
   have hprod := mul_nonneg (sub_nonneg.mpr hsmall) hbracket
-  nlinarith
+  nlinarith only [hb, hprod]
 
 end
 end SingularValueBounds.KL

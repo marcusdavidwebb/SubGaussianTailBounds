@@ -21,6 +21,7 @@ def upperFixedComparison (R : Matrix ι ι ℝ) : Matrix ι ι ℝ :=
 def upperFixedEigenvalue (r : ι → ℝ) (i : ι) : ℝ :=
   r i + upperWeight r i * (upperWeightedMean r - 2 * r i)
 
+omit [Nonempty ι] in
 theorem upperSquareWeight_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     upperSquareWeight R = (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) *
       Matrix.diagonal (upperWeight hR.isHermitian.eigenvalues) *
@@ -32,6 +33,7 @@ theorem upperSquareWeight_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   ext i j
   simp [Matrix.diagonal, upperWeight, div_eq_mul_inv, mul_comm]
 
+omit [Nonempty ι] in
 theorem upperSquareWeight_mean {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     Matrix.trace (R * upperSquareWeight R) = upperWeightedMean hR.isHermitian.eigenvalues := by
   rw [upperSquareWeight_spectral hR]
@@ -43,6 +45,7 @@ theorem upperSquareWeight_mean {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   intro i _
   ring
 
+omit [Nonempty ι] in
 /-- Spectral representation of the actual polynomial matrix, with coefficient two. -/
 theorem upperFixedComparison_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     upperFixedComparison R = (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) *
@@ -60,9 +63,10 @@ theorem upperFixedComparison_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   congr 2
   apply congrArg Matrix.diagonal
   funext i
-  simp only [Pi.sub_apply, upperAveragedEigenvalue, upperFixedEigenvalue]
+  simp only [upperAveragedEigenvalue, upperFixedEigenvalue]
   ring
 
+omit [DecidableEq ι] in
 /-- Positivity allows semidefinite, rather than positive-definite, matrices. -/
 theorem upperFixedEigenvalue_nonneg {r : ι → ℝ} (hr : ∀ i, 0 < r i) (i : ι) :
     0 ≤ upperFixedEigenvalue r i := by
@@ -88,7 +92,7 @@ theorem upperFixedComparison_trace {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     real_spectral_trace hR.isHermitian, upperSquareWeight_mean hR]
   obtain ⟨_, _, hp, _⟩ := upper_weight_properties hR.eigenvalues_pos
   simp only [upperFixedEigenvalue, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib,
-    ← Finset.sum_mul, hp, one_mul, mul_left_comm _ 2]
+    ← Finset.sum_mul, hp, one_mul]
   unfold upperWeightedMean
   have he : (∑ x, upperWeight hR.isHermitian.eigenvalues x * (2 * hR.isHermitian.eigenvalues x)) =
       2 * ∑ x, upperWeight hR.isHermitian.eigenvalues x * hR.isHermitian.eigenvalues x := by
@@ -117,6 +121,7 @@ theorem upperFixedComparison_eq_zero_of_subsingleton [Subsingleton ι]
     simp [Matrix.diagonal]
   rw [hz, hdz, mul_zero, zero_mul]
 
+omit [Fintype ι] [DecidableEq ι] [Nonempty ι] in
 /-- Harmonic-mean supporting inequality on any finite collection. This is
 Cauchy--Schwarz, the concavity calculation for `1/S_j` in the printed proof. -/
 theorem resolvent_harmonic_tangent (s : Finset ι) {r : ι → ℝ}
@@ -135,9 +140,9 @@ theorem resolvent_harmonic_tangent (s : Finset ι) {r : ι → ℝ}
     · intro i hi
       exact mul_nonneg (sq_nonneg _) (hd i hi).le
     · intro i hi
-      field_simp [(hd i hi).ne']
-      ring
-  convert hc using 2
+      have hd' : 1 + r i * h ≠ 0 := by simpa only [mul_comm] using (hd i hi).ne'
+      field_simp [(hd i hi).ne', hd']
+  convert! hc using 2
   rw [Finset.mul_sum, ← Finset.sum_add_distrib]
   apply Finset.sum_congr rfl
   intro i _
@@ -196,6 +201,7 @@ theorem upper_eigenvalue_tangent_of_harmonic {r s t S h : ℝ}
   rw [← htangent]
   linarith
 
+omit [Nonempty ι] in
 /-- The concavity tangent for every individual eigenvalue, including dimension one. -/
 theorem upper_fixed_eigenvalue_bound {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     {h : ℝ} (hh : 0 ≤ h) (i : ι) :
@@ -250,7 +256,7 @@ theorem upper_fixed_quadratic_comparison {R : Matrix ι ι ℝ} (hR : R.PosDef)
   have hr : ∀ i,0 < r i := hR.eigenvalues_pos
   have hd : 0 < ∑ j,r j^2/(1+h*r j) :=
     Finset.sum_pos (fun j _ => div_pos (sq_pos_of_pos (hr j)) (add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh.le (hr j).le))) Finset.univ_nonempty
-  rw [upperTailMatrix_eq_smul_criterion hR hh, Matrix.smul_mulVec_assoc,
+  rw [upperTailMatrix_eq_smul_criterion hR hh, Matrix.smul_mulVec,
     dotProduct_smul, smul_eq_mul, upperCriterion_spectral hR hh.le,
     quadratic_conjugate_diagonal, upperSquareWeight_spectral hR,
     quadratic_conjugate_diagonal, upperFixedComparison_spectral hR,
@@ -261,13 +267,12 @@ theorem upper_fixed_quadratic_comparison {R : Matrix ι ι ℝ} (hR : R.PosDef)
   apply Finset.sum_le_sum
   intro i _
   have hb := mul_le_mul_of_nonneg_left (upper_fixed_eigenvalue_bound hr hh.le i) (sq_nonneg (y i))
-  convert hb using 1
+  convert! hb using 1
   · dsimp [y,r]
     have hdi : 0 < 1+h*hR.isHermitian.eigenvalues i := by
       have hi := hR.eigenvalues_pos i
       positivity
     field_simp [hh.ne',hd.ne',hdi.ne']
-    ring
   · dsimp [y,r]
     ring
 
@@ -289,6 +294,7 @@ theorem upperSquareWeight_posDef {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   exact unitary_conjugate_posDef _ _
     (Matrix.PosDef.diagonal (upper_weight_properties hR.eigenvalues_pos).1)
 
+omit [Nonempty ι] in
 theorem upperTailMatrix_zero {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     upperTailMatrix R 0 = upperSquareWeight R := by
   have hres : upperResolvent R 0 = R := by
@@ -306,7 +312,7 @@ theorem upperShift_tail_event_nonneg {R : Matrix ι ι ℝ} (hR : R.PosDef)
   · rw [upperShift_pos_iff hR x,upperTailMatrix_zero hR]
     constructor
     · intro hx
-      simpa only [star_trivial] using (upperSquareWeight_posDef hR).2 x hx
+      simpa only [star_trivial] using (upperSquareWeight_posDef hR).dotProduct_mulVec_pos hx
     · intro hx hz
       subst x
       simpa using hx
@@ -347,10 +353,11 @@ theorem upper_fixed_matrix_comparison {R : Matrix ι ι ℝ} (hR : R.PosDef)
     change (h • upperFixedComparison R).conjTranspose = h • upperFixedComparison R
     rw [Matrix.conjTranspose_smul,hC]
     rfl
+  apply Matrix.posSemidef_iff_dotProduct_mulVec.mpr
   refine ⟨(hP.add hCs).sub hB,?_⟩
   intro x
   have hq := upper_fixed_quadratic_comparison_nonneg hR x hh
-  simpa only [star_trivial,Matrix.sub_mulVec,Matrix.add_mulVec,Matrix.smul_mulVec_assoc,
+  simpa only [star_trivial,Matrix.sub_mulVec,Matrix.add_mulVec,Matrix.smul_mulVec,
     dotProduct_sub,dotProduct_add,dotProduct_smul,smul_eq_mul,sub_nonneg] using hq
 
 end

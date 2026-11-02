@@ -32,7 +32,7 @@ private theorem prod_inv_sqrt_le {a : ι → ℝ} {c d : ℝ}
   rw [Finset.prod_inv_distrib]
   have hi := inv_le_inv₀ hp0 (mul_pos (Real.exp_pos (-(c / 2))) (Real.sqrt_pos.2 hd))
   have := hi.2 hbase
-  convert this using 1
+  convert! this using 1
   rw [mul_inv, ← Real.exp_neg]
   simp only [neg_neg, div_eq_mul_inv]
 
@@ -117,7 +117,6 @@ theorem upperShift_tail {X : Ω → ι → ℝ} {K φ τ : ℝ}
     have hid : 2 * K ^ 2 * l = 2 * τ * h := by
       dsimp [l]
       field_simp
-      ring
     have hlt : 2 * K ^ 2 * l < h := by
       rw [hid]
       nlinarith only [mul_pos hh hd]
@@ -139,7 +138,6 @@ theorem upperShift_tail {X : Ω → ι → ℝ} {K φ τ : ℝ}
       have heq : l * (1 - K ^ 2 * φ) = τ * y / K ^ 2 := by
         dsimp [l, h]
         field_simp
-        ring
       linarith
     exact ht.trans (by
       simpa only [div_eq_mul_inv, mul_comm] using
@@ -159,7 +157,7 @@ theorem upperShift_tail_third {X : Ω → ι → ℝ} {K φ : ℝ}
     rw [← Real.sqrt_inv]
     norm_num
   rw [hs] at h
-  convert h using 1
+  convert! h using 1
   congr 2
   ring
 

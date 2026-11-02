@@ -9,6 +9,12 @@ if (( $# )); then
   printf 'Usage: %s\n' "$0" >&2
   exit 2
 fi
+# Bind both sets of source and policy inputs before any checking or setup.
+snapshot_dir="$(mktemp -d "${TMPDIR:-/tmp}/svb-verification.XXXXXXXX")"
+trap 'rm -rf -- "$snapshot_dir"' EXIT
+snapshot_file="$snapshot_dir/sources.json"
+python3 "$trusted_root/scripts/configure_lean.py" --snapshot-file "$snapshot_file" \
+  --candidate-root "$source_root" --trusted-root "$trusted_root"
 # 1. Check the statement and build inputs before candidate setup can run.
 python3 "$trusted_root/scripts/check_canonical_statement.py" --root "$source_root"
 if [[ ! -f "$source_dir/SingularValueBounds/Canonical/Results.lean" ]]; then
@@ -85,5 +91,7 @@ if [[ "$(shasum -a 256 "${protected_files[@]}")" != "$policy_before" ]]; then
   printf '%s\n' 'Protected canonical policy artifact changed during verification.' >&2
   exit 1
 fi
+python3 "$trusted_root/scripts/configure_lean.py" --snapshot-file "$snapshot_file" \
+  --snapshot-check --candidate-root "$source_root" --trusted-root "$trusted_root"
 printf '%s\n' "$audit_output"
 printf '%s\n' 'PASS: complete canonical Lean targets, comparisons, and axiom audits.'

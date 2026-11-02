@@ -24,9 +24,9 @@ theorem quartic_bernstein_identity (a b c d e : ℚ) :
   norm_num [← map_mul, ← map_add, ← map_pow]
   ext k
   simp only [Polynomial.coeff_add, Polynomial.coeff_sub, Polynomial.coeff_mul_C,
-    Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_C_mul_X, Polynomial.coeff_C_mul,
+    Polynomial.coeff_C_mul,
     Polynomial.coeff_C, Polynomial.coeff_X_pow, Polynomial.coeff_X,
-    Polynomial.coeff_mul_ofNat, ← map_mul]
+    Polynomial.coeff_mul_ofNat]
   split_ifs <;> ring
 
 private theorem endpoint_far_certificate_0 :
@@ -61,11 +61,11 @@ private theorem endpoint_far_certificate_1 :
     norm_num [← map_mul, ← map_pow]
     all_goals
       ext k
-      simp only [Polynomial.coeff_add, Polynomial.coeff_sub, Polynomial.coeff_neg, Polynomial.coeff_mul_C,
-        Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_C_mul_X, Polynomial.coeff_C_mul,
+      simp only [Polynomial.coeff_add, Polynomial.coeff_sub, Polynomial.coeff_neg,
+        Polynomial.coeff_mul_C, Polynomial.coeff_C_mul,
         Polynomial.coeff_C, Polynomial.coeff_X_pow, Polynomial.coeff_X,
-        Polynomial.coeff_mul_ofNat, ← map_mul]
-      split_ifs <;> simp_all [Polynomial.coeff_X, Polynomial.coeff_C] <;> norm_num
+        Polynomial.coeff_mul_ofNat]
+      split_ifs <;> simp_all <;> norm_num
   rw [hpoly]
   constructor
   · exact quartic_bernstein_identity (27643/1638400) (-4687/163840) (5473/655360) (553/131072) (-245/1048576)
@@ -87,11 +87,11 @@ private theorem endpoint_far_certificate_2 :
     norm_num [← map_mul, ← map_pow]
     all_goals
       ext k
-      simp only [Polynomial.coeff_add, Polynomial.coeff_sub, Polynomial.coeff_neg, Polynomial.coeff_mul_C,
-        Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_C_mul_X, Polynomial.coeff_C_mul,
+      simp only [Polynomial.coeff_add, Polynomial.coeff_sub, Polynomial.coeff_neg,
+        Polynomial.coeff_mul_C, Polynomial.coeff_C_mul,
         Polynomial.coeff_C, Polynomial.coeff_X_pow, Polynomial.coeff_X,
-        Polynomial.coeff_mul_ofNat, ← map_mul]
-      split_ifs <;> simp_all [Polynomial.coeff_X, Polynomial.coeff_C] <;> norm_num
+        Polynomial.coeff_mul_ofNat]
+      split_ifs <;> simp_all <;> norm_num
   rw [hpoly]
   constructor
   · exact quartic_bernstein_identity (15763/26214400) (-239/1310720) (51397/2621440) (861/262144) (-245/1048576)
@@ -113,11 +113,11 @@ private theorem endpoint_far_certificate_3 :
     norm_num [← map_mul, ← map_pow]
     all_goals
       ext k
-      simp only [Polynomial.coeff_add, Polynomial.coeff_sub, Polynomial.coeff_neg, Polynomial.coeff_mul_C,
-        Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_C_mul_X, Polynomial.coeff_C_mul,
+      simp only [Polynomial.coeff_add, Polynomial.coeff_sub,
+        Polynomial.coeff_mul_C, Polynomial.coeff_C_mul,
         Polynomial.coeff_C, Polynomial.coeff_X_pow, Polynomial.coeff_X,
-        Polynomial.coeff_mul_ofNat, ← map_mul]
-      split_ifs <;> simp_all [Polynomial.coeff_X, Polynomial.coeff_C] <;> norm_num
+        Polynomial.coeff_mul_ofNat]
+      split_ifs <;> simp_all <;> norm_num
   rw [hpoly]
   constructor
   · exact quartic_bernstein_identity (2363/102400) (491/2560) (4597/10240) (77/512) (-245/4096)
@@ -139,11 +139,11 @@ private theorem endpoint_far_certificate_4 :
     norm_num [← map_mul, ← map_pow]
     all_goals
       ext k
-      simp only [Polynomial.coeff_add, Polynomial.coeff_sub, Polynomial.coeff_neg, Polynomial.coeff_mul_C,
-        Polynomial.coeff_C_mul_X_pow, Polynomial.coeff_C_mul_X, Polynomial.coeff_C_mul,
+      simp only [Polynomial.coeff_add, Polynomial.coeff_sub,
+        Polynomial.coeff_mul_C, Polynomial.coeff_C_mul,
         Polynomial.coeff_C, Polynomial.coeff_X_pow, Polynomial.coeff_X,
-        Polynomial.coeff_mul_ofNat, ← map_mul]
-      split_ifs <;> simp_all [Polynomial.coeff_X, Polynomial.coeff_C] <;> norm_num
+        Polynomial.coeff_mul_ofNat]
+      split_ifs <;> simp_all <;> norm_num
   rw [hpoly]
   constructor
   · exact quartic_bernstein_identity (1292653/819200) (20097/10240) (50741/81920) (-105/4096) (-735/32768)

@@ -1,4 +1,5 @@
 import SingularValueBounds.KL.Upper.RoundedAlgorithm
+import SingularValueBounds.KL.Upper.RoundedArithmetic
 
 /-! The finite rational predicates connect the printed fixed-point algorithm to
 the real exponential and logarithm. No analytic assertion is a certificate field. -/
@@ -22,7 +23,7 @@ theorem RoundedExpConditions.sound {x : ℚ} (h : RoundedExpConditions x) :
   dsimp [expUpperRoundedQ]
   split_ifs with hy
   · have ht := (if_pos hy ▸ h.2)
-    convert exp_neg_upper_of_lower_transcript ht.1 ht.2.1 ht.2.2 using 1 <;> simp
+    convert! exp_neg_upper_of_lower_transcript ht.1 ht.2.1 ht.2.2 using 1 <;> simp
   · exact (if_neg hy ▸ h.2).sound
 
 def UnitLogConditions (x : ℚ) : Prop :=

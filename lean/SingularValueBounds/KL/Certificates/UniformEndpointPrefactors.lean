@@ -22,7 +22,9 @@ private lemma logUnitPowerUpper_le_linear {x : ℚ} (hx : 1 ≤ x) (h2 : x ≤ 2
     (j : ℕ) : logUnitPowerUpper x j ≤ logUnitZUpper x + j / roundingScale := by
   have hr : logUnitZ2Upper x ≤ 1 := (logUnitZ2Upper_le_half hx h2).trans (by norm_num)
   induction j with
-  | zero => simp [logUnitPowerUpper, logPowerUpperQ]
+  | zero =>
+    change logUnitZUpper x ≤ logUnitZUpper x + (0 : ℚ) / roundingScale
+    simp only [zero_div, add_zero, le_refl]
   | succ j ih =>
     have hp := logUnitPowerUpper_nonneg hx j
     have hm := mul_le_mul_of_nonneg_left hr hp
@@ -44,7 +46,7 @@ theorem logUnitUpperQ_le_coarse {x : ℚ} (hx : 1 ≤ x) (h2 : x ≤ 2) :
   have hp (j : ℕ) (hj : j ≤ 18) : logUnitPowerUpper x j ≤ P := by
     apply (logUnitPowerUpper_le_linear hx h2 j).trans
     dsimp [P]
-    apply add_le_add_left
+    apply add_le_add_right
     exact div_le_div_of_nonneg_right (by exact_mod_cast hj) roundingScale_pos.le
   have hc (j : ℕ) (hj : j < 18) :
       logUnitCoeffUpper x j ≤ 2 * P + 1 / roundingScale := by
@@ -53,7 +55,7 @@ theorem logUnitUpperQ_le_coarse {x : ℚ} (hx : 1 ≤ x) (h2 : x ≤ 2) :
       rw [div_le_iff₀ (by positivity : (0 : ℚ) < 2*j+1)]
       have hh := hp j (by omega)
       nlinarith
-    exact (roundUpQ_lt_add _).le.trans (add_le_add_right hdiv _)
+    exact (roundUpQ_lt_add _).le.trans (add_le_add_left hdiv _)
   have hs : (∑ j ∈ Finset.range 18, logUnitCoeffUpper x j) ≤
       18 * (2 * P + 1 / roundingScale) := by
     calc
@@ -67,7 +69,7 @@ theorem logUnitUpperQ_le_coarse {x : ℚ} (hx : 1 ≤ x) (h2 : x ≤ 2) :
     rw [div_le_iff₀ (by linarith : (0 : ℚ) < 37 * (1 - logUnitZ2Upper x))]
     have hh := hp 18 le_rfl
     nlinarith
-  have htail := (roundUpQ_lt_add _).le.trans (add_le_add_right ht (1 / roundingScale))
+  have htail := (roundUpQ_lt_add _).le.trans (add_le_add_left ht (1 / roundingScale))
   have hz0 := logUnitZ_nonneg hx
   have hz := roundUpQ_lt_add (logUnitZ x)
   unfold logUnitUpperQ
@@ -94,8 +96,7 @@ theorem logRoundedQ_one_sub_lower_coarse {t : ℚ} (ht : 0 < t) (ht1 : t ≤ 1/8
     have he : logUnitZ (1/(1-t)) = t/(2-t) := by
       unfold logUnitZ
       field_simp [ne_of_gt hd, show (2 : ℚ)-t ≠ 0 by linarith]
-      ring_nf
-      simp
+      ring
     rw [he, div_le_iff₀ (by linarith : (0 : ℚ) < 2-t)]
     nlinarith
   rw [logRoundedQ_one_sub_lower ht ht1]

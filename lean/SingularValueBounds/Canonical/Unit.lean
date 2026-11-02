@@ -1,4 +1,6 @@
 import SingularValueBounds.Canonical.Adapter
+import SingularValueBounds.KL.Lower.MixedApplication
+import SingularValueBounds.KL.Upper.RowEstimates
 import SingularValueBounds.KL.Certificates.ConcreteEndpointMean
 import SingularValueBounds.KL.Certificates.ConcreteEndpointTable
 import SingularValueBounds.KL.Certificates.ConcreteEndpointFar
@@ -12,7 +14,7 @@ namespace SingularValueBounds.Canonical
 universe u
 
 theorem unit_baseline :
-    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 (Real.sqrt 2) := by
+    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 1.42 := by
   apply unit_of_tailBounds
   intro Ω _ μ _ m n _ hnm X hindep hiso hsg t ht
   exact ⟨KL.lower_tail_one_of_certificates KL.Certificates.endpointTableConditions

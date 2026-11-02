@@ -31,23 +31,23 @@ private theorem upperPade_deriv {z : ℝ} (hz : z < 1) :
       (z^7 / (1225 * upperPadeD z^2)) z := by
   have hn : HasDerivAt upperPadeN
       (1-(25/7)*z+(19/7)*z^2-(47/105)*z^3) z := by
-    convert (((hasDerivAt_id z).sub (((hasDerivAt_id z).pow 2).const_mul (25/14))).add
+    convert! (((hasDerivAt_id z).sub (((hasDerivAt_id z).pow 2).const_mul (25/14))).add
       (((hasDerivAt_id z).pow 3).const_mul (19/21))).sub
       (((hasDerivAt_id z).pow 4).const_mul (47/420)) using 1 <;>
-      simp [upperPadeN] <;> ring
+      simp <;> ring
   have hd : HasDerivAt upperPadeD
       (-(16/7)+(24/7)*z-(48/35)*z^2+(4/35)*z^3) z := by
-    convert ((((hasDerivAt_const z (1:ℝ)).sub ((hasDerivAt_id z).const_mul (16/7))).add
+    convert! ((((hasDerivAt_const z (1:ℝ)).sub ((hasDerivAt_id z).const_mul (16/7))).add
       (((hasDerivAt_id z).pow 2).const_mul (12/7))).sub
       (((hasDerivAt_id z).pow 3).const_mul (16/35))).add
       (((hasDerivAt_id z).pow 4).const_mul (1/35)) using 1 <;>
-      simp [upperPadeD] <;> ring
-  convert (hn.div hd (upperPadeD_pos hz).ne').add
+      simp <;> ring
+  convert! (hn.div hd (upperPadeD_pos hz).ne').add
     (((hasDerivAt_const z (1:ℝ)).sub (hasDerivAt_id z)).log (by linarith : 1-z ≠ 0)) using 1
   have hDn := (upperPadeD_pos hz).ne'
   have hzn : 1-z ≠ 0 := by linarith
-  simp only [id_eq]
-  field_simp only [hDn,hzn]
+  simp only [Pi.sub_apply, id_eq]
+  field_simp [hDn,hzn]
   unfold upperPadeD upperPadeN
   ring
 
@@ -92,20 +92,15 @@ theorem neg_log_one_sub_le_upperPade {z : ℝ} (hz : z < 1) :
 def upperComparisonZ (a x : ℝ) : ℝ := 2 * (x+a*x^2-2*x^3)
 
 /-- Every one of the six printed rectangles lies in the Padé domain. -/
-theorem upperComparisonZ_lt_one {a x : ℝ} (ha : a ≤ 5/6) (hx : 0 ≤ x) (hx1 : x ≤ 1) :
+theorem upperComparisonZ_lt_one {a x : ℝ} (ha : a ≤ 5/6) (hx : 0 ≤ x) :
     upperComparisonZ a x < 1 := by
   have hax := mul_nonneg (sub_nonneg.mpr ha) (sq_nonneg x)
-  have hf : x+(5/6)*x^2-2*x^3 ≤ 17/36 := by
-    by_cases hh : x ≤ 1/2
-    · have hx2 : x^2 ≤ 1/4 := by nlinarith
-      have hb : 0 ≤ 11/12-x/6-2*x^2 := by nlinarith
-      have hp := mul_nonneg (show 0 ≤ 1/2-x by linarith) hb
-      nlinarith
-    · have hu : 0 ≤ x-1/2 := by linarith
-      have hcube : 0 ≤ (x-1/2)^3 := pow_nonneg hu _
-      nlinarith [sq_nonneg (x-1/2-1/12),sq_nonneg (x-1/2)]
+  -- The cubic gap is a sum of squares:
+  -- 17/36 - (x+(5/6)*x^2-2*x^3) =
+  --   2*x*(x-7/12)^2 + (3/2)*(x-121/216)^2 + 47/31104.
   unfold upperComparisonZ
-  nlinarith
+  nlinarith only [hax, mul_nonneg hx (sq_nonneg (x - 7/12)),
+    sq_nonneg (x - 121/216)]
 
 /-- The six coefficient functions `B_i`. -/
 def upperMajorantB (i : Fin 6) (a : ℝ) : ℝ :=
@@ -146,7 +141,7 @@ theorem upperMajorantH_sum {ι : Type*} [Fintype ι] (i : Fin 6) (x : ι → ℝ
     (hnorm : ∑ j, x j^2 = 1) :
     (∑ j, upperMajorantH i (∑ k, x k^3) (x j)) =
       2*(∑ j,x j)+upperMajorantB i (∑ k,x k^3) := by
-  simp only [upperMajorantH, mul_sub, sub_mul, Finset.sum_add_distrib,
+  simp only [upperMajorantH, mul_sub, Finset.sum_add_distrib,
     Finset.sum_sub_distrib, ← Finset.mul_sum, ← Finset.sum_mul, hnorm, mul_one]
   have he : (∑ j, x j^2*(x j-(∑ k,x k^3))) = 0 := by
     simp_rw [mul_sub, ← pow_succ, Finset.sum_sub_distrib, ← Finset.sum_mul, hnorm, one_mul]

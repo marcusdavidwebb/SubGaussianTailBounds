@@ -1,3 +1,6 @@
+import SingularValueBounds.KL.Certificates.GeneralMeanCriticalLogs
+import SingularValueBounds.KL.Certificates.GeneralMeanPrefactorLogs
+import SingularValueBounds.KL.Certificates.IntegerResolventEvaluation
 import SingularValueBounds.KL.Certificates.IntegerLookupTree
 import SingularValueBounds.KL.Certificates.GeneralMeanDecayTables.Block00
 import SingularValueBounds.KL.Certificates.GeneralMeanDecayTables.Block01
@@ -39,9 +42,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 980).prefactor = (1175004534835341/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -52,54 +53,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 980).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 980).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 980).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 980).q*(generalMeanRows 980).c/2-2 = (1377/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable318.value]
-    have hcontinuation : (generalMeanRows 980).q*(generalMeanRows 980).cutoff/2-2 = (425/234:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable319.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 980).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 980
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 980).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 980).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 980).q*(generalMeanRows 980).c/2-2 = (1377/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable318.value]
+  have hcontinuation : (generalMeanRows 980).q*(generalMeanRows 980).cutoff/2-2 = (425/234:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable319.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 980).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 980).criticalRate j.val*(generalMeanRows 980).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 980).c*(generalMeanRows 980).criticalPoint j.val)).2-
       (generalMeanRows 980).J/2-(generalMeanRows 980).error (generalMeanGrid j.val)+
       (generalMeanRows 980).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 980).c)).2-
       (generalMeanRows 980).J/2-(generalMeanRows 980).error 4 := by
   have he : (generalMeanRows 980).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 980) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 980)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 980) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0980
 
@@ -116,9 +107,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 981).prefactor = (975774615203619/200000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -129,54 +118,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 981).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 981).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 981).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 981).q*(generalMeanRows 981).c/2-2 = (1681/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable302.value]
-    have hcontinuation : (generalMeanRows 981).q*(generalMeanRows 981).cutoff/2-2 = (425/234:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable319.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 981).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 981
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 981).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 981).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 981).q*(generalMeanRows 981).c/2-2 = (1681/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable302.value]
+  have hcontinuation : (generalMeanRows 981).q*(generalMeanRows 981).cutoff/2-2 = (425/234:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable319.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 981).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 981).criticalRate j.val*(generalMeanRows 981).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 981).c*(generalMeanRows 981).criticalPoint j.val)).2-
       (generalMeanRows 981).J/2-(generalMeanRows 981).error (generalMeanGrid j.val)+
       (generalMeanRows 981).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 981).c)).2-
       (generalMeanRows 981).J/2-(generalMeanRows 981).error 4 := by
   have he : (generalMeanRows 981).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 981) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 981)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 981) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0981
 
@@ -193,9 +172,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 982).prefactor = (4834017356809923/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -206,52 +183,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 982).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 982).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 982).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 982).q*(generalMeanRows 982).c/2-2 = (17/20:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable055.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 982).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 982
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 982).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 982).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 982).q*(generalMeanRows 982).c/2-2 = (17/20:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable055.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 982).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 982).criticalRate j.val*(generalMeanRows 982).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 982).c*(generalMeanRows 982).criticalPoint j.val)).2-
       (generalMeanRows 982).J/2-(generalMeanRows 982).error (generalMeanGrid j.val)+
       (generalMeanRows 982).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 982).c)).2-
       (generalMeanRows 982).J/2-(generalMeanRows 982).error 4 := by
   have he : (generalMeanRows 982).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 982) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 982)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 982) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0982
 
@@ -268,9 +235,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 983).prefactor = (1195538871920363/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -281,52 +246,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 983).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 983).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 983).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 983).q*(generalMeanRows 983).c/2-2 = (3359/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable311.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 983).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 983
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 983).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 983).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 983).q*(generalMeanRows 983).c/2-2 = (3359/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable311.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 983).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 983).criticalRate j.val*(generalMeanRows 983).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 983).c*(generalMeanRows 983).criticalPoint j.val)).2-
       (generalMeanRows 983).J/2-(generalMeanRows 983).error (generalMeanGrid j.val)+
       (generalMeanRows 983).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 983).c)).2-
       (generalMeanRows 983).J/2-(generalMeanRows 983).error 4 := by
   have he : (generalMeanRows 983).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 983) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 983)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 983) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0983
 
@@ -343,9 +298,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 984).prefactor = (236206984854869/50000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -356,52 +309,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 984).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 984).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 984).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 984).q*(generalMeanRows 984).c/2-2 = (847/1000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable287.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 984).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 984
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 984).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 984).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 984).q*(generalMeanRows 984).c/2-2 = (847/1000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable287.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 984).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 984).criticalRate j.val*(generalMeanRows 984).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 984).c*(generalMeanRows 984).criticalPoint j.val)).2-
       (generalMeanRows 984).J/2-(generalMeanRows 984).error (generalMeanGrid j.val)+
       (generalMeanRows 984).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 984).c)).2-
       (generalMeanRows 984).J/2-(generalMeanRows 984).error 4 := by
   have he : (generalMeanRows 984).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 984) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 984)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 984) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0984
 
@@ -418,9 +361,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 985).prefactor = (2330378611657859/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -431,54 +372,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 985).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 985).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 985).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 985).q*(generalMeanRows 985).c/2-2 = (799/1000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable320.value]
-    have hcontinuation : (generalMeanRows 985).q*(generalMeanRows 985).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable321.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 985).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 985
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 985).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 985).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 985).q*(generalMeanRows 985).c/2-2 = (799/1000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable320.value]
+  have hcontinuation : (generalMeanRows 985).q*(generalMeanRows 985).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable321.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 985).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 985).criticalRate j.val*(generalMeanRows 985).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 985).c*(generalMeanRows 985).criticalPoint j.val)).2-
       (generalMeanRows 985).J/2-(generalMeanRows 985).error (generalMeanGrid j.val)+
       (generalMeanRows 985).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 985).c)).2-
       (generalMeanRows 985).J/2-(generalMeanRows 985).error 4 := by
   have he : (generalMeanRows 985).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 985) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 985)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 985) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0985
 
@@ -495,9 +426,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 986).prefactor = (4804797862881839/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -508,52 +437,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 986).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 986).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 986).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 986).q*(generalMeanRows 986).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable321.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 986).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 986
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 986).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 986).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 986).q*(generalMeanRows 986).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable321.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 986).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 986).criticalRate j.val*(generalMeanRows 986).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 986).c*(generalMeanRows 986).criticalPoint j.val)).2-
       (generalMeanRows 986).J/2-(generalMeanRows 986).error (generalMeanGrid j.val)+
       (generalMeanRows 986).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 986).c)).2-
       (generalMeanRows 986).J/2-(generalMeanRows 986).error 4 := by
   have he : (generalMeanRows 986).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 986) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 986)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 986) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0986
 
@@ -570,9 +489,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 987).prefactor = (4953290076484661/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -583,54 +500,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 987).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 987).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 987).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 987).q*(generalMeanRows 987).c/2-2 = (853/1000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable322.value]
-    have hcontinuation : (generalMeanRows 987).q*(generalMeanRows 987).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable321.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 987).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 987
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 987).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 987).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 987).q*(generalMeanRows 987).c/2-2 = (853/1000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable322.value]
+  have hcontinuation : (generalMeanRows 987).q*(generalMeanRows 987).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable321.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 987).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 987).criticalRate j.val*(generalMeanRows 987).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 987).c*(generalMeanRows 987).criticalPoint j.val)).2-
       (generalMeanRows 987).J/2-(generalMeanRows 987).error (generalMeanGrid j.val)+
       (generalMeanRows 987).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 987).c)).2-
       (generalMeanRows 987).J/2-(generalMeanRows 987).error 4 := by
   have he : (generalMeanRows 987).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 987) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 987)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 987) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0987
 
@@ -647,9 +554,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 988).prefactor = (2553185719980073/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -660,52 +565,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 988).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 988).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 988).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 988).q*(generalMeanRows 988).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable321.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 988).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 988
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 988).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 988).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 988).q*(generalMeanRows 988).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable321.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 988).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 988).criticalRate j.val*(generalMeanRows 988).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 988).c*(generalMeanRows 988).criticalPoint j.val)).2-
       (generalMeanRows 988).J/2-(generalMeanRows 988).error (generalMeanGrid j.val)+
       (generalMeanRows 988).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 988).c)).2-
       (generalMeanRows 988).J/2-(generalMeanRows 988).error 4 := by
   have he : (generalMeanRows 988).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 988) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 988)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 988) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0988
 
@@ -722,9 +617,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 989).prefactor = (2632091890461833/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -735,54 +628,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 989).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 989).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 989).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 989).q*(generalMeanRows 989).c/2-2 = (853/1000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable322.value]
-    have hcontinuation : (generalMeanRows 989).q*(generalMeanRows 989).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable321.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 989).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 989
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 989).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 989).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 989).q*(generalMeanRows 989).c/2-2 = (853/1000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable322.value]
+  have hcontinuation : (generalMeanRows 989).q*(generalMeanRows 989).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable321.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 989).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 989).criticalRate j.val*(generalMeanRows 989).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 989).c*(generalMeanRows 989).criticalPoint j.val)).2-
       (generalMeanRows 989).J/2-(generalMeanRows 989).error (generalMeanGrid j.val)+
       (generalMeanRows 989).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 989).c)).2-
       (generalMeanRows 989).J/2-(generalMeanRows 989).error 4 := by
   have he : (generalMeanRows 989).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 989) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 989)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 989) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0989
 
@@ -799,9 +682,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 990).prefactor = (1085374662034223/200000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -812,54 +693,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 990).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 990).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 990).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 990).q*(generalMeanRows 990).c/2-2 = (853/1000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable322.value]
-    have hcontinuation : (generalMeanRows 990).q*(generalMeanRows 990).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable321.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 990).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 990
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 990).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 990).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 990).q*(generalMeanRows 990).c/2-2 = (853/1000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable322.value]
+  have hcontinuation : (generalMeanRows 990).q*(generalMeanRows 990).cutoff/2-2 = (215/104:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable321.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 990).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 990).criticalRate j.val*(generalMeanRows 990).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 990).c*(generalMeanRows 990).criticalPoint j.val)).2-
       (generalMeanRows 990).J/2-(generalMeanRows 990).error (generalMeanGrid j.val)+
       (generalMeanRows 990).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 990).c)).2-
       (generalMeanRows 990).J/2-(generalMeanRows 990).error 4 := by
   have he : (generalMeanRows 990).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 990) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 990)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 990) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0990
 
@@ -876,9 +747,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 991).prefactor = (5107890788590123/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -889,52 +758,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 991).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 991).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 991).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 991).q*(generalMeanRows 991).c/2-2 = (2611/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable317.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 991).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 991
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 991).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 991).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 991).q*(generalMeanRows 991).c/2-2 = (2611/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable317.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 991).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 991).criticalRate j.val*(generalMeanRows 991).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 991).c*(generalMeanRows 991).criticalPoint j.val)).2-
       (generalMeanRows 991).J/2-(generalMeanRows 991).error (generalMeanGrid j.val)+
       (generalMeanRows 991).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 991).c)).2-
       (generalMeanRows 991).J/2-(generalMeanRows 991).error 4 := by
   have he : (generalMeanRows 991).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 991) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 991)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 991) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0991
 
@@ -951,9 +810,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 992).prefactor = (511212072459053/100000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -964,52 +821,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 992).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 992).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 992).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 992).q*(generalMeanRows 992).c/2-2 = (71/100:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable291.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 992).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 992
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 992).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 992).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 992).q*(generalMeanRows 992).c/2-2 = (71/100:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable291.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 992).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 992).criticalRate j.val*(generalMeanRows 992).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 992).c*(generalMeanRows 992).criticalPoint j.val)).2-
       (generalMeanRows 992).J/2-(generalMeanRows 992).error (generalMeanGrid j.val)+
       (generalMeanRows 992).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 992).c)).2-
       (generalMeanRows 992).J/2-(generalMeanRows 992).error 4 := by
   have he : (generalMeanRows 992).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 992) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 992)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 992) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0992
 
@@ -1026,9 +873,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 993).prefactor = (4851087689391467/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1039,52 +884,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 993).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 993).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 993).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 993).q*(generalMeanRows 993).c/2-2 = (253/400:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable141.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 993).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 993
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 993).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 993).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 993).q*(generalMeanRows 993).c/2-2 = (253/400:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable141.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 993).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 993).criticalRate j.val*(generalMeanRows 993).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 993).c*(generalMeanRows 993).criticalPoint j.val)).2-
       (generalMeanRows 993).J/2-(generalMeanRows 993).error (generalMeanGrid j.val)+
       (generalMeanRows 993).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 993).c)).2-
       (generalMeanRows 993).J/2-(generalMeanRows 993).error 4 := by
   have he : (generalMeanRows 993).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 993) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 993)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 993) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0993
 
@@ -1101,9 +936,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 994).prefactor = (151055334387707/31250000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1114,50 +947,40 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 994).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 994).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 994).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 994).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 994
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 994).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 994).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 994).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 994).criticalRate j.val*(generalMeanRows 994).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 994).c*(generalMeanRows 994).criticalPoint j.val)).2-
       (generalMeanRows 994).J/2-(generalMeanRows 994).error (generalMeanGrid j.val)+
       (generalMeanRows 994).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 994).c)).2-
       (generalMeanRows 994).J/2-(generalMeanRows 994).error 4 := by
   have he : (generalMeanRows 994).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 994) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 994)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 994) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0994
 
@@ -1174,9 +997,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 995).prefactor = (2403134730694089/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1187,52 +1008,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 995).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 995).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 995).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 995).q*(generalMeanRows 995).c/2-2 = (1339/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable323.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 995).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 995
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 995).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 995).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 995).q*(generalMeanRows 995).c/2-2 = (1339/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable323.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 995).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 995).criticalRate j.val*(generalMeanRows 995).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 995).c*(generalMeanRows 995).criticalPoint j.val)).2-
       (generalMeanRows 995).J/2-(generalMeanRows 995).error (generalMeanGrid j.val)+
       (generalMeanRows 995).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 995).c)).2-
       (generalMeanRows 995).J/2-(generalMeanRows 995).error 4 := by
   have he : (generalMeanRows 995).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 995) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 995)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 995) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0995
 
@@ -1249,9 +1060,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 996).prefactor = (47697369695181/10000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1262,54 +1071,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 996).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 996).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 996).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 996).q*(generalMeanRows 996).c/2-2 = (7/10:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable043.value]
-    have hcontinuation : (generalMeanRows 996).q*(generalMeanRows 996).cutoff/2-2 = (668/371:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable324.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 996).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 996
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 996).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 996).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 996).q*(generalMeanRows 996).c/2-2 = (7/10:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable043.value]
+  have hcontinuation : (generalMeanRows 996).q*(generalMeanRows 996).cutoff/2-2 = (668/371:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable324.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 996).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 996).criticalRate j.val*(generalMeanRows 996).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 996).c*(generalMeanRows 996).criticalPoint j.val)).2-
       (generalMeanRows 996).J/2-(generalMeanRows 996).error (generalMeanGrid j.val)+
       (generalMeanRows 996).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 996).c)).2-
       (generalMeanRows 996).J/2-(generalMeanRows 996).error 4 := by
   have he : (generalMeanRows 996).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 996) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 996)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 996) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0996
 
@@ -1326,9 +1125,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 997).prefactor = (4959676953466319/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1339,54 +1136,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 997).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 997).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 997).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 997).q*(generalMeanRows 997).c/2-2 = (133/160:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable309.value]
-    have hcontinuation : (generalMeanRows 997).q*(generalMeanRows 997).cutoff/2-2 = (668/371:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable324.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 997).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 997
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 997).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 997).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 997).q*(generalMeanRows 997).c/2-2 = (133/160:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable309.value]
+  have hcontinuation : (generalMeanRows 997).q*(generalMeanRows 997).cutoff/2-2 = (668/371:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable324.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 997).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 997).criticalRate j.val*(generalMeanRows 997).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 997).c*(generalMeanRows 997).criticalPoint j.val)).2-
       (generalMeanRows 997).J/2-(generalMeanRows 997).error (generalMeanGrid j.val)+
       (generalMeanRows 997).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 997).c)).2-
       (generalMeanRows 997).J/2-(generalMeanRows 997).error 4 := by
   have he : (generalMeanRows 997).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 997) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 997)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 997) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0997
 
@@ -1403,9 +1190,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 998).prefactor = (980605053875979/200000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1416,52 +1201,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 998).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 998).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 998).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 998).q*(generalMeanRows 998).c/2-2 = (3359/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable311.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 998).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 998
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 998).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 998).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 998).q*(generalMeanRows 998).c/2-2 = (3359/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable311.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 998).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 998).criticalRate j.val*(generalMeanRows 998).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 998).c*(generalMeanRows 998).criticalPoint j.val)).2-
       (generalMeanRows 998).J/2-(generalMeanRows 998).error (generalMeanGrid j.val)+
       (generalMeanRows 998).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 998).c)).2-
       (generalMeanRows 998).J/2-(generalMeanRows 998).error 4 := by
   have he : (generalMeanRows 998).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 998) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 998)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 998) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0998
 
@@ -1478,9 +1253,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 999).prefactor = (968009212210663/200000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1491,52 +1264,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 999).cutoff/(gen
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 999).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 999).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 999).q*(generalMeanRows 999).c/2-2 = (663/800:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable325.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 999).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 999
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 999).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 999).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 999).q*(generalMeanRows 999).c/2-2 = (663/800:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable325.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 999).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 999).criticalRate j.val*(generalMeanRows 999).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 999).c*(generalMeanRows 999).criticalPoint j.val)).2-
       (generalMeanRows 999).J/2-(generalMeanRows 999).error (generalMeanGrid j.val)+
       (generalMeanRows 999).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 999).c)).2-
       (generalMeanRows 999).J/2-(generalMeanRows 999).error 4 := by
   have he : (generalMeanRows 999).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 999) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 999)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 999) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow0999
 
@@ -1553,9 +1316,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1000).prefactor = (4771596813378881/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1566,52 +1327,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1000).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1000).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1000).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1000).q*(generalMeanRows 1000).c/2-2 = (799/1000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable320.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1000).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1000
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1000).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1000).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1000).q*(generalMeanRows 1000).c/2-2 = (799/1000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable320.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1000).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1000).criticalRate j.val*(generalMeanRows 1000).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1000).c*(generalMeanRows 1000).criticalPoint j.val)).2-
       (generalMeanRows 1000).J/2-(generalMeanRows 1000).error (generalMeanGrid j.val)+
       (generalMeanRows 1000).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1000).c)).2-
       (generalMeanRows 1000).J/2-(generalMeanRows 1000).error 4 := by
   have he : (generalMeanRows 1000).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1000) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1000)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1000) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1000
 
@@ -1628,9 +1379,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1001).prefactor = (234923108055817/50000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1641,52 +1390,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1001).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1001).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1001).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1001).q*(generalMeanRows 1001).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable326.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1001).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1001
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1001).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1001).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1001).q*(generalMeanRows 1001).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable326.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1001).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1001).criticalRate j.val*(generalMeanRows 1001).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1001).c*(generalMeanRows 1001).criticalPoint j.val)).2-
       (generalMeanRows 1001).J/2-(generalMeanRows 1001).error (generalMeanGrid j.val)+
       (generalMeanRows 1001).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1001).c)).2-
       (generalMeanRows 1001).J/2-(generalMeanRows 1001).error 4 := by
   have he : (generalMeanRows 1001).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1001) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1001)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1001) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1001
 
@@ -1703,9 +1442,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1002).prefactor = (1212102989455877/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1716,52 +1453,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1002).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1002).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1002).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1002).q*(generalMeanRows 1002).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable326.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1002).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1002
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1002).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1002).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1002).q*(generalMeanRows 1002).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable326.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1002).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1002).criticalRate j.val*(generalMeanRows 1002).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1002).c*(generalMeanRows 1002).criticalPoint j.val)).2-
       (generalMeanRows 1002).J/2-(generalMeanRows 1002).error (generalMeanGrid j.val)+
       (generalMeanRows 1002).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1002).c)).2-
       (generalMeanRows 1002).J/2-(generalMeanRows 1002).error 4 := by
   have he : (generalMeanRows 1002).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1002) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1002)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1002) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1002
 
@@ -1778,9 +1505,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1003).prefactor = (2501573675244919/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1791,54 +1516,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1003).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1003).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1003).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1003).q*(generalMeanRows 1003).c/2-2 = (3431/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable327.value]
-    have hcontinuation : (generalMeanRows 1003).q*(generalMeanRows 1003).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable326.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1003).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1003
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1003).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1003).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1003).q*(generalMeanRows 1003).c/2-2 = (3431/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable327.value]
+  have hcontinuation : (generalMeanRows 1003).q*(generalMeanRows 1003).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable326.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1003).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1003).criticalRate j.val*(generalMeanRows 1003).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1003).c*(generalMeanRows 1003).criticalPoint j.val)).2-
       (generalMeanRows 1003).J/2-(generalMeanRows 1003).error (generalMeanGrid j.val)+
       (generalMeanRows 1003).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1003).c)).2-
       (generalMeanRows 1003).J/2-(generalMeanRows 1003).error 4 := by
   have he : (generalMeanRows 1003).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1003) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1003)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1003) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1003
 
@@ -1855,9 +1570,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1004).prefactor = (5162821069757109/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1868,54 +1581,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1004).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1004).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1004).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1004).q*(generalMeanRows 1004).c/2-2 = (1751/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable267.value]
-    have hcontinuation : (generalMeanRows 1004).q*(generalMeanRows 1004).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable326.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1004).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1004
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1004).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1004).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1004).q*(generalMeanRows 1004).c/2-2 = (1751/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable267.value]
+  have hcontinuation : (generalMeanRows 1004).q*(generalMeanRows 1004).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable326.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1004).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1004).criticalRate j.val*(generalMeanRows 1004).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1004).c*(generalMeanRows 1004).criticalPoint j.val)).2-
       (generalMeanRows 1004).J/2-(generalMeanRows 1004).error (generalMeanGrid j.val)+
       (generalMeanRows 1004).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1004).c)).2-
       (generalMeanRows 1004).J/2-(generalMeanRows 1004).error 4 := by
   have he : (generalMeanRows 1004).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1004) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1004)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1004) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1004
 
@@ -1932,9 +1635,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1005).prefactor = (1065518144122549/200000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -1945,54 +1646,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1005).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1005).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1005).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1005).q*(generalMeanRows 1005).c/2-2 = (1751/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable267.value]
-    have hcontinuation : (generalMeanRows 1005).q*(generalMeanRows 1005).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable326.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1005).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1005
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1005).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1005).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1005).q*(generalMeanRows 1005).c/2-2 = (1751/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable267.value]
+  have hcontinuation : (generalMeanRows 1005).q*(generalMeanRows 1005).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable326.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1005).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1005).criticalRate j.val*(generalMeanRows 1005).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1005).c*(generalMeanRows 1005).criticalPoint j.val)).2-
       (generalMeanRows 1005).J/2-(generalMeanRows 1005).error (generalMeanGrid j.val)+
       (generalMeanRows 1005).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1005).c)).2-
       (generalMeanRows 1005).J/2-(generalMeanRows 1005).error 4 := by
   have he : (generalMeanRows 1005).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1005) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1005)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1005) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1005
 
@@ -2009,9 +1700,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1006).prefactor = (1374404734488229/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2022,54 +1711,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1006).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1006).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1006).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1006).q*(generalMeanRows 1006).c/2-2 = (3431/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable327.value]
-    have hcontinuation : (generalMeanRows 1006).q*(generalMeanRows 1006).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable326.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1006).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1006
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1006).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1006).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1006).q*(generalMeanRows 1006).c/2-2 = (3431/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable327.value]
+  have hcontinuation : (generalMeanRows 1006).q*(generalMeanRows 1006).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable326.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1006).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1006).criticalRate j.val*(generalMeanRows 1006).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1006).c*(generalMeanRows 1006).criticalPoint j.val)).2-
       (generalMeanRows 1006).J/2-(generalMeanRows 1006).error (generalMeanGrid j.val)+
       (generalMeanRows 1006).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1006).c)).2-
       (generalMeanRows 1006).J/2-(generalMeanRows 1006).error 4 := by
   have he : (generalMeanRows 1006).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1006) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1006)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1006) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1006
 
@@ -2086,9 +1765,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1007).prefactor = (139616431180649/25000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2099,54 +1776,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1007).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1007).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1007).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1007).q*(generalMeanRows 1007).c/2-2 = (3147/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable328.value]
-    have hcontinuation : (generalMeanRows 1007).q*(generalMeanRows 1007).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable326.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1007).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1007
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1007).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1007).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1007).q*(generalMeanRows 1007).c/2-2 = (3147/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable328.value]
+  have hcontinuation : (generalMeanRows 1007).q*(generalMeanRows 1007).cutoff/2-2 = (3388/1643:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable326.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1007).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1007).criticalRate j.val*(generalMeanRows 1007).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1007).c*(generalMeanRows 1007).criticalPoint j.val)).2-
       (generalMeanRows 1007).J/2-(generalMeanRows 1007).error (generalMeanGrid j.val)+
       (generalMeanRows 1007).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1007).c)).2-
       (generalMeanRows 1007).J/2-(generalMeanRows 1007).error 4 := by
   have he : (generalMeanRows 1007).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1007) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1007)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1007) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1007
 
@@ -2163,9 +1830,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1008).prefactor = (1002043591626283/200000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2176,50 +1841,40 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1008).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1008).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1008).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1008).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1008
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1008).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1008).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1008).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1008).criticalRate j.val*(generalMeanRows 1008).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1008).c*(generalMeanRows 1008).criticalPoint j.val)).2-
       (generalMeanRows 1008).J/2-(generalMeanRows 1008).error (generalMeanGrid j.val)+
       (generalMeanRows 1008).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1008).c)).2-
       (generalMeanRows 1008).J/2-(generalMeanRows 1008).error 4 := by
   have he : (generalMeanRows 1008).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1008) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1008)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1008) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1008
 
@@ -2236,9 +1891,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1009).prefactor = (2493056194342993/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2249,50 +1902,40 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1009).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1009).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1009).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1009).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1009
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1009).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1009).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1009).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1009).criticalRate j.val*(generalMeanRows 1009).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1009).c*(generalMeanRows 1009).criticalPoint j.val)).2-
       (generalMeanRows 1009).J/2-(generalMeanRows 1009).error (generalMeanGrid j.val)+
       (generalMeanRows 1009).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1009).c)).2-
       (generalMeanRows 1009).J/2-(generalMeanRows 1009).error 4 := by
   have he : (generalMeanRows 1009).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1009) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1009)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1009) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1009
 
@@ -2309,9 +1952,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1010).prefactor = (495185347257101/100000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2322,50 +1963,40 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1010).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1010).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1010).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1010).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1010
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1010).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1010).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1010).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1010).criticalRate j.val*(generalMeanRows 1010).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1010).c*(generalMeanRows 1010).criticalPoint j.val)).2-
       (generalMeanRows 1010).J/2-(generalMeanRows 1010).error (generalMeanGrid j.val)+
       (generalMeanRows 1010).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1010).c)).2-
       (generalMeanRows 1010).J/2-(generalMeanRows 1010).error 4 := by
   have he : (generalMeanRows 1010).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1010) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1010)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1010) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1010
 
@@ -2382,9 +2013,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1011).prefactor = (4908606852629231/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2395,52 +2024,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1011).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1011).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1011).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1011).q*(generalMeanRows 1011).cutoff/2-2 = (109/63:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable112.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1011).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1011
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1011).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1011).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1011).q*(generalMeanRows 1011).cutoff/2-2 = (109/63:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable112.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1011).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1011).criticalRate j.val*(generalMeanRows 1011).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1011).c*(generalMeanRows 1011).criticalPoint j.val)).2-
       (generalMeanRows 1011).J/2-(generalMeanRows 1011).error (generalMeanGrid j.val)+
       (generalMeanRows 1011).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1011).c)).2-
       (generalMeanRows 1011).J/2-(generalMeanRows 1011).error 4 := by
   have he : (generalMeanRows 1011).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1011) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1011)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1011) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1011
 
@@ -2457,9 +2076,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1012).prefactor = (607181431029591/125000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2470,54 +2087,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1012).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1012).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1012).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1012).q*(generalMeanRows 1012).c/2-2 = (2767/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable329.value]
-    have hcontinuation : (generalMeanRows 1012).q*(generalMeanRows 1012).cutoff/2-2 = (821/459:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable330.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1012).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1012
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1012).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1012).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1012).q*(generalMeanRows 1012).c/2-2 = (2767/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable329.value]
+  have hcontinuation : (generalMeanRows 1012).q*(generalMeanRows 1012).cutoff/2-2 = (821/459:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable330.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1012).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1012).criticalRate j.val*(generalMeanRows 1012).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1012).c*(generalMeanRows 1012).criticalPoint j.val)).2-
       (generalMeanRows 1012).J/2-(generalMeanRows 1012).error (generalMeanGrid j.val)+
       (generalMeanRows 1012).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1012).c)).2-
       (generalMeanRows 1012).J/2-(generalMeanRows 1012).error 4 := by
   have he : (generalMeanRows 1012).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1012) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1012)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1012) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1012
 
@@ -2534,9 +2141,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1013).prefactor = (1265148067922739/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2547,54 +2152,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1013).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1013).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1013).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1013).q*(generalMeanRows 1013).c/2-2 = (3359/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable311.value]
-    have hcontinuation : (generalMeanRows 1013).q*(generalMeanRows 1013).cutoff/2-2 = (821/459:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable330.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1013).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1013
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1013).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1013).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1013).q*(generalMeanRows 1013).c/2-2 = (3359/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable311.value]
+  have hcontinuation : (generalMeanRows 1013).q*(generalMeanRows 1013).cutoff/2-2 = (821/459:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable330.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1013).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1013).criticalRate j.val*(generalMeanRows 1013).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1013).c*(generalMeanRows 1013).criticalPoint j.val)).2-
       (generalMeanRows 1013).J/2-(generalMeanRows 1013).error (generalMeanGrid j.val)+
       (generalMeanRows 1013).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1013).c)).2-
       (generalMeanRows 1013).J/2-(generalMeanRows 1013).error 4 := by
   have he : (generalMeanRows 1013).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1013) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1013)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1013) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1013
 
@@ -2611,9 +2206,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1014).prefactor = (1247049331142919/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2624,52 +2217,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1014).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1014).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1014).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1014).q*(generalMeanRows 1014).c/2-2 = (663/800:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable325.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1014).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1014
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1014).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1014).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1014).q*(generalMeanRows 1014).c/2-2 = (663/800:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable325.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1014).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1014).criticalRate j.val*(generalMeanRows 1014).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1014).c*(generalMeanRows 1014).criticalPoint j.val)).2-
       (generalMeanRows 1014).J/2-(generalMeanRows 1014).error (generalMeanGrid j.val)+
       (generalMeanRows 1014).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1014).c)).2-
       (generalMeanRows 1014).J/2-(generalMeanRows 1014).error 4 := by
   have he : (generalMeanRows 1014).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1014) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1014)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1014) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1014
 
@@ -2686,9 +2269,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1015).prefactor = (306925679684923/62500000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2699,54 +2280,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1015).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1015).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1015).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1015).q*(generalMeanRows 1015).c/2-2 = (799/1000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable320.value]
-    have hcontinuation : (generalMeanRows 1015).q*(generalMeanRows 1015).cutoff/2-2 = (23/12:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable028.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1015).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1015
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1015).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1015).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1015).q*(generalMeanRows 1015).c/2-2 = (799/1000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable320.value]
+  have hcontinuation : (generalMeanRows 1015).q*(generalMeanRows 1015).cutoff/2-2 = (23/12:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable028.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1015).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1015).criticalRate j.val*(generalMeanRows 1015).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1015).c*(generalMeanRows 1015).criticalPoint j.val)).2-
       (generalMeanRows 1015).J/2-(generalMeanRows 1015).error (generalMeanGrid j.val)+
       (generalMeanRows 1015).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1015).c)).2-
       (generalMeanRows 1015).J/2-(generalMeanRows 1015).error 4 := by
   have he : (generalMeanRows 1015).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1015) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1015)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1015) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1015
 
@@ -2763,9 +2334,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1016).prefactor = (2414593085524973/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2776,54 +2345,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1016).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1016).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1016).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1016).q*(generalMeanRows 1016).c/2-2 = (3147/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable328.value]
-    have hcontinuation : (generalMeanRows 1016).q*(generalMeanRows 1016).cutoff/2-2 = (1663/837:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable331.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1016).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1016
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1016).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1016).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1016).q*(generalMeanRows 1016).c/2-2 = (3147/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable328.value]
+  have hcontinuation : (generalMeanRows 1016).q*(generalMeanRows 1016).cutoff/2-2 = (1663/837:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable331.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1016).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1016).criticalRate j.val*(generalMeanRows 1016).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1016).c*(generalMeanRows 1016).criticalPoint j.val)).2-
       (generalMeanRows 1016).J/2-(generalMeanRows 1016).error (generalMeanGrid j.val)+
       (generalMeanRows 1016).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1016).c)).2-
       (generalMeanRows 1016).J/2-(generalMeanRows 1016).error 4 := by
   have he : (generalMeanRows 1016).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1016) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1016)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1016) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1016
 
@@ -2840,9 +2399,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1017).prefactor = (4997995123910217/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2853,52 +2410,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1017).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1017).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1017).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1017).q*(generalMeanRows 1017).cutoff/2-2 = (1663/837:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable331.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1017).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1017
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1017).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1017).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1017).q*(generalMeanRows 1017).cutoff/2-2 = (1663/837:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable331.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1017).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1017).criticalRate j.val*(generalMeanRows 1017).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1017).c*(generalMeanRows 1017).criticalPoint j.val)).2-
       (generalMeanRows 1017).J/2-(generalMeanRows 1017).error (generalMeanGrid j.val)+
       (generalMeanRows 1017).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1017).c)).2-
       (generalMeanRows 1017).J/2-(generalMeanRows 1017).error 4 := by
   have he : (generalMeanRows 1017).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1017) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1017)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1017) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1017
 
@@ -2915,9 +2462,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1018).prefactor = (4900586141633259/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -2928,54 +2473,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1018).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1018).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1018).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1018).q*(generalMeanRows 1018).c/2-2 = (27/32:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable332.value]
-    have hcontinuation : (generalMeanRows 1018).q*(generalMeanRows 1018).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable333.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1018).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1018
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1018).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1018).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1018).q*(generalMeanRows 1018).c/2-2 = (27/32:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable332.value]
+  have hcontinuation : (generalMeanRows 1018).q*(generalMeanRows 1018).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable333.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1018).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1018).criticalRate j.val*(generalMeanRows 1018).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1018).c*(generalMeanRows 1018).criticalPoint j.val)).2-
       (generalMeanRows 1018).J/2-(generalMeanRows 1018).error (generalMeanGrid j.val)+
       (generalMeanRows 1018).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1018).c)).2-
       (generalMeanRows 1018).J/2-(generalMeanRows 1018).error 4 := by
   have he : (generalMeanRows 1018).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1018) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1018)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1018) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1018
 
@@ -2992,9 +2527,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1019).prefactor = (2531161559287533/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3005,54 +2538,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1019).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1019).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1019).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1019).q*(generalMeanRows 1019).c/2-2 = (703/800:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable334.value]
-    have hcontinuation : (generalMeanRows 1019).q*(generalMeanRows 1019).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable333.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1019).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1019
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1019).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1019).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1019).q*(generalMeanRows 1019).c/2-2 = (703/800:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable334.value]
+  have hcontinuation : (generalMeanRows 1019).q*(generalMeanRows 1019).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable333.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1019).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1019).criticalRate j.val*(generalMeanRows 1019).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1019).c*(generalMeanRows 1019).criticalPoint j.val)).2-
       (generalMeanRows 1019).J/2-(generalMeanRows 1019).error (generalMeanGrid j.val)+
       (generalMeanRows 1019).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1019).c)).2-
       (generalMeanRows 1019).J/2-(generalMeanRows 1019).error 4 := by
   have he : (generalMeanRows 1019).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1019) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1019)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1019) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1019
 
@@ -3069,9 +2592,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1020).prefactor = (2614698998875119/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3082,54 +2603,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1020).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1020).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1020).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1020).q*(generalMeanRows 1020).c/2-2 = (703/800:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable334.value]
-    have hcontinuation : (generalMeanRows 1020).q*(generalMeanRows 1020).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable333.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1020).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1020
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1020).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1020).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1020).q*(generalMeanRows 1020).c/2-2 = (703/800:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable334.value]
+  have hcontinuation : (generalMeanRows 1020).q*(generalMeanRows 1020).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable333.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1020).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1020).criticalRate j.val*(generalMeanRows 1020).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1020).c*(generalMeanRows 1020).criticalPoint j.val)).2-
       (generalMeanRows 1020).J/2-(generalMeanRows 1020).error (generalMeanGrid j.val)+
       (generalMeanRows 1020).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1020).c)).2-
       (generalMeanRows 1020).J/2-(generalMeanRows 1020).error 4 := by
   have he : (generalMeanRows 1020).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1020) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1020)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1020) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1020
 
@@ -3146,9 +2657,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1021).prefactor = (5401986949140397/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3159,54 +2668,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1021).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1021).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1021).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1021).q*(generalMeanRows 1021).c/2-2 = (703/800:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable334.value]
-    have hcontinuation : (generalMeanRows 1021).q*(generalMeanRows 1021).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable333.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1021).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1021
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1021).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1021).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1021).q*(generalMeanRows 1021).c/2-2 = (703/800:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable334.value]
+  have hcontinuation : (generalMeanRows 1021).q*(generalMeanRows 1021).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable333.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1021).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1021).criticalRate j.val*(generalMeanRows 1021).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1021).c*(generalMeanRows 1021).criticalPoint j.val)).2-
       (generalMeanRows 1021).J/2-(generalMeanRows 1021).error (generalMeanGrid j.val)+
       (generalMeanRows 1021).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1021).c)).2-
       (generalMeanRows 1021).J/2-(generalMeanRows 1021).error 4 := by
   have he : (generalMeanRows 1021).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1021) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1021)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1021) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1021
 
@@ -3223,9 +2722,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1022).prefactor = (1395067989242617/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3236,52 +2733,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1022).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1022).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1022).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1022).q*(generalMeanRows 1022).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable333.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1022).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1022
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1022).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1022).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1022).q*(generalMeanRows 1022).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable333.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1022).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1022).criticalRate j.val*(generalMeanRows 1022).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1022).c*(generalMeanRows 1022).criticalPoint j.val)).2-
       (generalMeanRows 1022).J/2-(generalMeanRows 1022).error (generalMeanGrid j.val)+
       (generalMeanRows 1022).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1022).c)).2-
       (generalMeanRows 1022).J/2-(generalMeanRows 1022).error 4 := by
   have he : (generalMeanRows 1022).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1022) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1022)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1022) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1022
 
@@ -3298,9 +2785,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1023).prefactor = (5764441011599659/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3311,54 +2796,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1023).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1023).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1023).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1023).q*(generalMeanRows 1023).c/2-2 = (27/32:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable332.value]
-    have hcontinuation : (generalMeanRows 1023).q*(generalMeanRows 1023).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable333.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1023).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1023
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1023).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1023).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1023).q*(generalMeanRows 1023).c/2-2 = (27/32:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable332.value]
+  have hcontinuation : (generalMeanRows 1023).q*(generalMeanRows 1023).cutoff/2-2 = (167/81:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable333.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1023).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1023).criticalRate j.val*(generalMeanRows 1023).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1023).c*(generalMeanRows 1023).criticalPoint j.val)).2-
       (generalMeanRows 1023).J/2-(generalMeanRows 1023).error (generalMeanGrid j.val)+
       (generalMeanRows 1023).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1023).c)).2-
       (generalMeanRows 1023).J/2-(generalMeanRows 1023).error 4 := by
   have he : (generalMeanRows 1023).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1023) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1023)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1023) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1023
 
@@ -3375,9 +2850,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1024).prefactor = (516911606153881/100000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3388,52 +2861,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1024).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1024).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1024).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1024).q*(generalMeanRows 1024).c/2-2 = (1377/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable318.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1024).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1024
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1024).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1024).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1024).q*(generalMeanRows 1024).c/2-2 = (1377/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable318.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1024).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1024).criticalRate j.val*(generalMeanRows 1024).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1024).c*(generalMeanRows 1024).criticalPoint j.val)).2-
       (generalMeanRows 1024).J/2-(generalMeanRows 1024).error (generalMeanGrid j.val)+
       (generalMeanRows 1024).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1024).c)).2-
       (generalMeanRows 1024).J/2-(generalMeanRows 1024).error 4 := by
   have he : (generalMeanRows 1024).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1024) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1024)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1024) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1024
 
@@ -3450,9 +2913,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1025).prefactor = (638490242709709/125000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3463,54 +2924,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1025).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1025).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1025).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1025).q*(generalMeanRows 1025).c/2-2 = (7/10:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable043.value]
-    have hcontinuation : (generalMeanRows 1025).q*(generalMeanRows 1025).cutoff/2-2 = (128/77:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable182.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1025).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1025
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1025).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1025).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1025).q*(generalMeanRows 1025).c/2-2 = (7/10:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable043.value]
+  have hcontinuation : (generalMeanRows 1025).q*(generalMeanRows 1025).cutoff/2-2 = (128/77:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable182.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1025).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1025).criticalRate j.val*(generalMeanRows 1025).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1025).c*(generalMeanRows 1025).criticalPoint j.val)).2-
       (generalMeanRows 1025).J/2-(generalMeanRows 1025).error (generalMeanGrid j.val)+
       (generalMeanRows 1025).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1025).c)).2-
       (generalMeanRows 1025).J/2-(generalMeanRows 1025).error 4 := by
   have he : (generalMeanRows 1025).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1025) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1025)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1025) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1025
 
@@ -3527,9 +2978,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1026).prefactor = (315065567525113/62500000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3540,52 +2989,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1026).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1026).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1026).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1026).q*(generalMeanRows 1026).c/2-2 = (2767/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable329.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1026).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1026
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1026).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1026).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1026).q*(generalMeanRows 1026).c/2-2 = (2767/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable329.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1026).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1026).criticalRate j.val*(generalMeanRows 1026).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1026).c*(generalMeanRows 1026).criticalPoint j.val)).2-
       (generalMeanRows 1026).J/2-(generalMeanRows 1026).error (generalMeanGrid j.val)+
       (generalMeanRows 1026).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1026).c)).2-
       (generalMeanRows 1026).J/2-(generalMeanRows 1026).error 4 := by
   have he : (generalMeanRows 1026).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1026) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1026)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1026) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1026
 
@@ -3602,9 +3041,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1027).prefactor = (1242246232322387/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3615,50 +3052,40 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1027).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1027).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1027).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1027).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1027
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1027).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1027).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1027).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1027).criticalRate j.val*(generalMeanRows 1027).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1027).c*(generalMeanRows 1027).criticalPoint j.val)).2-
       (generalMeanRows 1027).J/2-(generalMeanRows 1027).error (generalMeanGrid j.val)+
       (generalMeanRows 1027).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1027).c)).2-
       (generalMeanRows 1027).J/2-(generalMeanRows 1027).error 4 := by
   have he : (generalMeanRows 1027).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1027) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1027)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1027) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1027
 
@@ -3675,9 +3102,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1028).prefactor = (1223074607996291/250000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3688,52 +3113,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1028).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1028).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1028).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1028).q*(generalMeanRows 1028).cutoff/2-2 = (203/110:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable183.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1028).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1028
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1028).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1028).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1028).q*(generalMeanRows 1028).cutoff/2-2 = (203/110:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable183.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1028).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1028).criticalRate j.val*(generalMeanRows 1028).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1028).c*(generalMeanRows 1028).criticalPoint j.val)).2-
       (generalMeanRows 1028).J/2-(generalMeanRows 1028).error (generalMeanGrid j.val)+
       (generalMeanRows 1028).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1028).c)).2-
       (generalMeanRows 1028).J/2-(generalMeanRows 1028).error 4 := by
   have he : (generalMeanRows 1028).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1028) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1028)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1028) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1028
 
@@ -3750,9 +3165,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1029).prefactor = (5094252476708089/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3763,54 +3176,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1029).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1029).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1029).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1029).q*(generalMeanRows 1029).c/2-2 = (167/200:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable082.value]
-    have hcontinuation : (generalMeanRows 1029).q*(generalMeanRows 1029).cutoff/2-2 = (203/110:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable183.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1029).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1029
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1029).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1029).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1029).q*(generalMeanRows 1029).c/2-2 = (167/200:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable082.value]
+  have hcontinuation : (generalMeanRows 1029).q*(generalMeanRows 1029).cutoff/2-2 = (203/110:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable183.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1029).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1029).criticalRate j.val*(generalMeanRows 1029).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1029).c*(generalMeanRows 1029).criticalPoint j.val)).2-
       (generalMeanRows 1029).J/2-(generalMeanRows 1029).error (generalMeanGrid j.val)+
       (generalMeanRows 1029).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1029).c)).2-
       (generalMeanRows 1029).J/2-(generalMeanRows 1029).error 4 := by
   have he : (generalMeanRows 1029).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1029) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1029)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1029) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1029
 
@@ -3827,9 +3230,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1030).prefactor = (4997811930880511/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3840,52 +3241,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1030).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1030).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1030).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1030).q*(generalMeanRows 1030).c/2-2 = (3147/4000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable328.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1030).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1030
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1030).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1030).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1030).q*(generalMeanRows 1030).c/2-2 = (3147/4000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable328.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1030).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1030).criticalRate j.val*(generalMeanRows 1030).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1030).c*(generalMeanRows 1030).criticalPoint j.val)).2-
       (generalMeanRows 1030).J/2-(generalMeanRows 1030).error (generalMeanGrid j.val)+
       (generalMeanRows 1030).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1030).c)).2-
       (generalMeanRows 1030).J/2-(generalMeanRows 1030).error 4 := by
   have he : (generalMeanRows 1030).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1030) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1030)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1030) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1030
 
@@ -3902,9 +3293,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1031).prefactor = (979854774001817/200000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3915,52 +3304,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1031).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1031).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1031).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1031).q*(generalMeanRows 1031).cutoff/2-2 = (328/165:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable000.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1031).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1031
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1031).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1031).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1031).q*(generalMeanRows 1031).cutoff/2-2 = (328/165:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable000.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1031).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1031).criticalRate j.val*(generalMeanRows 1031).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1031).c*(generalMeanRows 1031).criticalPoint j.val)).2-
       (generalMeanRows 1031).J/2-(generalMeanRows 1031).error (generalMeanGrid j.val)+
       (generalMeanRows 1031).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1031).c)).2-
       (generalMeanRows 1031).J/2-(generalMeanRows 1031).error 4 := by
   have he : (generalMeanRows 1031).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1031) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1031)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1031) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1031
 
@@ -3977,9 +3356,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1032).prefactor = (5077359558728903/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -3990,54 +3367,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1032).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1032).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1032).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1032).q*(generalMeanRows 1032).c/2-2 = (703/800:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable334.value]
-    have hcontinuation : (generalMeanRows 1032).q*(generalMeanRows 1032).cutoff/2-2 = (328/165:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable000.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1032).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1032
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1032).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1032).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1032).q*(generalMeanRows 1032).c/2-2 = (703/800:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable334.value]
+  have hcontinuation : (generalMeanRows 1032).q*(generalMeanRows 1032).cutoff/2-2 = (328/165:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable000.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1032).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1032).criticalRate j.val*(generalMeanRows 1032).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1032).c*(generalMeanRows 1032).criticalPoint j.val)).2-
       (generalMeanRows 1032).J/2-(generalMeanRows 1032).error (generalMeanGrid j.val)+
       (generalMeanRows 1032).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1032).c)).2-
       (generalMeanRows 1032).J/2-(generalMeanRows 1032).error 4 := by
   have he : (generalMeanRows 1032).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1032) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1032)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1032) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1032
 
@@ -4054,9 +3421,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1033).prefactor = (4963118744112289/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4067,54 +3432,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1033).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1033).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1033).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1033).q*(generalMeanRows 1033).c/2-2 = (829/1000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable068.value]
-    have hcontinuation : (generalMeanRows 1033).q*(generalMeanRows 1033).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable335.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1033).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1033
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1033).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1033).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1033).q*(generalMeanRows 1033).c/2-2 = (829/1000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable068.value]
+  have hcontinuation : (generalMeanRows 1033).q*(generalMeanRows 1033).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable335.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1033).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1033).criticalRate j.val*(generalMeanRows 1033).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1033).c*(generalMeanRows 1033).criticalPoint j.val)).2-
       (generalMeanRows 1033).J/2-(generalMeanRows 1033).error (generalMeanGrid j.val)+
       (generalMeanRows 1033).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1033).c)).2-
       (generalMeanRows 1033).J/2-(generalMeanRows 1033).error 4 := by
   have he : (generalMeanRows 1033).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1033) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1033)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1033) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1033
 
@@ -4131,9 +3486,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1034).prefactor = (2566395378960549/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4144,54 +3497,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1034).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1034).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1034).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1034).q*(generalMeanRows 1034).c/2-2 = (449/500:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable336.value]
-    have hcontinuation : (generalMeanRows 1034).q*(generalMeanRows 1034).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable335.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1034).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1034
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1034).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1034).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1034).q*(generalMeanRows 1034).c/2-2 = (449/500:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable336.value]
+  have hcontinuation : (generalMeanRows 1034).q*(generalMeanRows 1034).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable335.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1034).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1034).criticalRate j.val*(generalMeanRows 1034).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1034).c*(generalMeanRows 1034).criticalPoint j.val)).2-
       (generalMeanRows 1034).J/2-(generalMeanRows 1034).error (generalMeanGrid j.val)+
       (generalMeanRows 1034).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1034).c)).2-
       (generalMeanRows 1034).J/2-(generalMeanRows 1034).error 4 := by
   have he : (generalMeanRows 1034).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1034) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1034)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1034) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1034
 
@@ -4208,9 +3551,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1035).prefactor = (5308263276161539/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4221,54 +3562,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1035).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1035).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1035).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1035).q*(generalMeanRows 1035).c/2-2 = (449/500:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable336.value]
-    have hcontinuation : (generalMeanRows 1035).q*(generalMeanRows 1035).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable335.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1035).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1035
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1035).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1035).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1035).q*(generalMeanRows 1035).c/2-2 = (449/500:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable336.value]
+  have hcontinuation : (generalMeanRows 1035).q*(generalMeanRows 1035).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable335.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1035).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1035).criticalRate j.val*(generalMeanRows 1035).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1035).c*(generalMeanRows 1035).criticalPoint j.val)).2-
       (generalMeanRows 1035).J/2-(generalMeanRows 1035).error (generalMeanGrid j.val)+
       (generalMeanRows 1035).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1035).c)).2-
       (generalMeanRows 1035).J/2-(generalMeanRows 1035).error 4 := by
   have he : (generalMeanRows 1035).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1035) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1035)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1035) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1035
 
@@ -4285,9 +3616,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1036).prefactor = (2744867299096547/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4298,54 +3627,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1036).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1036).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1036).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1036).q*(generalMeanRows 1036).c/2-2 = (449/500:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable336.value]
-    have hcontinuation : (generalMeanRows 1036).q*(generalMeanRows 1036).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable335.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1036).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1036
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1036).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1036).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1036).q*(generalMeanRows 1036).c/2-2 = (449/500:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable336.value]
+  have hcontinuation : (generalMeanRows 1036).q*(generalMeanRows 1036).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable335.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1036).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1036).criticalRate j.val*(generalMeanRows 1036).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1036).c*(generalMeanRows 1036).criticalPoint j.val)).2-
       (generalMeanRows 1036).J/2-(generalMeanRows 1036).error (generalMeanGrid j.val)+
       (generalMeanRows 1036).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1036).c)).2-
       (generalMeanRows 1036).J/2-(generalMeanRows 1036).error 4 := by
   have he : (generalMeanRows 1036).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1036) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1036)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1036) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1036
 
@@ -4362,9 +3681,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1037).prefactor = (567740980255049/100000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4375,52 +3692,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1037).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1037).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1037).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1037).q*(generalMeanRows 1037).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable335.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1037).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1037
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1037).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1037).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1037).q*(generalMeanRows 1037).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable335.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1037).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1037).criticalRate j.val*(generalMeanRows 1037).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1037).c*(generalMeanRows 1037).criticalPoint j.val)).2-
       (generalMeanRows 1037).J/2-(generalMeanRows 1037).error (generalMeanGrid j.val)+
       (generalMeanRows 1037).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1037).c)).2-
       (generalMeanRows 1037).J/2-(generalMeanRows 1037).error 4 := by
   have he : (generalMeanRows 1037).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1037) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1037)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1037) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1037
 
@@ -4437,9 +3744,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1038).prefactor = (2935750489350221/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4450,54 +3755,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1038).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1038).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1038).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1038).q*(generalMeanRows 1038).c/2-2 = (1727/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable337.value]
-    have hcontinuation : (generalMeanRows 1038).q*(generalMeanRows 1038).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable335.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1038).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1038
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1038).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1038).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1038).q*(generalMeanRows 1038).c/2-2 = (1727/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable337.value]
+  have hcontinuation : (generalMeanRows 1038).q*(generalMeanRows 1038).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable335.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1038).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1038).criticalRate j.val*(generalMeanRows 1038).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1038).c*(generalMeanRows 1038).criticalPoint j.val)).2-
       (generalMeanRows 1038).J/2-(generalMeanRows 1038).error (generalMeanGrid j.val)+
       (generalMeanRows 1038).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1038).c)).2-
       (generalMeanRows 1038).J/2-(generalMeanRows 1038).error 4 := by
   have he : (generalMeanRows 1038).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1038) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1038)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1038) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1038
 
@@ -4514,9 +3809,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1039).prefactor = (2985510405012273/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4527,54 +3820,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1039).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1039).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1039).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1039).q*(generalMeanRows 1039).c/2-2 = (1589/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable251.value]
-    have hcontinuation : (generalMeanRows 1039).q*(generalMeanRows 1039).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable335.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1039).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1039
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1039).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1039).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1039).q*(generalMeanRows 1039).c/2-2 = (1589/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable251.value]
+  have hcontinuation : (generalMeanRows 1039).q*(generalMeanRows 1039).cutoff/2-2 = (3296/1595:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable335.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1039).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1039).criticalRate j.val*(generalMeanRows 1039).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1039).c*(generalMeanRows 1039).criticalPoint j.val)).2-
       (generalMeanRows 1039).J/2-(generalMeanRows 1039).error (generalMeanGrid j.val)+
       (generalMeanRows 1039).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1039).c)).2-
       (generalMeanRows 1039).J/2-(generalMeanRows 1039).error 4 := by
   have he : (generalMeanRows 1039).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1039) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1039)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1039) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1039
 
@@ -4591,9 +3874,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1040).prefactor = (5044262486406209/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4604,50 +3885,40 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1040).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1040).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1040).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1040).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1040
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1040).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1040).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1040).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1040).criticalRate j.val*(generalMeanRows 1040).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1040).c*(generalMeanRows 1040).criticalPoint j.val)).2-
       (generalMeanRows 1040).J/2-(generalMeanRows 1040).error (generalMeanGrid j.val)+
       (generalMeanRows 1040).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1040).c)).2-
       (generalMeanRows 1040).J/2-(generalMeanRows 1040).error 4 := by
   have he : (generalMeanRows 1040).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1040) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1040)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1040) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1040
 
@@ -4664,9 +3935,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1041).prefactor = (9698242317277/1953125000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4677,52 +3946,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1041).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1041).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1041).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1041).q*(generalMeanRows 1041).cutoff/2-2 = (1583/924:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable338.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1041).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1041
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1041).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1041).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1041).q*(generalMeanRows 1041).cutoff/2-2 = (1583/924:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable338.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1041).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1041).criticalRate j.val*(generalMeanRows 1041).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1041).c*(generalMeanRows 1041).criticalPoint j.val)).2-
       (generalMeanRows 1041).J/2-(generalMeanRows 1041).error (generalMeanGrid j.val)+
       (generalMeanRows 1041).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1041).c)).2-
       (generalMeanRows 1041).J/2-(generalMeanRows 1041).error 4 := by
   have he : (generalMeanRows 1041).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1041) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1041)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1041) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1041
 
@@ -4739,9 +3998,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1042).prefactor = (2608182308626923/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4752,52 +4009,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1042).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1042).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1042).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1042).q*(generalMeanRows 1042).cutoff/2-2 = (1583/924:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable338.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1042).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1042
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1042).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1042).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1042).q*(generalMeanRows 1042).cutoff/2-2 = (1583/924:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable338.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1042).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1042).criticalRate j.val*(generalMeanRows 1042).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1042).c*(generalMeanRows 1042).criticalPoint j.val)).2-
       (generalMeanRows 1042).J/2-(generalMeanRows 1042).error (generalMeanGrid j.val)+
       (generalMeanRows 1042).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1042).c)).2-
       (generalMeanRows 1042).J/2-(generalMeanRows 1042).error 4 := by
   have he : (generalMeanRows 1042).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1042) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1042)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1042) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1042
 
@@ -4814,9 +4061,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1043).prefactor = (2556585152110743/500000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4827,50 +4072,40 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1043).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1043).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1043).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1043).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1043
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1043).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1043).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1043).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1043).criticalRate j.val*(generalMeanRows 1043).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1043).c*(generalMeanRows 1043).criticalPoint j.val)).2-
       (generalMeanRows 1043).J/2-(generalMeanRows 1043).error (generalMeanGrid j.val)+
       (generalMeanRows 1043).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1043).c)).2-
       (generalMeanRows 1043).J/2-(generalMeanRows 1043).error 4 := by
   have he : (generalMeanRows 1043).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1043) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1043)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1043) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1043
 
@@ -4887,9 +4122,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1044).prefactor = (5010098897659089/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4900,50 +4133,40 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1044).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1044).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1044).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1044).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1044
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1044).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1044).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1044).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1044).criticalRate j.val*(generalMeanRows 1044).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1044).c*(generalMeanRows 1044).criticalPoint j.val)).2-
       (generalMeanRows 1044).J/2-(generalMeanRows 1044).error (generalMeanGrid j.val)+
       (generalMeanRows 1044).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1044).c)).2-
       (generalMeanRows 1044).J/2-(generalMeanRows 1044).error 4 := by
   have he : (generalMeanRows 1044).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1044) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1044)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1044) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1044
 
@@ -4960,9 +4183,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1045).prefactor = (4906759121548101/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -4973,52 +4194,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1045).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1045).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1045).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1045).q*(generalMeanRows 1045).cutoff/2-2 = (23/12:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable028.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1045).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1045
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1045).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1045).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1045).q*(generalMeanRows 1045).cutoff/2-2 = (23/12:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable028.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1045).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1045).criticalRate j.val*(generalMeanRows 1045).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1045).c*(generalMeanRows 1045).criticalPoint j.val)).2-
       (generalMeanRows 1045).J/2-(generalMeanRows 1045).error (generalMeanGrid j.val)+
       (generalMeanRows 1045).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1045).c)).2-
       (generalMeanRows 1045).J/2-(generalMeanRows 1045).error 4 := by
   have he : (generalMeanRows 1045).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1045) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1045)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1045) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1045
 
@@ -5035,9 +4246,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1046).prefactor = (5105763409703809/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -5048,52 +4257,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1046).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1046).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1046).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1046).q*(generalMeanRows 1046).cutoff/2-2 = (23/12:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable028.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1046).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1046
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1046).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1046).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1046).q*(generalMeanRows 1046).cutoff/2-2 = (23/12:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable028.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1046).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1046).criticalRate j.val*(generalMeanRows 1046).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1046).c*(generalMeanRows 1046).criticalPoint j.val)).2-
       (generalMeanRows 1046).J/2-(generalMeanRows 1046).error (generalMeanGrid j.val)+
       (generalMeanRows 1046).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1046).c)).2-
       (generalMeanRows 1046).J/2-(generalMeanRows 1046).error 4 := by
   have he : (generalMeanRows 1046).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1046) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1046)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1046) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1046
 
@@ -5110,9 +4309,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1047).prefactor = (4985064449104499/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -5123,52 +4320,42 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1047).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1047).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1047).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hcontinuation : (generalMeanRows 1047).q*(generalMeanRows 1047).cutoff/2-2 = (1619/812:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable339.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1047).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1047
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1047).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1047).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hcontinuation : (generalMeanRows 1047).q*(generalMeanRows 1047).cutoff/2-2 = (1619/812:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable339.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1047).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1047).criticalRate j.val*(generalMeanRows 1047).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1047).c*(generalMeanRows 1047).criticalPoint j.val)).2-
       (generalMeanRows 1047).J/2-(generalMeanRows 1047).error (generalMeanGrid j.val)+
       (generalMeanRows 1047).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1047).c)).2-
       (generalMeanRows 1047).J/2-(generalMeanRows 1047).error 4 := by
   have he : (generalMeanRows 1047).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1047) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1047)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1047) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1047
 
@@ -5185,9 +4372,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1048).prefactor = (5173987400135099/1000000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -5198,54 +4383,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1048).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1048).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1048).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1048).q*(generalMeanRows 1048).c/2-2 = (1727/2000:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable337.value]
-    have hcontinuation : (generalMeanRows 1048).q*(generalMeanRows 1048).cutoff/2-2 = (1619/812:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable339.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1048).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1048
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1048).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1048).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1048).q*(generalMeanRows 1048).c/2-2 = (1727/2000:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable337.value]
+  have hcontinuation : (generalMeanRows 1048).q*(generalMeanRows 1048).cutoff/2-2 = (1619/812:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable339.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1048).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1048).criticalRate j.val*(generalMeanRows 1048).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1048).c*(generalMeanRows 1048).criticalPoint j.val)).2-
       (generalMeanRows 1048).J/2-(generalMeanRows 1048).error (generalMeanGrid j.val)+
       (generalMeanRows 1048).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1048).c)).2-
       (generalMeanRows 1048).J/2-(generalMeanRows 1048).error 4 := by
   have he : (generalMeanRows 1048).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1048) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1048)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1048) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1048
 
@@ -5262,9 +4437,7 @@ private noncomputable def errorValues (j : Fin 121) : ℚ := (errorNumerators j 
 
 private theorem prefactorValue : (generalMeanRows 1049).prefactor = (503837096431961/100000000000000) := by
   simp only [GeneralMeanRow.prefactor, GeneralMeanRow.prefactorArgument,
-    logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+    GeneralPrefactorLogs.lower_eq_cache]
   try simp only [expUpperRoundedQ_eq_integer]
   decide +kernel
 
@@ -5275,54 +4448,44 @@ private theorem cutoffLogValue : (logRoundedQ ((generalMeanRows 1049).cutoff/(ge
   simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
   decide +kernel
 
-private theorem errorValue (j : ℕ) (hj : j < 121) :
-    (generalMeanRows 1049).error (generalMeanGrid j) = errorValues ⟨j,hj⟩ := by
-  have hall : ∀ j : Fin 121, (generalMeanRows 1049).error (generalMeanGrid j.val) = errorValues j := by
-    simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
-    have hfirst : (generalMeanRows 1049).q*(generalMeanRows 1049).c/2-2 = (161/200:ℚ) := by decide +kernel
-    simp only [hfirst, GeneralMeanDecayTable110.value]
-    have hcontinuation : (generalMeanRows 1049).q*(generalMeanRows 1049).cutoff/2-2 = (407/196:ℚ) := by decide +kernel
-    simp only [hcontinuation, GeneralMeanDecayTable340.value]
-    try simp only [expUpperRoundedQ_eq_integer]
-    decide +kernel
-  exact hall ⟨j,hj⟩
-
-private theorem prefactorDomain : roundUpQ (generalMeanRows 1049).prefactorArgument < 82 :=
-  generalMeanRows_prefactorDomain 1049
-
-private theorem slopePositive (j : Fin 120) : 0 < (generalMeanRows 1049).criticalRate j.val := by
-  simp only [GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  rw [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+private theorem errorValue (j : Fin 121) :
+    (generalMeanRows 1049).error (generalMeanGrid j.val) = errorValues j := by
   revert j
+  simp only [GeneralMeanRow.error, GeneralMeanRow.rawError, prefactorValue, cutoffLogValue]
+  have hfirst : (generalMeanRows 1049).q*(generalMeanRows 1049).c/2-2 = (161/200:ℚ) := by decide +kernel
+  simp only [hfirst, GeneralMeanDecayTable110.value]
+  have hcontinuation : (generalMeanRows 1049).q*(generalMeanRows 1049).cutoff/2-2 = (407/196:ℚ) := by decide +kernel
+  simp only [hcontinuation, GeneralMeanDecayTable340.value]
+  try simp only [expUpperRoundedQ_eq_integer]
+  simp only [resolventUpperQ_eq_integer, resolventLowerQ_eq_integer]
   decide +kernel
 
-private theorem criticalMargin (j : Fin 120) :
+private theorem criticalConditions (j : Fin 120) :
+    0 < (generalMeanRows 1049).criticalRate j.val ∧
     0 ≤ 2+(generalMeanRows 1049).criticalRate j.val*(generalMeanRows 1049).criticalPoint j.val-
       (logRoundedQ ((generalMeanRows 1049).c*(generalMeanRows 1049).criticalPoint j.val)).2-
       (generalMeanRows 1049).J/2-(generalMeanRows 1049).error (generalMeanGrid j.val)+
       (generalMeanRows 1049).slope j.val*generalMeanGrid j.val := by
   simp only [GeneralMeanRow.criticalPoint, GeneralMeanRow.criticalRate, GeneralMeanRow.slope]
-  simp only [errorValue j.val (by omega), errorValue (j.val+1) (by omega)]
+  simp only [errorValue ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩,
+    errorValue ⟨j.val+1, Nat.succ_lt_succ j.isLt⟩]
   revert j
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 private theorem finalMargin :
     0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*(generalMeanRows 1049).c)).2-
       (generalMeanRows 1049).J/2-(generalMeanRows 1049).error 4 := by
   have he : (generalMeanRows 1049).error 4 = errorValues 120 := by
-    convert errorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    simpa only [generalMeanGrid_last] using errorValue (120 : Fin 121)
   rw [he]
-  simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
-  simp only [logUnitLowerQ_two, logUnitUpperQ_two]
-  simp only [logUnitLowerQ_eq_int, logUnitUpperQ_eq_int]
+  simp only [GeneralCriticalLogs.upper_eq_cache]
   decide +kernel
 
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 1049) :=
   generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 1049)
-    prefactorDomain slopePositive criticalMargin finalMargin
+    (generalMeanRows_prefactorDomain 1049) (fun j => (criticalConditions j).1)
+    (fun j => (criticalConditions j).2) finalMargin
 
 end SingularValueBounds.KL.Certificates.EntropyRow1049
 

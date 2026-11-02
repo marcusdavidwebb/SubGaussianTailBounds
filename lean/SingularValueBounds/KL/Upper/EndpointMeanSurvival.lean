@@ -21,7 +21,7 @@ theorem endpoint_mean_joint_survival (h : EndpointMeanCertificateConditions)
       realEval₂ (endpointMeanBilinearQ ki ai) a k := by
   have hc := h.jointCutoff ki ai hact
   have hd : Real.exp (-(18 : ℝ))≤(endpointDecayQ 90 8000 : ℝ) := by
-    convert (h.decays 90 (by norm_num)).sound (j := 8000) (by norm_num) using 1 <;> norm_num
+    convert! (h.decays 90 (by norm_num)).sound (j := 8000) (by norm_num) using 1 <;> norm_num
   have hg := entropy_grid_bound_real hc.1 hc.2 hT hT0 hTail
     (h.gridLogs _ (by simp only [Finset.mem_Icc]; omega))
     (fun j hj => by
@@ -51,7 +51,7 @@ theorem endpoint_mean_small_survival (h : EndpointMeanCertificateConditions)
         entropyKernel ((endpointSmallCutoff i : ℝ)/200) u*T u)≤(endpointSmallTarget i : ℝ) := by
   have hc := h.smallCutoff i
   have hd : Real.exp (-(18 : ℝ))≤(endpointDecayQ 90 8000 : ℝ) := by
-    convert (h.decays 90 (by norm_num)).sound (j := 8000) (by norm_num) using 1 <;> norm_num
+    convert! (h.decays 90 (by norm_num)).sound (j := 8000) (by norm_num) using 1 <;> norm_num
   have hg := entropy_grid_bound_real hc.1 hc.2 hT hT0 hTail
     (h.gridLogs _ (by simp only [Finset.mem_Icc]; omega))
     (fun j hj => by
@@ -102,7 +102,7 @@ theorem endpoint_mean_small_survival (h : EndpointMeanCertificateConditions)
   have hn : (entropyGridBoundQ (endpointSmallCutoff i) (endpointSmallBound i)
       (endpointDecayQ 90 8000) : ℝ)≤(endpointSmallTarget i : ℝ) := by exact_mod_cast h.smallNumerical i
   apply hg.trans
-  convert hn using 1 <;> unfold entropyGridBoundReal entropyGridBoundQ <;> push_cast <;> rfl
+  convert! hn using 1 <;> unfold entropyGridBoundReal entropyGridBoundQ <;> push_cast <;> rfl
 
 end
 end SingularValueBounds.KL

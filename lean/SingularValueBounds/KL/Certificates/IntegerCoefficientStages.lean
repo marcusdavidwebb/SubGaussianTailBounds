@@ -1,3 +1,5 @@
+import Mathlib.Algebra.BigOperators.Field
+import SingularValueBounds.KL.Certificates.IntegerMatrixNotation
 import SingularValueBounds.KL.Certificates.EndpointPolynomialStages
 
 /-!
@@ -74,8 +76,8 @@ theorem boxCertificate_of_integerStages (n m : ℕ)
 
 
 /-- Fixed integer Bernstein weights, shared by every degree-(6,15) box. -/
-def bernsteinIntegerWeights6 : Fin 7 → Fin 7 → ℤ :=
-  fun i k => (![![60, 0, 0, 0, 0, 0, 0],
+noncomputable def bernsteinIntegerWeights6 : Fin 7 → Fin 7 → ℤ :=
+  fun i k => (integer_matrix![![60, 0, 0, 0, 0, 0, 0],
     ![60, 10, 0, 0, 0, 0, 0],
     ![60, 20, 4, 0, 0, 0, 0],
     ![60, 30, 12, 3, 0, 0, 0],
@@ -90,8 +92,8 @@ theorem bernsteinIntegerWeights6_exact (i k : Fin 7) :
   simp only [Nat.choose_eq_fast_choose]
   decide +kernel
 
-def bernsteinIntegerWeights15 : Fin 16 → Fin 16 → ℤ :=
-  fun i k => (![![45045, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+noncomputable def bernsteinIntegerWeights15 : Fin 16 → Fin 16 → ℤ :=
+  fun i k => (integer_matrix![![45045, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ![45045, 3003, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ![45045, 6006, 429, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ![45045, 9009, 1287, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],

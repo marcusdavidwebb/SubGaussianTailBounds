@@ -54,7 +54,7 @@ theorem mixedInverse_le_iff {g : ℝ → ℝ} {l : ℝ} (hl : l ≤ 1)
   unfold mixedInverse
   rw [hp]
   have he : e (e.symm ⟨c,hc'⟩) ≤ e ⟨x,hx⟩ ↔ e.symm ⟨c,hc'⟩ ≤ ⟨x,hx⟩ := e.le_iff_le
-  simpa only [OrderIso.apply_symm_apply] using he.symm
+  simpa only [OrderIso.apply_symm_apply] using! he.symm
 
 theorem mixedInverse_apply {g : ℝ → ℝ} {l : ℝ} (hl : l ≤ 1)
     (hc : ContinuousOn g (Icc l 1)) (hm : StrictMonoOn g (Icc l 1))

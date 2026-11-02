@@ -20,6 +20,7 @@ abbrev BarrierState (ι : Type*) [Fintype ι] [DecidableEq ι] :=
 namespace BarrierState
 
 def R (q : BarrierState ι) : Matrix ι ι ℝ := q.1.1
+omit [Nonempty ι] in
 lemma positive (q : BarrierState ι) : q.R.PosDef := q.1.2
 def shifts (q : BarrierState ι) : ℝ := q.2.1
 def outward (q : BarrierState ι) : ℝ := q.2.2.1
@@ -65,12 +66,14 @@ namespace CorrectionRule
 def prepared (c : CorrectionRule ι) (R : PositiveResolvent ι) : PositiveResolvent ι :=
   ⟨outwardResolvent R.1 (c.amount R), outwardResolvent_posDef R.2 (c.nonneg R)⟩
 
+omit [Nonempty ι] in
 lemma measurable_prepared (c : CorrectionRule ι) : Measurable c.prepared := by
   apply Measurable.subtype_mk
   change Measurable (fun R : PositiveResolvent ι => (R.1⁻¹+c.amount R • (1 : Matrix ι ι ℝ))⁻¹)
   apply measurable_matrix_inverse.comp
   exact (measurable_matrix_inverse.comp measurable_subtype_coe).add (c.measurable.smul measurable_const)
 
+omit [Nonempty ι] in
 lemma prepared_inv (c : CorrectionRule ι) (R : PositiveResolvent ι) :
     (c.prepared R).1⁻¹ = R.1⁻¹ + c.amount R • (1 : Matrix ι ι ℝ) := by
   exact Matrix.nonsing_inv_nonsing_inv _
@@ -106,8 +109,8 @@ lemma measurable_step (c : CorrectionRule ι) (upper : Bool) :
     (show Continuous (fun x : ι → ℝ => Matrix.vecMulVec x x) by fun_prop).measurable.comp hx
   have hg : Measurable (fun z : T => rowGap upper (c.prepared z.1.1) z.2) := by
     cases upper
-    · simpa only [rowGap, Bool.false_eq_true, if_false] using (hR.add ho).sub (hδ.smul measurable_const)
-    · simpa only [rowGap, Bool.true_eq, if_true] using (hR.add (hδ.smul measurable_const)).sub ho
+    · simpa only [rowGap, Bool.false_eq_true, if_false] using! (hR.add ho).sub (hδ.smul measurable_const)
+    · simpa only [rowGap, Bool.true_eq, if_true] using! (hR.add (hδ.smul measurable_const)).sub ho
   have hs : Measurable (fun z : T => z.1.shifts) :=
     measurable_fst.comp (measurable_snd.comp measurable_fst)
   have hc : Measurable (fun z : T => z.1.outward) :=
@@ -118,7 +121,8 @@ lemma measurable_step (c : CorrectionRule ι) (upper : Bool) :
       (⟨(rowGap upper (c.prepared z.1.1) z.2)⁻¹,
         (rowGap_preserves upper (c.prepared z.1.1) z.2).1.inv⟩ : PositiveResolvent ι)) :=
     (measurable_matrix_inverse.comp hg).subtype_mk
-  simpa only [step, BarrierState.shifts, BarrierState.outward, BarrierState.gram] using
+  simpa only [step, BarrierState.shifts, BarrierState.outward, BarrierState.gram,
+    Pi.add_apply, Function.comp_def] using!
     hnew.prodMk ((hs.add hδ).prodMk ((hc.add (c.measurable.comp hr)).prodMk (hgram.add ho)))
 
 attribute [local semireducible] prepared exactShift rowGap
@@ -173,7 +177,7 @@ def traceChain (c : CorrectionRule ι) (upper : Bool) (R₀ : PositiveResolvent 
   R i := (c.process upper R₀ x i).R
   positive i _ := (c.process upper R₀ x i).positive
   amount i := c.amount (c.process upper R₀ x i).1
-  nonneg i _ := c.nonneg _
+  nonneg _ _ := c.nonneg _
   trace_next i _ := c.step_trace upper (c.process upper R₀ x i) (x i)
 
 /-- The inverse gap has exactly the accumulated scalar cost and Gram matrix. -/
@@ -188,11 +192,11 @@ lemma process_inverse (c : CorrectionRule ι) (upper : Bool) (R₀ : PositiveRes
   | zero => simp [process, BarrierState.R, BarrierState.shifts, BarrierState.outward, BarrierState.gram]
   | succ m ih =>
     rw [process, c.step_inv]
-    simp only [rowGap, Bool.false_eq_true, Bool.true_eq, if_false, if_true]
+    simp only [rowGap, Bool.false_eq_true, if_false, if_true]
     rw [c.prepared_inv]
-    simp only [Bool.false_eq_true, Bool.true_eq, if_false, if_true, BarrierState.R] at ih
+    simp only [Bool.false_eq_true, if_false, if_true, BarrierState.R] at ih
     rw [ih]
-    simp only [process, step, BarrierState.shifts, BarrierState.outward, BarrierState.gram,
+    simp only [step, BarrierState.shifts, BarrierState.outward, BarrierState.gram,
       add_smul, sub_smul]
     abel
 
@@ -202,12 +206,12 @@ end CorrectionRule
 def constantCorrectionRule (K : ℝ) {w b : ℝ} (hw : 0 ≤ w) (hb : 0 < b) : CorrectionRule ι where
   amount R := constantCorrection K w b R.1
   measurable := measurable_constantCorrection K hw hb
-  nonneg R := (constantCorrection_spec R.2 K hw hb).1
+  nonneg R := (constantCorrection_spec R.2 K hb).1
 
 lemma constantCorrectionRule_cap (K : ℝ) {w b : ℝ} (hw : 0 ≤ w) (hb : 0 < b)
     (R : PositiveResolvent ι) :
     regularityCost K w ((constantCorrectionRule K hw hb).prepared R).1 ≤ b :=
-  (constantCorrection_spec R.2 K hw hb).2
+  (constantCorrection_spec R.2 K hb).2
 
 /-- Total correction cost for every deterministic row sequence, before evaluating
 its explicit scalar initial trace. -/

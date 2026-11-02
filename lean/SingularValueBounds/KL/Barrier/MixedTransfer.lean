@@ -62,7 +62,7 @@ theorem lower_mixed_row_general_of_certificates {X : Ω→Fin n→ℝ} {K : ℝ}
     change K^2*Matrix.trace R.1+frobenius R.1*(K^2*logParameter K*
       generalLowerProfile (spectralRatio R.1 R.2))≤b at hcap
     nlinarith only [hcap]
-  exact lowerShift_general_laplace_of_certificates hdata hsg hiso hK R.2 hc hb hℓ.le
+  exact lowerShift_general_laplace_of_certificates hdata hsg hiso hK R.2 hc hℓ.le
 
 theorem lower_mixed_row_one_of_certificates {X : Ω→Fin n→ℝ}
     (htable : Certificates.EndpointTableConditions) (hfar : Certificates.EndpointFarConditions)
@@ -71,7 +71,7 @@ theorem lower_mixed_row_one_of_certificates {X : Ω→Fin n→ℝ}
   intro R b hb hcap ℓ hℓ
   have hc : Matrix.trace R.1+frobenius R.1*min (2*spectralRatio R.1 R.2) (73/50)≤b := by
     simpa only [mixedCost,one_mul] using hcap
-  exact lowerShift_endpoint_laplace_of_certificates htable hfar hsg hiso R.2 hc hb hℓ.le
+  exact lowerShift_endpoint_laplace_of_certificates htable hfar hsg hiso R.2 hc hℓ.le
 
 /-- The actual mixed construction discharges the complete pathwise budget;
 only the stated row estimates remain as an intermediate analytic input. -/

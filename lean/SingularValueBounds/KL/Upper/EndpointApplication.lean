@@ -41,7 +41,6 @@ theorem upperShift_endpoint_high_mgf
       simpa only [Function.comp_def] using (measurable_upperShift (ι := ι)).comp hp)
   have hY0 : ∀ω,0≤Y ω := fun ω =>
     mul_nonneg (sub_pos.mpr hb).le (upperShift_nonneg hR (X ω))
-  have hT0 : ∀ω,0≤T ω := quadraticForm_nonneg (upperSquareWeight_posDef hR).posSemidef X
   have hG0 : ∀g,0≤G g := by
     intro g
     exact Finset.sum_nonneg (fun j hj => mul_nonneg (sq_nonneg _) (sq_nonneg _))
@@ -76,7 +75,7 @@ theorem upperShift_endpoint_high_mgf
     rw [he] at h
     exact h.trans (mul_le_mul_of_nonneg_right hs (Real.exp_nonneg _))
   apply endpoint_mgf_of_rare_gaussian (ν := standardGaussian ι) (Y := Y) (T := T)
-    (G := G) (E := E) i hY hY0 hT0 hG.aemeasurable hG0 hE ht ht4 hMean
+    (G := G) (E := E) i hY hY0 hG.aemeasurable hG0 hE ht ht4 hMean
     (hiso.quadratic_integrable _) ((hiso.quadratic_mean _).trans (upperSquareWeight_trace hR))
     (endpointGaussian_mean hx.2) (fun p => (hGMom p).1) hComp.1 hComp.2
   · intro ω hω
@@ -89,7 +88,7 @@ theorem upperShift_endpoint_high_mgf
   · exact upperComparison_endpoint_rare_probability hcert hsg hiso.measurable hR i top hw hcap hκ
   · exact hTail
   · exact endpoint_row_cutoff i
-  · exact endpointGaussian_second i hx.1 hx.2 top hκ
+  · exact endpointGaussian_second i hx.2 top hκ
   · intro p hp
     exact (hGMom p).2
 

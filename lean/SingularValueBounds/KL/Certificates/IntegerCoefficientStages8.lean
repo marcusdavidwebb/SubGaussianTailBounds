@@ -1,3 +1,4 @@
+import SingularValueBounds.KL.Certificates.IntegerMatrixNotation
 import SingularValueBounds.KL.Certificates.IntegerCoefficientStages
 
 /-! Shared integer Bernstein weights for the degree-(8,15) general-mean tests. -/
@@ -5,8 +6,8 @@ open Polynomial
 open scoped BigOperators
 namespace SingularValueBounds.KL.Certificates
 
-def bernsteinIntegerWeights8 : Fin 9 → Fin 9 → ℤ :=
-  fun i k => (![![280, 0, 0, 0, 0, 0, 0, 0, 0],
+noncomputable def bernsteinIntegerWeights8 : Fin 9 → Fin 9 → ℤ :=
+  fun i k => (integer_matrix![![280, 0, 0, 0, 0, 0, 0, 0, 0],
     ![280, 35, 0, 0, 0, 0, 0, 0, 0],
     ![280, 70, 10, 0, 0, 0, 0, 0, 0],
     ![280, 105, 30, 5, 0, 0, 0, 0, 0],

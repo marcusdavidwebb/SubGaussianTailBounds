@@ -8,7 +8,7 @@ open Set Filter MeasureTheory
 open scoped BigOperators Matrix Topology
 namespace SingularValueBounds.KL
 noncomputable section
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 def outwardResolvent (R : Matrix ι ι ℝ) (ω : ℝ) : Matrix ι ι ℝ :=
   (R⁻¹ + ω • (1 : Matrix ι ι ℝ))⁻¹
@@ -58,7 +58,7 @@ lemma outward_frobenius {R : Matrix ι ι ℝ} (hR : R.PosDef) {ω : ℝ} (hω :
   rw [frobenius_eq_sqrt_trace_square (outwardResolvent_posDef hR hω).isHermitian,
     outward_powerTrace hR hω]
 
-theorem outward_trace_strictAnti {R : Matrix ι ι ℝ} (hR : R.PosDef) :
+theorem outward_trace_strictAnti [Nonempty ι] {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     StrictAntiOn (fun ω => Matrix.trace (outwardResolvent R ω)) (Ici 0) := by
   intro a ha b hb hab
   change Matrix.trace (outwardResolvent R b) < Matrix.trace (outwardResolvent R a)
@@ -78,6 +78,7 @@ lemma continuousOn_outwardResolvent {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     (show ContinuousAt (fun x : ℝ => R⁻¹ + x • (1 : Matrix ι ι ℝ)) ω by
       fun_prop)).continuousWithinAt
 
+omit [DecidableEq ι] in
 lemma continuous_frobenius : Continuous (frobenius (ι := ι)) := by
   unfold frobenius
   fun_prop
@@ -87,7 +88,7 @@ lemma measurable_outwardResolvent :
   measurable_matrix_inverse.comp ((measurable_matrix_inverse.comp measurable_fst).add
     (measurable_snd.smul measurable_const))
 
-theorem hasDerivAt_outwardTrace {R : Matrix ι ι ℝ} (hR : R.PosDef)
+theorem hasDerivAt_outwardTrace [Nonempty ι] {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {ω : ℝ} (hω : 0 ≤ ω) :
     HasDerivAt (fun x => Matrix.trace (outwardResolvent R x))
       (-(frobenius (outwardResolvent R ω))^2) ω := by
@@ -110,10 +111,10 @@ theorem hasDerivAt_outwardTrace {R : Matrix ι ι ℝ} (hR : R.PosDef)
       (-reciprocalTrace H.2.eigenvalues 2 ω) ω := by
     have ht (i : ι) : HasDerivAt (fun x : ℝ => (x - H.2.eigenvalues i)⁻¹)
         (-((ω - H.2.eigenvalues i)⁻¹)^2) ω := by
-      convert ((hasDerivAt_id ω).sub_const (H.2.eigenvalues i)).inv
-        (sub_pos.mpr (ha i)).ne' using 1 <;> simp <;> ring
+      convert! ((hasDerivAt_id ω).sub_const (H.2.eigenvalues i)).inv
+        (sub_pos.mpr (ha i)).ne' using 1 <;> (try simp) <;> ring
     unfold reciprocalTrace
-    simpa only [pow_one, Finset.sum_neg_distrib] using
+    simpa only [pow_one, Finset.sum_neg_distrib, Finset.sum_fn] using!
       HasDerivAt.sum (u := Finset.univ) (fun i _ => ht i)
   have hf : (frobenius (outwardResolvent R ω))^2 = reciprocalTrace H.2.eigenvalues 2 ω := by
     rw [outward_frobenius hR hω]
@@ -128,7 +129,7 @@ lemma leastCorrection_mem {f : ℝ → ℝ} {b : ℝ}
     0 ≤ leastCorrection f b ∧ f (leastCorrection f b) ≤ b := by
   have hclosed : IsClosed {x : ℝ | 0 ≤ x ∧ f x ≤ b} := by
     have := hc.preimage_isClosed_of_isClosed isClosed_Ici (isClosed_Iic : IsClosed (Iic b))
-    simpa only [Set.preimage, Set.mem_Iic, Set.setOf_and] using this
+    simpa only [Set.preimage, Set.mem_Iic, Set.setOf_and] using! this
   exact hclosed.csInf_mem hne ⟨0, fun x hx => hx.1⟩
 
 lemma leastCorrection_le_iff {f : ℝ → ℝ} {b x : ℝ}
@@ -157,7 +158,7 @@ lemma constantCost_continuous {R : Matrix ι ι ℝ} (hR : R.PosDef) (K w : ℝ)
     (continuousOn_const.mul (continuous_frobenius.comp_continuousOn
       (continuousOn_outwardResolvent hR))))
 
-lemma constantCost_antitone {R : Matrix ι ι ℝ} (hR : R.PosDef) (K : ℝ)
+lemma constantCost_antitone [Nonempty ι] {R : Matrix ι ι ℝ} (hR : R.PosDef) (K : ℝ)
     {w : ℝ} (hw : 0 ≤ w) :
     AntitoneOn (fun x => regularityCost K w (outwardResolvent R x)) (Ici 0) := by
   intro x hx y hy hxy
@@ -178,7 +179,7 @@ lemma constantCost_tendsto {R : Matrix ι ι ℝ} (hR : R.PosDef) (K w : ℝ) :
     filter_upwards [eventually_ge_atTop (0 : ℝ)] with x hx
     simp only [regularityCost, outward_trace hR hx, outward_frobenius hR hx]
   apply Filter.Tendsto.congr' he.symm
-  simpa only [mul_zero, Real.sqrt_zero, add_zero] using
+  simpa only [mul_zero, Real.sqrt_zero, add_zero] using!
     ((tendsto_const_nhds.mul (reciprocalTrace_tendsto (outwardBase R hR).2.eigenvalues
       (by decide : 1 ≠ 0))).add (tendsto_const_nhds.mul
         (Real.continuous_sqrt.continuousAt.tendsto.comp
@@ -195,12 +196,12 @@ def constantCorrection (K w b : ℝ) (R : Matrix ι ι ℝ) : ℝ :=
   leastCorrection (fun x => regularityCost K w (outwardResolvent R x)) b
 
 theorem constantCorrection_spec {R : Matrix ι ι ℝ} (hR : R.PosDef)
-    (K : ℝ) {w b : ℝ} (_hw : 0 ≤ w) (hb : 0 < b) :
+    (K : ℝ) {w b : ℝ} (hb : 0 < b) :
     0 ≤ constantCorrection K w b R ∧
       regularityCost K w (outwardResolvent R (constantCorrection K w b R)) ≤ b :=
   leastCorrection_mem (constantCost_continuous hR K w) (constantCost_nonempty hR K w hb)
 
-theorem constantCorrection_le_iff {R : Matrix ι ι ℝ} (hR : R.PosDef)
+theorem constantCorrection_le_iff [Nonempty ι] {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (K : ℝ) {w b x : ℝ} (hw : 0 ≤ w) (hb : 0 < b) :
     constantCorrection K w b R ≤ x ↔
       0 ≤ x ∧ regularityCost K w (outwardResolvent R x) ≤ b :=
@@ -208,7 +209,7 @@ theorem constantCorrection_le_iff {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (constantCost_nonempty hR K w hb)
 
 set_option maxHeartbeats 800000 in
-theorem measurable_constantCorrection (K : ℝ) {w b : ℝ} (hw : 0 ≤ w) (hb : 0 < b) :
+theorem measurable_constantCorrection [Nonempty ι] (K : ℝ) {w b : ℝ} (hw : 0 ≤ w) (hb : 0 < b) :
     Measurable (fun R : {R : Matrix ι ι ℝ // R.PosDef} => constantCorrection K w b R.1) := by
   apply measurable_of_Iic
   intro x

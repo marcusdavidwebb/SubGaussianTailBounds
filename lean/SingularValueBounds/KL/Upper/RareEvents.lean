@@ -47,7 +47,7 @@ This deterministic rare-event split does not claim moment domination of
 the original sub-Gaussian quadratic form. -/
 theorem mgf_rare_event_split [IsProbabilityMeasure μ] {Y T : Ω → ℝ}
     {E : Set Ω} {t : ℝ} (hE : MeasurableSet E) (ht : 0≤t)
-    (hY0 : ∀ ω, 0≤Y ω) (hT0 : ∀ ω, 0≤T ω)
+    (hY0 : ∀ ω, 0≤Y ω)
     (hYi : Integrable Y μ) (hTi : Integrable T μ)
     (hYE : Integrable (fun ω => Real.exp (t*Y ω)) μ)
     (hTE : Integrable (fun ω => Real.exp (t*T ω)) μ)
@@ -65,7 +65,7 @@ theorem mgf_rare_event_split [IsProbabilityMeasure μ] {Y T : Ω → ℝ}
     by_cases hω : ω∈E
     · simp only [Set.indicator_of_mem hω]
       linarith [exponentialRemainder_nonneg t (T ω)]
-    · simp only [Set.indicator_of_not_mem hω,add_zero]
+    · simp only [Set.indicator_of_notMem hω,add_zero]
       exact exponentialRemainder_mono ht (hY0 ω) (hGood ω hω)
   have hi := integral_mono hRY (hRT.add (hRY.indicator hE)) hpoint
   change (∫ ω, exponentialRemainder t (Y ω) ∂μ)≤
@@ -75,12 +75,12 @@ theorem mgf_rare_event_split [IsProbabilityMeasure μ] {Y T : Ω → ℝ}
     (fun ω : Ω => t*Y ω)) ω ∂μ)≤_ at hi
   rw [integral_sub' (hYE.sub (integrable_const 1)) (hYi.const_mul t),
     integral_sub' hYE (integrable_const 1),integral_const_mul] at hi
-  simp only [integral_const,measureReal_univ_eq_one,one_smul] at hi
+  simp only [integral_const,probReal_univ,one_smul] at hi
   nlinarith
 
 /-- Combining an event bound and an unrestricted exponential tail. -/
 theorem restricted_tail_bounds [IsFiniteMeasure μ] {Y : Ω → ℝ} {E : Set Ω}
-    {p C r : ℝ} (hY : Measurable Y) (hE : MeasurableSet E)
+    {p C r : ℝ} (hE : MeasurableSet E)
     (hp : μ.real E ≤ p)
     (htail : ∀ u, 0 ≤ u → μ.real {ω | u < Y ω} ≤ C*Real.exp (-(r*u)))
     {u : ℝ} (hu : 0 ≤ u) :
@@ -97,7 +97,7 @@ the dominating survival function. -/
 theorem finite_measure_cutoff_moment [IsFiniteMeasure μ]
     {Y : Ω → ℝ} {p C r A : ℝ}
     (hY : AEMeasurable Y μ) (hY0 : ∀ ω, 0 ≤ Y ω)
-    (hp : 0 ≤ p) (hC : 0 ≤ C) (hr : 0 < r) (hA : 0 ≤ A)
+    (hC : 0 ≤ C) (hr : 0 < r) (hA : 0 ≤ A)
     (hmass : μ.real univ ≤ p)
     (htail : ∀ u, 0 ≤ u → μ.real {ω | u < Y ω} ≤ C*Real.exp (-(r*u)))
     (hcut : C*Real.exp (-(r*A)) ≤ p) (n : ℕ) :
@@ -132,7 +132,7 @@ theorem finite_measure_cutoff_moment [IsFiniteMeasure μ]
     (hUi (n-j)).const_mul _
   have hSumInt : Integrable (fun ω => (A+U ω)^n) μ := by
     simp_rw [hsum]
-    exact integrable_finset_sum _ (fun j hj => hcoeff j)
+    exact integrable_finsetSum _ (fun j hj => hcoeff j)
   have hpoint : ∀ ω, Y ω^n ≤ (A+U ω)^n := by
     intro ω
     apply pow_le_pow_left₀ (hY0 ω)
@@ -141,7 +141,7 @@ theorem finite_measure_cutoff_moment [IsFiniteMeasure μ]
     linarith
   have hbound := integral_mono hYi hSumInt hpoint
   simp_rw [hsum] at hbound
-  rw [integral_finset_sum _ (fun j hj => hcoeff j)] at hbound
+  rw [integral_finsetSum _ (fun j hj => hcoeff j)] at hbound
   simp_rw [integral_const_mul] at hbound
   have hterms : (∑ j ∈ Finset.range (n+1), (n.choose j : ℝ)*A^j*(∫ ω, U ω^(n-j) ∂μ)) ≤
       (n.factorial : ℝ)*(p*tailMomentSeries (n+1) A (1/r)) := by
@@ -167,16 +167,16 @@ theorem finite_measure_cutoff_moment [IsFiniteMeasure μ]
 independence statement about `E` and `Y`. -/
 theorem rare_event_moment [IsFiniteMeasure μ] {Y : Ω → ℝ} {E : Set Ω}
     {p C r A : ℝ} (hY : Measurable Y) (hY0 : ∀ ω, 0 ≤ Y ω)
-    (hE : MeasurableSet E) (hp : 0 ≤ p) (hC : 0 ≤ C)
+    (hE : MeasurableSet E) (hC : 0 ≤ C)
     (hr : 0 < r) (hA : 0 ≤ A) (hprob : μ.real E ≤ p)
     (htail : ∀ u, 0 ≤ u → μ.real {ω | u < Y ω} ≤ C*Real.exp (-(r*u)))
     (hcut : C*Real.exp (-(r*A)) ≤ p) (n : ℕ) :
     IntegrableOn (fun ω => Y ω^n) E μ ∧
       (∫ ω in E, Y ω^n ∂μ)/(n.factorial : ℝ) ≤ p*tailMomentSeries (n+1) A (1/r) := by
-  apply finite_measure_cutoff_moment hY.aemeasurable hY0 hp hC hr hA
+  apply finite_measure_cutoff_moment hY.aemeasurable hY0 hC hr hA
     (by simpa using hprob) _ hcut n
   intro u hu
-  exact (restricted_tail_bounds hY hE hprob htail hu).2
+  exact (restricted_tail_bounds hE hprob htail hu).2
 
 end
 end SingularValueBounds.KL

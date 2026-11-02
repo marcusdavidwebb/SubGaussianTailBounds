@@ -49,7 +49,7 @@ theorem upperShift_tail_extended {X : Ω → ι → ℝ} {K L w b v v0 C k eta u
     have hm := mul_le_mul_of_nonneg_right hmargin heta.le
     have hm0 : u*eta*k*(v0-1) ≤ b-K^2*Matrix.trace R := by nlinarith
     have ht := div_le_div_of_nonneg_right hm0 hb0.le
-    convert ht using 1 <;> dsimp [h,theta] <;> field_simp only [hb0.ne'] <;> ring
+    convert! ht using 1 <;> dsimp [h,theta] <;> field_simp [hb0.ne'] <;> ring
   have hps := upperTailWeight_le_normalized hr hh.le heta hnorm hmax
   have hspec : (∀ i,0 < 1-q*upperTailEigenvalue r h i) ∧
       -(∑ i,Real.log (1-q*upperTailEigenvalue r h i)) ≤
@@ -61,7 +61,7 @@ theorem upperShift_tail_extended {X : Ω → ι → ℝ} {K L w b v v0 C k eta u
         nlinarith
       have hfirst (i : ι) : Real.exp (-(q*h*r i)) ≤ (1-(q-1)*h*r i)/(1+h*r i) := by
         have he := upper_first_factor_exp_rate (hr i) hh.le hq.le hq1
-        convert he using 1 <;> ring
+        convert! he using 1 <;> ring
       have hrate (i : ι) : q/(1-(q-1)*h*r i) ≤ v := by
         have hd : 1 ≤ 1-(q-1)*h*r i := by
           have hnon := mul_nonpos_of_nonpos_of_nonneg (show q-1 ≤ 0 by linarith)
@@ -73,7 +73,7 @@ theorem upperShift_tail_extended {X : Ω → ι → ℝ} {K L w b v v0 C k eta u
         (sq_pos_of_pos hk) hps hvk hden hfirst hrate
       have hl := Real.log_le_log (mul_pos (Real.exp_pos _) (Real.exp_pos _)) hdet
       rw [Real.log_mul (Real.exp_pos _).ne' (Real.exp_pos _).ne',Real.log_exp,Real.log_exp,
-        Real.log_prod _ _ (fun i _ => (hgap i).ne')] at hl
+        Real.log_prod (fun i _ => (hgap i).ne')] at hl
       refine ⟨hgap,?_⟩
       have hCf : 0 ≤ C/k^2 := div_nonneg hC (sq_nonneg k)
       linarith
@@ -89,7 +89,7 @@ theorem upperShift_tail_extended {X : Ω → ι → ℝ} {K L w b v v0 C k eta u
   have hlog : -(∑ i,Real.log (1-q*upperTailEigenvalue hR.isHermitian.eigenvalues h i)) ≤
       q*h*Matrix.trace R+(C/k^2-Real.log (1-v*k^2)/k^2) := by
     rw [real_spectral_trace hR.isHermitian]
-    exact (by convert hspec.2 using 1 <;> ring)
+    exact (by convert! hspec.2 using 1 <;> ring)
   have ht := upperShift_tail_of_spectral_logdet hsg hm hK hR hh hq hspec.1 hlog
   have hevent : {ω | u < (1-b)*upperShift R hR (X ω)} =
       {ω | h < upperShift R hR (X ω)} := by
@@ -97,10 +97,10 @@ theorem upperShift_tail_extended {X : Ω → ι → ℝ} {K L w b v v0 C k eta u
     change u < (1-b)*upperShift R hR (X ω) ↔ u/(1-b) < upperShift R hR (X ω)
     rw [div_lt_iff₀ hb0,mul_comm]
   rw [hevent]
-  convert ht using 1
+  convert! ht using 1
   congr 1
   dsimp [q,h,theta]
-  field_simp only [hb0.ne',hcap1.ne',hK.ne']
+  field_simp [hb0.ne',hcap1.ne',hK.ne']
   ring
 end
 end SingularValueBounds.KL

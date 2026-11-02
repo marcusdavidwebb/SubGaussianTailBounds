@@ -48,11 +48,11 @@ theorem weightedLaplace_convex {weight rate : ℝ → ℝ}
     simp only [smul_eq_mul] at he
     have he' : Real.exp (-(rate v*(a*x+b*y))) ≤
         a*Real.exp (-(rate v*x))+b*Real.exp (-(rate v*y)) := by
-      convert he using 1 <;> congr 1 <;> ring
+      convert! he using 1 <;> congr 1 <;> ring
     have hm := mul_le_mul_of_nonneg_left he' (hw v hv)
     change weight v*Real.exp (-(rate v*(a*x+b*y))) ≤
       a*(weight v*Real.exp (-(rate v*x)))+b*(weight v*Real.exp (-(rate v*y)))
-    convert hm using 1 <;> ring
+    convert! hm using 1 <;> ring
 
 theorem affineLaplace_integrable {weight : ℝ → ℝ} {α β L : ℝ}
     (hwmeas : Measurable weight) (hw : ∀ v > 0, 0 ≤ weight v ∧ weight v ≤ 1)
@@ -101,7 +101,7 @@ theorem affineLaplace_convex {weight : ℝ → ℝ} {α β : ℝ}
     (hα : 0 ≤ α) (hβ : 0 < β) :
     ConvexOn ℝ (Ici 1) (weightedLaplace weight (fun v => α+β*v)) :=
   weightedLaplace_convex (fun v hv => (hw v hv).1)
-    (fun L hL => affineLaplace_integrable hm hw hα hβ hL)
+    (fun _ hL => affineLaplace_integrable hm hw hα hβ hL)
 
 theorem affineLaplace_antitone {weight : ℝ → ℝ} {α β : ℝ}
     (hm : Measurable weight) (hw : ∀ v > 0, 0 ≤ weight v ∧ weight v ≤ 1)

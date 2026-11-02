@@ -1,30 +1,15 @@
-## Change and scope
+## Change
 
-Describe the change, affected regime, concise explanation and attribution.
-An alternative formalization at unchanged constants is eligible for review.
-No component may increase above either the baseline or the currently accepted
-quartet. Marcus Webb decides whether to accept every eligible PR.
+Describe the scope, affected declarations/constants and attribution. Follow
+[CONTRIBUTING.md](../CONTRIBUTING.md), including the contribution-history entry.
+Identify any verification-policy change requiring separate review.
 
-## Lean evidence
+## Verification
 
-- [ ] The root `MainTheoremStatement.lean` is byte-for-byte unchanged.
-- [ ] Named universe-polymorphic Lean theorem directly proves the canonical proposition.
-- [ ] All four baseline and trusted-current comparisons are proved in Lean.
-- [ ] The other regime and both baseline corollaries remain verified.
-- [ ] `CONTRIBUTIONS.md` records the explanation and attribution.
-- [ ] `./lean/verify.sh` passes, including the complete theorem and axiom audits.
+Record the candidate and accepted-base commit IDs, exact command and actual
+result of the complete [local verification](../docs/VERIFICATION.md), plus other
+checks performed. State failed, skipped or interrupted checks explicitly.
+The immutable root statement must remain byte-for-byte unchanged.
 
-The maintainer reruns the complete Lean check locally before merging. CI checks
-repository integrity only; its green status is not Lean verification evidence.
-
-Give declaration names and actual verification results. Do not submit a
-separate prose proof, PDF proof, or Python certificate package. State incomplete
-checks explicitly rather than checking boxes for unfinished mathematics.
-
-## Trusted policy and review
-
-Every PR requires the same complete local Lean check, including comparison with
-the accepted base; maintenance comments cannot exempt a claim. Record the checked
-head/base revisions and result. Identify any build-policy migration requiring
-separate review. See the
-[Lean interface](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/main/docs/VERIFICATION.md#lean-interface).
+Marcus Webb repeats the complete accepted-base check before merging every PR.
+Green administrative CI is not Lean proof verification.

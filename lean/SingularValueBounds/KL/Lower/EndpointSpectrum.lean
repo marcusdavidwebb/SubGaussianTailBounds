@@ -37,6 +37,7 @@ lemma endpointPair_nonneg {k x y : ℝ} (hk : 0 ≤ k) (hx : 0 ≤ x) (hy : 0 �
     nlinarith [mul_nonneg hx (sub_nonneg.mpr hyk), mul_nonneg hy (sub_nonneg.mpr hxk)]
   exact mul_nonneg (by positivity) (by nlinarith [mul_nonneg hk (add_nonneg hx hy)])
 
+omit [DecidableEq ι] in
 lemma endpointComparisonEigen_sq_sum (r : ι → ℝ) (A c : ℝ) :
     (∑ i, endpointComparisonEigen A c (r i)^2) =
       spectralMoment r 2 + 2*A*spectralMoment r 3 +
@@ -49,6 +50,7 @@ lemma endpointComparisonEigen_sq_sum (r : ι → ℝ) (A c : ℝ) :
   simp only [Finset.sum_add_distrib, Finset.sum_sub_distrib, ← Finset.mul_sum, spectralMoment]
 
 set_option maxRecDepth 4000 in
+omit [DecidableEq ι] in
 lemma endpointPair_sum (r : ι → ℝ) (k : ℝ) :
     (∑ i, ∑ j, endpointPair k (r i) (r j)) =
       2 * (2*k*(spectralMoment r 5*spectralMoment r 2 -
@@ -114,6 +116,7 @@ lemma endpointPair_top_lower {k x : ℝ} (hk : 0 ≤ k) (hx : 0 ≤ x)
   dsimp [endpointPair]
   nlinarith only [hp1, hp2, hp3]
 
+omit [DecidableEq ι] in
 lemma normalized_fourth_le_top_square (r : ι → ℝ) {k : ℝ}
     (hk : 0 ≤ k) (hr : ∀ i, 0 ≤ r i ∧ r i ≤ k)
     (h2 : spectralMoment r 2 = 1) : spectralMoment r 4 ≤ k^2 := by

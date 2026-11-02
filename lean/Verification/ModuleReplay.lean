@@ -1,6 +1,5 @@
 import Lean
 import Lean.Replay
-import Lean.Util.CollectAxioms
 
 /-! Trusted module-DAG kernel replay worker.
 Only the scheduler may promote an imported project module to a verified seed.
@@ -19,7 +18,9 @@ private def roots : Array Import :=
     { module := `CanonicalCandidateConstants }]
 
 private def load (imports : Array Import) : IO Environment :=
-  importModules imports {} (loadExts := false)
+  -- Pinned dependencies use the module system. Load their actual private
+  -- types/proofs, not exported theorem stubs or cached axiom summaries.
+  importModules imports {} (loadExts := false) (level := .private)
 
 -- A structural encoding, not Name.toString: quoted string components and
 -- numeric components must never alias a different protected declaration.
@@ -75,6 +76,10 @@ private def pinnedSeedNames (env : Environment) (trustedNames : Inventory) : Std
 private def moduleData (name : Name) : IO (System.FilePath × ModuleData) := do
   let path ← findOLean name
   let (data, _) ← readModuleData path
+  -- The scheduler fixes the bytes of one artifact per project module. Until
+  -- its protocol covers every split part, reject split project artifacts.
+  if data.isModule then
+    throw <| IO.userError s!"Split project module artifacts are not supported by single-file replay: {name}"
   return (path, data)
 
 -- Lean may emit the same lazy equation theorem in several importing modules.
@@ -102,6 +107,8 @@ private def plan (trustedNames : Inventory) : IO Unit := do
     -- These records and their backing compacted regions are already retained
     -- by the imported environment. Reading every file again doubles loading.
     let data := imported.header.moduleData[idx]!
+    if data.isModule then
+      throw <| IO.userError s!"Split project module artifacts are not supported by single-file replay: {name}"
     unless data.constNames == data.constants.map ConstantInfo.name do
       throw <| IO.userError s!"Inconsistent declaration names in module {name}"
     let mut localNames : NameSet := {}
@@ -127,9 +134,13 @@ private def plan (trustedNames : Inventory) : IO Unit := do
 -- the scheduler. Their hashes are fixed. Traverse fresh and pinned declarations
 -- completely, stopping only at those verified ancestor declarations. This is
 -- induction over the module DAG, not trust in candidate checked/origin flags.
+private structure AxiomState where
+  visited : NameSet := {}
+  axioms : Array Name := #[]
+
 private partial def collectBounded (env : Environment) (pinned : Std.HashSet Name)
     (fresh : Std.HashMap Name ConstantInfo) (name : Name) :
-    StateT CollectAxioms.State IO Unit := do
+    StateT AxiomState IO Unit := do
   unless (← get).visited.contains name do
     modify fun state => { state with visited := state.visited.insert name }
     let some info := fresh[name]? <|> env.checked.get.find? name |
@@ -139,7 +150,9 @@ private partial def collectBounded (env : Environment) (pinned : Std.HashSet Nam
     if !fresh.contains name && !pinned.contains name then
       return
     match info with
-    | .axiomInfo _ => modify fun state => { state with axioms := state.axioms.push name }
+    | .axiomInfo value =>
+      modify fun state => { state with axioms := state.axioms.push name }
+      value.type.getUsedConstants.forM (collectBounded env pinned fresh)
     | .quotInfo _ => pure ()
     | .inductInfo value =>
       value.type.getUsedConstants.forM (collectBounded env pinned fresh)
@@ -211,6 +224,8 @@ private def checkModule (name : Name) (trustedNames : Inventory) (report : Bool)
     IO.println s!"MODULE_KERNEL_REPLAY_COMPLETE {name}"
 
 def main (args : List String) : IO Unit := do
+  -- Lean 4.33 passes the explicit `--run FILE -- ...` separator to main.
+  let args := match args with | "--" :: rest => rest | _ => args
   initSearchPath (← findSysroot)
   match args with
   | ["inventory"] => exportInventory

@@ -1,11 +1,32 @@
 import Lean
 import Lean.Replay
-import Lean.Util.CollectAxioms
 
 /-! Trusted executable: this source is elaborated without importing candidate results.
 At runtime importModules loads constants with loadExts=false, so candidate syntax,
 elaborators and environment initializers cannot reinterpret the policy. -/
 open Lean
+
+-- Traverse the actual checked declarations. Lean's public collectAxioms now
+-- consults imported cached summaries, which are not evidence for this audit.
+private structure DirectAxiomState where
+  visited : NameSet := {}
+  axioms : Array Name := #[]
+
+private partial def collectDirect (env : Environment) (name : Name) :
+    StateT DirectAxiomState IO Unit := do
+  unless (← get).visited.contains name do
+    modify fun state => { state with visited := state.visited.insert name }
+    let some info := env.checked.get.find? name |
+      throw <| IO.userError s!"Missing logical dependency: {name}"
+    if info.isUnsafe || info.isPartial then
+      throw <| IO.userError s!"Logical declaration depends on unsafe/partial {name}"
+    match info with
+    | .axiomInfo value =>
+      modify fun state => { state with axioms := state.axioms.push name }
+      value.type.getUsedConstants.forM (collectDirect env)
+    | .quotInfo _ => pure ()
+    | _ => info.getUsedConstantsAsSet.toList.forM (collectDirect env)
+
 def specs : List (String × Nat × List String) := [
 @@TARGET_SPECS@@
 ]
@@ -15,16 +36,18 @@ def publicTypeRequired (suffix : String) : Bool :=
   suffix.startsWith "unit_baseline" || suffix.endsWith "_recorded"
 
 def main (args : List String) : IO Unit := do
+  -- Lean 4.33 passes the explicit `--run FILE -- ...` separator to main.
+  let args := match args with | "--" :: rest => rest | _ => args
   unless args.isEmpty || args == ["--verified-module-replay"] do
     throw <| IO.userError "Unexpected canonical audit arguments"
   initSearchPath (← findSysroot)
-  let imported ← importModules #[@@CANDIDATE_IMPORTS@@] {} (loadExts := false)
+  let imported ← importModules #[@@CANDIDATE_IMPORTS@@] {} (loadExts := false) (level := .private)
   -- The continuation follows the scheduler's complete per-module kernel and
   -- axiom audits. Only the standalone mode needs a second trusted environment,
   -- whole-library dependency scan and a proof-closure map.
   let env ← if args.isEmpty then do
       let trusted ← importModules #[{ module := `Mathlib }, { module := `CanonicalAcceptanceExpected }]
-        {} (loadExts := false)
+        {} (loadExts := false) (level := .private)
       let fresh := imported.constants.fold (fun acc name info =>
         if trusted.contains name then acc else acc.insert name info)
         ({} : Std.HashMap Name ConstantInfo)
@@ -37,7 +60,7 @@ def main (args : List String) : IO Unit := do
         if info.isTheorem then some name else none
       let diagnosticRoots := fresh.toList.filterMap fun (name, info) =>
         if !info.isUnsafe && !info.isPartial then some name else none
-      let (_, diagnostic) := (((diagnosticRoots.forM CollectAxioms.collect).run imported).run {})
+      let (_, diagnostic) ← (diagnosticRoots.forM (collectDirect imported)).run {}
       let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
       for name in diagnostic.axioms do
         unless allowed.contains name do
@@ -79,7 +102,10 @@ def main (args : List String) : IO Unit := do
       ["CanonicalAcceptanceCI.checked_", "SubGaussian.Current."] else ["CanonicalAcceptanceCI.checked_"]
     for namePrefix in prefixes do
       let name := (namePrefix ++ suffix).toName
-      let some info := env.find? name | throw <| IO.userError s!"Missing acceptance target: {name}"
+      -- Kernel replay returns an environment whose new declarations are in
+      -- the checked kernel map, not necessarily in Environment.find?'s view.
+      let some info := env.checked.get.find? name |
+        throw <| IO.userError s!"Missing acceptance target: {name}"
       unless info.isTheorem do
         throw <| IO.userError s!"Acceptance target must be a theorem declaration: {name}"
       unless info.levelParams.length == universes do
@@ -94,7 +120,7 @@ def main (args : List String) : IO Unit := do
         throw <| IO.userError s!"Acceptance target is not kernel checked: {name}"
       targets := name :: targets
   if args.isEmpty then
-    let (_, state) := (((targets.forM CollectAxioms.collect).run env).run {})
+    let (_, state) ← (targets.forM (collectDirect env)).run {}
     let allowed : List Name := [`propext, `Classical.choice, `Quot.sound]
     for name in state.axioms do
       unless allowed.contains name do

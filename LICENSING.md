@@ -14,3 +14,13 @@ unless explicitly stated otherwise and agreed by the maintainer. See
 
 Third-party dependencies and reused material retain their applicable terms and
 attribution requirements. Pinning a dependency does not choose its licence.
+
+The canonical statement directly imports NLA-lib, pinned to
+[`6491e7528c1b1e68e46301cde6a76ae153e8e834`](https://github.com/NLA-lib/NLAlib/tree/6491e7528c1b1e68e46301cde6a76ae153e8e834).
+NLA-lib is licensed under the
+[Apache License 2.0](https://github.com/NLA-lib/NLAlib/blob/6491e7528c1b1e68e46301cde6a76ae153e8e834/LICENSE).
+Its source, licence and notices remain in the centrally stored dependency;
+NLA-lib source files are not copied into this repository. The compatibility
+proofs written here use its imported definitions and theorems and remain
+covered by this repository's MIT licence. See [Lean setup](lean/README.md) for
+the dependency pins and external storage locations.

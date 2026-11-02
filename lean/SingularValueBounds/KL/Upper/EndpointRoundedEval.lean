@@ -71,7 +71,7 @@ theorem EndpointJointPrefactorConditions.sound {k a q : ℚ}
   push_cast
   calc
     _ ≤ (q : ℝ)/2+(a : ℝ)*(-((logRoundedQ (1-q*k^2)).1 : ℝ)-roundDownQ (q*k^2))/(2*(k : ℝ)^3) := by
-      convert add_le_add_left hScale ((q : ℝ)/2) using 1 <;> ring
+      convert! add_le_add_left hScale ((q : ℝ)/2) using 1 <;> ring
     _ ≤ _ := add_le_add hQ hRound
 
 def endpointSmallPrefactorQ (k q : ℚ) : ℚ :=

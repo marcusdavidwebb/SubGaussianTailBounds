@@ -69,7 +69,6 @@ theorem upper_tail_general_of_certificates
   have hν : 0 < (9/2:ℝ)*K^2*logParameter K := by positivity
   have hwK : ((47/20:ℝ)*K^2*logParameter K)/K = (47/20:ℝ)*K*logParameter K := by
     field_simp
-    <;> ring
   have hsqrt : Real.sqrt (((9/2:ℝ)*K^2*logParameter K)/2) =
       (3/2:ℝ)*K*Real.sqrt (logParameter K) := by
     apply (Real.sqrt_eq_iff_eq_sq (by positivity) (by positivity)).2

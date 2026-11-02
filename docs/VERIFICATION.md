@@ -1,12 +1,21 @@
 # Verification and review
 
-`./lean/verify.sh` is the single complete mathematical check. Marcus Webb runs
-it locally before merging each PR. GitHub CI checks source integrity and
+`./lean/check-statements.sh` checks the two displayed propositions and their
+proof dependencies. `./lean/verify.sh` is the broader repository acceptance
+check, including independent replay and contribution-policy comparisons.
+Marcus Webb runs the complete check locally before merging each PR. GitHub CI checks source integrity and
 repository administration; its green status does not certify a Lean proof.
+
+The focused command builds the proof dependency closure, checks the exact types
+for arbitrary sample-space universes and audits their transitive axioms. It
+trusts imported compiled artifacts and elaborators; hostile imported syntax can
+affect its source-level type checks. It does not replace the independent replay,
+separate exact-type audit, full source coverage or accepted-base comparisons in
+the complete check.
 
 This guide explains the acceptance contract and review procedure. Use
 [lean/README.md](../lean/README.md) for setup and memory settings, or the
-[repository map](../REPOSITORY_MAP.md) to find each implementation file.
+[source layout](../lean/README.md#source-layout) to find the proof and checking code.
 
 ## Manual verification before merge
 
@@ -22,6 +31,12 @@ Replace the path with the accepted checkout's actual absolute path. It supplies
 the trusted policy and current constants. An unset `SVB_TRUSTED_ROOT` compares
 the checkout with itself and is only a preflight.
 
+The separate checkout can be an ordinary Git worktree of the accepted branch.
+Its purpose is to keep a candidate from choosing the checks or comparison
+ceilings used to assess that same candidate. When the accepted branch predates a
+deliberate statement or verifier migration, the maintainer must first review and
+adopt that migration; an old checkout cannot certify the new policy by itself.
+
 Require successful completion of the full replay and axiom audit, including
 `CANONICAL_ACCEPTANCE_COMPLETE 22 targets` and the final
 `PASS: complete canonical Lean targets, comparisons, and axiom audits.`
@@ -36,6 +51,47 @@ self-comparison an independent accepted-base check. Candidate Lean metaprograms
 run with the local user's permissions, so review setup and verification changes
 before executing them. The local command is not a hostile-code sandbox.
 
+The 30 October 2026 NLA-lib migration changes the canonical source and the
+pinned toolchain/dependencies with the maintainer's authorization. Its verifier
+compatibility changes require review as part of that adoption: the constants
+parser handles Lean 4.33's syntax while rejecting module/import modifiers, and
+the axiom auditors traverse actual checked types and proof bodies instead of
+Lean's new cached axiom summaries. Pinned dependencies load their private proof
+bodies with extensions disabled. Split project artifacts are rejected because
+the current scheduler hashes one artifact per project module. The exact-type,
+universe, source-coverage, replay and axiom requirements are retained.
+Compilation and selected checks during this migration do not constitute a
+complete verification run; the maintainer explicitly deferred kernel replay.
+
+The separately authorized real-probability statement revision also changes the
+canonical source digest and the exact expected tail types. Its equivalence to
+the preceding `ENNReal` bounds is proved in
+[TailEquivalence.lean](../lean/SingularValueBounds/Canonical/TailEquivalence.lean)
+under a probability measure. The maintainer’s authorization of this precise
+statement change does not waive independent replay or authorize later canonical
+changes; an accepted checkout with the earlier digest will reject this revision
+until the reviewed policy is adopted. A later explicitly requested helper and
+import simplification likewise changes the canonical digest without waiving any
+of these checks.
+
+The maintainer's 2 November 2026 refactor factors both propositions through
+`TailBoundAt`, moving the general parameter quantifier before the sample-space
+arguments and specializing the unit case at `K = 1`. The existing
+[statement equivalences](../lean/SingularValueBounds/Canonical/StatementEquivalence.lean)
+connect these definitions to the expanded hypotheses and bounds. The source pin
+changes, while all 22 public obligations and the exact-type, universe, replay,
+source-coverage and axiom requirements remain. An older trusted source pin still
+rejects this revision until reviewed adoption; focused checks do not waive the
+complete before-merge run, which the maintainer has deferred for this task.
+
+The final source supplied later that day names the tail helper
+`GaussianSingularValueTails` and places `1 ≤ n → n ≤ m` after the matrix argument
+in `TailBoundAt`. Its protected digest and proof bridge are synchronized with
+those final bytes. The general/unit propositions and all 22 obligations retain
+their mathematical requirements. See the
+[final synchronization record](HISTORY.md#final-statement-synchronization--2-november-2026)
+for the checks performed; an older trusted pin still requires reviewed adoption.
+
 ## Lean interface
 
 <a id="prepared-complete-lean-acceptance"></a>
@@ -48,12 +104,12 @@ before executing them. The local command is not a hostile-code sandbox.
 | `generalAlpha`, `generalBeta`, `generalGamma`, `generalDelta` | One jointly proved general quartet of exact Lean real expressions |
 | `unitAlpha`, `unitBeta`, `unitGamma`, `unitDelta` | One jointly proved unit quartet of exact Lean real expressions |
 | `general.{u}`, `unit.{u}` | The respective canonical proposition at that quartet, for arbitrary universe `u` |
-| `general_baseline.{u}`, `unit_baseline.{u}` | The canonical propositions at the original baseline quartets |
-| `general_baseline_alpha` through `general_baseline_delta`, and `unit_baseline_*` | Each component is at most its original baseline |
+| `general_baseline.{u}`, `unit_baseline.{u}` | The canonical propositions at the baseline quartets in [CONTRIBUTING.md](../CONTRIBUTING.md#mathematical-contract) |
+| `general_baseline_alpha` through `general_baseline_delta`, and `unit_baseline_*` | Each component is at most its corresponding baseline component |
 | `general_current_alpha` through `general_current_delta`, and `unit_current_*` | Each component is at most its trusted currently accepted counterpart |
 | `general_recorded`, `unit_recorded` | The current quartet equals the corresponding candidate `AcceptedConstants` quartet |
 
-The 22 obligations are the two current results, two baseline corollaries,
+The 22 obligations are the two current results, two baseline theorems,
 sixteen componentwise comparisons and two recorded-tuple equalities. Results
 must cover arbitrary sample-space universe `u` and the complete canonical
 propositions. The [contribution contract](../CONTRIBUTING.md#mathematical-contract)
@@ -97,6 +153,22 @@ Each module is independently replayed through Lean's kernel after its project
 ancestors pass. Artifact hashes are checked throughout; an ancestor is a trusted
 seed only after its replay and axiom audit succeed in this run. Compiled checked
 flags and earlier runs cannot substitute for this verification.
+
+The proposed launcher also snapshots the paths, contents and executable bits of
+candidate and trusted source/configuration inputs at the start and checks them
+again before reporting success. This detects a final checkout that differs from
+the starting inputs, including same-size edits with restored timestamps. It does
+not detect changes fully reverted between checks and is not a sandbox. This
+verification-policy change requires separate review and adoption.
+
+The pinned declaration inventory comes from `Mathlib` and
+`CanonicalAcceptanceExpected`; NLA-lib is covered through the modules imported
+by the canonical statement. Pinning NLA-lib does not automatically add all of
+its modules to that inventory. An additional split NLA-lib module outside this
+import closure is rejected by the single-artifact replay guard. Supporting such
+an import requires a separately reviewed inventory expansion or support for
+hashing and replaying every artifact part, with the complete replay and axiom
+requirements preserved.
 
 All fresh safe declarations, including private theorems and ordinary definitions,
 receive a transitive axiom audit. Unsafe implementation stubs cannot be logical

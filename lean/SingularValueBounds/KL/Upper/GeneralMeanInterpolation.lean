@@ -53,7 +53,7 @@ theorem generalMeanCritical_minimum {r c lo hi x : ℝ}
           dsimp only [z,generalMeanCritical]
           rw [max_eq_right (le_of_not_ge hleft), min_eq_right (le_of_not_ge hright)]
         rw [hz]
-        simp [hr.ne']
+        simp
   have he : (r-1/z)*(x-z) = r*(x-z)-(x-z)/z := by ring
   rw [he] at hs
   linarith
@@ -73,7 +73,7 @@ theorem generalMean_chord {E : ℝ → ℝ} {lo hi el eh L : ℝ}
     (show hi ∈ Icc lo hi from ⟨hlohi.le,le_rfl⟩) ha hb hsum
   simp only [smul_eq_mul,hnode] at hc
   have hh := hc.trans (add_le_add (mul_le_mul_of_nonneg_left hel ha) (mul_le_mul_of_nonneg_left heh hb))
-  convert hh using 1 <;> dsimp [a,b] <;> field_simp [ne_of_gt (sub_pos.mpr hlohi)] <;> ring
+  convert! hh using 1 <;> (try dsimp [a,b]) <;> field_simp [ne_of_gt (sub_pos.mpr hlohi)] <;> ring
 
 /-- The finite minimum comparison certifies an entire real grid interval. -/
 theorem generalMean_chord_cost {E : ℝ → ℝ} {w c J lo hi el eh L : ℝ}

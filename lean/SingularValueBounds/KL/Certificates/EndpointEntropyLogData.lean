@@ -1,4 +1,5 @@
-import SingularValueBounds.KL.Certificates.EndpointEntropyEvaluation
+import SingularValueBounds.KL.Certificates.EntropyLookup
+import Mathlib.Data.Int.Notation
 
 /-! Exact fixed-point endpoint grid logarithms. Their values are proved in
 EndpointEntropyLog.lean, independently of the generator. -/

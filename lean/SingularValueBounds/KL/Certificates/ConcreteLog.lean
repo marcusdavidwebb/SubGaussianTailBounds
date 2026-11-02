@@ -82,7 +82,8 @@ theorem unitLogConditions {x : ℚ} (hx : 1 ≤ x) (h2 : x ≤ 2) : UnitLogCondi
     exact roundDownQ_le _
   · intro j _
     exact le_roundUpQ _
-  · apply add_le_add_left
+  · unfold logUnitUpperQ
+    apply add_le_add_right
     apply le_trans _ (le_roundUpQ _)
     norm_num only [Nat.cast_ofNat, Nat.reduceMul, Nat.reduceAdd]
     apply div_le_div_of_nonneg_left (mul_nonneg (by norm_num) (logUnitPowerUpper_nonneg hx 18))
@@ -111,7 +112,7 @@ lemma rational_le_natAbs_num {x : ℚ} (hx : 0 ≤ x) : x ≤ x.num.natAbs := by
   have hnum : (0:ℚ) ≤ x.num := by exact_mod_cast Rat.num_nonneg.mpr hx
   have hden : (1:ℚ) ≤ x.den := by exact_mod_cast x.den_pos
   have hnat : (x.num:ℚ) ≤ x.num.natAbs := by
-    rw [Int.cast_natAbs]
+    rw [Nat.cast_natAbs]
     exact_mod_cast (le_abs_self x.num)
   calc
     x = (x.num:ℚ)/x.den := (Rat.num_div_den x).symm

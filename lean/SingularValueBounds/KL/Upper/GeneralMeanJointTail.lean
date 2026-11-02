@@ -8,13 +8,12 @@ open scoped Matrix BigOperators
 namespace SingularValueBounds.KL
 noncomputable section
 set_option maxHeartbeats 1400000
-variable {ι Ω : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι Ω : Type*} [Fintype ι] [Nonempty ι]
 
 theorem upper_tail_second_cost_joint {r : ι → ℝ} (hr : ∀ i,0 < r i)
-    {h q v k eta : ℝ} (hh : 0 ≤ h) (hq : 0 < q) (hv : 0 < v)
+    {h q v k eta : ℝ} (hh : 0 ≤ h) (hv : 0 < v)
     (hk : 0 < k) (hvk : v*k^2 < 1) (heta : 0 < eta)
     (hnorm : eta^2 = ∑ i,r i^2) (hmax : ∀ i,r i ≤ k*eta)
-    (hden : ∀ i,0 < 1-(q-1)*h*r i)
     (hrate : ∀ i,q/(1-(q-1)*h*r i) ≤ v) :
     (∀ i,0 < 1-upperTailSecondArgument r h q i) ∧
     -(∑ i,Real.log (1-upperTailSecondArgument r h q i)) ≤
@@ -25,9 +24,6 @@ theorem upper_tail_second_cost_joint {r : ι → ℝ} (hr : ∀ i,0 < r i)
     simp only [rho,div_pow,← Finset.sum_div,← hnorm]
     exact div_self (pow_ne_zero 2 heta.ne')
   have hmax' : ∀ i,rho i ≤ k := fun i => (div_le_iff₀ heta).2 (hmax i)
-  have harg0 (i : ι) : 0 ≤ upperTailSecondArgument r h q i := by
-    dsimp [upperTailSecondArgument]
-    exact mul_nonneg (div_nonneg hq.le (hden i).le) ((upperTailWeight_properties hr hh).1 i).le
   have harg (i : ι) : upperTailSecondArgument r h q i ≤ v*normalizedShiftWeight rho (h*eta) i := by
     have hh' := mul_le_mul_of_nonneg_right (hrate i) ((upperTailWeight_properties hr hh).1 i).le
     have hn : normalizedShiftWeight rho (h*eta) i = upperTailWeight r h i :=
@@ -40,9 +36,9 @@ theorem upper_tail_second_cost_joint {r : ι → ℝ} (hr : ∀ i,0 < r i)
     linarith [harg i]
   refine ⟨hgap,?_⟩
   exact normalizedShiftWeight_log_prefactor_of_le hrho hs (mul_nonneg hh heta.le) hk hmax'
-    hv.le hvk harg0 harg
+    hv.le hvk harg
 
-theorem upper_extended_spectral_logdet_joint {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+theorem upper_extended_spectral_logdet_joint {ι : Type*} [Fintype ι] [Nonempty ι]
     {r : ι → ℝ} (hr : ∀ i,0 < r i) {h eta k v v0 theta C : ℝ}
     (hh : 0 < h) (heta : 0 < eta) (hk : 0 < k)
     (hnorm : eta^2 = ∑ i,r i^2) (hmax : ∀ i,r i ≤ k*eta)
@@ -88,10 +84,12 @@ theorem upper_extended_spectral_logdet_joint {ι : Type*} [Fintype ι] [Decidabl
   have hmaxC : max 0 (upperRateF v0 theta) ≤ C := max_le hC hFc
   have hfirstcost : (∑ i,upperFactorF q (h*r i)) ≤ C/k^2 :=
     hF.trans (div_le_div_of_nonneg_right hmaxC (sq_nonneg k))
-  obtain ⟨hsecond,hsecondcost⟩ := upper_tail_second_cost_joint hr hh.le (by linarith : 0 < q)
-    (by linarith : 0 < v) hk hvk heta hnorm hmax hden hrate
+  obtain ⟨hsecond,hsecondcost⟩ := upper_tail_second_cost_joint hr hh.le
+    (by linarith : 0 < v) hk hvk heta hnorm hmax hrate
   have ht := upper_tail_logdet_of_costs hr hh.le hden hsecond hfirstcost hsecondcost
-  convert ht using 1 <;> dsimp [q] <;> ring
+  convert! ht using 1
+
+variable [DecidableEq ι]
 
 variable [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
 
@@ -132,7 +130,7 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
     have hm := mul_le_mul_of_nonneg_right hmargin heta.le
     have hm0 : u*eta*k*(v0-1) ≤ b-K^2*Matrix.trace R := by nlinarith
     have ht := div_le_div_of_nonneg_right hm0 hb0.le
-    convert ht using 1 <;> dsimp [h,theta] <;> field_simp only [hb0.ne'] <;> ring
+    convert! ht using 1 <;> dsimp [h,theta] <;> field_simp [hb0.ne'] <;> ring
   have hps := upperTailWeight_le_normalized hr hh.le heta hnorm hmax
   have hspec : (∀ i,0 < 1-q*upperTailEigenvalue r h i) ∧
       -(∑ i,Real.log (1-q*upperTailEigenvalue r h i)) ≤
@@ -144,7 +142,7 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
         nlinarith
       have hfirst (i : ι) : Real.exp (-(q*h*r i)) ≤ (1-(q-1)*h*r i)/(1+h*r i) := by
         have he := upper_first_factor_exp_rate (hr i) hh.le hq.le hq1
-        convert he using 1 <;> ring
+        convert! he using 1 <;> ring
       have hrate (i : ι) : q/(1-(q-1)*h*r i) ≤ v := by
         have hd : 1 ≤ 1-(q-1)*h*r i := by
           have hnon := mul_nonpos_of_nonpos_of_nonneg (show q-1 ≤ 0 by linarith)
@@ -152,8 +150,8 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
           nlinarith
         have hqv0 : q ≤ v0 := div_le_self (by linarith) ht1
         exact (div_le_self hq.le hd).trans (hqv0.trans hvv)
-      obtain ⟨hsecond,hsecondcost⟩ := upper_tail_second_cost_joint hr hh.le hq hv hk hvk
-        heta hnorm hmax hden hrate
+      obtain ⟨hsecond,hsecondcost⟩ := upper_tail_second_cost_joint hr hh.le hv hk hvk
+        heta hnorm hmax hrate
       have hfirstcost : (∑ i,upperFactorF q (h*r i)) ≤ (0:ℝ) := by
         apply Finset.sum_nonpos
         intro i _
@@ -179,7 +177,7 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
   have hlog : -(∑ i,Real.log (1-q*upperTailEigenvalue hR.isHermitian.eigenvalues h i)) ≤
       q*h*Matrix.trace R+(C/k^2+upperJointCost v k (∑ i,(r i/eta)^3)) := by
     rw [real_spectral_trace hR.isHermitian]
-    exact (by convert hspec.2 using 1 <;> ring)
+    exact (by convert! hspec.2 using 1 <;> ring)
   have ht := upperShift_tail_of_spectral_logdet hsg hm hK hR hh hq hspec.1 hlog
   have hevent : {ω | u < (1-b)*upperShift R hR (X ω)} =
       {ω | h < upperShift R hR (X ω)} := by
@@ -187,10 +185,10 @@ theorem upperShift_tail_extended_joint {X : Ω → ι → ℝ} {K L w b v v0 C k
     change u < (1-b)*upperShift R hR (X ω) ↔ u/(1-b) < upperShift R hR (X ω)
     rw [div_lt_iff₀ hb0,mul_comm]
   rw [hevent]
-  convert ht using 1
+  convert! ht using 1
   congr 1
   dsimp [q,h,theta]
-  field_simp only [hb0.ne',hcap1.ne',hK.ne']
+  field_simp [hb0.ne',hcap1.ne',hK.ne']
   ring
 
 def extendedJointPrefactor (v k C a : ℝ) : ℝ :=

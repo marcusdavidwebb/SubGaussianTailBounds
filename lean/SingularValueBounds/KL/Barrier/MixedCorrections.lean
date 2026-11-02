@@ -11,11 +11,13 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
 instance positiveResolventBorelSpace : BorelSpace (PositiveResolvent ι) :=
   inferInstanceAs (BorelSpace ({R : Matrix ι ι ℝ | R.PosDef} : Set (Matrix ι ι ℝ)))
 
+omit [Nonempty ι] in
 lemma continuous_outwardState (R : PositiveResolvent ι) : Continuous (outwardState R) := by
   apply Continuous.subtype_mk
   exact (continuousOn_outwardResolvent R.2).comp_continuous
     (continuous_id.max continuous_const) (fun ω => (show max ω 0 ∈ Ici (0 : ℝ) from le_max_right ω 0))
 
+omit [Nonempty ι] in
 lemma measurable_outwardState :
     Measurable (fun z : PositiveResolvent ι × ℝ => outwardState z.1 z.2) := by
   apply Measurable.subtype_mk
@@ -63,7 +65,7 @@ lemma mixedCost_le_constant (R : PositiveResolvent ι) {a : ℝ} (ha : 0 ≤ a)
   have hs := spectralRatio_pos_le_one R.2
   have he := hh ⟨hs.1.le,hs.2⟩ ⟨by norm_num,le_rfl⟩ hs.2
   simpa only [mixedCost,regularityCost,Real.sq_sqrt ha,mul_comm (h 1)] using
-    add_le_add_left (mul_le_mul_of_nonneg_left he (frobenius_nonneg R.1)) (a*Matrix.trace R.1)
+    add_le_add_right (mul_le_mul_of_nonneg_left he (frobenius_nonneg R.1)) (a*Matrix.trace R.1)
 
 lemma mixedCost_outward_nonempty (R : PositiveResolvent ι) {a : ℝ} (ha : 0 ≤ a)
     {h : ℝ → ℝ} (hh : MonotoneOn h (Icc (0 : ℝ) 1)) {b : ℝ} (hb : 0 < b) :

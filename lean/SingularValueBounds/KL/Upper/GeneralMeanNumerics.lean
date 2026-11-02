@@ -1,3 +1,4 @@
+import SingularValueBounds.KL.Upper.GeneralMeanRowData
 import SingularValueBounds.KL.Upper.GeneralMeanError
 import SingularValueBounds.KL.Upper.RoundedAlgorithmSoundness
 import SingularValueBounds.KL.Upper.JointTail
@@ -8,25 +9,10 @@ namespace SingularValueBounds.KL.Certificates
 noncomputable section
 set_option maxHeartbeats 1800000
 
-structure GeneralMeanRow where
-  klo : ℚ
-  khi : ℚ
-  alo : ℚ
-  ahi : ℚ
-  J : ℚ
-  q : ℚ
-  c : ℚ
-  C : ℚ
-  majorant : Fin 8
-  deriving DecidableEq
-
 def resolventLowerQ (x : ℚ) : ℚ := (x^2+8*x+11)/(x^3+9*x^2+18*x+6)
 def resolventUpperQ (x : ℚ) : ℚ :=
   (x^3+11*x^2+26*x+6)/(x*(x^3+12*x^2+36*x+24))
 def GeneralMeanRow.cutoff (r : GeneralMeanRow) : ℚ := (47/20)/(r.khi*(r.q-1))
-def GeneralMeanRow.prefactorArgument (r : GeneralMeanRow) : ℚ :=
-  r.q/2+r.ahi/(2*r.khi^3)*(-(logRoundedQ (1-r.q*r.khi^2)).1-r.q*r.khi^2)+
-    r.C/(2*r.khi^2)
 def GeneralMeanRow.prefactor (r : GeneralMeanRow) : ℚ := expUpperRoundedQ r.prefactorArgument
 def GeneralMeanRow.rawError (r : GeneralMeanRow) (L : ℚ) : ℚ :=
   (2*r.prefactor/r.q)*expUpperRoundedQ (-2-(r.q*r.c/2-2)*L)*
@@ -37,7 +23,6 @@ def GeneralMeanRow.rawError (r : GeneralMeanRow) (L : ℚ) : ℚ :=
           2*resolventUpperQ (r.cutoff*L/2)-(2/r.q)*resolventLowerQ (r.q*r.cutoff*L/2))
     else 0
 def GeneralMeanRow.error (r : GeneralMeanRow) (L : ℚ) : ℚ := finalEntropyRoundQ (r.rawError L)
-def generalMeanGrid (j : ℕ) : ℚ := (j+40:ℚ)/40
 def GeneralMeanRow.slope (r : GeneralMeanRow) (j : ℕ) : ℚ :=
   (r.error (generalMeanGrid (j+1))-r.error (generalMeanGrid j))/
     (generalMeanGrid (j+1)-generalMeanGrid j)

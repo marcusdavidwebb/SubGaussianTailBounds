@@ -8,9 +8,9 @@ open Certificates
 noncomputable section
 set_option maxHeartbeats 1600000
 
-theorem GeneralMeanTailProfile.mono {T U : ℝ → ℝ} {A q c s K L : ℝ}
-    (h : GeneralMeanTailProfile U A q c s K L) (hTU : ∀u,T u≤U u) :
-    GeneralMeanTailProfile T A q c s K L := by
+theorem GeneralMeanTailProfile.mono {T U : ℝ → ℝ} {A q s K L : ℝ}
+    (h : GeneralMeanTailProfile U A q s K L) (hTU : ∀u,T u≤U u) :
+    GeneralMeanTailProfile T A q s K L := by
   unfold GeneralMeanTailProfile at h ⊢
   split_ifs at h ⊢ with hq
   · exact ⟨fun u hu hv => (hTU u).trans (h.1 u hu hv),
@@ -30,7 +30,7 @@ theorem upperShift_general_mean_of_row {r : GeneralMeanRow}
     (hJ : upperComparisonMatrixLogdet R≤(r.J:ℝ))
     (hTail : GeneralMeanTailProfile
       (fun u => μ.real {ω | u<(1-b)*upperShift R hR (X ω)})
-      r.prefactor r.q r.c r.cutoff K L) :
+      r.prefactor r.q r.cutoff K L) :
     Integrable (fun ω => (1-b)*upperShift R hR (X ω)) μ ∧
       (∫ω,(1-b)*upperShift R hR (X ω) ∂μ)≤1 := by
   have hLp : 0≤L := by linarith
@@ -49,9 +49,8 @@ theorem upperShift_general_mean_of_row {r : GeneralMeanRow}
     have ht := upperShift_tail_family hsg hiso.measurable hK hR hTrace hb
       (by norm_num : (0:ℝ)<1/2) (by norm_num : (1/2:ℝ)<1) hu
     apply (hDom u).trans
-    convert ht using 1 <;> congr 2 <;> ring
+    convert! ht using 1 <;> congr 2 <;> ring
   have hCost := generalMean_entropy_cost_of_row hnum hK hL hKL hW hWi hW0 hMean hWE
-    (by positivity : 0≤(Real.sqrt (1-(1/2:ℝ)))⁻¹)
     (by positivity : 0<1/(4*K^2)) hGlobal (hTail.mono hDom)
   linarith
 

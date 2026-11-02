@@ -3,6 +3,7 @@ import SingularValueBounds.KL.Certificates.IntegerRoundedLog
 import SingularValueBounds.KL.Certificates.RoundedLogTwo
 import SingularValueBounds.KL.Certificates.IntegerRoundedLogEvaluation
 import SingularValueBounds.KL.Upper.GeneralMeanCells
+import SingularValueBounds.KL.Upper.GeneralMeanNumerics
 import SingularValueBounds.KL.Certificates.ConcreteLog
 
 /-!
@@ -87,7 +88,7 @@ theorem generalMeanSmallRow_finalMargin :
     0 ≤ 2 + 4 * (47 / 20 - 2) - (logRoundedQ (4 * generalMeanSmallRow.c)).2 -
       generalMeanSmallRow.J / 2 - generalMeanSmallRow.error 4 := by
   have he : generalMeanSmallRow.error 4 = smallErrorValues 120 := by
-    convert smallErrorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
+    convert! smallErrorValue 120 (by decide) using 1 <;> norm_num [generalMeanGrid]
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
   simp only [logUnitLowerQ_two, logUnitUpperQ_two]

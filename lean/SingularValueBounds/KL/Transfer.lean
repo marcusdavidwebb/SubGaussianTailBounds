@@ -18,6 +18,7 @@ def rowProcess (c : CorrectionRule (Fin n)) (upper : Bool) (R₀ : PositiveResol
     (X : Fin m → Ω → Fin n → ℝ) (i : ℕ) (ω : Ω) : BarrierState (Fin n) :=
   c.process upper R₀ (fun j => spectralRow X j ω) i
 
+omit [MeasurableSpace Ω] in
 lemma rowProcess_eq_adaptive (c : CorrectionRule (Fin n)) (upper : Bool)
     (R₀ : PositiveResolvent (Fin n)) (X : Fin m → Ω → Fin n → ℝ) (i : ℕ) :
     rowProcess c upper R₀ X i =
@@ -40,6 +41,7 @@ theorem rowProcess_independent (c : CorrectionRule (Fin n)) (upper : Bool)
   rw [rowProcess_eq_adaptive]
   exact measurable_adaptiveState_past _ (fun _ => c.measurable_step upper) _ _ _ _
 
+omit [MeasurableSpace Ω] in
 /-- Actual Gram matrix at the final state. -/
 lemma rowProcess_gram (c : CorrectionRule (Fin n)) (upper : Bool)
     (R₀ : PositiveResolvent (Fin n)) (X : Fin m → Ω → Fin n → ℝ) (ω : Ω) :
@@ -101,7 +103,6 @@ theorem rowProcess_mgf [IsProbabilityMeasure μ]
   rw [heq]
   convert hi using 1
   rw [← Real.exp_nat_mul]
-  congr 1
   ring
 
 attribute [local semireducible] CorrectionRule.prepared exactShift rowGap
@@ -141,6 +142,7 @@ theorem upper_process_mgf [IsProbabilityMeasure μ]
     ((constantCorrectionRule K hw.le hb).prepared R).2 b
     (constantCorrectionRule_cap K hw.le hb R) hb1 θ hθ hθν
 
+omit [MeasurableSpace Ω] in
 /-- The actual lower barrier gives a strict bound for the squared minimum. -/
 lemma rowProcess_lower_sq (c : CorrectionRule (Fin n)) (u : ℝ) (hu : 0 < u)
     (X : Fin m → Ω → Fin n → ℝ) (ω : Ω) :
@@ -153,10 +155,11 @@ lemma rowProcess_lower_sq (c : CorrectionRule (Fin n)) (u : ℝ) (hu : 0 < u)
   have hgram : q.gram = (rowMatrix X ω)ᴴ*rowMatrix X ω := rowProcess_gram c false _ X ω
   rw [hgram] at hg
   have hh := smallestSingularValue_sq_gt (rowMatrix X ω) (a := u+q.outward-q.shifts) (by
-    convert hg using 1 <;> simp only [sub_smul, add_smul, neg_smul, neg_one_smul, one_smul] <;> abel)
+    convert hg using 1 <;> simp only [sub_smul, add_smul, neg_smul, one_smul] <;> abel)
   dsimp [q] at hh ⊢
   linarith
 
+omit [MeasurableSpace Ω] in
 lemma rowProcess_upper_sq (c : CorrectionRule (Fin n)) (u : ℝ) (hu : 0 < u)
     (X : Fin m → Ω → Fin n → ℝ) (ω : Ω) :
     largestSingularValue (rowMatrix X ω)^2 <
@@ -330,7 +333,6 @@ theorem constant_dimension_cost_lt {K w : ℝ} (hK : 0 < K) (hw : 0 < w) :
   have hform : (K*Real.sqrt n+w/K)^2 = K^2*n+2*w*Real.sqrt n+(w/K)^2 := by
     rw [add_sq, mul_pow, hs]
     field_simp
-    ring
   nlinarith [sq_pos_of_pos (div_pos hw hK), Real.sqrt_nonneg (K^2*n+2*w*Real.sqrt n)]
 
 /-- The same strict allowance for the mixed-profile budget
@@ -339,7 +341,7 @@ profile integration package through `LowerTransferInput`. -/
 theorem mixed_dimension_cost_lt {K L H : ℝ} (hK : 0 < K) (hL : 0 < L) (hH : 0 < H) :
     Real.sqrt (K^2*n+2*K^2*L*H*Real.sqrt n) < K*Real.sqrt n+K*L*H := by
   have h := constant_dimension_cost_lt (n := n) hK (show 0 < K^2*L*H by positivity)
-  have he : K^2*L*H/K=K*L*H := by field_simp; ring
+  have he : K^2*L*H/K=K*L*H := by field_simp
   rw [he] at h
   convert h using 1 <;> congr 1 <;> ring
 

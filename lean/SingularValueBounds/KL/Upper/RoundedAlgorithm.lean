@@ -1,9 +1,10 @@
-import SingularValueBounds.KL.Upper.RoundedArithmetic
+import Mathlib.Algebra.BigOperators.Group.Finset.Defs
+import Mathlib.Data.Rat.Floor
+import Mathlib.Data.Nat.Log
 
 /-! # Rational fixed-point algorithms for the entropy certificates
-The functions mirror supplementary/check_main_constants.py exactly. Their
-finite transcripts, rather than executable evaluation in Lean, are the
-numerical premises used by the analytic soundness lemmas. -/
+These rational functions define the rounded calculations used by the analytic
+soundness lemmas. The finite obligations used in the results are proved in Lean. -/
 open scoped BigOperators
 namespace SingularValueBounds.KL.Certificates
 

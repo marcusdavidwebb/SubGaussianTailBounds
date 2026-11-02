@@ -195,7 +195,7 @@ theorem plateauScalarRow0 : PlateauScalarCertificate (1207/1000) (6/5) (1631/100
       [(0, (147/400)), ((147/400), (441/800)), ((441/800), (1029/1600)), ((1029/1600), (147/200))] := by decide +kernel
     intro cell hc
     rw [hl] at hc
-    simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hc
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hc
     rcases hc with rfl | rfl | rfl | rfl
     · exact qCell0
     · exact qCell1
@@ -205,7 +205,7 @@ theorem plateauScalarRow0 : PlateauScalarCertificate (1207/1000) (6/5) (1631/100
       [(0, (147/200))] := by decide +kernel
     intro cell hc
     rw [hl] at hc
-    simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hc
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hc
     rcases hc with rfl
     · exact dCell0
 

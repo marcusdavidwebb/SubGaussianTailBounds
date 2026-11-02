@@ -32,13 +32,10 @@ private theorem expTaylorFold_eq_integer (a : ℤ) (b : ℕ) (hb : 0 < b)
         ((power*a : ℤ) : ℚ)/(denominator*(b*(j+1)) : ℕ) := by
       push_cast
       field_simp [hbq, hdq, hjq]
-      ring_nf
-      simp
     have htotal : (total : ℚ)/denominator + ((power*a : ℤ) : ℚ)/(denominator*(b*(j+1)) : ℕ) =
         ((total*(b*(j+1) : ℕ)+power*a : ℤ) : ℚ)/(denominator*(b*(j+1)) : ℕ) := by
       push_cast
       field_simp [hbq, hdq, hjq]
-      ring
     simp only [expTaylorFold, expTaylorIntegerFold]
     rw [hterm, htotal]
     exact ih (j+1) (power*a) (total*(b*(j+1) : ℕ)+power*a) (denominator*(b*(j+1)))
@@ -91,12 +88,10 @@ private theorem logTaylorFold_eq_integer (a : ℤ) (b : ℕ) (hb : 0 < b)
         ((power*a^2*(2*j+1 : ℕ) : ℤ) : ℚ)/(denominator*(b^2*(2*j+1)) : ℕ) := by
       push_cast
       field_simp [hbq, hdq, hjq]
-      ring
     have htotal : (total : ℚ)/denominator + 2*((power : ℚ)/denominator)/(2*(j:ℚ)+1) =
         (((total*(2*j+1 : ℕ)+2*power)*b^2 : ℤ) : ℚ)/(denominator*(b^2*(2*j+1)) : ℕ) := by
       push_cast
       field_simp [hbq, hdq, hjq]
-      ring
     simp only [logTaylorFold, logTaylorIntegerFold]
     rw [hpower, htotal]
     exact ih (j+1) (power*a^2*(2*j+1 : ℕ)) ((total*(2*j+1 : ℕ)+2*power)*b^2)
@@ -152,12 +147,10 @@ private theorem lowerMPartialFold_eq_integer (a : ℤ) (b : ℕ) (hb : 0 < b)
         ((power*a*((j+2)*(j+3) : ℕ) : ℤ) : ℚ)/(denominator*(b*((j+2)*(j+3))) : ℕ) := by
       push_cast
       field_simp [hbq, hdq, hj2, hj3]
-      ring
     have htotal : (total : ℚ)/denominator + 2*((power : ℚ)/denominator)/((j+2)*(j+3)) =
         (((total*((j+2)*(j+3) : ℕ)+2*power)*b : ℤ) : ℚ)/(denominator*(b*((j+2)*(j+3))) : ℕ) := by
       push_cast
       field_simp [hbq, hdq, hj2, hj3]
-      ring
     simp only [lowerMPartialFold, lowerMPartialIntegerFold]
     rw [hpower, htotal]
     exact ih (j+1) (power*a*((j+2)*(j+3) : ℕ)) ((total*((j+2)*(j+3) : ℕ)+2*power)*b)

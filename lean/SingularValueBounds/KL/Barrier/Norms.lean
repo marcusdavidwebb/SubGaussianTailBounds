@@ -22,7 +22,6 @@ lemma quadratic_le_spectralMaximum {R : Matrix ι ι ℝ} (hR : R.IsHermitian)
     simpa only [Matrix.diagonal_one, mul_one, U.2.2, Matrix.one_mulVec,
       mul_one] using h.symm
   have hq := congrArg (fun A : Matrix ι ι ℝ => x ⬝ᵥ (A *ᵥ x)) (real_spectral_decomposition hR)
-  dsimp only at hq
   rw [quadratic_conjugate_diagonal] at hq
   rw [hq, ← hsum, Finset.mul_sum]
   apply Finset.sum_le_sum
@@ -31,6 +30,7 @@ lemma quadratic_le_spectralMaximum {R : Matrix ι ι ℝ} (hR : R.IsHermitian)
     (sq_nonneg ((star (U : Matrix ι ι ℝ) *ᵥ x) i))]
 
 
+omit [DecidableEq ι] [Nonempty ι] in
 lemma euclidean_dot_self (x : EuclideanSpace ℝ ι) :
     (x : ι → ℝ) ⬝ᵥ (x : ι → ℝ) = ‖x‖ ^ 2 := by
   simpa only [EuclideanSpace.inner_eq_star_dotProduct, star_trivial] using
@@ -58,7 +58,7 @@ theorem spectralMaximum_attained {R : Matrix ι ι ℝ} (hR : R.IsHermitian) :
   have hn := euclidean_dot_self (hR.eigenvectorBasis i)
   rw [hR.eigenvectorBasis.orthonormal.norm_eq_one i] at hn
   rw [hn]
-  simpa only [one_pow, mul_one] using hi.symm
+  simpa only [spectralMaximum, one_pow, mul_one] using hi.symm
 
 /-- Rayleigh characterization, with the Euclidean norm made explicit. -/
 theorem spectralMaximum_le_iff_euclidean_quadratic {R : Matrix ι ι ℝ}

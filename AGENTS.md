@@ -15,12 +15,12 @@ Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
   Report mathematical or compatibility problems precisely without changing
   the canonical source or weakening the required theorem.
 - The observed SHA-256 is
-  `eb24daadaf9c0aaac3bea45128a08b81ba5492183bcbb6eb03b62c3245c2701c`.
+  `7c7a879e16d58ea8d9915d795f5f9bab73cbff125313d730fe7305470e417d27`.
   Compare bytes before and after work. A digest detects drift; it is not a
   mathematical proof. The README copy must match the full annotated source.
 - Inventory repository-local AI instructions, including hidden/editor files,
-  when introducing or changing instructions. The current inventory is in
-  [docs/HISTORY.md](docs/HISTORY.md).
+  when introducing or changing instructions. The current inventory consists of
+  this root `AGENTS.md`.
 
 ## Proofs and contributions
 
@@ -29,6 +29,9 @@ Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
 - Either regime may be replaced at componentwise no larger constants than both
   its baseline and current accepted quartet. Equality is allowed; preserve the
   other regime and all accepted improvements. Marcus Webb decides acceptance.
+- The unit baseline quartet is `(1.32, 1.12, 2.32, 1.42)`. Its theorem and
+  componentwise comparison ceilings use these same constants. Subsequent
+  contributions must not increase a baseline ceiling or an accepted improvement.
 - Contributions are complete Lean sources, comparison proofs, concise explanation
   and attribution, and a [CONTRIBUTIONS.md](CONTRIBUTIONS.md) entry. No separate
   prose/PDF proof or external mathematical certificate is required.

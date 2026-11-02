@@ -117,7 +117,7 @@ theorem endpointMeanEnvelope_corner (h : EndpointMeanCertificateConditions)
       have hp := (h.jointPrefactors ki ai hact v j hj).sound
       norm_num only [Rat.cast_div,Rat.cast_natCast,Rat.cast_ofNat] at hp
       have ht := mul_le_mul_of_nonneg_left hp (endpointMeanEnvelopeCoeff_nonneg h ki ai hact hj)
-      convert ht using 1 <;> unfold endpointMeanEnvelopeCoeff <;> ring
+      convert! ht using 1 <;> unfold endpointMeanEnvelopeCoeff <;> ring
     linarith
   have hn : (endpointMeanNumericCorner ki ai v : ℝ)≤(endpointMeanCorner ki ai v : ℝ) := by
     exact_mod_cast h.jointCorners ki ai hact v

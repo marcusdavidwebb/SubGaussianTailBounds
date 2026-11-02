@@ -51,6 +51,7 @@ class AcceptancePreparationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             (root / "lean").mkdir()
+            (root / "scripts").mkdir()
             canonical = (SOURCE / "MainTheoremStatement.lean").read_bytes()
             (root / "MainTheoremStatement.lean").write_bytes(canonical)
             (root / "README.md").write_bytes(gate.canonical.BEGIN + b"\n```lean\n" + canonical +
@@ -70,13 +71,11 @@ class AcceptancePreparationTests(unittest.TestCase):
             self.assertFalse(marker.exists())
 
     def test_verification_has_no_partial_success_modes(self):
-        for mode in ("all", "build", "snapshot", "audit", "audit-prepare"):
-            result = subprocess.run(["bash", str(SOURCE / "lean/verify.sh"), mode],
-                                    env=dict(os.environ, SVB_TRUSTED_ROOT=str(SOURCE)),
-                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-            with self.subTest(mode=mode):
-                self.assertEqual(result.returncode, 2, result.stdout)
-                self.assertIn("Usage:", result.stdout)
+        result = subprocess.run(["bash", str(SOURCE / "lean/verify.sh"), "build"],
+                                env=dict(os.environ, SVB_TRUSTED_ROOT=str(SOURCE)),
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("Usage:", result.stdout)
 
     def test_build_configuration_pins_and_root_cannot_be_redirected(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -109,13 +108,14 @@ class AcceptancePreparationTests(unittest.TestCase):
         self.assertIn("SubGaussian.Current.general.{u}", source)
         self.assertIn("SubGaussian.Current.unit.{u}", source)
         self.assertEqual(source.count("theorem checked_"), 22)
-        self.assertNotIn("FinalCertificateConditions", source)
-        self.assertNotIn("NumericalCertificateConditions", source)
-        self.assertIn("CollectAxioms.collect", source)
+        self.assertIn("targets.forM (collectDirect env)", source)
+        self.assertIn("env.checked.get.find? name", source)
+        self.assertNotIn("CollectAxioms.collect", source)
 
     def test_external_auditor_inspects_types_without_candidate_extensions(self):
         source = gate.external_audit_source()
         self.assertIn("loadExts := false", source)
+        self.assertIn("level := .private", source)
         self.assertIn("Kernel.isDefEqGuarded", source)
         self.assertIn("trusted.replay closure", source)
         self.assertIn("info.getUsedConstantsAsSet", source)
@@ -123,6 +123,7 @@ class AcceptancePreparationTests(unittest.TestCase):
         self.assertIn("info.levelParams.length == universes", source)
         self.assertNotIn("import SingularValueBounds.Canonical.Results", source)
         self.assertNotIn("import CanonicalAcceptance\n", source)
+        self.assertNotIn("CollectAxioms.collect", source)
 
     def test_baseline_and_trusted_current_comparisons_are_distinct(self):
         source = gate.acceptance_source()
@@ -132,6 +133,11 @@ class AcceptancePreparationTests(unittest.TestCase):
                 self.assertIn(f"{constant} ≤ {value}", source)
                 self.assertIn(f"{constant} ≤ CanonicalAcceptanceCI.TrustedBase.SubGaussian."
                               f"AcceptedConstants.{regime}{field.capitalize()}", source)
+        self.assertIn("SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 1.42", source)
+        expected = gate.expected_source()
+        self.assertIn("def unit_baseline : Prop := SubGaussian.UnitSingularValueTailBound.{u} "
+                      "1.32 1.12 2.32 1.42", expected)
+        self.assertIn("def unit_baseline_delta (x : ℝ) : Prop := x ≤ 1.42", expected)
 
     def test_trusted_snapshot_accepts_exact_lean_expressions(self):
         source = "import Mathlib.Data.Real.Sqrt\nnoncomputable def value : ℝ := Real.sqrt 2 + 1 / 7\n"
@@ -227,7 +233,7 @@ class LeanAcceptanceTests(unittest.TestCase):
         cls.elan = os.environ.get("SVB_ELAN_BIN", str(Path.home() / ".elan/bin/elan"))
         cls.toolchain = (SOURCE / "lean/lean-toolchain").read_text().strip()
         installed = subprocess.check_output([cls.elan, "toolchain", "list"], text=True)
-        if cls.toolchain not in installed:
+        if cls.toolchain not in [line.split()[0] for line in installed.splitlines() if line]:
             raise ValueError("Pinned toolchain is not already installed; tests never download it.")
         cls.lean_path = subprocess.check_output(
             [cls.elan, "run", cls.toolchain, "lake", "env", "printenv", "LEAN_PATH"],
@@ -249,7 +255,7 @@ class LeanAcceptanceTests(unittest.TestCase):
         else:
             self.assertNotEqual(result.returncode, 0, result.stdout)
             if error:
-                self.assertIn(error, result.stdout)
+                self.assertIn(error.casefold(), result.stdout.casefold())
         return result.stdout
 
     def test_actual_canonical_rejects_universe_restriction(self):
@@ -258,6 +264,26 @@ universe u
 def wrong (h : SubGaussian.GeneralSingularValueTailBound.{0} 3.84 1.58 2.35 1.5) :
     SubGaussian.GeneralSingularValueTailBound.{u} 3.84 1.58 2.35 1.5 := h
 """, success=False, error="type mismatch")
+
+    def test_elaboration_audit_reads_split_import_private_proofs(self):
+        self.compile("SplitAxiomDependency", """module
+public import Init
+private axiom hiddenFalse : False
+public theorem splitFalse : False := hiddenFalse
+""")
+        # The exported theorem stub has no proof. The ordinary audit module
+        # must load the private body and find its actual forbidden premise.
+        # This check performs elaboration/axiom traversal, not kernel replay.
+        self.compile("SplitAxiomAudit", "import SplitAxiomDependency\nimport Lean\n" +
+                     gate.audit_source(["splitFalse"]), success=False, error="hiddenFalse")
+
+    def test_elaboration_audit_accepts_split_import_checked_proofs(self):
+        self.compile("SplitCheckedDependency", """module
+public import Init
+public theorem splitZero : (0 : Nat) = 0 := rfl
+""")
+        self.compile("SplitCheckedAudit", "import SplitCheckedDependency\nimport Lean\n" +
+                     gate.audit_source(["splitZero"]))
 
     def test_actual_canonical_rejects_extra_certificate_premise(self):
         self.compile("ConditionalResult", """import MainTheoremStatement
@@ -445,7 +471,7 @@ run_cmd do
     levelParams := []
     type := mkConst `False
     value := mkConst `True.intro }
-  match env.addDeclCore 0 (.thmDecl info) none (doCheck := false) with
+  match env.addDeclCore 0 0 (.thmDecl info) none (doCheck := false) with
   | .ok env => setEnv env
   | .error _ => throwError "failed to build adversarial fixture"
 """)

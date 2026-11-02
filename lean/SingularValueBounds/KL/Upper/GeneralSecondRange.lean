@@ -36,7 +36,7 @@ theorem general_second_cells_cover_y {y : ℝ} (hy0 : (376/1000:ℝ) ≤ y)
   constructor <;> linarith
 
 /-- The cells overlap the endpoint neighbourhood and the unbounded-range cutoff. -/
-theorem general_second_range_coverage {L : ℝ} (hL : 1 ≤ L) :
+theorem general_second_range_coverage (L : ℝ) :
     L ≤ 51/50 ∨ (∃ j : Fin 334,L-1 ∈ Icc (secondCellDLo j:ℝ) (secondCellDHi j:ℝ)) ∨
       5/4 ≤ L := by
   by_cases hs : L ≤ 51/50
@@ -92,7 +92,7 @@ lemma general_second_small_fourth {Ω : Type*} [MeasurableSpace Ω] {μ : Measur
     (hvar : (∫ ω,Y ω^2 ∂μ)=1) (hK : 0 < K) (hL : logParameter K ≤ 51/50) :
     (∫ ω,Y ω^4 ∂μ)<4 := by
   have hE : K^2 ≤ (secondExpUpperQ (1/25):ℝ) := by
-    convert general_second_K_sq_le hK (b:=1/50) (by norm_num) (by push_cast; linarith) using 1 <;> norm_num
+    convert! general_second_K_sq_le hK (b:=1/50) (by norm_num) (by push_cast; linarith) using 1 <;> norm_num
   exact scalar_fourth_exclusion (x:=(5/2:ℝ)) hsg hvar (by norm_num) hE
     (by simpa using fourth_exclusion_of_certificate h.1)
 
@@ -118,7 +118,7 @@ theorem general_second_bounded_range (h : GeneralSecondCertificateConditions) (i
     generalSecondScalar i m (L-1) ≤ 9/2 := by
   by_cases hs : L ≤ 51/50
   · exact general_second_small_bound h i (hsmall hs) ⟨by linarith,by linarith⟩
-  have hcover := general_second_range_coverage hL
+  have hcover := general_second_range_coverage L
   rcases hcover with hh|⟨j,hj⟩|hh
   · exact (hs hh).elim
   · exact general_second_cell_bound h j i (hcells j hj) hj
@@ -135,7 +135,7 @@ lemma hasDerivAt_generalLowSecondCost {d : ℝ} (hd : d ≠ -1) :
   have he1 := (((hasDerivAt_id d).const_mul (-5:ℝ)).div_const 4).exp
   have he2 := ((hasDerivAt_id d).const_mul (-2:ℝ)).exp
   have ht := he2.div (((hasDerivAt_id d).const_add 1).const_mul 2) (by simpa only [id_eq] using mul_ne_zero (by norm_num : (2:ℝ)≠0) hd1)
-  convert (((he1.mul ((hasDerivAt_const d (13/4:ℝ)).add hr)).const_mul (5/21:ℝ)).const_add (13/4:ℝ)).sub ht using 1 <;>
+  convert! (((he1.mul ((hasDerivAt_const d (13/4:ℝ)).add hr)).const_mul (5/21:ℝ)).const_add (13/4:ℝ)).sub ht using 1 <;>
     (try ext x) <;> dsimp [generalLowSecondCost,generalLowSecondDerivative] <;> field_simp [hd1] <;> ring
 
 lemma generalLowSecond_scaled_derivative {d : ℝ} (hd : 0 ≤ d) :

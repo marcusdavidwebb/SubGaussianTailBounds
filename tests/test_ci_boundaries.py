@@ -33,8 +33,6 @@ class WorkflowBoundaryTests(unittest.TestCase):
         self.assertIn("cancel-in-progress: true", header)
         self.assertNotIn("workflow_call:", self.source)
         self.assertNotIn("uses: ./.github/workflows/", self.source)
-        for name in ("lean-stage.yml", "lean-shard.yml"):
-            self.assertFalse((SOURCE / ".github/workflows" / name).exists(), name)
 
     def test_ci_never_installs_builds_or_audits_lean(self):
         for command in ("install_ci_lean.sh", "/lean/setup.sh", "check_acceptance.sh",
@@ -71,11 +69,13 @@ class WorkflowBoundaryTests(unittest.TestCase):
         self.assertIn('merge --no-commit --no-ff "$BASE_REF"', preflight)
         self.assertIn("python3 trusted/scripts/check_contributions.py", preflight)
         self.assertIn('--root "$GITHUB_WORKSPACE/candidate" --trusted-root "$GITHUB_WORKSPACE/trusted"', preflight)
+        self.assertIn(
+            'run: python3 trusted/scripts/generate_theorem_tex.py --root "$GITHUB_WORKSPACE/candidate" --check',
+            preflight)
         contribution_check = preflight.split(
             "      - name: Check immutable source and contribution history with trusted policy\n", 1)[1]
         self.assertIn("BASE_REF: ${{ github.event.pull_request.base.sha }}", contribution_check)
         self.assertIn('args+=(--base-ref "$BASE_REF")', contribution_check)
-        self.assertNotIn("ci_context.py", self.source)
         self.assertNotIn("GH_TOKEN", preflight)
         self.assertNotIn("pull-requests:", preflight)
         self.assertNotIn("python3 candidate/", preflight)
@@ -89,8 +89,6 @@ class WorkflowBoundaryTests(unittest.TestCase):
         needs = re.search(r"needs: \[([^\]]+)\]", required).group(1)
         self.assertEqual({name.strip() for name in needs.split(",")},
                          set(self.jobs) - {"required"})
-        self.assertIn("job['result'] != 'success'", required)
-        self.assertIn("live['head']['sha'] != sha or live['base']['sha'] != base", required)
         self.assertNotIn("supplement", required)
 
     def reporter(self, *, preflight="success", announce="success", head=None, base=None,

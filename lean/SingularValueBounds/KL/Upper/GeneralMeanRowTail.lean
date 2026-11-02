@@ -14,7 +14,7 @@ theorem upperJointCost_mono_third {v k a a' : ℝ} (hk : 0<k)
   have hl := Real.log_le_sub_one_of_pos (show 0<1-v*k^2 by linarith)
   have hr : 0≤-Real.log (1-v*k^2)-v*k^2 := by linarith
   unfold upperJointCost
-  exact add_le_add_left (mul_le_mul_of_nonneg_right
+  exact add_le_add_right (mul_le_mul_of_nonneg_right
     (div_le_div_of_nonneg_right ha (by positivity : 0≤k^3)) hr) _
 
 theorem upperRateF_nonpos_of_le_two {v theta : ℝ} (hv : 1<v) (hv2 : v≤2)
@@ -56,7 +56,7 @@ theorem upperShift_tail_general_mean_row
     (hcompatible : r.rateCompatible) (hrate : RateCertificateConditions) :
     GeneralMeanTailProfile
       (fun u=>μ.real {ω|u<(1-b)*upperShift R hR (X ω)})
-      r.prefactor r.q r.c r.cutoff K L := by
+      r.prefactor r.q r.cutoff K L := by
   have hk : (0:ℝ)<r.khi := by exact_mod_cast hnum.shape
   have hq : (0:ℝ)<r.q := by exact_mod_cast hnum.rate
   have hvk : (r.q:ℝ)*(r.khi:ℝ)^2<1 := by exact_mod_cast hnum.gap

@@ -23,11 +23,14 @@ private def permittedKinds : List Name := [
   `Lean.Parser.Command.declId, `Lean.Parser.Command.optDeclSig,
   `Lean.Parser.Command.declValSimple, `Lean.Parser.Termination.suffix,
   `Lean.Parser.Term.typeSpec, `Lean.Parser.Term.app, `Lean.Parser.Term.paren,
+  -- Ordinary parentheses and let binders carry hygiene metadata in Lean 4.33.
+  `Lean.Parser.Term.hygienicLParen, `hygieneInfo,
   `Lean.Parser.Term.typeAscription, `Lean.Parser.Term.explicit,
   `Lean.Parser.Term.explicitBinder, `Lean.Parser.Term.implicitBinder,
   `Lean.Parser.Term.strictImplicitBinder, `Lean.Parser.Term.instBinder,
   `Lean.Parser.Term.fun, `Lean.Parser.Term.basicFun,
-  `Lean.Parser.Term.let, `Lean.Parser.Term.letDecl, `Lean.Parser.Term.letIdDecl,
+  `Lean.Parser.Term.let, `Lean.Parser.Term.letConfig,
+  `Lean.Parser.Term.letDecl, `Lean.Parser.Term.letId, `Lean.Parser.Term.letIdDecl,
   `Lean.Parser.Term.arrow, `Lean.Parser.Term.depArrow,
   `Lean.Parser.Term.type, `Lean.Parser.Term.prop, `Lean.Parser.Term.sort,
   `Lean.Parser.Level.num, `Lean.Parser.Level.add, `Lean.Parser.Level.max,
@@ -61,13 +64,18 @@ private unsafe def checkFile (path : String) : IO Unit := do
   let input ← IO.FS.readFile path
   let context := Parser.mkInputContext input path
   let (header, initial, initialMessages) ← Parser.parseHeader context
-  if initialMessages.hasErrors || !header[0].isNone then
+  -- Lean 4.33 headers contain module?, prelude?, imports. Snapshots retain
+  -- ordinary imports only; the module system must not change their visibility.
+  if initialMessages.hasErrors || !header.raw[0].isNone || !header.raw[1].isNone then
     throw <| IO.userError s!"Invalid constants snapshot import header: {path}"
-  unless !header[1].getArgs.isEmpty do
+  unless !header.raw[2].getArgs.isEmpty do
     throw <| IO.userError "Snapshot needs explicit installed Mathlib imports"
-  for declaration in header[1].getArgs do
-    let name := declaration[2].getId
-    unless declaration[1].isNone && (`Mathlib).isPrefixOf name do
+  for declaration in header.raw[2].getArgs do
+    -- Import fields are public?, meta?, import, all?, name. Reject each
+    -- modifier, preserving the preceding guard's ordinary-Mathlib-only rule.
+    let name := declaration[4].getId
+    unless declaration[0].isNone && declaration[1].isNone && declaration[3].isNone &&
+        (`Mathlib).isPrefixOf name do
       throw <| IO.userError s!"Snapshot may import only installed Mathlib modules: {name}"
     let _ ← findOLean name
   -- Parse with precisely the trusted notation/elaborator registry that will be
@@ -113,6 +121,8 @@ private unsafe def checkFile (path : String) : IO Unit := do
   IO.println s!"STABLE_CONSTANTS_SOURCE {path}"
 
 unsafe def main (paths : List String) : IO Unit := do
+  -- Lean 4.33 passes the conventional separator through to interpreted main.
+  let paths := if paths.head? == some "--" then paths.tail! else paths
   if paths.isEmpty then throw <| IO.userError "Supply constants snapshot source paths"
   initSearchPath (← findSysroot)
   -- Only the pinned Mathlib dependencies may execute trusted initializers.

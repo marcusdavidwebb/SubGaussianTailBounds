@@ -118,8 +118,8 @@ theorem endpoint_covariance_ratio (r : ι → ℝ) (top : ι) {A c : ℝ}
     field_simp [hk0.ne',hp0.ne',hq0.ne',hd0.ne']
   change ratio+(d*p)/(k^2*q) ≤ 6
   rw [he]
-  apply (mul_le_mul_right hr0).mp
-  have hi : (ratio+1/ratio)*ratio = ratio^2+1 := by field_simp [hr0.ne']; ring
+  apply (mul_le_mul_iff_left₀ hr0).mp
+  have hi : (ratio+1/ratio)*ratio = ratio^2+1 := by field_simp [hr0.ne']
   rw [hi]
   exact hs
 

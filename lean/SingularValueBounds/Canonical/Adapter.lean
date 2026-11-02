@@ -1,5 +1,6 @@
 import MainTheoremStatement
-import SingularValueBounds.KL.Theorem
+import SingularValueBounds.Canonical.StatementEquivalence
+import SingularValueBounds.KL.Statement
 import SingularValueBounds.Spectral.Continuity
 
 /-!
@@ -9,6 +10,15 @@ existing formalization; none asserts an unconditional numerical tail bound.
 
 open MeasureTheory ProbabilityTheory
 open scoped BigOperators Matrix ENNReal
+
+namespace SubGaussian
+
+-- Historical spellings used only by the proof adapter. The canonical statement
+-- refers directly to NLA-lib's singular values.
+noncomputable abbrev smallestSingularValue := @Previous.smallestSingularValue
+noncomputable abbrev largestSingularValue := @Previous.largestSingularValue
+
+end SubGaussian
 
 namespace SingularValueBounds.Canonical
 noncomputable section
@@ -25,14 +35,18 @@ local instance rectangularMatrixBorelSpace {m n : ℕ} :
 theorem smallestSingularValue_eq {m n : ℕ} (hn : 1 ≤ n) [NeZero n]
     (A : Matrix (Fin m) (Fin n) ℝ) :
     SubGaussian.smallestSingularValue hn A = SingularValueBounds.smallestSingularValue A := by
-  simp only [SubGaussian.smallestSingularValue, SingularValueBounds.smallestSingularValue,
-    singularValues, Finset.min'_eq_inf', Finset.inf'_image, Function.comp_def, id_eq]
+  change (Finset.univ.image (SingularValueBounds.singularValues A)).min' _ =
+    Finset.univ.inf' _ (SingularValueBounds.singularValues A)
+  erw [Finset.min'_eq_inf', Finset.inf'_image]
+  rfl
 
 theorem largestSingularValue_eq {m n : ℕ} (hn : 1 ≤ n) [NeZero n]
     (A : Matrix (Fin m) (Fin n) ℝ) :
     SubGaussian.largestSingularValue hn A = SingularValueBounds.largestSingularValue A := by
-  simp only [SubGaussian.largestSingularValue, SingularValueBounds.largestSingularValue,
-    singularValues, Finset.max'_eq_sup', Finset.sup'_image, Function.comp_def, id_eq]
+  change (Finset.univ.image (SingularValueBounds.singularValues A)).max' _ =
+    Finset.univ.sup' _ (SingularValueBounds.singularValues A)
+  erw [Finset.max'_eq_sup', Finset.sup'_image]
+  rfl
 
 theorem logParameter_eq {K : ℝ} (hK : 1 ≤ K) :
     Real.log (Real.exp 1 * K) = logParameter K := by
@@ -42,8 +56,9 @@ theorem logParameter_eq {K : ℝ} (hK : 1 ≤ K) :
 
 theorem euclidean_norm_sq (n : ℕ) (v : Fin n → ℝ) :
     ‖((WithLp.equiv 2 (Fin n → ℝ)).symm v : EuclideanSpace ℝ (Fin n))‖ ^ 2 = v ⬝ᵥ v := by
-  simpa [EuclideanSpace.inner_eq_star_dotProduct] using
-    (real_inner_self_eq_norm_sq ((WithLp.equiv 2 (Fin n → ℝ)).symm v : EuclideanSpace ℝ (Fin n))).symm
+  rw [EuclideanSpace.real_norm_sq_eq]
+  change (∑ j, (v j) ^ 2) = ∑ j, v j * v j
+  simp only [pow_two]
 
 theorem centredIsotropic_of_coordinates {Ω : Type u} [MeasurableSpace Ω]
     {μ : Measure Ω} {n : ℕ} {X : Ω → Fin n → ℝ}
@@ -135,7 +150,7 @@ theorem measurable_smallestSingularValue {m n : ℕ} (hn : 1 ≤ n) :
   · have ha0 : 0 ≤ a := le_of_not_gt ha
     let f : Matrix (Fin m) (Fin n) ℝ → SymmetricMatrix (Fin n) := fun A =>
       ⟨Aᴴ * A - a ^ 2 • 1,
-        (Matrix.isHermitian_transpose_mul_self A).sub (by simp [Matrix.IsHermitian])⟩
+        (Matrix.isHermitian_conjTranspose_mul_self A).sub (by simp [Matrix.IsHermitian])⟩
     have hf : Continuous f := by
       apply Continuous.subtype_mk
       fun_prop
@@ -147,8 +162,8 @@ theorem measurable_smallestSingularValue {m n : ℕ} (hn : 1 ≤ n) :
         Finset.lt_inf'_iff, singularValues, Finset.mem_univ,
         forall_true_left]
       exact (forall_congr' (fun j : Fin n => Real.lt_sqrt (y :=
-        (Matrix.isHermitian_transpose_mul_self A).eigenvalues j) ha0)).trans
-          (lower_gap_posDef_iff _ (Matrix.isHermitian_transpose_mul_self A) (a ^ 2)).symm
+        (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues j) ha0)).trans
+          (lower_gap_posDef_iff _ (Matrix.isHermitian_conjTranspose_mul_self A) (a ^ 2)).symm
     rw [he]
     exact (isOpen_symmetric_posDef.preimage hf).measurableSet
 
@@ -161,7 +176,7 @@ theorem measurable_largestSingularValue {m n : ℕ} (hn : 1 ≤ n) :
   · let f : Matrix (Fin m) (Fin n) ℝ → SymmetricMatrix (Fin n) := fun A =>
       ⟨a ^ 2 • 1 - Aᴴ * A,
         (by simp [Matrix.IsHermitian] : (a ^ 2 • (1 : Matrix (Fin n) (Fin n) ℝ)).IsHermitian).sub
-          (Matrix.isHermitian_transpose_mul_self A)⟩
+          (Matrix.isHermitian_conjTranspose_mul_self A)⟩
     have hf : Continuous f := by
       apply Continuous.subtype_mk
       fun_prop
@@ -169,12 +184,12 @@ theorem measurable_largestSingularValue {m n : ℕ} (hn : 1 ≤ n) :
         f ⁻¹' {H | H.1.PosDef} := by
       ext A
       have hg := SymmetricMatrix.gap_posDef_iff
-        (⟨Aᴴ * A, Matrix.isHermitian_transpose_mul_self A⟩ : SymmetricMatrix (Fin n)) (a ^ 2)
+        (⟨Aᴴ * A, Matrix.isHermitian_conjTranspose_mul_self A⟩ : SymmetricMatrix (Fin n)) (a ^ 2)
       simp only [Set.mem_preimage, Set.mem_Iio, Set.mem_setOf_eq, f,
         largestSingularValue_eq, SingularValueBounds.largestSingularValue,
         Finset.sup'_lt_iff, singularValues, Finset.mem_univ, forall_true_left]
       exact (forall_congr' (fun j : Fin n => Real.sqrt_lt' (x :=
-        (Matrix.isHermitian_transpose_mul_self A).eigenvalues j) ha)).trans hg.symm
+        (Matrix.isHermitian_conjTranspose_mul_self A).eigenvalues j) ha)).trans hg.symm
     rw [he]
     exact (isOpen_symmetric_posDef.preimage hf).measurableSet
   · have he : (SubGaussian.largestSingularValue (m := m) hn) ⁻¹' Set.Iio a = ∅ := by
@@ -197,6 +212,7 @@ theorem general_of_tailBounds
     (hbound : ∀ (Ω : Type u) [MeasurableSpace Ω] (μ : Measure Ω)
       [IsProbabilityMeasure μ], KL.TheoremKL μ KL.generalConstants) :
     SubGaussian.GeneralSingularValueTailBound.{u} 3.84 1.58 2.35 1.5 := by
+  apply (SubGaussian.general_iff_previous _ _ _ _).mpr
   refine ⟨by norm_num, ?_⟩
   intro Ω _ μ _ m n hn A K hnm hK hm hind hc hi hsg t ht
   letI : NeZero n := ⟨by omega⟩
@@ -227,8 +243,9 @@ theorem general_of_tailBounds
 theorem unit_of_tailBounds
     (hbound : ∀ (Ω : Type u) [MeasurableSpace Ω] (μ : Measure Ω)
       [IsProbabilityMeasure μ], KL.TheoremKLOne μ) :
-    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 (Real.sqrt 2) := by
-  refine ⟨⟨by norm_num, by norm_num, by norm_num, Real.sqrt_pos.mpr (by norm_num)⟩, ?_⟩
+    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 1.42 := by
+  apply (SubGaussian.unit_iff_previous _ _ _ _).mpr
+  refine ⟨by norm_num, ?_⟩
   intro Ω _ μ _ m n hn A hnm hm hind hc hi hsg t ht
   letI : NeZero n := ⟨by omega⟩
   have hA : Measurable A := measurable_pi_lambda _ hm
@@ -251,22 +268,16 @@ theorem unit_of_tailBounds
   · refine ⟨measurableSet_le measurable_const
       ((measurable_largestSingularValue hn).comp hA), ?_⟩
     apply ennreal_bound_of_real (Real.exp_pos _).le
-    convert hu using 1
+    apply le_trans (measureReal_mono ?_) hu
+    intro ω hω
+    change KL.UpperThreshold KL.oneConstants m n 1 t ≤
+      SingularValueBounds.largestSingularValue (A ω)
+    have hd : Real.sqrt 2 ≤ (1.42 : ℝ) := by
+      norm_num [Real.sqrt_le_iff]
+    have hdt := mul_le_mul_of_nonneg_right hd ht
     norm_num [largestSingularValue_eq, SingularValueBounds.rowMatrix, KL.UpperThreshold,
-        KL.oneConstants, logParameter]
-    rfl
-
-/-- The legacy finite bundle still supplies a conditional general theorem. -/
-theorem general_of_finalCertificates (hcert : KL.FinalCertificateConditions) :
-    SubGaussian.GeneralSingularValueTailBound.{u} 3.84 1.58 2.35 1.5 :=
-  general_of_tailBounds fun _ _ _ _ =>
-    (KL.theorem_explicit_constants_of_certificates hcert).1
-
-/-- The legacy finite bundle still supplies a conditional unit theorem. -/
-theorem unit_of_finalCertificates (hcert : KL.FinalCertificateConditions) :
-    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 (Real.sqrt 2) :=
-  unit_of_tailBounds fun _ _ _ _ =>
-    (KL.theorem_explicit_constants_of_certificates hcert).2
+        KL.oneConstants, logParameter] at hω ⊢
+    linarith
 
 end
 end SingularValueBounds.Canonical

@@ -40,24 +40,29 @@ theorem endpointLogratioCleared_eval (A x : ℝ) :
     endpointLogratioZDerivativeQ,padeDQ,padeNQ,Polynomial.eval₂_mul,
     Polynomial.eval₂_add,Polynomial.eval₂_sub,Polynomial.eval₂_C,
     Polynomial.eval₂_X,Polynomial.eval₂_pow,Polynomial.eval₂_one,
-    Polynomial.eval₂_natCast,Polynomial.coe_eval₂RingHom]
+    Polynomial.coe_eval₂RingHom]
   norm_num [endpointLogratioZ,upperPadeD,upperPadeN]
+
+/-- The normalized comparison cubic is increasing throughout the small-coordinate interval. -/
+theorem upper_comparison_cubic_monotone {A : ℝ} (hA : 0≤A) :
+    MonotoneOn (fun x : ℝ => x+A*x^2-2*x^3) (Icc 0 (7/20)) := by
+  apply monotoneOn_of_deriv_nonneg (convex_Icc _ _)
+  · fun_prop
+  · fun_prop
+  · intro x hx
+    have hx' : x∈Icc (0 : ℝ) (7/20) := interior_subset hx
+    have hd : HasDerivAt (fun x : ℝ => x+A*x^2-2*x^3) (1+2*A*x-6*x^2) x := by
+      convert! ((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
+        (((hasDerivAt_id x).pow 3).const_mul 2) using 1 <;> simp only [id_eq] <;> ring
+    rw [hd.deriv]
+    have hx2 := pow_le_pow_left₀ hx'.1 hx'.2 2
+    nlinarith [mul_nonneg hA hx'.1]
 
 theorem endpointLogratioZ_bounds {A x : ℝ} (hA : A∈Icc (1/2 : ℝ) 1)
     (hx : x∈Icc (0 : ℝ) (7/20)) :
     0≤endpointLogratioZ A x ∧ endpointLogratioZ A x<1 := by
-  have hmono : MonotoneOn (fun x : ℝ => x+A*x^2-2*x^3) (Icc 0 (7/20)) := by
-    apply monotoneOn_of_deriv_nonneg (convex_Icc _ _)
-    · fun_prop
-    · fun_prop
-    · intro y hy
-      have hy' : y∈Icc (0 : ℝ) (7/20) := interior_subset hy
-      have hd : HasDerivAt (fun x : ℝ => x+A*x^2-2*x^3) (1+2*A*y-6*y^2) y := by
-        convert ((hasDerivAt_id y).add (((hasDerivAt_id y).pow 2).const_mul A)).sub
-          (((hasDerivAt_id y).pow 3).const_mul 2) using 1 <;> simp only [id_eq] <;> ring
-      rw [hd.deriv]
-      have hy2 := pow_le_pow_left₀ hy'.1 hy'.2 2
-      nlinarith [mul_nonneg (show 0≤A by linarith [hA.1]) hy'.1]
+  have hmono := upper_comparison_cubic_monotone
+    (show 0 ≤ A from (by norm_num : (0 : ℝ) ≤ 1/2).trans hA.1)
   have hl := hmono ⟨le_rfl,by norm_num⟩ hx hx.1
   have hh := hmono hx ⟨by norm_num,le_rfl⟩ hx.2
   norm_num at hl hh
@@ -110,7 +115,7 @@ theorem endpointLogratio_monotone (hcert : EndpointLogratioCertificateConditions
     let zp := (12/5 : ℝ)*(1+2*A*x-6*x^2)
     have hz : 1-z≠0 := ne_of_gt (by dsimp [z]; linarith)
     have hdZ : HasDerivAt (endpointLogratioZ A) zp x := by
-      convert (((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
+      convert! (((hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).const_mul A)).sub
         (((hasDerivAt_id x).pow 3).const_mul 2)).const_mul (12/5 : ℝ) using 1 <;>
         dsimp [endpointLogratioZ,zp] <;> ring
     have hd := ((((hasDerivAt_const x 1).sub hdZ).log hz).neg.sub hdZ).div
@@ -118,7 +123,8 @@ theorem endpointLogratio_monotone (hcert : EndpointLogratioCertificateConditions
     have hd' : HasDerivAt (endpointLogratio A)
         (((zp/(1-z)-zp)*x^2-(-Real.log (1-z)-z)*(2*x))/(x^2)^2) x := by
       simpa only [endpointLogratio,id_eq,Nat.cast_ofNat,Nat.reduceSub,pow_one,
-        mul_one,zero_sub,neg_div,neg_neg] using hd
+        mul_one,zero_sub,neg_div,neg_neg,Pi.sub_apply,Pi.neg_apply,Pi.pow_apply,
+        Pi.div_apply] using! hd
     rw [hd'.deriv]
     have hP := hcert.nonneg (show endpointLogratioBox.contains A x by
       simpa [endpointLogratioBox,RationalBox.contains] using
@@ -140,7 +146,7 @@ theorem endpointLogratio_monotone (hcert : EndpointLogratioCertificateConditions
     apply div_nonneg _ (sq_nonneg _)
     apply nonneg_of_mul_nonneg_left (b := 1-z) _ hzpos
     have hn := mul_nonneg hx'.1.le hnum
-    convert hn using 1
+    convert! hn using 1
     field_simp [hz]
     <;> ring
 

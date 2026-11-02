@@ -1,4 +1,4 @@
-import SingularValueBounds.KL.Lower.PlateauGeometry
+import SingularValueBounds.KL.Lower.PlateauCertificates
 
 /-! # Finite rational certificates for the whole-interval plateau costs
 A direct Taylor/Bernstein certificate proves the same final cost inequality

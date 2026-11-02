@@ -16,7 +16,7 @@ set_option maxHeartbeats 1200000
 
 theorem endpoint_cutoff_epsilon :
     (46/15 : ℝ)/(1/2)*Real.exp (-((1/2 : ℝ)*(13/2)))≤5/21 := by
-  have he := Certificates.expTaylor_le_exp 24 (x := (13/4 : ℝ)) (by norm_num)
+  have he := Certificates.expTaylor_le_exp 10 (x := (13/4 : ℝ)) (by norm_num)
   have hnum : (644/25 : ℝ)≤Real.exp (13/4) := by
     norm_num [Certificates.expTaylor,Finset.sum_range_succ] at he
     linarith
@@ -65,10 +65,10 @@ theorem endpoint_mgf_of_low_tail {Y : Ω → ℝ} {t : ℝ}
     have hTa : a≤S := hT
     have hprod := mul_nonneg (sub_nonneg.mpr he) (sub_nonneg.mpr hTa)
     have hh : (∫ ω,Y ω^(n+1) ∂μ)/((n+1).factorial : ℝ)≤(1-e)*a+e*S := by
-      convert h using 1 <;> dsimp [a,S] <;> ring
+      convert! h using 1 <;> dsimp [a,S] <;> ring
     have hg : (∫ ω,Y ω^(n+1) ∂μ)/((n+1).factorial : ℝ)≤(16/21 : ℝ)*a+(5/21 : ℝ)*S := by
       nlinarith
-    convert hg using 1 <;> dsimp [a,S] <;> ring
+    convert! hg using 1 <;> dsimp [a,S] <;> ring
   apply mgf_of_bernstein_moments hY.aemeasurable hY0 (by norm_num : (0 : ℝ)≤4)
     ht ht4 hm hMean
   · have h := hc 1
@@ -88,7 +88,7 @@ comparison, and Gaussian comparison; none is a numerical certificate. -/
 theorem endpoint_mgf_of_rare_gaussian
     {Γ : Type*} [MeasurableSpace Γ] {ν : Measure Γ} [IsProbabilityMeasure ν]
     {Y T : Ω → ℝ} {G : Γ → ℝ} {E : Set Ω} {t : ℝ} (i : Fin 3)
-    (hY : Measurable Y) (hY0 : ∀ω,0≤Y ω) (hT0 : ∀ω,0≤T ω)
+    (hY : Measurable Y) (hY0 : ∀ω,0≤Y ω)
     (hG : AEMeasurable G ν) (hG0 : ∀ω,0≤G ω)
     (hE : MeasurableSet E) (ht : 0≤t) (ht4 : 4*t<1)
     (hMeanY : (∫ω,Y ω ∂μ)≤1) (hTi : Integrable T μ)
@@ -117,19 +117,20 @@ theorem endpoint_mgf_of_rare_gaussian
     have h := hRem.1.add (integrable_const (1 : ℝ))
     exact h.congr (Filter.Eventually.of_forall fun ω => by
       simp only [Pi.add_apply,one_mul,zero_mul,sub_zero,sub_add_cancel])
-  have hr0 : 0≤(endpointRareRow i).probability := by fin_cases i <;> norm_num [endpointRareRow]
-  have hA0 : 0≤(endpointRareRow i).cutoff := by fin_cases i <;> norm_num [endpointRareRow]
-  have hRare (p : ℕ) := rare_event_moment hY hY0 hE hr0
+  have hA0 : 0≤(endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
+  have hRare (p : ℕ) := rare_event_moment hY hY0 hE
     (by norm_num : (0 : ℝ)≤177/50) (by norm_num : (0 : ℝ)<23/50)
     hA0 hProb hTail hCut p
   let g : ℕ → ℝ := fun n => ((∫ω,G ω^(n+2) ∂ν)/((n+2).factorial : ℝ))*t^(n+2)
   let r : ℕ → ℝ := fun n => ((∫ω in E,Y ω^(n+2) ∂μ)/((n+2).factorial : ℝ))*t^(n+2)
   have hg0 (n : ℕ) : 0≤g n := by
-    have h := integral_nonneg (μ := ν) (fun ω => pow_nonneg (hG0 ω) (n+2))
+    have h : 0 ≤ ∫ ω, G ω ^ (n+2) ∂ν :=
+      integral_nonneg (fun ω => pow_nonneg (hG0 ω) (n+2))
     dsimp [g]
     positivity
   have hr0' (n : ℕ) : 0≤r n := by
-    have h := integral_nonneg (μ := μ.restrict E) (fun ω => pow_nonneg (hY0 ω) (n+2))
+    have h : 0 ≤ ∫ ω in E, Y ω ^ (n+2) ∂μ :=
+      integral_nonneg (fun ω => pow_nonneg (hY0 ω) (n+2))
     dsimp [r]
     positivity
   have hbound (n : ℕ) : g n+r n≤bernsteinMajorantTerm 4 t (n+2) := by
@@ -155,7 +156,7 @@ theorem endpoint_mgf_of_rare_gaussian
           endpointRareCoefficient_higher i (by omega : 3≤n+2)
     have hh := mul_le_mul_of_nonneg_right (hTotal.trans hCoeff) (pow_nonneg ht (n+2))
     dsimp [g,r,bernsteinMajorantTerm]
-    convert hh using 1 <;> ring
+    convert! hh using 1 <;> ring
   have hMajor := bernsteinMajorant_hasSum (by norm_num : (0 : ℝ)≤4) ht ht4
   have hMajorTail : Summable (fun n => bernsteinMajorantTerm 4 t (n+2)) :=
     (summable_nat_add_iff 2).2 hMajor.summable
@@ -178,7 +179,7 @@ theorem endpoint_mgf_of_rare_gaussian
     rw [integral_exponentialRemainder hTi hTE,
       integral_exponentialRemainder hGInt hGE.1,hMeanT,hMeanG]
     simpa using hCompare
-  have hSplit := mgf_rare_event_split hE ht hY0 hT0 hYi hTi hYE hTE hMeanY hGood
+  have hSplit := mgf_rare_event_split hE ht hY0 hYi hTi hYE hTE hMeanY hGood
   have hSums := hBoth.tsum_le_tsum hbound hMajorTail
   rw [Summable.tsum_add hgSum hrSum] at hSums
   have hFinal := hMajor.summable.sum_add_tsum_nat_add 2

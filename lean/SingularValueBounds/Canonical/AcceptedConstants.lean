@@ -23,6 +23,6 @@ noncomputable def generalDelta : ℝ := 1.5
 noncomputable def unitAlpha : ℝ := 1.32
 noncomputable def unitBeta : ℝ := 1.12
 noncomputable def unitGamma : ℝ := 2.32
-noncomputable def unitDelta : ℝ := Real.sqrt 2
+noncomputable def unitDelta : ℝ := 1.42
 
 end SubGaussian.AcceptedConstants

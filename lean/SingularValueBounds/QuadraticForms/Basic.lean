@@ -29,7 +29,8 @@ theorem SubGaussianMGF.directional (h : SubGaussianMGF μ X K) (u : ι → ℝ) 
         (by simpa only [star_trivial] using dotProduct_star_self_nonneg u)⟩ μ := by
   refine ⟨h.integrable_exp u, ?_⟩
   intro t
-  simpa only [mgf, NNReal.coe_mk, mul_comm, mul_left_comm, mul_assoc] using h.mgf_bound u t
+  change mgf (fun ω => u ⬝ᵥ X ω) μ t ≤ Real.exp ((K ^ 2 * (u ⬝ᵥ u)) * t ^ 2 / 2)
+  simpa only [mgf, mul_comm, mul_left_comm, mul_assoc] using h.mgf_bound u t
 
 /-- Every real directional projection has all finite absolute moments. -/
 theorem SubGaussianMGF.directional_memLp (h : SubGaussianMGF μ X K)

@@ -1,3 +1,4 @@
+import SingularValueBounds.KL.Statement
 import SingularValueBounds.KL.Upper.CertificateBridges
 import SingularValueBounds.KL.Upper.ExtendedTails
 
@@ -62,7 +63,7 @@ theorem upper_extended_two_piece_low {tail : ℝ → ℝ} {K L w k v C u : ℝ}
   have ht := hbase v u hv le_rfl hu hmargin
   unfold extendedTailPrefactor
   rw [← Real.exp_add]
-  convert ht using 1 <;> congr 1 <;> ring
+  convert! ht using 1 <;> congr 1 <;> ring
 
 /-- Past the cutoff, retain the complete finite-threshold penalty. -/
 theorem upper_extended_two_piece_high {tail : ℝ → ℝ} {K L w k v C u : ℝ}
@@ -81,7 +82,7 @@ theorem upper_extended_two_piece_high {tail : ℝ → ℝ} {K L w k v C u : ℝ}
   have ht := hbase rate u hr1 hrv hu0.le hm.le
   unfold extendedTailPrefactor
   rw [← Real.exp_add]
-  convert ht using 1
+  convert! ht using 1
   congr 1
   dsimp [rate]
   field_simp [hK.ne', hu0.ne']

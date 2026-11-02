@@ -38,8 +38,8 @@ theorem upperWeightedMean_normalized {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   rw [upperWeight_eq_normalized_square hR]
   unfold upperNormalizedSpectrum
   field_simp [(frobenius_pos hR).ne']
-  <;> ring
 
+omit [DecidableEq ι] [Nonempty ι] in
 theorem product_inv_sqrt_eq_exp_log {d : ι → ℝ} (hd : ∀j,0<d j) :
     (∏j,(Real.sqrt (d j))⁻¹)=Real.exp (-(∑j,Real.log (d j))/2) := by
   have he (j : ι) : (Real.sqrt (d j))⁻¹=Real.exp (-Real.log (d j)/2) := by
@@ -79,7 +79,7 @@ theorem upperComparison_endpoint_log_mgf (hcert : EndpointLogratioCertificateCon
   have hgapd : ∀j,0<1-2*(1 : ℝ)^2*((6/5 : ℝ)/η)*d j := by
     intro j
     rw [hd]
-    convert hgap j using 1
+    convert! hgap j using 1
     field_simp [hη.ne']
     <;> ring
   have hb := unitary_quadratic_exponential_bound hsg hm U d
@@ -109,7 +109,7 @@ theorem upperComparison_endpoint_log_mgf (hcert : EndpointLogratioCertificateCon
   rw [hidentity] at hsum
   rw [htrace]
   dsimp [endpointLogMGFCost,endpointLogExcess] at hsum ⊢
-  have hscale : ((6/5 : ℝ)/η)*(η*∑j,c j)=(6/5 : ℝ)*∑j,c j := by field_simp [hη.ne'] <;> ring
+  have hscale : ((6/5 : ℝ)/η)*(η*∑j,c j)=(6/5 : ℝ)*∑j,c j := by field_simp [hη.ne']
   rw [hscale]
   linarith [hn.1,hn.2]
 
@@ -152,7 +152,6 @@ theorem upperComparison_endpoint_rare_probability
     have hid : lam*((endpointSpectralRow i).gap*η)=(6/5 : ℝ)*(endpointSpectralRow i).gap := by
       dsimp [lam]
       field_simp [hη.ne']
-      <;> ring
     rwa [hid] at hh
   calc
     _ ≤ μ.real {ω | b≤Q ω} := by

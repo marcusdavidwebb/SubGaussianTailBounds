@@ -11,10 +11,8 @@ def exponentialResolvent (x : ℝ) : ℝ := ∫ u in Ioi 0, Real.exp (-u) / (x +
 
 private theorem exp_power_integrable (j : ℕ) :
     IntegrableOn (fun u : ℝ => u ^ j * Real.exp (-u)) (Ioi 0) := by
-  have h := integrableOn_rpow_mul_exp_neg_mul_rpow
-    (s := (j : ℝ)) (p := 1) (b := 1)
-    (by have := Nat.cast_nonneg (α := ℝ) j; linarith) (by norm_num) (by norm_num)
-  simpa using h
+  simpa only [one_mul] using
+    integrableOn_pow_mul_exp_neg_mul_Ioi j (r := 1) (by norm_num) (A := 0) le_rfl
 
 /-- Factorial moments of the mean-one exponential density. -/
 theorem exponential_factorial_moment (j : ℕ) :
@@ -60,13 +58,19 @@ private def upperCoeff (x : ℝ) (j : ℕ) : ℝ :=
 private theorem polynomial_integrable (c : ℕ → ℝ) (n : ℕ) :
     IntegrableOn (fun u : ℝ => ∑ j ∈ Finset.range n, c j * (u ^ j * Real.exp (-u)))
       (Ioi 0) := by
-  exact integrable_finset_sum _ (fun j hj => (exp_power_integrable j).const_mul (c j))
+  exact integrable_finsetSum _ (fun j hj => (exp_power_integrable j).const_mul (c j))
 
 private theorem polynomial_integral (c : ℕ → ℝ) (n : ℕ) :
     (∫ u in Ioi 0, ∑ j ∈ Finset.range n, c j * (u ^ j * Real.exp (-u))) =
       ∑ j ∈ Finset.range n, c j * (j.factorial : ℝ) := by
-  rw [integral_finset_sum _ (fun j hj => (exp_power_integrable j).const_mul (c j))]
+  rw [integral_finsetSum _ (fun j hj => (exp_power_integrable j).const_mul (c j))]
   simp_rw [integral_const_mul, exponential_factorial_moment]
+
+private theorem weighted_polynomial_remainder (E P D S x : ℝ)
+    (hx : x ≠ 0) (hP : P = D + x*S) :
+    E*P/x = D*(E/x) + E*S := by
+  rw [hP]
+  field_simp [hx]
 
 /-- The first printed positive-square remainder identity. -/
 theorem exponentialResolvent_lower_remainder {x : ℝ} (hx : 0 < x) :
@@ -83,18 +87,31 @@ theorem exponentialResolvent_lower_remainder {x : ℝ} (hx : 0 < x) :
     intro u hu
     have hu0 : 0 < u := hu
     have hxu : x + u ≠ 0 := ne_of_gt (by linarith : 0 < x + u)
-    norm_num [Finset.sum_range_succ, lowerCoeff]
-    dsimp [D]
-    field_simp
-    <;> ring
+    have hpoly : (u^3 - 9*u^2 + 18*u - 6)^2 =
+        D^2 + (x+u) * (∑ j ∈ Finset.range 6, lowerCoeff x j * u^j) := by
+      norm_num [Finset.sum_range_succ, lowerCoeff]
+      dsimp [D]
+      ring
+    rw [weighted_polynomial_remainder _ _ _ _ _ hxu hpoly, Finset.mul_sum]
+    congr 1
+    apply Finset.sum_congr rfl
+    intro j _
+    ring
   have hi := setIntegral_congr_fun (μ := volume) measurableSet_Ioi hp
   rw [hi, integral_add ((exponentialResolvent_integrable hx).const_mul (D^2))
     (polynomial_integrable (lowerCoeff x) 6), integral_const_mul, polynomial_integral]
   change exponentialResolvent x - (x^2 + 8*x + 11) / D = _
-  norm_num [Finset.sum_range_succ, lowerCoeff]
-  dsimp [exponentialResolvent, D]
-  field_simp [hx.ne', hD]
-  <;> ring
+  have hcoeff : (∑ j ∈ Finset.range 6, lowerCoeff x j * (j.factorial : ℝ)) =
+      -(D * (x^2 + 8*x + 11)) := by
+    norm_num [Finset.sum_range_succ, lowerCoeff]
+    dsimp [D]
+    ring
+  rw [hcoeff]
+  have hdivide (E D N : ℝ) (hD : D ≠ 0) :
+      E - N / D = (D^2 * E + -(D * N)) / D^2 := by
+    field_simp [hD]
+    <;> ring
+  exact hdivide (exponentialResolvent x) D (x^2 + 8*x + 11) hD
 
 /-- The second printed positive-square remainder identity. -/
 theorem exponentialResolvent_upper_remainder {x : ℝ} (hx : 0 < x) :
@@ -112,18 +129,31 @@ theorem exponentialResolvent_upper_remainder {x : ℝ} (hx : 0 < x) :
     intro u hu
     have hu0 : 0 < u := hu
     have hxu : x + u ≠ 0 := ne_of_gt (by linarith : 0 < x + u)
-    norm_num [Finset.sum_range_succ, upperCoeff]
-    dsimp [D]
-    field_simp
-    <;> ring
+    have hpoly : u * (u^3 - 12*u^2 + 36*u - 24)^2 =
+        -(x*D^2) + (x+u) * (∑ j ∈ Finset.range 7, upperCoeff x j * u^j) := by
+      norm_num [Finset.sum_range_succ, upperCoeff]
+      dsimp [D]
+      ring
+    rw [mul_assoc, weighted_polynomial_remainder _ _ _ _ _ hxu hpoly, Finset.mul_sum]
+    congr 1
+    apply Finset.sum_congr rfl
+    intro j _
+    ring
   have hi := setIntegral_congr_fun (μ := volume) measurableSet_Ioi hp
   rw [hi, integral_add ((exponentialResolvent_integrable hx).const_mul (-(x*D^2)))
     (polynomial_integrable (upperCoeff x) 7), integral_const_mul, polynomial_integral]
   change (x^3 + 11*x^2 + 26*x + 6) / (x*D) - exponentialResolvent x = _
-  norm_num [Finset.sum_range_succ, upperCoeff]
-  dsimp [exponentialResolvent, D]
-  field_simp [hx.ne', hD]
-  <;> ring
+  have hcoeff : (∑ j ∈ Finset.range 7, upperCoeff x j * (j.factorial : ℝ)) =
+      D * (x^3 + 11*x^2 + 26*x + 6) := by
+    norm_num [Finset.sum_range_succ, upperCoeff]
+    dsimp [D]
+    ring
+  rw [hcoeff]
+  have hdivide (E x D N : ℝ) (hx : x ≠ 0) (hD : D ≠ 0) :
+      N / (x*D) - E = (-(x*D^2) * E + D*N) / (x*D^2) := by
+    field_simp [hx, hD]
+    <;> ring
+  exact hdivide (exponentialResolvent x) x D (x^3 + 11*x^2 + 26*x + 6) hx.ne' hD
 
 /-- Both rational bounds, with no external arithmetic hypotheses. -/
 theorem exponentialResolvent_rational_bounds {x : ℝ} (hx : 0 < x) :

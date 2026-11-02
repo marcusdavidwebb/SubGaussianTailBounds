@@ -91,7 +91,7 @@ theorem momentEll_upper {a p : ℚ} (ha : 0 < a) (ha1 : a ≤ 1) (hp : (19:ℚ)/
   have hdiv := div_le_div_of_nonneg_right hlog (show (0:ℝ) ≤ 2*(a:ℝ)^2 by positivity)
   have hr : (logUpperQ (momentDq a p)/(2*a^2):ℝ) ≤ (momentEllQ a p:ℝ) := by
     have hh := (Rat.cast_le (K:=ℝ)).2 (le_roundUpQ (logUpperQ (momentDq a p)/(2*a^2)))
-    simpa only [Rat.cast_div,Rat.cast_mul,Rat.cast_pow,Rat.cast_ofNat] using hh
+    simpa only [momentEllQ,Rat.cast_div,Rat.cast_mul,Rat.cast_pow,Rat.cast_ofNat] using hh
   dsimp [momentLogM]
   rw [← cast_momentDq]
   exact hdiv.trans (by simpa using hr)
@@ -104,7 +104,6 @@ theorem lowerJ_upperQ {q : ℚ} (hq0 : 0 ≤ q) (hq : q < 1) :
   have hid : Real.log ((1/(1-q):ℚ):ℝ) = -Real.log (1-(q:ℝ)) := by simp [Real.log_inv]
   rw [hid] at h
   dsimp [lowerJ]
-  push_cast
   linarith
 
 theorem epsilon_upper {p : ℚ} (hp : (19:ℚ)/4 ≤ p) :

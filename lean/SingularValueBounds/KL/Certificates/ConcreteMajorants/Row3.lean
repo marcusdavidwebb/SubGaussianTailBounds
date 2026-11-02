@@ -7,7 +7,7 @@ open scoped BigOperators
 namespace SingularValueBounds.KL.Certificates
 set_option maxRecDepth 10000
 set_option maxHeartbeats 5000000
-private def baseCoefficients : Fin 7 → Fin 14 → ℚ :=
+private noncomputable def baseCoefficients : Fin 7 → Fin 14 → ℚ :=
   fun k l => (![![(-7/60), (-2/1), (16/1), (0/1), (0/1), (0/1), (0/1)],
       ![(58/15), (-104/7), (-512/7), (0/1), (0/1), (0/1), (0/1)],
       ![(-1264/105), (1328/15), (818/7), (-512/7), (0/1), (0/1), (0/1)],
@@ -27,14 +27,12 @@ private theorem quotient_identity : majorantQuotient 3 = tensorOfFn 6 13 baseCoe
   rw [← majorant_cleared_factorization]
   apply tensor_eq_of_eval
   intro a b
-  norm_num [majorantCleared, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
+  simp [majorantCleared, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
     comparisonZQ, tensorOfFn, baseCoefficients, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
   ring
 
 private theorem majorant_3_leaf_0 : BoxCertificate (majorantQuotient 3) 6 13

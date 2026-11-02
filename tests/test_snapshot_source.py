@@ -21,7 +21,7 @@ class SnapshotSourceTests(unittest.TestCase):
         cls.elan = os.environ.get("SVB_ELAN_BIN", str(Path.home() / ".elan/bin/elan"))
         cls.toolchain = (SOURCE / "lean/lean-toolchain").read_text().strip()
         installed = subprocess.check_output([cls.elan, "toolchain", "list"], text=True)
-        if cls.toolchain not in installed:
+        if cls.toolchain not in [line.split()[0] for line in installed.splitlines() if line]:
             raise ValueError("Pinned Lean must already be installed; no download attempted.")
         cls.lean_path = subprocess.check_output([cls.elan, "run", cls.toolchain,
             "lake", "env", "printenv", "LEAN_PATH"], cwd=cls.work, text=True).strip()
@@ -56,6 +56,14 @@ end SubGaussian.AcceptedConstants
 
     def test_current_snapshot_is_declarative(self):
         self.check((SOURCE / "lean/SingularValueBounds/Canonical/AcceptedConstants.lean").read_text(), True)
+
+    def test_module_and_import_modifiers_are_rejected(self):
+        for header in ("module\nimport Mathlib.Data.Real.Sqrt", "prelude\nimport Mathlib.Data.Real.Sqrt",
+                       "public import Mathlib.Data.Real.Sqrt", "meta import Mathlib.Data.Real.Sqrt",
+                       "import all Mathlib.Data.Real.Sqrt"):
+            with self.subTest(header=header):
+                self.check(header + "\nnamespace SubGaussian.AcceptedConstants\n"
+                           "def value : Nat := 1\nend SubGaussian.AcceptedConstants\n", False)
 
     def test_guarded_line_comment_stays_a_comment_after_wrapping(self):
         source = ("import Mathlib.Data.Real.Sqrt\r\nnamespace SubGaussian.AcceptedConstants\r\n" +

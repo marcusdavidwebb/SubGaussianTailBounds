@@ -31,9 +31,11 @@ theorem mixedShapeEnvelope_base {n : ℕ} (hn : 0<n) :
   have hs2 : (Real.sqrt n)^2=(n:ℝ) := Real.sq_sqrt hn0.le
   have harg : 1-1/((n:ℝ)*(1/Real.sqrt n)^2)=0 := by
     field_simp
+    nlinarith only [hs2]
   unfold mixedShapeEnvelope
   rw [harg,Real.sqrt_zero,mul_zero,add_zero]
   field_simp
+  exact hs2
 
 theorem mixedShapeEnvelope_one {n : ℕ} (hn : 0<n) : mixedShapeEnvelope n 1=1 := by
   have hn1 : (1:ℝ)≤n := by exact_mod_cast hn
@@ -62,12 +64,12 @@ theorem mixedShapeEnvelope_monotone {n : ℕ} (hn : 0<n) :
           (mul_ne_zero hn0.ne' (pow_ne_zero 2 hx0.ne')))).sqrt hg.ne').const_mul
             (Real.sqrt (1-1/(n:ℝ))))
     change HasDerivAt (mixedShapeEnvelope n) _ x at hd
-    convert hd using 1
-    simp only [id_eq,Nat.cast_ofNat,pow_one,zero_mul,sub_zero,one_mul,mul_one,zero_sub]
+    convert! hd using 1
+    simp only [Pi.pow_apply,id_eq,Nat.cast_ofNat,zero_mul,one_mul,mul_one,zero_sub]
     generalize Real.sqrt (1-1/(n:ℝ))=c
     generalize hr : Real.sqrt (1-1/((n:ℝ)*x^2))=r
     have hr0 : r≠0 := by rw [←hr];exact (Real.sqrt_pos.mpr hg).ne'
-    field_simp only [hn0.ne',hx0.ne',hr0]
+    field_simp [hn0.ne',hx0.ne',hr0]
     <;> ring
   apply monotoneOn_of_deriv_nonneg (convex_Icc _ _ )
   · intro x hx
@@ -99,7 +101,6 @@ theorem mixedShapeEnvelope_monotone {n : ℕ} (hn : 0<n) :
       have he : (x*Real.sqrt (1-1/((n:ℝ)*x^2)))^2=x^2-1/(n:ℝ) := by
         rw [mul_pow,h1]
         field_simp
-        ring
       apply le_of_sq_le_sq _ (Real.sqrt_nonneg _)
       rw [he,h2]
       nlinarith [hx.2]
@@ -180,7 +181,7 @@ theorem mixedShapeEnvelope_spectralRatio {R : Matrix ι ι ℝ} (hR : R.PosDef) 
   have hprod : N*eta^2*((M/eta-1/(N*(eta/tau)))^2-
       (1-1/N)*(1-1/(N*(eta/tau)^2)))≤0 := by rw [←hid];linarith
   have hh : (M/eta-1/(N*(eta/tau)))^2≤(1-1/N)*(1-1/(N*(eta/tau)^2)) := by
-    have hh := (mul_le_mul_left (mul_pos hn (sq_pos_of_pos he))).mp
+    have hh := (mul_le_mul_iff_right₀ (mul_pos hn (sq_pos_of_pos he))).mp
       (show N*eta^2*((M/eta-1/(N*(eta/tau)))^2-
         (1-1/N)*(1-1/(N*(eta/tau)^2)))≤N*eta^2*0 by simpa only [mul_zero] using hprod)
     linarith

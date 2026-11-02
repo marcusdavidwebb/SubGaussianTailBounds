@@ -77,7 +77,7 @@ theorem normalized_lower_mixed_small {X : Ω → ι → ℝ} {K : ℝ}
     (by norm_num) (by norm_num) huk hM (by norm_num)
   have he : lowerJ ((400/147:ℝ)*k)/(2*k^2) ≤
       lowerJ ((400/147:ℝ)*(3/100))/(2*(3/100:ℝ)^2) := by
-    convert div_le_div_of_nonneg_right hJ (by norm_num : (0:ℝ) ≤ 2) using 1 <;> ring
+    convert! div_le_div_of_nonneg_right hJ (by norm_num : (0:ℝ) ≤ 2) using 1 <;> ring
   dsimp [k] at he
   norm_num at he ⊢
   linarith

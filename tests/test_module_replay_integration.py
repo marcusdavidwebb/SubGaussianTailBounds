@@ -78,6 +78,18 @@ class ModuleReplayIntegrationTests(unittest.TestCase):
         self.module_inventory.write_text(json.dumps({"modules": inventory["modules"]}))
         return path
 
+    def test_split_project_artifacts_rejected_during_planning(self):
+        self.compile("SplitProject", """module
+public import Init
+public theorem splitTrue : True := True.intro
+""")
+        self.roots("SplitProject")
+        # The scheduler currently hashes one .olean per project module. Reject
+        # split artifacts before replay rather than leaving private parts unchecked.
+        result = self.worker("plan")
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("Split project module artifacts are not supported", result.stdout)
+
     def test_valid_dependency_chain_replays_once_in_order(self):
         self.compile("ReplayBase", "import Init\ndef replayValue : Nat := 3\n")
         self.compile("ReplayChild", "import ReplayBase\ntheorem replayCorrect : replayValue = 3 := rfl\n")
@@ -111,7 +123,7 @@ run_cmd do
     levelParams := []
     type := mkConst `False
     value := mkConst `True.intro }
-  match env.addDeclCore 0 (.thmDecl info) none (doCheck := false) with
+  match env.addDeclCore 0 0 (.thmDecl info) none (doCheck := false) with
   | .ok env => setEnv env
   | .error _ => throwError "failed to construct adversarial fixture"
 """)
@@ -141,7 +153,7 @@ run_cmd do
     levelParams := []
     type := mkConst `False
     value := mkConst `replayUnsafeFalse }
-  match env.addDeclCore 0 (.thmDecl info) none (doCheck := false) with
+  match env.addDeclCore 0 0 (.thmDecl info) none (doCheck := false) with
   | .ok env => setEnv env
   | .error _ => throwError "failed to construct adversarial fixture"
 """)
@@ -199,7 +211,7 @@ run_cmd do
     levelParams := [`u]
     type := mkConst `True
     value := mkConst `True.intro }
-  match env.addDeclCore 0 (.thmDecl info) none (doCheck := false) with
+  match env.addDeclCore 0 0 (.thmDecl info) none (doCheck := false) with
   | .ok env => setEnv env
   | .error _ => throwError "failed to construct universe collision fixture"
 """,
@@ -207,7 +219,7 @@ run_cmd do
         inventory = self.inventory()
         for kind, declaration in variants.items():
             with self.subTest(kind=kind):
-                self.compile("ReplayRight", "import Lean\n" + declaration + "\n")
+                self.compile("ReplayRight", "import Mathlib\n" + declaration + "\n")
                 # Keep the conflicting declarations in separately compiled
                 # roots so the independent loader/planner sees both artifacts.
                 self.compile("SingularValueBounds", "import ReplayLeft\n")
@@ -273,7 +285,7 @@ def hiddenOracle : (1 : Nat) = 1 := by native_decide
             if result.returncode:
                 raise ValueError(result.stdout)
 
-        with self.assertRaisesRegex(ValueError, "Forbidden axiom"):
+        with self.assertRaisesRegex(ValueError, "Forbidden new logical axiom: hiddenOracle"):
             gate.replay(modules, check, jobs=1, progress=lambda _: None)
         self.assertNotIn("ReplayChild", attempted)
 

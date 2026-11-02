@@ -24,7 +24,7 @@ theorem bernsteinMajorant_hasSum {v t : ℝ} (hv : 0≤v) (ht : 0≤t) (hvt : v*
   have hsum := hg.add hsingle
   have htail : HasSum (fun n => bernsteinMajorantTerm v t (n+2))
       (v*t^2/(1-v*t)+t^2/2) := by
-    convert hsum using 1
+    convert! hsum using 1
     · ext n
       dsimp [bernsteinMajorantTerm]
       rw [pow_succ,pow_add,mul_pow]
@@ -35,9 +35,9 @@ theorem bernsteinMajorant_hasSum {v t : ℝ} (hv : 0≤v) (ht : 0≤t) (hvt : v*
       · simp only [show n+2≠2 by omega,hn,if_false,add_zero]
         ring
   apply (hasSum_nat_add_iff' 2).1
-  convert htail using 1
+  convert! htail using 1
   norm_num [bernsteinMajorantTerm,Finset.sum_range_succ]
-  field_simp [show 1-v*t≠0 by linarith]
+  field_simp [show 1-v*t≠0 by linarith, show 1-t*v≠0 by nlinarith]
   <;> ring
 
 theorem bernsteinMajorant_le_exp {v t : ℝ} (hv : 0≤v) (ht : 0≤t) (hvt : v*t<1) :
@@ -119,7 +119,7 @@ theorem mgf_of_bernstein_moments {Y : Ω → ℝ} {v t : ℝ}
   have he := exp_integrable_and_eq_tsum_of_moments hY hY0 ht hMom haSum
   refine ⟨he.1, ?_⟩
   rw [he.2]
-  have hh := tsum_le_tsum hb haSum hsum.summable
+  have hh := haSum.tsum_le_tsum hb hsum.summable
   rw [hsum.tsum_eq] at hh
   exact hh.trans (bernsteinMajorant_le_exp hv ht hvt)
 

@@ -11,7 +11,7 @@ set_option maxRecDepth 10000
 set_option maxHeartbeats 2000000
 
 /-- The unshifted coefficient vector is shared by every subdivision leaf. -/
-private def rateBase8 : Fin 28 → ℚ := ![(7292254479272448/3814697265625),
+private noncomputable def rateBase8 : Fin 28 → ℚ := ![(7292254479272448/3814697265625),
     (17709760878233088/762939453125),
     (-288905090725461504/3814697265625),
     (-3513272142723764736/3814697265625),
@@ -44,9 +44,9 @@ private theorem ratePolynomial_identity8 : ratePolynomial (12/5) (21/10000) = Po
   rw [Polynomial.ofFn_eq_sum_monomial]
   apply Polynomial.funext
   intro x
-  norm_num [rateBase8, ratePolynomial, Finset.sum_range_succ, Polynomial.eval_add,
+  simp [rateBase8, ratePolynomial, Finset.sum_range_succ, Polynomial.eval_add,
     Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C,
-    Polynomial.eval_X, Fin.sum_univ_succ, Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.eval_X, Fin.sum_univ_succ, Polynomial.eval_monomial]
   ring
 
 private theorem rate_8_leaf_0 :

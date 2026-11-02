@@ -1,27 +1,23 @@
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.Analysis.SpecialFunctions.Exponential
-import Mathlib.Tactic
+import Mathlib.Tactic.Ext
+import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.Linarith
+import Mathlib.Tactic.NormNum
+import Mathlib.Tactic.NormNum.BigOperators
+import Mathlib.Tactic.NormNum.NatFactorial
+import Mathlib.Tactic.NormNum.RealSqrt
+import Mathlib.Tactic.Positivity
+import Mathlib.Tactic.Ring
 
 /-!
-# Analytic rules for the exact Python certificates (supplementary S1.2)
+# Analytic rules for rational enclosures
 
-The finite rational/integer computations remain in `check_main_constants.py`.
-This module proves the analytic rules used by `exp_lo`, `exp_up`, `_log_unit`,
-`log_up`, `logi`, and `expi`; no Python result is an analytic premise.
-The truncation orders are arbitrary, and include 18, 24, 40, and 80.
-
-The two `_log_unit`/`logi`/`expi` implementations occur inside Python
-`check_k_one_upper_entropy` and `check_general_upper_drift`. `_log_unit` uses
-`log_ratio_le_logTaylorUpper` with order 18, and the termwise interval rules
-below justify its outward rounding at scale `10^15`. `logi` uses
-`log_argument_transform`, `log_pow_two_mul`, and `log_reciprocal`.
-The positive `expi` branch uses `exp_le_expTaylorUpper` at order 80;
-the negative branch uses `expTaylor_le_exp` and `exp_neg_le_reciprocal`.
-Inside `check_uniform_lower_higher_moments`, `exp_lo`/`exp_up` use the
-exponential bounds at orders 24/40, `log_up` uses the odd bound at order 24,
-and `up`/`down` use `scaled_floor_ceil_enclosure` at scale `10^12`.
-The full numerical transcripts are intentionally external finite arithmetic;
-the two literal pilot predicates below demonstrate their typed interface.
+The Taylor bounds, argument reductions and rounding lemmas below connect finite
+rational inequalities to real exponential and logarithm bounds. The certificate
+structures and pilot implications are conditional lemmas; the concrete finite
+obligations used by the canonical results are proved separately in Lean.
 -/
 
 open Finset
@@ -30,25 +26,25 @@ noncomputable section
 
 namespace SingularValueBounds.KL.Certificates
 
-/-- The Python `exp_lo(x,n)` sum, including both endpoints. -/
+/-- The exponential Taylor sum, including both endpoints. -/
 def expTaylor (N : ℕ) (x : ℝ) : ℝ :=
   ∑ j ∈ range (N + 1), x ^ j / (j.factorial : ℝ)
 
-/-- The unrounded upper value returned by Python `exp_up(x,n)`. -/
+/-- The exponential Taylor upper value before rounding. -/
 def expTaylorUpper (N : ℕ) (x : ℝ) : ℝ :=
   expTaylor N x + x ^ (N + 1) / ((N + 1).factorial : ℝ) / (1 - x / (N + 2))
 
-/-- The odd-power logarithm sum used by Python `_log_unit` and `log_up`. -/
+/-- The odd-power logarithm sum. -/
 def logTaylor (N : ℕ) (z : ℝ) : ℝ :=
   ∑ j ∈ range N, 2 * (1 / (2 * (j : ℝ) + 1)) * z ^ (2 * j + 1)
 
-/-- The unrounded upper value used by `_log_unit` (N=18) and `log_up` (N=24). -/
+/-- The logarithm Taylor upper value before rounding. -/
 def logTaylorUpper (N : ℕ) (z : ℝ) : ℝ :=
   logTaylor N z + 2 * z ^ (2 * N + 1) / ((2 * (N : ℝ) + 1) * (1 - z ^ 2))
 
 private theorem hasSum_exp (x : ℝ) :
     HasSum (fun j : ℕ => x ^ j / (j.factorial : ℝ)) (Real.exp x) := by
-  simpa only [Real.exp_eq_exp_ℝ] using NormedSpace.expSeries_div_hasSum_exp ℝ x
+  simpa only [Real.exp_eq_exp_ℝ] using NormedSpace.expSeries_div_hasSum_exp x
 
 /-- Nonnegative Taylor terms give the lower half of (S1.2). -/
 theorem expTaylor_le_exp (N : ℕ) {x : ℝ} (hx : 0 ≤ x) :
@@ -62,7 +58,7 @@ private theorem hasSum_le_geometric {f : ℕ → ℝ} {s c r : ℝ}
   have hg := (hasSum_geometric_of_lt_one hr₀ hr₁).mul_left c
   simpa only [div_eq_mul_inv] using hasSum_le hdom hs hg
 
-/-- The geometric-remainder upper bound used by Python `exp_up` and positive `expi`. -/
+/-- The exponential upper bound with a geometric remainder. -/
 theorem exp_le_expTaylorUpper (N : ℕ) {x : ℝ} (hx₀ : 0 ≤ x)
     (hx₁ : x < N + 2) : Real.exp x ≤ expTaylorUpper N x := by
   let n := N + 1
@@ -128,7 +124,7 @@ theorem log_ratio_le_logTaylorUpper (N : ℕ) {z : ℝ} (hz₀ : 0 ≤ z) (hz₁
       rw [show 2 * (j + N) + 1 = (2 * N + 1) + 2 * j by omega, pow_add, pow_mul]
       ring
 
-/-- The substitution in Python `log_up(x,n)` maps `[1,∞)` to `[0,1)`. -/
+/-- The logarithm substitution maps `[1,∞)` to `[0,1)`. -/
 theorem log_argument_transform {x : ℝ} (hx : 1 ≤ x) :
     0 ≤ (x - 1) / (x + 1) ∧ (x - 1) / (x + 1) < 1 ∧
       (1 + (x - 1) / (x + 1)) / (1 - (x - 1) / (x + 1)) = x := by
@@ -137,13 +133,13 @@ theorem log_argument_transform {x : ℝ} (hx : 1 ≤ x) :
   field_simp
   ring
 
-/-- Powers-of-two reduction in both Python `logi` implementations. -/
+/-- Powers-of-two reduction for the logarithm. -/
 theorem log_pow_two_mul (k : ℕ) {u : ℝ} (hu : 0 < u) :
     Real.log ((2 : ℝ) ^ k * u) = Real.log u + (k : ℝ) * Real.log 2 := by
   rw [Real.log_mul (pow_ne_zero _ (by norm_num)) hu.ne', Real.log_pow]
   ring
 
-/-- Reciprocal argument rule used by Python `logi` when its numerator is smaller. -/
+/-- Reciprocal argument rule for the logarithm. -/
 theorem log_reciprocal (x : ℝ) : Real.log (1 / x) = -Real.log x := by
   simp
 
@@ -153,7 +149,7 @@ theorem reciprocal_enclosure {y lo hi : ℝ} (hlo : 0 < lo)
   have hy : 0 < y := hlo.trans_le hl
   exact ⟨one_div_le_one_div_of_le hy hu, one_div_le_one_div_of_le hlo hl⟩
 
-/-- Negative branch of Python `expi`: the lower positive Taylor sum yields an upper bound. -/
+/-- For a negative argument, the lower positive Taylor sum yields an upper bound. -/
 theorem exp_neg_le_reciprocal {x lo : ℝ} (hlo : 0 < lo) (hl : lo ≤ Real.exp x) :
     Real.exp (-x) ≤ 1 / lo := by
   rw [Real.exp_neg, ← one_div]
@@ -164,7 +160,7 @@ theorem outward_rounding {y lo hi roundedLo roundedHi : ℝ}
     (hl : lo ≤ y) (hu : y ≤ hi) (hdl : roundedLo ≤ lo) (huh : hi ≤ roundedHi) :
     roundedLo ≤ y ∧ y ≤ roundedHi := ⟨hdl.trans hl, hu.trans huh⟩
 
-/-- Exact integer floor/ceiling rule for Python `down`, `up`, `ceildiv` at positive scale. -/
+/-- Exact integer floor/ceiling rule at positive scale. -/
 theorem scaled_floor_ceil_enclosure (y : ℝ) {scale : ℝ} (hscale : 0 < scale) :
     (⌊scale * y⌋ : ℝ) / scale ≤ y ∧ y ≤ (⌈scale * y⌉ : ℝ) / scale := by
   constructor
@@ -189,7 +185,7 @@ theorem add_enclosure {a b al au bl bu : ℝ}
     al + bl ≤ a + b ∧ a + b ≤ au + bu :=
   ⟨add_le_add ha.1 hb.1, add_le_add ha.2 hb.2⟩
 
-/-- The endpoint swap in the negative branch of Python `logi`. -/
+/-- Negation reverses the endpoints of an enclosure. -/
 theorem neg_enclosure {a lo hi : ℝ} (h : lo ≤ a ∧ a ≤ hi) :
     -hi ≤ -a ∧ -a ≤ -lo := ⟨neg_le_neg h.2, neg_le_neg h.1⟩
 
@@ -200,39 +196,39 @@ theorem div_enclosure_pos {a lo hi d : ℝ} (h : lo ≤ a ∧ a ≤ hi) (hd : 0 
 
 namespace NumericalCertificateConditions
 
-/-- Finite rational counterpart of `expTaylor`; Python evaluates precisely this sum. -/
+/-- Finite rational counterpart of `expTaylor`. -/
 def expTaylorQ (N : ℕ) (x : ℚ) : ℚ :=
   ∑ j ∈ range (N + 1), x ^ j / (j.factorial : ℚ)
 
 def expTaylorUpperQ (N : ℕ) (x : ℚ) : ℚ :=
   expTaylorQ N x + x ^ (N + 1) / ((N + 1).factorial : ℚ) / (1 - x / (N + 2))
 
-/-- Finite rational counterpart of the exact odd sum in `log_up` and `_log_unit`. -/
+/-- Finite rational counterpart of the odd logarithm sum. -/
 def logTaylorQ (N : ℕ) (z : ℚ) : ℚ :=
   ∑ j ∈ range N, 2 * (1 / (2 * (j : ℚ) + 1)) * z ^ (2 * j + 1)
 
 def logTaylorUpperQ (N : ℕ) (z : ℚ) : ℚ :=
   logTaylorQ N z + 2 * z ^ (2 * N + 1) / ((2 * (N : ℚ) + 1) * (1 - z ^ 2))
 
-/-- Exactly the finite tests made by the exp pilot in `check_enclosure_interface.py`. -/
+/-- Finite hypotheses for an exponential enclosure. -/
 structure ExpCertificate (N : ℕ) (x lo hi : ℚ) : Prop where
   nonneg : 0 ≤ x
   domain : x < N + 2
   lower : lo ≤ expTaylorQ N x
   upper : expTaylorUpperQ N x ≤ hi
 
-/-- Exactly the finite tests made by the log pilot in `check_enclosure_interface.py`. -/
+/-- Finite hypotheses for a logarithm enclosure. -/
 structure LogCertificate (N : ℕ) (z lo hi : ℚ) : Prop where
   nonneg : 0 ≤ z
   domain : z < 1
   lower : lo ≤ logTaylorQ N z
   upper : logTaylorUpperQ N z ≤ hi
 
-/-- Literal exp pilot: Python checks these four rational comparisons without floating point. -/
+/-- A concrete exponential enclosure predicate. -/
 def expHalfPilot : Prop :=
   ExpCertificate 24 (1 / 2) (1648721270700 / 10^12) (1648721270701 / 10^12)
 
-/-- Literal log pilot: `z=1/3` represents `log 2`; the order 18 matches `_log_unit`. -/
+/-- A concrete logarithm enclosure predicate, with `z=1/3` representing `log 2`. -/
 def logTwoPilot : Prop :=
   LogCertificate 18 (1 / 3) (693147180559 / 10^12) (693147180560 / 10^12)
 
@@ -284,7 +280,7 @@ theorem log_enclosure_of_certificate {N : ℕ} {z lo hi : ℚ} (h : LogCertifica
   exact ⟨hl.trans (logTaylor_le_log_ratio N hz₀ hz₁),
     (log_ratio_le_logTaylorUpper N hz₀ hz₁).trans hu⟩
 
-/-- The exp pilot has this analytic consequence once its finite Python predicate is supplied. -/
+/-- The exponential pilot has this consequence when its finite predicate is proved. -/
 theorem exp_half_of_pilot (h : expHalfPilot) :
     (1648721270700 : ℝ) / 10^12 ≤ Real.exp (1 / 2) ∧
       Real.exp (1 / 2) ≤ (1648721270701 : ℝ) / 10^12 := by
@@ -292,7 +288,7 @@ theorem exp_half_of_pilot (h : expHalfPilot) :
   norm_num only [Rat.cast_div, Rat.cast_ofNat, Rat.cast_pow] at hb
   convert hb using 1 <;> norm_num
 
-/-- The log pilot has this analytic consequence once its finite Python predicate is supplied. -/
+/-- The logarithm pilot has this consequence when its finite predicate is proved. -/
 theorem log_two_of_pilot (h : logTwoPilot) :
     (693147180559 : ℝ) / 10^12 ≤ Real.log 2 ∧
       Real.log 2 ≤ (693147180560 : ℝ) / 10^12 := by

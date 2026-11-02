@@ -25,7 +25,7 @@ theorem current_shift_mean_lower {q e : Ω → ℝ} {a η M b : ℝ}
     dsimp [D]; have := hq0 ω; have := he0 ω; positivity
   have hdiv := (shift_integrable hq hq2 he hq0 he0 ha hη).1
   have hmul : Integrable (fun ω => q ω * D ω) μ := by
-    convert ((hq.const_mul a).add hqe).add (hq2.const_mul η) using 1
+    convert! ((hq.const_mul a).add hqe).add (hq2.const_mul η) using 1
     funext ω; dsimp [D]; ring
   have hc := integral_ratio_cauchy hq0 hD hdiv hmul
   rw [hmean, one_pow] at hc
@@ -38,7 +38,7 @@ theorem current_shift_mean_lower {q e : Ω → ℝ} {a η M b : ℝ}
           ((hq.const_mul a).add hqe) (hq2.const_mul η),
           integral_add (hq.const_mul a) hqe]
         simp only [integral_const_mul, hmean, mul_one]
-      _ ≤ _ := add_le_add (add_le_add_left hexcess a)
+      _ ≤ _ := add_le_add (add_le_add_right hexcess a)
         (mul_le_mul_of_nonneg_left hsecond hη)
   have hnon : 0 ≤ ∫ ω, q ω / D ω ∂μ :=
     integral_nonneg (fun ω => div_nonneg (hq0 ω) (hD ω).le)
@@ -68,6 +68,7 @@ theorem current_shift_second_moment_upper {q e : Ω → ℝ} {a η M : ℝ}
       ((hq.aemeasurable.pow_const 2).div
         (aemeasurable_const.add (hq.aemeasurable.const_mul (2 * η)))).aestronglyMeasurable
     filter_upwards [] with ω
+    change ‖q ω ^ 2 / D ω‖ ≤ q ω ^ 2 / (a - η * M)
     rw [Real.norm_eq_abs, abs_of_nonneg (div_nonneg (sq_nonneg _) (hD ω).le)]
     apply div_le_div_of_nonneg_left (sq_nonneg _) ha0
     dsimp [D]

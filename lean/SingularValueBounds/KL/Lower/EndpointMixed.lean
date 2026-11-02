@@ -17,6 +17,7 @@ variable {μ : Measure Ω} [IsProbabilityMeasure μ] {X : Ω → ι → ℝ}
 def diagonalQuadratic (b : ι → ℝ) (X : Ω → ι → ℝ) (ω : Ω) : ℝ :=
   ∑ i, b i * X ω i ^ 2
 
+omit [MeasurableSpace Ω] in
 lemma quadraticForm_diagonal_eq (b : ι → ℝ) :
     quadraticForm (Matrix.diagonal b) X = diagonalQuadratic b X := by
   ext ω
@@ -74,6 +75,7 @@ def endpointG (A c ξ x : ℝ) : ℝ :=
   (A/ξ+1-c)*x + (A+ξ/2+(A^2-2*c)/(2*ξ))*x^2 -
     (c+A*c/ξ)*x^3+c^2/(2*ξ)*x^4
 
+omit [DecidableEq ι] in
 theorem endpoint_ordinary_cost_young (r : ι → ℝ) (A c : ℝ)
     (h2 : spectralMoment r 2 = 1) {ξ : ℝ} (hξ : 0 < ξ) :
     endpointOrdinaryCost r A c ≤ A+1/(2*ξ)+(∑ i, r i^2*endpointG A c ξ (r i)) := by
@@ -81,7 +83,7 @@ theorem endpoint_ordinary_cost_young (r : ι → ℝ) (A c : ℝ)
   have hB : 0 ≤ ∑ i, endpointComparisonEigen A c (r i)^2 := Finset.sum_nonneg fun _ _ => by positivity
   have hy : Real.sqrt (spectralMoment r 4)*Real.sqrt (∑ i, endpointComparisonEigen A c (r i)^2) ≤
       ξ/2*spectralMoment r 4+(∑ i, endpointComparisonEigen A c (r i)^2)/(2*ξ) := by
-    apply (mul_le_mul_right (show 0 < 2*ξ by positivity)).mp
+    apply (mul_le_mul_iff_left₀ (show 0 < 2*ξ by positivity)).mp
     have hs := sq_nonneg (Real.sqrt (∑ i, endpointComparisonEigen A c (r i)^2) -
       ξ*Real.sqrt (spectralMoment r 4))
     have hex : (Real.sqrt (∑ i, endpointComparisonEigen A c (r i)^2)-
@@ -94,7 +96,6 @@ theorem endpoint_ordinary_cost_young (r : ι → ℝ) (A c : ℝ)
     have heq : (ξ/2*spectralMoment r 4+(∑ i, endpointComparisonEigen A c (r i)^2)/(2*ξ))*(2*ξ) =
         ξ^2*spectralMoment r 4+(∑ i, endpointComparisonEigen A c (r i)^2) := by
       field_simp [hξ.ne']
-      ring
     rw [heq]
     nlinarith only [hs]
   have hp (x : ℝ) : x^2*endpointG A c ξ x =

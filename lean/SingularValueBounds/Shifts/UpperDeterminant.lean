@@ -79,7 +79,7 @@ theorem upperDeterminantCorrection_sum [Nonempty ι] {r : ι → ℝ}
       have hsum : 0 < ∑ i, r i ^ 2 / (1 + h * r i) :=
         Finset.sum_pos (fun i _ => div_pos (sq_pos_of_pos (hr i)) (hdh i)) Finset.univ_nonempty
       field_simp [hh.ne', hsum.ne']
-      ring
+      simp only [mul_comm]
 
 /-- The finite-dimensional determinant estimate used in Lemma 3.2. The
 parameter `t` is `2 K² λ`; the expression inside the product is an eigenvalue
@@ -112,8 +112,8 @@ theorem upper_determinant_factor_bound [Nonempty ι] {r : ι → ℝ}
     dsimp [f, c, spectralUpperResolvent, upperDeterminantCorrection]
     have hdh : 0 < 1 + h * r i := by nlinarith [mul_pos hh (hr i)]
     have hdt : 0 < 1 + (h - t) * r i := by nlinarith [mul_pos (sub_pos.mpr hth) (hr i)]
-    field_simp [hdh.ne', hdt.ne', hd.ne']
-    ring
+    field_simp (disch := first | positivity | nlinarith [mul_pos hdh hdt, sq_pos_of_pos hdh])
+    <;> ring
   constructor
   · intro i
     rw [hfactor]
@@ -124,7 +124,7 @@ theorem upper_determinant_factor_bound [Nonempty ι] {r : ι → ℝ}
     have hfirst : Real.exp (-(t * ∑ i, r i)) ≤ ∏ i, f i := by
       have hp := Finset.prod_le_prod (s := Finset.univ)
         (fun i _ => (Real.exp_pos (-(t * r i))).le) (fun i _ => hf i)
-      convert hp using 1
+      convert! hp using 1
       rw [← Real.exp_sum]
       congr 1
       simp only [Finset.mul_sum, Finset.sum_neg_distrib]

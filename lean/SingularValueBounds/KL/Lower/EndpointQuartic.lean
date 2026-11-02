@@ -83,7 +83,7 @@ theorem endpoint_diagonal_quartic (hsg : SubGaussianMGF μ X 1)
     let vp := Real.sqrt h • u + Real.sqrt j • V g
     let vm := Real.sqrt h • u + (-Real.sqrt j) • V g
     have hi : Integrable (F · g) μ := by
-      convert ((hsg.directional_integrable_pow vp 4).add
+      convert! ((hsg.directional_integrable_pow vp 4).add
         (hsg.directional_integrable_pow vm 4)).div_const 2 using 1
       funext ω
       exact (hp ω g).symm
@@ -133,18 +133,18 @@ theorem endpoint_diagonal_quartic (hsg : SubGaussianMGF μ X 1)
       integral_add (f := fun _ => h ^ 2 * Z ω ^ 4)
         (g := fun g => 6*h*j*Z ω ^ 2*W ω g ^ 2)
         (integrable_const _) ((hgW ω 2).const_mul _)]
-    simp only [integral_const, measureReal_univ_eq_one, smul_eq_mul, one_mul,
+    simp only [integral_const, probReal_univ, smul_eq_mul, one_mul,
       integral_const_mul, hg2, hg4]
     ring
   have hY : MemLp Y 2 μ := by
-    convert hsg.quadratic_memLp_two (Matrix.diagonal b) using 1
+    convert! hsg.quadratic_memLp_two (Matrix.diagonal b) using 1
     ext ω
     simp only [Y, quadraticForm, Matrix.mulVec_diagonal, dotProduct]
     apply Finset.sum_congr rfl
     intro i _
     ring
   have hZ2 : MemLp (fun ω => Z ω ^ 2) 2 μ := by
-    convert hsg.quadratic_memLp_two (Matrix.vecMulVec u u) using 1
+    convert! hsg.quadratic_memLp_two (Matrix.vecMulVec u u) using 1
     ext ω
     exact (outer_quadratic u (X ω)).symm
   have hYn (ω : Ω) : 0 ≤ Y ω := Finset.sum_nonneg fun i _ => mul_nonneg (hb i) (sq_nonneg _)
@@ -171,14 +171,14 @@ theorem endpoint_diagonal_quartic (hsg : SubGaussianMGF μ X 1)
       _ = _ := by
         have hQi : Integrable Q (standardGaussian ι) := by
           dsimp [Q]
-          exact integrable_finset_sum _ (fun i _ =>
+          exact integrable_finsetSum _ (fun i _ =>
             (by
               have hi := standardGaussian_linear_pow_integrable (Pi.single i (1 : ℝ)) 2
               simpa [Pi.single_apply] using hi.const_mul (b i)))
         have hQ2i := standardGaussian_quadratic_sq_integrable b
         have hQmean : (∫ g, Q g ∂standardGaussian ι) = ∑ i, b i := by
           dsimp [Q]
-          rw [integral_finset_sum]
+          rw [integral_finsetSum]
           · simp only [integral_const_mul]
             have hc (i : ι) : (∫ g, g i ^ 2 ∂standardGaussian ι) = 1 := by
               simpa [Pi.single_apply] using (standardGaussian_linear_moments (Pi.single i (1 : ℝ))).1
@@ -187,7 +187,7 @@ theorem endpoint_diagonal_quartic (hsg : SubGaussianMGF μ X 1)
             have hi := standardGaussian_linear_pow_integrable (Pi.single i 1) 2
             simpa [Pi.single_apply] using hi.const_mul (b i)
         have hi : Integrable (fun g => 3*(h+j*Q g)^2) (standardGaussian ι) := by
-          convert (((integrable_const (h^2)).add (hQi.const_mul (2*h*j))).add
+          convert! (((integrable_const (h^2)).add (hQi.const_mul (2*h*j))).add
             (hQ2i.const_mul (j^2))).const_mul 3 using 1
           funext g
           dsimp [Q]
@@ -203,7 +203,7 @@ theorem endpoint_diagonal_quartic (hsg : SubGaussianMGF μ X 1)
           ((integrable_const _).add (hQi.const_mul _)) (hQ2i.const_mul _),
           integral_add (f := fun _ => h^2) (g := fun g => 2*h*j*Q g)
             (integrable_const _) (hQi.const_mul _)]
-        simp only [integral_const, measureReal_univ_eq_one, smul_eq_mul, one_mul,
+        simp only [integral_const, probReal_univ, smul_eq_mul, one_mul,
           integral_const_mul, hQmean, Q, standardGaussian_quadratic_second]
   rw [← ofReal_integral_eq_lintegral_ofReal hlefti
     (Filter.Eventually.of_forall (fun ω => by have := hYn ω; positivity))] at hbound

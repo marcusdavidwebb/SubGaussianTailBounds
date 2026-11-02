@@ -67,7 +67,7 @@ theorem endpoint_rankone_scalar {a d p q v x y z vy vw : ℝ}
   have hsum : 6*p*q*(a*d*v + d*x + a*y + z - (2*a*d+2*p*q)) ≤ 0 := by
     nlinarith only [hY, hW, hcov, hr']
   have hpos : 0 < 6*p*q := by positivity
-  have := (mul_le_mul_left hpos).mp (show 6*p*q*(a*d*v+d*x+a*y+z-(2*a*d+2*p*q)) ≤ 6*p*q*0 by simpa using hsum)
+  have := (mul_le_mul_iff_right₀ hpos).mp (show 6*p*q*(a*d*v+d*x+a*y+z-(2*a*d+2*p*q)) ≤ 6*p*q*0 by simpa using hsum)
   linarith
 
 /-- Supplementary `eq:app-K-one-rankone-covariance`, with no commutation
@@ -112,7 +112,7 @@ theorem endpoint_rankone_covariance_le (hsg : SubGaussianMGF μ X 1)
     have hs := (div_le_iff₀ (mul_pos hdp haq)).mp
       (show ((a*frobenius B)^2+(d*frobenius P)^2) /
           ((d*frobenius P)*(a*frobenius B)) ≤ 6 from by
-        convert hr using 1 <;> field_simp [hdp.ne', haq.ne'] <;> ring)
+        convert! hr using 1 <;> field_simp [hdp.ne', haq.ne'])
     nlinarith only [hs]
   rw [quadraticCovariance_rankone_expansion hsg]
   apply endpoint_rankone_scalar hp hq (by simpa using hv) hr' hy hw

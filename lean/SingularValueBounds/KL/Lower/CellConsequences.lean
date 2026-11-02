@@ -82,11 +82,11 @@ theorem MomentCellCertificate.shape_bounds {a b p : ℚ} (h : MomentCellCertific
   have hjUpper := lowerJ_upperQ hQ h.u_domain
   have hjUpper' : lowerJ (lowerMomentU (p:ℝ) (a:ℝ)*(b:ℝ)) ≤
       (logUpperQ (1/(1-(4*p/((p-1)*generalLowerProfileQ a))*b))-
-        (4*p/((p-1)*generalLowerProfileQ a))*b:ℚ) := by simpa using hjUpper
+        (4*p/((p-1)*generalLowerProfileQ a))*b:ℚ) := by simpa [lowerMomentU] using hjUpper
   have hjDiv := div_le_div_of_nonneg_right hjUpper' (sq_nonneg (b:ℝ))
   refine ⟨huk,hshape,?_⟩
   have hfinal := div_le_div_of_nonneg_right (hJ.trans hjDiv) (by norm_num : (0:ℝ) ≤ 2)
-  convert hfinal using 1 <;> push_cast <;> ring
+  convert! hfinal using 1 <;> push_cast <;> ring
 
 theorem momentB_pos_and_product {k p : ℝ} (hk : 0 ≤ k) (hk1 : k ≤ 1)
     (hp : (19:ℝ)/4 ≤ p) : 0 < momentB k p ∧ 1 ≤ p*momentB k p := by
@@ -145,7 +145,7 @@ theorem MomentCellCertificate.entropy_condition {a b p : ℚ} (h : MomentCellCer
         (4*p/((p-1)*generalLowerProfileQ a))*b)/(2*b^2):ℚ):ℝ)+
       (momentLogMinusOneQ (momentEllQ a p):ℝ)+(p:ℝ)*(logUpperQ (p*momentBq b p):ℝ)+
       1/((expTaylorQ 24 (p-1/20):ℝ)-1) < 3*(p:ℝ) := by
-    convert (Rat.cast_lt (K:=ℝ)).2 h.entropy using 1 <;> push_cast <;> ring
+    convert! (Rat.cast_lt (K:=ℝ)).2 h.entropy using 1 <;> push_cast <;> ring
   linarith
 
 end LowerCertificates

@@ -119,12 +119,11 @@ theorem upper_resolvent_jensen [Nonempty ι] {r : ι → ℝ} (hr : ∀ i, 0 < r
           rw [hsum]
           change ((1 + 2 * h * upperWeightedMean r) * 1 - h * upperWeightedMean r) /
             (1 + h * upperWeightedMean r) ^ 2 = _
-          field_simp
-          ring
+          field_simp <;> ring
     rw [hid] at hsumineq
     simpa only [mul_one_div] using hsumineq
   have hmul := mul_le_mul_of_nonneg_left hb hS.le
-  convert hmul using 1
+  convert! hmul using 1
   · ring
   · rw [Finset.mul_sum]
     apply Finset.sum_congr rfl
@@ -132,7 +131,6 @@ theorem upper_resolvent_jensen [Nonempty ι] {r : ι → ℝ} (hr : ∀ i, 0 < r
     dsimp [upperWeight]
     have hd : 0 < 1 + h * r i := by nlinarith [mul_nonneg hh (hr i).le]
     field_simp [hS.ne', hd.ne']
-    ring
 
 private theorem upper_scalar_comparison {x b w : ℝ}
     (hx : 0 ≤ x) (hb : 0 ≤ b) (hw : 0 ≤ w) (hw1 : w ≤ 1) :
@@ -145,14 +143,13 @@ private theorem upper_scalar_comparison {x b w : ℝ}
     have heq : x / (1 + x) + (1 + b) / (1 + x) ^ 2 =
         (x * (1 + x) + (1 + b)) / (1 + x) ^ 2 := by
       field_simp
-      ring
     rw [heq]
     apply (div_le_iff₀ (sq_pos_of_pos hd)).2
     nlinarith [mul_nonneg hb hx, mul_nonneg hb (sq_nonneg x)]
   have h1 := mul_le_mul_of_nonneg_left hfirst (sub_nonneg.mpr hw1)
   have h2 := mul_le_mul_of_nonneg_left hsecond hw
   have hs := add_le_add h1 h2
-  convert hs using 1
+  convert! hs using 1
   ring
 
 theorem upper_resolvent_eigenvalue_bound [Nonempty ι] {r : ι → ℝ}
@@ -167,13 +164,12 @@ theorem upper_resolvent_eigenvalue_bound [Nonempty ι] {r : ι → ℝ}
   calc
     _ ≤ h * (r i / (1 + h * r i)) + (r i / (1 + h * r i)) ^ 2 /
         ((∑ j, r j ^ 2) / (1 + h * upperWeightedMean r)) :=
-      add_le_add_left (div_le_div_of_nonneg_left (sq_nonneg _)
+      add_le_add_right (div_le_div_of_nonneg_left (sq_nonneg _)
         (div_pos hS hda) (upper_resolvent_jensen hr hh)) _
     _ = (h * r i) / (1 + h * r i) +
         upperWeight r i * (1 + h * upperWeightedMean r) / (1 + h * r i) ^ 2 := by
       dsimp [upperWeight]
       field_simp
-      ring
     _ ≤ (1 - upperWeight r i) * (h * r i) +
         upperWeight r i * (1 + h * upperWeightedMean r) :=
       upper_scalar_comparison (mul_nonneg hh (hr i).le) (mul_nonneg hh ha.le) (hw i).le (hw1 i)
@@ -293,8 +289,8 @@ theorem upperResolvent_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
   apply congrArg Matrix.diagonal
   funext i
   have hd : 0 < 1 + h * r i := by nlinarith [mul_nonneg hh (hr i).le]
+  change ((r i)⁻¹ + h)⁻¹ = r i / (1 + h * r i)
   field_simp [ne_of_gt (hr i), hd.ne']
-  rfl
 
 theorem upperResolvent_trace_drop {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {h : ℝ} (hh : 0 ≤ h) :
@@ -308,8 +304,9 @@ theorem upperResolvent_trace_drop {R : Matrix ι ι ℝ} (hR : R.PosDef)
   intro i _
   have hd : 0 < 1 + h * hR.isHermitian.eigenvalues i :=
     add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh (hR.eigenvalues_pos i).le)
-  field_simp [hd.ne']
-  ring
+  have hd' : 1 + hR.isHermitian.eigenvalues i * h ≠ 0 := by
+    simpa only [mul_comm] using hd.ne'
+  field_simp [hd.ne', hd'] <;> ring
 
 theorem upperCriterion_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {h : ℝ} (hh : 0 ≤ h) :
@@ -363,13 +360,12 @@ theorem upper_quadratic_comparison [Nonempty ι] {R : Matrix ι ι ℝ} (hR : R.
   intro i _
   have hb := mul_le_mul_of_nonneg_left (upper_resolvent_eigenvalue_bound hr hh.le i)
     (sq_nonneg (y i))
-  convert hb using 1
+  convert! hb using 1
   · dsimp [y, r] at *
     rw [← Finset.mul_sum]
     have hdi : 0 < 1 + h * hR.isHermitian.eigenvalues i :=
       add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh.le (hR.eigenvalues_pos i).le)
     field_simp [hh.ne', hd.ne', hdi.ne']
-    ring
   · dsimp [y, r, upperWeight]
     ring
 

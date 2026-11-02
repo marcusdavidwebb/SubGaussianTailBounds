@@ -70,8 +70,8 @@ private theorem logTaylorFold_correct (z : ℚ) (count j : ℕ) :
 theorem logTaylorQ_eq_fold (N : ℕ) (z : ℚ) :
     logTaylorQ N z = (logTaylorFold z N 0 z 0).2 := by
   have h := congrArg Prod.snd (logTaylorFold_correct z N 0)
-  simp only [Nat.zero_add, Nat.mul_zero, zero_add, pow_one,
-    Finset.sum_range_zero, Prod.snd] at h
+  simp only [Nat.mul_zero, zero_add, pow_one,
+    Finset.sum_range_zero] at h
   rw [h]
   apply Finset.sum_congr rfl
   intro i hi
@@ -82,7 +82,7 @@ theorem logTaylorUpperQ_eq_fold (N : ℕ) (z : ℚ) :
       let p := logTaylorFold z N 0 z 0
       p.2 + 2*p.1/((2*(N:ℚ)+1)*(1-z^2)) := by
   have h := logTaylorFold_correct z N 0
-  simp only [Nat.zero_add, Nat.mul_zero, zero_add, pow_one,
+  simp only [Nat.mul_zero, zero_add, pow_one,
     Finset.sum_range_zero] at h
   rw [h]
   unfold logTaylorUpperQ logTaylorQ

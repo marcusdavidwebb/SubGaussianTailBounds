@@ -21,21 +21,21 @@ private theorem factor_derivatives {q x : ℝ} (hx : 0 ≤ x) (hd : (q-1)*x < 1)
   have hd1 := (hasDerivAt_const x (1:ℝ)).add (hasDerivAt_id x)
   have hd2 := (hasDerivAt_const x (1:ℝ)).sub ((hasDerivAt_id x).const_mul (q-1))
   refine ⟨?_,?_,?_⟩
-  · convert ((hd1.log h1).sub (hd2.log h2)).sub ((hasDerivAt_id x).const_mul q) using 1 <;>
-      simp [upperFactorF,upperFactorF1]
+  · convert! ((hd1.log h1).sub (hd2.log h2)).sub ((hasDerivAt_id x).const_mul q) using 1 <;>
+      simp [upperFactorF1]
     ring
-  · convert (((hasDerivAt_const x (1:ℝ)).div hd1 h1).add
-      ((hasDerivAt_const x (q-1)).div hd2 h2)).sub_const q using 1
-    simp only [id_eq]
-    unfold upperFactorF2
-    field_simp only [h1,h2]
-    ring
-  · convert (((hasDerivAt_const x (-1:ℝ)).div (hd1.pow 2) (pow_ne_zero 2 h1)).add
-      ((hasDerivAt_const x ((q-1)^2)).div (hd2.pow 2) (pow_ne_zero 2 h2))) using 1
-    simp only [id_eq]
-    unfold upperFactorF3
-    field_simp only [h1,h2]
-    ring
+  · convert! ((hd1.inv h1).add ((hd2.inv h2).const_mul (q-1))).sub_const q using 1 <;>
+      (try ext t) <;>
+      simp only [upperFactorF1, upperFactorF2, id_eq, Pi.add_apply, Pi.sub_apply,
+        Pi.inv_apply, div_eq_mul_inv, ← inv_pow, sub_mul, one_mul, mul_one,
+        zero_add, zero_sub] <;> ring
+  · convert! (((hd1.inv h1).pow 2).neg.add
+      (((hd2.inv h2).pow 2).const_mul ((q-1)^2))) using 1 <;>
+      (try ext t) <;>
+      simp only [upperFactorF2, upperFactorF3, id_eq, Pi.add_apply, Pi.sub_apply,
+        Pi.pow_apply, Pi.neg_apply, Pi.inv_apply, div_eq_mul_inv, ← inv_pow,
+        sub_mul, mul_one,
+        one_mul, zero_add, zero_sub, Nat.cast_ofNat, Nat.reduceSub, pow_one] <;> ring
 
 /-- The rescaling estimate for the first determinant factors, on the full
 positive-denominator domain, without assuming a finite certificate. -/
@@ -76,8 +76,7 @@ theorem upperFactorF_sum_bound {ι : Type*} [Fintype ι] {q x0 k : ℝ}
     have hb := mul_le_mul_of_nonneg_right
       (div_le_div_of_nonneg_right hxsq (sq_nonneg x0)) hF
     have hid : ((x0^2/k^2)/x0^2)*upperFactorF q x0 = upperFactorF q x0/k^2 := by
-      field_simp only [hx0.ne',hk.ne']
-      ring
+      field_simp [hx0.ne',hk.ne']
     exact hs.trans (by simpa only [hid] using hb)
   · have hF0 : upperFactorF q x0 ≤ 0 := le_of_not_ge hF
     rw [max_eq_left hF0,zero_div]
@@ -90,11 +89,11 @@ theorem upperFactorF_rate_identity {v theta : ℝ} (hv : 1 < v) (ht : 1 ≤ thet
   have hv0 : 0 < v-1 := by linarith
   have hbase : 0 < (theta-1)^2+v-1 := by nlinarith [sq_nonneg (theta-1)]
   have hplus : 1+(theta-1)/(v-1) = (theta+v-2)/(v-1) := by
-    field_simp only [hv0.ne']
+    field_simp [hv0.ne']
     ring
   have hminus : 1-(v/theta-1)*((theta-1)/(v-1)) =
       ((theta-1)^2+v-1)/(theta*(v-1)) := by
-    field_simp only [ht0.ne',hv0.ne']
+    field_simp [ht0.ne',hv0.ne']
     ring
   have hp : 0 < 1+(theta-1)/(v-1) := add_pos_of_pos_of_nonneg zero_lt_one
     (div_nonneg (by linarith) hv0.le)
@@ -105,11 +104,10 @@ theorem upperFactorF_rate_identity {v theta : ℝ} (hv : 1 < v) (ht : 1 ≤ thet
   rw [← Real.log_div hp.ne' hm.ne',hplus,hminus]
   have hratio : ((theta+v-2)/(v-1))/(((theta-1)^2+v-1)/(theta*(v-1))) =
       theta*(theta+v-2)/((theta-1)^2+v-1) := by
-    field_simp only [ht0.ne',hv0.ne',hbase.ne']
-    ring
+    field_simp [ht0.ne',hv0.ne',hbase.ne']
   rw [hratio]
   congr 1
-  field_simp only [ht0.ne',hv0.ne'] <;> ring
+  field_simp [ht0.ne',hv0.ne']
 
 /-- Positivity and rate control for the second factors need no upper bound
 of two on the target rate. -/
@@ -137,7 +135,7 @@ theorem upper_rate_rescaling_denominator {v theta H : ℝ} (hv : 1 < v)
     have hd : 0 < 1-(q-1)*H := by linarith
     refine ⟨hd,(div_le_iff₀ hd).2 ?_⟩
     have hmul := mul_le_mul_of_nonneg_left hm (show 0 ≤ v by linarith)
-    have he : v*((theta-1)/theta) = v-q := by dsimp [q];field_simp only [ht0.ne'];ring
+    have he : v*((theta-1)/theta) = v-q := by dsimp [q];field_simp [ht0.ne']
     rw [he] at hmul
     linarith
 
@@ -193,7 +191,7 @@ theorem upper_extended_spectral_logdet {ι : Type*} [Fintype ι] [DecidableEq ι
   obtain ⟨hsecond,hsecondcost⟩ := upper_tail_second_cost_shape hr hh.le (by linarith : 0 < q)
     (by linarith : 0 < v) (sq_pos_of_pos hk) hvk hps hden hrate
   have ht := upper_tail_logdet_of_costs hr hh.le hden hsecond hfirstcost hsecondcost
-  convert ht using 1 <;> dsimp [q] <;> ring
+  convert! ht using 1 <;> dsimp [q] <;> ring
 
 end
 end SingularValueBounds.KL

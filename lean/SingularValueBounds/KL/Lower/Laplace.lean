@@ -22,7 +22,7 @@ theorem exp_neg_pade_lower {x : ℝ} (hx : 0 ≤ x) :
     (2 - x) / (2 + x) ≤ Real.exp (-x) := by
   let f : ℝ → ℝ := fun y => (2 + y) * Real.exp (-y) - (2 - y)
   have hd (y : ℝ) : HasDerivAt f (1 - (1 + y) * Real.exp (-y)) y := by
-    convert (((hasDerivAt_const y 2).add (hasDerivAt_id y)).mul
+    convert! (((hasDerivAt_const y 2).add (hasDerivAt_id y)).mul
       ((hasDerivAt_id y).neg.exp)).sub
         ((hasDerivAt_const y 2).sub (hasDerivAt_id y)) using 1 <;>
       dsimp [f] <;> ring
@@ -101,6 +101,7 @@ theorem lower_laplace_rational [IsProbabilityMeasure μ]
     apply hT.mono' ((hT.aemeasurable.div
       ((aemeasurable_const.add hQ).add (hT.aemeasurable.const_mul s))).aestronglyMeasurable)
     filter_upwards [] with ω
+    change ‖T ω / D ω‖ ≤ T ω
     rw [Real.norm_eq_abs, abs_of_nonneg (div_nonneg (hT0 ω) (hD ω).le)]
     apply div_le_self (hT0 ω)
     dsimp [D]; have := hQ0 ω; have := mul_nonneg hs (hT0 ω); linarith
@@ -137,7 +138,7 @@ theorem lower_laplace_rational [IsProbabilityMeasure μ]
   have hi := integral_mono hexp ((integrable_const 1).sub (hdiv.const_mul s)) hp
   simp only [Pi.sub_apply] at hi
   rw [integral_sub (integrable_const 1) (hdiv.const_mul s), integral_const_mul] at hi
-  simp only [integral_const, measureReal_univ_eq_one, smul_eq_mul, one_mul] at hi
+  simp only [integral_const, probReal_univ, smul_eq_mul, one_mul] at hi
   have hr := mul_le_mul_of_nonneg_left hratio hs
   have hid : s * (1 / (1 + b + s * m2)) = ℓ / (1 + m2 * ℓ) := by
     have hb1 : 1 + b ≠ 0 := by positivity
