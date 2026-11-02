@@ -33,7 +33,7 @@ theorem integral_ratio_cauchy {q D : Ω → ℝ}
     intro ω
     rw [← Real.sqrt_mul (div_nonneg (hq0 ω) (hD0 ω).le)]
     have hid : q ω / D ω * (q ω * D ω) = (q ω) ^ 2 := by
-      field_simp [(hD0 ω).ne'] <;> ring
+      field_simp [(hD0 ω).ne']
     rw [hid, Real.sqrt_sq (hq0 ω)]
   simpa only [he, hs₁, hs₂] using integral_mul_sq_le h₁ h₂
 
@@ -137,7 +137,7 @@ theorem scalar_upper_exponential [IsProbabilityMeasure μ]
     (show 2 ≤ (1 / (3 * K ^ 2)) * (8 * K ^ 2 * logParameter K) from ?_)
     ((scalar_tail_coefficient hK).trans (by norm_num)) hℓ hℓv ?_ hmean
   · have hi : (1 / (3 * K ^ 2)) * (8 * K ^ 2 * logParameter K) =
-        (8 / 3 : ℝ) * logParameter K := by field_simp [hK0.ne'] <;> ring
+        (8 / 3 : ℝ) * logParameter K := by field_simp [hK0.ne']
     rw [hi]
     linarith
   · intro x hx

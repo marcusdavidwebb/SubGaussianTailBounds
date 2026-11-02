@@ -54,15 +54,14 @@ theorem endpointMeanPolynomial_identity_0 (d : Fin 4 → ℚ) :
   simp only [endpointMeanPolynomial, show (0 : Fin 7) ≠ 3 by decide, if_false]
   apply tensor_eq_of_eval
   intro a b
-  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
-    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+  simp [endpointMeanMajorantIndex, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
+    comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients0, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def endpointMeanPolynomialCoefficients1 (d : Fin 4 → ℚ) : Fin 7 → Fin 16 → ℚ :=
@@ -88,15 +87,14 @@ theorem endpointMeanPolynomial_identity_1 (d : Fin 4 → ℚ) :
   simp only [endpointMeanPolynomial, show (1 : Fin 7) ≠ 3 by decide, if_false]
   apply tensor_eq_of_eval
   intro a b
-  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
-    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+  simp [endpointMeanMajorantIndex, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
+    comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients1, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def endpointMeanPolynomialCoefficients2 (d : Fin 4 → ℚ) : Fin 7 → Fin 16 → ℚ :=
@@ -122,15 +120,14 @@ theorem endpointMeanPolynomial_identity_2 (d : Fin 4 → ℚ) :
   simp only [endpointMeanPolynomial, show (2 : Fin 7) ≠ 3 by decide, if_false]
   apply tensor_eq_of_eval
   intro a b
-  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
-    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+  simp [endpointMeanMajorantIndex, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
+    comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients2, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 def endpointMeanPolynomialCoefficients3 (d : Fin 4 → ℚ) : Fin 5 → Fin 2 → ℚ :=
@@ -141,15 +138,12 @@ theorem endpointMeanPolynomial_identity_3 (d : Fin 4 → ℚ) :
     endpointMeanPolynomial 3 d = tensorOfFn 4 1 (endpointMeanPolynomialCoefficients3 d) := by
   apply tensor_eq_of_eval
   intro a b
-  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
-    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+  simp [endpointMeanPolynomial, endpointMeanJ0Q, tensorOfFn,
     endpointMeanPolynomialCoefficients3, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
   ring
 
 def endpointMeanPolynomialCoefficients4 (d : Fin 4 → ℚ) : Fin 7 → Fin 16 → ℚ :=
@@ -175,15 +169,14 @@ theorem endpointMeanPolynomial_identity_4 (d : Fin 4 → ℚ) :
   simp only [endpointMeanPolynomial, show (4 : Fin 7) ≠ 3 by decide, if_false]
   apply tensor_eq_of_eval
   intro a b
-  simp [endpointMeanPolynomial, endpointMeanMajorantIndex, endpointMeanJ0Q,
-    majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ, comparisonZQ, tensorOfFn,
+  simp [endpointMeanMajorantIndex, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
+    comparisonZQ, tensorOfFn,
     endpointMeanPolynomialCoefficients4, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_X,
+    Polynomial.eval_monomial]
   ring
 
 end

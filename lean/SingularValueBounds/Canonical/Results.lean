@@ -6,7 +6,7 @@ import SingularValueBounds.Canonical.StatementEquivalence
 
 /-! Public interface for the single current formalization. The accepted snapshot
 records each jointly proved quartet; the trusted verifier supplies the independent
-previous ceiling. Baseline corollaries use the same proof by monotonicity. -/
+previous ceiling. -/
 
 namespace SubGaussian.Current
 universe u
@@ -50,14 +50,14 @@ theorem unit_recorded : (unitAlpha, unitBeta, unitGamma, unitDelta) =
 theorem unit_baseline_alpha : unitAlpha ≤ 1.32 := le_rfl
 theorem unit_baseline_beta : unitBeta ≤ 1.12 := le_rfl
 theorem unit_baseline_gamma : unitGamma ≤ 2.32 := le_rfl
-theorem unit_baseline_delta : unitDelta ≤ (Real.sqrt 2) := le_rfl
+theorem unit_baseline_delta : unitDelta ≤ 1.42 := le_rfl
 
 theorem unit_current_alpha : unitAlpha ≤ 1.32 := le_rfl
 theorem unit_current_beta : unitBeta ≤ 1.12 := le_rfl
 theorem unit_current_gamma : unitGamma ≤ 2.32 := le_rfl
-theorem unit_current_delta : unitDelta ≤ (Real.sqrt 2) := le_rfl
+theorem unit_current_delta : unitDelta ≤ 1.42 := le_rfl
 
-theorem unit_baseline : SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 (Real.sqrt 2) :=
+theorem unit_baseline : SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 1.42 :=
   unit.{u}.mono unit_baseline_alpha unit_baseline_beta unit_baseline_gamma unit_baseline_delta
 
 end

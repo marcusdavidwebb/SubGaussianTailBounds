@@ -1,4 +1,6 @@
 import SingularValueBounds.Canonical.Adapter
+import SingularValueBounds.KL.Lower.MixedApplication
+import SingularValueBounds.KL.Upper.RowEstimates
 import SingularValueBounds.KL.Certificates.ConcreteGeneralLower
 import SingularValueBounds.KL.Certificates.ConcreteMajorants
 import SingularValueBounds.KL.Certificates.ConcreteNormDeterminants

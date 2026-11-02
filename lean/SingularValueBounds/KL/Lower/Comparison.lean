@@ -35,6 +35,7 @@ def lowerWeight (R : Matrix ι ι ℝ) : Matrix ι ι ℝ :=
 def lowerComparison (R : Matrix ι ι ℝ) (A c : ℝ) : Matrix ι ι ℝ :=
   R + lowerWeight R * ((A * frobenius R) • (1 : Matrix ι ι ℝ) - c • R)
 
+omit [Nonempty ι] in
 lemma quadratic_square_pos {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {x : ι → ℝ} (hx : x ≠ 0) : 0 < x ⬝ᵥ ((R ^ 2) *ᵥ x) := by
   rw [real_spectral_square hR.isHermitian, quadratic_conjugate_diagonal]
@@ -44,6 +45,7 @@ lemma quadratic_square_pos {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (Finset.single_le_sum (fun j _ => mul_nonneg (sq_nonneg _) (sq_nonneg _))
       (Finset.mem_univ i))
 
+omit [Nonempty ι] in
 lemma real_spectral_cube {R : Matrix ι ι ℝ} (hR : R.IsHermitian) :
     R ^ 3 = (hR.eigenvectorUnitary : Matrix ι ι ℝ) *
       Matrix.diagonal (fun i => hR.eigenvalues i ^ 3) *
@@ -54,27 +56,32 @@ lemma real_spectral_cube {R : Matrix ι ι ℝ} (hR : R.IsHermitian) :
       have h := congrArg₂ (fun A B : Matrix ι ι ℝ => A * B)
         (real_spectral_square hR) (real_spectral_decomposition hR)
       rw [unitary_conjugate_mul, Matrix.diagonal_mul_diagonal] at h
-      convert! h using 1 <;> simp only [pow_succ]
+      convert! h using 1
 
+omit [DecidableEq ι] [Nonempty ι] in
 lemma lowerDenominator_pos {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     0 < 1 + x ⬝ᵥ (R *ᵥ x) := by
   have : 0 ≤ x ⬝ᵥ (R *ᵥ x) := by simpa using hR.posSemidef.dotProduct_mulVec_nonneg x
   linarith
 
+omit [Nonempty ι] in
 theorem lowerDrop_pos {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {x : ι → ℝ} (hx : x ≠ 0) : 0 < lowerDrop R x :=
   div_pos (quadratic_square_pos hR hx) (lowerDenominator_pos hR x)
 
+omit [Nonempty ι] in
 theorem lowerDrop_eq_trace {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     lowerDrop R x = Matrix.trace R - Matrix.trace (lowerUnshifted R x) := by
   rw [lowerUnshifted, rankOne_trace hR]
   dsimp [lowerDrop]
   ring
 
+omit [Nonempty ι] in
 theorem lowerUnshifted_posDef {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     (lowerUnshifted R x).PosDef :=
   (hR.inv.add_posSemidef (outer_posSemidef x)).inv
 
+omit [Nonempty ι] in
 /-- Cauchy--Schwarz for the three row-weighted spectral moments. -/
 theorem quadratic_moment_cauchy {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     (x ⬝ᵥ ((R ^ 2) *ᵥ x)) ^ 2 ≤
@@ -92,6 +99,7 @@ theorem quadratic_moment_cauchy {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι �
   · intro i _
     ring
 
+omit [Nonempty ι] in
 /-- `q ≤ c_X ≤ M ≤ η`, with no distributional assumptions. -/
 theorem lowerDrop_le_rowMean {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {x : ι → ℝ} (hx : x ≠ 0) : lowerDrop R x ≤ lowerRowMean R x := by
@@ -117,16 +125,19 @@ theorem lowerRowMean_le_maximum {R : Matrix ι ι ℝ} (hR : R.PosDef)
       (sq_nonneg (hR.isHermitian.eigenvalues i)))
   convert! h using 1 <;> ring
 
+omit [DecidableEq ι] [Nonempty ι] in
 lemma trace_outer (x y : ι → ℝ) : Matrix.trace (Matrix.vecMulVec x y) = y ⬝ᵥ x := by
   simp only [Matrix.trace, Matrix.diag, Matrix.vecMulVec_apply, dotProduct]
   apply Finset.sum_congr rfl
   intro i _
   ring
 
+omit [DecidableEq ι] [Nonempty ι] in
 lemma trace_mul_outer (R : Matrix ι ι ℝ) (x : ι → ℝ) :
     Matrix.trace (R * Matrix.vecMulVec x x) = x ⬝ᵥ (R *ᵥ x) := by
   rw [mul_outer, trace_outer]
 
+omit [Nonempty ι] in
 /-- Exact square-trace identity after the unshifted row update. -/
 theorem lowerUnshifted_trace_square {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {x : ι → ℝ} (hx : x ≠ 0) :
@@ -147,7 +158,7 @@ theorem lowerUnshifted_trace_square {R : Matrix ι ι ℝ} (hR : R.PosDef)
       Matrix.dotProduct_mulVec, hs]
   rw [lowerUnshifted, rankOne_inverse hR, pow_two]
   simp only [Matrix.sub_mul, Matrix.mul_sub, Matrix.mul_smul, Matrix.smul_mul,
-    smul_smul, Matrix.trace_sub, Matrix.trace_smul]
+    Matrix.trace_sub, Matrix.trace_smul]
   rw [Matrix.trace_mul_comm (Matrix.vecMulVec _ _) R, trace_mul_outer,
     outer_mul_outer, Matrix.trace_smul, trace_outer]
   simp only [smul_eq_mul]
@@ -157,6 +168,7 @@ theorem lowerUnshifted_trace_square {R : Matrix ι ι ℝ} (hR : R.PosDef)
   field_simp [hn.ne', hd.ne']
   ring
 
+omit [Nonempty ι] in
 /-- Spectral description of a lower resolvent gap. -/
 lemma lowerResolvent_spectral {G : Matrix ι ι ℝ} (hG : G.PosDef) {δ : ℝ}
     (hgap : (G⁻¹ - δ • (1 : Matrix ι ι ℝ)).PosDef) :
@@ -196,6 +208,7 @@ lemma lowerResolvent_spectral {G : Matrix ι ι ℝ} (hG : G.PosDef) {δ : ℝ}
   rw [he]
 
 
+omit [Nonempty ι] in
 /-- The trace-increment/resolvent bound. `H` is any upper bound for the
 spectrum of the unshifted resolvent, so both its spectral and Frobenius
 bounds may be substituted. -/
@@ -294,7 +307,7 @@ theorem lowerDrop_ratio_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
   nlinarith only [hb, hf, hq]
 
 /-- The scalar square-root reduction, written without differentiation. -/
-lemma lower_sqrt_reduction {η q d : ℝ} (hη : 0 ≤ η)
+lemma lower_sqrt_reduction {η q d : ℝ}
     (hq : 0 ≤ q) (hqd : q ≤ d) (hdη : d ≤ η) :
     q - 2 * d + Real.sqrt (η ^ 2 - 2 * q * d + q ^ 2) ≤
       Real.sqrt (η ^ 2 - d ^ 2) - d := by
@@ -328,7 +341,7 @@ theorem lowerDrop_ratio_frobenius {R : Matrix ι ι ℝ} (hR : R.PosDef)
   rw [lowerUnshifted_trace_square hR hx, hgs] at hb
   have hf := frobenius_sq R
   rw [← trace_square_eq_sum_sq hR.isHermitian] at hf
-  have hs := lower_sqrt_reduction (frobenius_nonneg R) (lowerDrop_pos hR hx).le
+  have hs := lower_sqrt_reduction (lowerDrop_pos hR hx).le
     (lowerDrop_le_rowMean hR hx)
     ((lowerRowMean_le_maximum hR hx).trans (spectralMaximum_le_frobenius hR.posSemidef))
   have hmul := mul_le_mul_of_nonneg_left hs (lowerDrop_pos hR hx).le
@@ -351,7 +364,7 @@ theorem lowerDrop_ratio_two_comparisons {R : Matrix ι ι ℝ} (hR : R.PosDef)
 lemma sqrt_lower_normalization {η d : ℝ} (hη : 0 < η) :
     Real.sqrt (η ^ 2 - d ^ 2) = η * Real.sqrt (1 - (d / η) ^ 2) := by
   have hid : η ^ 2 - d ^ 2 = η ^ 2 * (1 - (d / η) ^ 2) := by
-    field_simp [hη.ne'] <;> ring
+    field_simp [hη.ne']
   rw [hid, Real.sqrt_mul (sq_nonneg η), Real.sqrt_sq hη.le]
 
 /-- Equation `eq:app-low-two-comparisons`, with `κ=M/η`, `z=c_X/η`. -/
@@ -371,8 +384,9 @@ theorem lowerDrop_ratio_normalized {R : Matrix ι ι ℝ} (hR : R.PosDef)
         (Real.sqrt (1 - (lowerRowMean R x / frobenius R) ^ 2)) := by
     rw [mul_min_of_nonneg _ _ hη.le, mul_div_cancel₀ _ hη.ne']
   rw [hm] at hb
-  convert! hb using 1 <;> field_simp [hη.ne'] <;> ring
+  convert! hb using 1 <;> field_simp [hη.ne']
 
+omit [Nonempty ι] in
 lemma lowerComparison_polynomial (R : Matrix ι ι ℝ) (A c : ℝ) :
     lowerComparison R A c = R + (Matrix.trace (R ^ 2))⁻¹ •
       ((A * frobenius R) • R ^ 2 - c • R ^ 3) := by
@@ -380,6 +394,7 @@ lemma lowerComparison_polynomial (R : Matrix ι ι ℝ) (A c : ℝ) :
   rw [Matrix.smul_mul, Matrix.mul_sub, Matrix.mul_smul, Matrix.mul_smul, mul_one,
     ← pow_succ]
 
+omit [Nonempty ι] in
 /-- The comparison quadratic form in terms of the second and third row moments. -/
 theorem lowerComparison_quadratic (R : Matrix ι ι ℝ) (x : ι → ℝ) (A c : ℝ) :
     x ⬝ᵥ (lowerComparison R A c *ᵥ x) = x ⬝ᵥ (R *ᵥ x) +
@@ -390,6 +405,7 @@ theorem lowerComparison_quadratic (R : Matrix ι ι ℝ) (x : ι → ℝ) (A c :
     dotProduct_add, dotProduct_sub, dotProduct_smul, smul_eq_mul]
   ring
 
+omit [Nonempty ι] in
 /-- Spectral form of the polynomial comparison matrix. -/
 lemma lowerComparison_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) (A c : ℝ) :
     lowerComparison R A c = (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) *

@@ -17,6 +17,7 @@ variable {μ : Measure Ω} [IsProbabilityMeasure μ] {X : Ω → ι → ℝ}
 def diagonalQuadratic (b : ι → ℝ) (X : Ω → ι → ℝ) (ω : Ω) : ℝ :=
   ∑ i, b i * X ω i ^ 2
 
+omit [MeasurableSpace Ω] in
 lemma quadraticForm_diagonal_eq (b : ι → ℝ) :
     quadraticForm (Matrix.diagonal b) X = diagonalQuadratic b X := by
   ext ω
@@ -74,6 +75,7 @@ def endpointG (A c ξ x : ℝ) : ℝ :=
   (A/ξ+1-c)*x + (A+ξ/2+(A^2-2*c)/(2*ξ))*x^2 -
     (c+A*c/ξ)*x^3+c^2/(2*ξ)*x^4
 
+omit [DecidableEq ι] in
 theorem endpoint_ordinary_cost_young (r : ι → ℝ) (A c : ℝ)
     (h2 : spectralMoment r 2 = 1) {ξ : ℝ} (hξ : 0 < ξ) :
     endpointOrdinaryCost r A c ≤ A+1/(2*ξ)+(∑ i, r i^2*endpointG A c ξ (r i)) := by

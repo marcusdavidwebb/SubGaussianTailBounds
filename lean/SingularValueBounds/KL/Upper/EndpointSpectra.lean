@@ -51,7 +51,7 @@ theorem spectralComplementMoment_monotone :
     have he : HasDerivAt spectralComplementMoment
         (3*x*(x-Real.sqrt (1-x^2))) x := by
       convert! hf using 1
-      simp only [spectralComplementMoment,id_eq,Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,zero_sub,
+      simp only [id_eq,Nat.cast_ofNat,Nat.reduceSub,pow_one,mul_one,zero_sub,
         Pi.sub_apply,Pi.pow_apply]
       field_simp [hs0.ne']
       nlinarith [hs2]
@@ -62,7 +62,7 @@ theorem endpoint_cubic_monotone {A : ℝ} (hA : 0≤A) :
     MonotoneOn (fun x : ℝ => x+A*x^2-2*x^3) (Icc 0 (7/20)) := by
   exact upper_comparison_cubic_monotone hA
 
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 theorem endpoint_spectral_row_bounds (i : Fin 3) {x : ι → ℝ}
     (hx : ∀j,0≤x j) (h2 : ∑j,x j^2=1) (top : ι)

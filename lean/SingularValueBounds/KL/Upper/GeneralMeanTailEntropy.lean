@@ -9,7 +9,7 @@ set_option maxHeartbeats 1800000
 theorem generalMean_exponential_entropy_integrable {a A r : ℝ}
     (ha : 0<a) (hA : 0≤A) (hr : 0<r) :
     IntegrableOn (fun u => entropyKernel a u*(A*Real.exp (-(r*u)))) (Ioi a) :=
-  entropy_tail_integrable (T := fun u => A*Real.exp (-(r*u))) ha hA hr
+  entropy_tail_integrable (C := A) (T := fun u => A*Real.exp (-(r*u))) ha hr
     (by fun_prop) (fun u => mul_nonneg hA (Real.exp_nonneg _)) (fun u hu => le_rfl)
 
 theorem generalMean_two_piece_integral {a v A B r t : ℝ} {T : ℝ → ℝ}
@@ -69,7 +69,7 @@ theorem generalMean_one_piece_integral {a A r : ℝ} {T : ℝ → ℝ}
   rw [hid,integral_const_mul,generalMean_exponential_primitive_integral ha le_rfl hr] at hh
   exact hh
 
-def GeneralMeanTailProfile (T : ℝ → ℝ) (A q c s K L : ℝ) : Prop :=
+def GeneralMeanTailProfile (T : ℝ → ℝ) (A q s K L : ℝ) : Prop :=
   if 1<q then
     (∀u,0≤u → u≤s*K^2*L → T u≤A*Real.exp (-q*u/(2*K^2))) ∧
     (∀u,s*K^2*L<u → T u≤A*Real.exp (-u/(2*K^2)-s*(q-1)*L/2))
@@ -79,7 +79,7 @@ theorem generalMean_tail_integral_bound {T : ℝ → ℝ} {A q c s K L : ℝ}
     (hK : 0<K) (hL : 1≤L) (hKL : L=1+Real.log K)
     (hA : 0≤A) (hq : 0<q) (hc : 0<c) (hcont : 1<q → c≤s)
     (hTi : IntegrableOn (fun u => entropyKernel (c*K^2*L) u*T u) (Ioi (c*K^2*L)))
-    (hTail : GeneralMeanTailProfile T A q c s K L) :
+    (hTail : GeneralMeanTailProfile T A q s K L) :
     (∫u in Ioi (c*K^2*L),entropyKernel (c*K^2*L) u*T u)≤
       generalMeanError A q c s L := by
   have hLp : 0<L := by linarith
@@ -124,10 +124,10 @@ theorem generalMean_entropy_cost_of_row {r : Certificates.GeneralMeanRow}
     {W : Ω → ℝ} (hW : Measurable W) (hWi : Integrable W μ)
     (hW0 : ∀ω,0≤W ω) (hMean : (∫ω,W ω ∂μ)=1)
     (hWE : Integrable (fun ω => W ω*Real.log (W ω)) μ)
-    {C t : ℝ} (hC : 0≤C) (ht : 0<t)
+    {C t : ℝ} (ht : 0<t)
     (hGlobal : ∀u,0≤u → μ.real {ω | u<W ω}≤C*Real.exp (-(t*u)))
     (hTail : GeneralMeanTailProfile (fun u => μ.real {ω | u<W ω})
-      r.prefactor r.q r.c r.cutoff K L) :
+      r.prefactor r.q r.cutoff K L) :
     (∫ω,W ω*Real.log (W ω) ∂μ)+(r.J:ℝ)/2≤(47/20)*L := by
   have hc : (0:ℝ)<r.c := by exact_mod_cast h.cutoff
   have hq : (0:ℝ)<r.q := by exact_mod_cast h.rate
@@ -136,7 +136,7 @@ theorem generalMean_entropy_cost_of_row {r : Certificates.GeneralMeanRow}
     apply Antitone.measurable
     intro u v huv
     exact measureReal_mono (fun ω hω => lt_of_le_of_lt huv hω) (measure_ne_top μ _)
-  have hTi := entropy_tail_integrable ha hC ht hTm (fun u => measureReal_nonneg)
+  have hTi := entropy_tail_integrable ha ht hTm (fun u => measureReal_nonneg)
     (fun u hu => hGlobal u (ha.le.trans hu.le))
   have he := generalMean_tail_integral_bound hK hL hKL h.prefactor_pos.le hq hc
     (fun hq1 => by

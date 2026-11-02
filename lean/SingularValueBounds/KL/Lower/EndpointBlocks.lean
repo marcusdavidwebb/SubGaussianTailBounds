@@ -35,7 +35,7 @@ lemma endpointRestP_sq (r : ι → ℝ) (top : ι) :
 
 lemma endpointRestQ_sq (r : ι → ℝ) (top : ι) (A c : ℝ) :
     endpointRestQ r top A c ^ 2 = ∑ i ∈ Finset.univ.erase top, endpointComparisonEigen A c (r i)^2 :=
-  Real.sq_sqrt (Finset.sum_nonneg fun i _ => sq_nonneg _)
+  Real.sq_sqrt (Finset.sum_nonneg fun _ _ => sq_nonneg _)
 
 theorem endpoint_diagonal_rankone_cost (hsg : SubGaussianMGF μ X 1)
     (hiso : CentredIsotropic μ X) (r : ι → ℝ) (top : ι) (A c : ℝ)
@@ -63,10 +63,10 @@ theorem endpoint_diagonal_rankone_cost (hsg : SubGaussianMGF μ X 1)
     split_ifs <;> first | positivity | exact hf i)
   have hPu : P *ᵥ u = 0 := by
     ext i
-    by_cases hi : i = top <;> simp [P, u, Matrix.mulVec_diagonal, Pi.single_apply, hi]
+    by_cases hi : i = top <;> simp [P, u, Matrix.mulVec_diagonal, hi]
   have hBu : B *ᵥ u = 0 := by
     ext i
-    by_cases hi : i = top <;> simp [B, u, Matrix.mulVec_diagonal, Pi.single_apply, hi]
+    by_cases hi : i = top <;> simp [B, u, Matrix.mulVec_diagonal, hi]
   have hfp : frobenius P = endpointRestP r top := by
     rw [frobenius_diagonal_eq]
     simp only [ite_pow, zero_pow (by decide : 2 ≠ 0), ← pow_mul, show 2*2=4 from rfl]
@@ -85,10 +85,10 @@ theorem endpoint_diagonal_rankone_cost (hsg : SubGaussianMGF μ X 1)
     · subst j
       by_cases hi : i = top
       · subst i
-        simp [u, Matrix.vecMulVec_apply, Matrix.diagonal, Pi.single_apply]
-      · simp [u, Matrix.vecMulVec_apply, Matrix.diagonal, Pi.single_apply, hi, Ne.symm hi]
+        simp [u, Matrix.vecMulVec_apply, Matrix.diagonal]
+      · simp [u, Matrix.vecMulVec_apply, Matrix.diagonal, hi]
     · by_cases hi : i = top <;> by_cases hj : j = top <;>
-        simp_all [u, Matrix.vecMulVec_apply, Matrix.diagonal, Pi.single_apply]
+        simp_all [u, Matrix.vecMulVec_apply, Matrix.diagonal]
   have he := endpoint_rankone_covariance_le hsg hiso u P B hu hP hB hPu hBu
     (sq_pos_of_pos hk) hd (by rwa [hfp]) (by rwa [hfq])
     (by simpa only [hfp,hfq] using hratio)

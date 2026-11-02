@@ -12,7 +12,7 @@ def tailMomentSeries (p : ℕ) (A s : ℝ) : ℝ :=
   ∑ j ∈ Finset.range p, A^j*s^(p-1-j)/(j.factorial : ℝ)
 
 /-- Its exact factorial recurrence. -/
-theorem tailMomentSeries_succ {p : ℕ} (hp : 1 ≤ p) (A s : ℝ) :
+theorem tailMomentSeries_succ (p : ℕ) (A s : ℝ) :
     tailMomentSeries (p+1) A s = s*tailMomentSeries p A s + A^p/(p.factorial : ℝ) := by
   unfold tailMomentSeries
   rw [Finset.sum_range_succ, Finset.mul_sum]
@@ -47,7 +47,7 @@ theorem tailMomentSeries_succ_le {p : ℕ} (hp : 1 ≤ p) {A s : ℝ}
     nth_rw 1 [show p = (p-1)+1 by omega]
     rw [pow_succ]
     field_simp
-  rw [tailMomentSeries_succ hp, he]
+  rw [tailMomentSeries_succ p, he]
   nlinarith [mul_le_mul_of_nonneg_left hlast (div_nonneg hA hp0.le)]
 
 /-- The numerical majorant obtained after epsilon is bounded by one quarter. -/
@@ -89,7 +89,6 @@ theorem tailMomentCoefficient_le {p : ℕ} (hp : 3 ≤ p) :
             _ = _ := by rw [pow_succ]; ring
         rw [hpow]
         field_simp
-        <;> ring
       rw [he]
       apply mul_le_mul_of_nonneg_right _ (by positivity)
       apply (div_le_iff₀ (by positivity : (0 : ℝ) < n+1)).2
@@ -155,10 +154,9 @@ theorem integral_monomial_exp_cutoff (n : ℕ) {r A : ℝ} (hr : 0 < r) (hA : 0 
           tailMomentSeries (n+1) A (1/r)) + A^(n+1)*Real.exp (-(r*A)))/r := by
       apply (eq_div_iff hr.ne').2
       linarith [hi]
-    rw [hsolve, tailMomentSeries_succ (by omega : 1 ≤ n+1), Nat.factorial_succ,
+    rw [hsolve, tailMomentSeries_succ (n+1), Nat.factorial_succ,
       Nat.cast_mul, Nat.cast_add, Nat.cast_one]
     field_simp [hr.ne', hf]
-    <;> ring
 
 private theorem cutoff_lintegral_translate (f : ℝ → ℝ≥0∞) (A : ℝ) :
     (∫⁻ u in Ioi 0, f (A+u)) = ∫⁻ u in Ioi A, f u := by
@@ -205,7 +203,7 @@ theorem first_moment_cutoff [IsProbabilityMeasure μ] {Y : Ω → ℝ} {C r A : 
     intro t
     convert! (((((hasDerivAt_const t A).add (hasDerivAt_id t)).pow (n+1)).sub_const
       (A^(n+1))).sub ((hasDerivAt_id t).const_mul (A^n))) using 1 <;>
-      simp [F, g, Nat.cast_add, Nat.cast_one] <;> ring
+      simp [g, Nat.cast_add, Nat.cast_one]
   have hFi : ∀ t : ℝ, (∫ u in (0 : ℝ)..t, g u) = F t := by
     intro t
     have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt
@@ -278,7 +276,7 @@ theorem first_moment_cutoff [IsProbabilityMeasure μ] {Y : Ω → ℝ} {C r A : 
     have hset : {ω | t < U ω} = {ω | A+t < Y ω} := by
       ext ω
       dsimp [U]
-      simp only [Set.mem_setOf_eq, lt_max_iff]
+      simp only [lt_max_iff]
       constructor
       · rintro (h | h) <;> linarith
       · intro h; exact Or.inl (by linarith)
@@ -355,7 +353,7 @@ theorem tailMomentSeries_ge_leading (n : ℕ) {A s : ℝ} (hA : 0 ≤ A) (hs : 0
 /-- Replacing epsilon by one quarter and the scale by its uniform upper bound. -/
 theorem cutoff_coefficient_le (n : ℕ) {B s ε : ℝ}
     (hB : 0 ≤ B) (hs : 0 ≤ s) (hsB : s ≤ (20/9 : ℝ)*B)
-    (hε0 : 0 ≤ ε) (hε : ε ≤ 1/4) :
+    (hε : ε ≤ 1/4) :
     (1-ε)*((15/2 : ℝ)*B)^n/((n+1).factorial : ℝ) +
       ε*tailMomentSeries (n+1) ((15/2 : ℝ)*B) s ≤
       B^n*tailMomentCoefficient (n+1) := by
@@ -369,7 +367,7 @@ theorem cutoff_coefficient_le (n : ℕ) {B s ε : ℝ}
   have hh := hInterp.trans (add_le_add_right (mul_le_mul_of_nonneg_left hT
     (by norm_num : (0 : ℝ) ≤ 1/4)) ((3/4 : ℝ)*a))
   convert! hh using 1 <;> dsimp [a, T, tailMomentCoefficient] <;>
-    simp only [Nat.add_sub_cancel, mul_pow] <;> ring
+    simp only [mul_pow] <;> ring
 
 /-- The finite Taylor lower bound used in the epsilon estimate. -/
 theorem exp_twenty_seven_eighths_lower : (146/5 : ℝ) < Real.exp (27/8) := by
@@ -408,7 +406,7 @@ theorem cutoff_epsilon_identity {K L : ℝ} (hK : 0 < K) (hKL : L = 1+Real.log K
     congr 1
     ring
   calc
-    _ = (20*Real.sqrt 10/9)*(K^2*Real.exp (-((27/8)*L))) := by field_simp <;> ring
+    _ = (20*Real.sqrt 10/9)*(K^2*Real.exp (-((27/8)*L))) := by field_simp
     _ = _ := by rw [hm]
 
 /-- Supplementary Lemma S1.11: the complete higher-moment assertion. -/
@@ -434,7 +432,6 @@ theorem upper_tail_higher_moments [IsProbabilityMeasure μ] {Y : Ω → ℝ} {K 
   have hpEq : p-1+1 = p := by omega
   rw [hpEq] at hcut
   let ε := Real.sqrt 10/(9/(20*K^2))*Real.exp (-((9/(20*K^2))*((15/2)*K^2*L)))
-  have hε0 : 0 ≤ ε := by dsimp [ε]; positivity
   have hε : ε ≤ 1/4 := by
     dsimp [ε]
     rw [cutoff_epsilon_identity hKpos hKL]
@@ -443,7 +440,7 @@ theorem upper_tail_higher_moments [IsProbabilityMeasure μ] {Y : Ω → ℝ} {K 
     nlinarith
   have hcoeff := cutoff_coefficient_le (p-1) hB
     (s := 1/(9/(20*K^2))) (by positivity)
-    (by field_simp; nlinarith [sq_nonneg K]) hε0 hε
+    (by field_simp; nlinarith [sq_nonneg K]) hε
   rw [hpEq] at hcoeff
   have hAeq : (15/2 : ℝ)*(K^2*L) = (15/2)*K^2*L := by ring
   rw [hAeq] at hcoeff
@@ -584,7 +581,7 @@ theorem upper_tail_second_moment [IsProbabilityMeasure μ] {Y : Ω → ℝ} {K L
   have hcost : (∫ ω, Y ω^2 ∂μ)/(2*K^2*L)-1/(2*K^2*L) ≤
       15/4+ε*(15/4+(20/9)/L)-(1/2)*(1/K^2)/L := by
     convert! sub_le_sub_right hdiv (1/(2*K^2*L)) using 1 <;>
-      field_simp [hK2, hLpos.ne'] <;> ring
+      field_simp [hK2, hLpos.ne']
   have hpow : K^2 = Real.exp (2*(L-1)) := by
     rw [show 2*(L-1) = Real.log K+Real.log K by rw [hKL]; ring,
       Real.exp_add, Real.exp_log hKpos]
@@ -629,7 +626,7 @@ theorem upper_tail_moment_series_summable [IsProbabilityMeasure μ]
       have hh := mul_le_mul_of_nonneg_right hm (pow_nonneg ht0 (n+3))
       convert! hh using 1
       dsimp [v]
-      simp only [Nat.add_sub_cancel_right, pow_add, mul_pow]
+      simp only [pow_add, mul_pow]
       ring
   exact (summable_nat_add_iff 3).1 hs
 

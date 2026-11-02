@@ -17,8 +17,6 @@ theorem factorialTerm_succ (x : ℝ) (j : ℕ) :
     factorialTerm x (j+1)=factorialTerm x j*x/(j+1 : ℝ) := by
   simp only [factorialTerm,pow_succ,Nat.factorial_succ,Nat.cast_mul,Nat.cast_add,Nat.cast_one]
   field_simp [show (j.factorial : ℝ)≠0 by positivity,show (j : ℝ)+1≠0 by positivity]
-  <;> ring
-  <;> simp
 
 structure ExpLowerTranscript (N : ℕ) (x out : ℚ) (term : ℕ → ℚ) : Prop where
   argument : 0≤x
@@ -131,7 +129,7 @@ theorem LogTranscript.powers {N : ℕ} {z lo hi : ℚ}
       exact_mod_cast h.stepHi j (Finset.mem_range.mpr (by omega))
     have hid : (z : ℝ)^(2*(j+1)+1)=(z : ℝ)^(2*j+1)*(z : ℝ)^2 := by
       rw [← pow_add]
-      congr 1 <;> omega
+      congr 1
     rw [hid]
     exact ⟨hL.trans (mul_le_mul_of_nonneg_right hp.1 (sq_nonneg _)),
       (mul_le_mul_of_nonneg_right hp.2 (sq_nonneg _)).trans hH⟩

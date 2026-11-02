@@ -123,7 +123,7 @@ run_cmd do
     levelParams := []
     type := mkConst `False
     value := mkConst `True.intro }
-  match env.addDeclCore 0 (.thmDecl info) none (doCheck := false) with
+  match env.addDeclCore 0 0 (.thmDecl info) none (doCheck := false) with
   | .ok env => setEnv env
   | .error _ => throwError "failed to construct adversarial fixture"
 """)
@@ -153,7 +153,7 @@ run_cmd do
     levelParams := []
     type := mkConst `False
     value := mkConst `replayUnsafeFalse }
-  match env.addDeclCore 0 (.thmDecl info) none (doCheck := false) with
+  match env.addDeclCore 0 0 (.thmDecl info) none (doCheck := false) with
   | .ok env => setEnv env
   | .error _ => throwError "failed to construct adversarial fixture"
 """)
@@ -211,7 +211,7 @@ run_cmd do
     levelParams := [`u]
     type := mkConst `True
     value := mkConst `True.intro }
-  match env.addDeclCore 0 (.thmDecl info) none (doCheck := false) with
+  match env.addDeclCore 0 0 (.thmDecl info) none (doCheck := false) with
   | .ok env => setEnv env
   | .error _ => throwError "failed to construct universe collision fixture"
 """,
@@ -219,7 +219,7 @@ run_cmd do
         inventory = self.inventory()
         for kind, declaration in variants.items():
             with self.subTest(kind=kind):
-                self.compile("ReplayRight", "import Lean\n" + declaration + "\n")
+                self.compile("ReplayRight", "import Mathlib\n" + declaration + "\n")
                 # Keep the conflicting declarations in separately compiled
                 # roots so the independent loader/planner sees both artifacts.
                 self.compile("SingularValueBounds", "import ReplayLeft\n")
@@ -285,7 +285,7 @@ def hiddenOracle : (1 : Nat) = 1 := by native_decide
             if result.returncode:
                 raise ValueError(result.stdout)
 
-        with self.assertRaisesRegex(ValueError, "Forbidden axiom"):
+        with self.assertRaisesRegex(ValueError, "Forbidden new logical axiom: hiddenOracle"):
             gate.replay(modules, check, jobs=1, progress=lambda _: None)
         self.assertNotIn("ReplayChild", attempted)
 

@@ -21,6 +21,7 @@ def upperFixedComparison (R : Matrix ι ι ℝ) : Matrix ι ι ℝ :=
 def upperFixedEigenvalue (r : ι → ℝ) (i : ι) : ℝ :=
   r i + upperWeight r i * (upperWeightedMean r - 2 * r i)
 
+omit [Nonempty ι] in
 theorem upperSquareWeight_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     upperSquareWeight R = (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) *
       Matrix.diagonal (upperWeight hR.isHermitian.eigenvalues) *
@@ -32,6 +33,7 @@ theorem upperSquareWeight_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   ext i j
   simp [Matrix.diagonal, upperWeight, div_eq_mul_inv, mul_comm]
 
+omit [Nonempty ι] in
 theorem upperSquareWeight_mean {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     Matrix.trace (R * upperSquareWeight R) = upperWeightedMean hR.isHermitian.eigenvalues := by
   rw [upperSquareWeight_spectral hR]
@@ -43,6 +45,7 @@ theorem upperSquareWeight_mean {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   intro i _
   ring
 
+omit [Nonempty ι] in
 /-- Spectral representation of the actual polynomial matrix, with coefficient two. -/
 theorem upperFixedComparison_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     upperFixedComparison R = (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) *
@@ -60,9 +63,10 @@ theorem upperFixedComparison_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   congr 2
   apply congrArg Matrix.diagonal
   funext i
-  simp only [Pi.sub_apply, upperAveragedEigenvalue, upperFixedEigenvalue]
+  simp only [upperAveragedEigenvalue, upperFixedEigenvalue]
   ring
 
+omit [DecidableEq ι] in
 /-- Positivity allows semidefinite, rather than positive-definite, matrices. -/
 theorem upperFixedEigenvalue_nonneg {r : ι → ℝ} (hr : ∀ i, 0 < r i) (i : ι) :
     0 ≤ upperFixedEigenvalue r i := by
@@ -88,7 +92,7 @@ theorem upperFixedComparison_trace {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     real_spectral_trace hR.isHermitian, upperSquareWeight_mean hR]
   obtain ⟨_, _, hp, _⟩ := upper_weight_properties hR.eigenvalues_pos
   simp only [upperFixedEigenvalue, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib,
-    ← Finset.sum_mul, hp, one_mul, mul_left_comm _ 2]
+    ← Finset.sum_mul, hp, one_mul]
   unfold upperWeightedMean
   have he : (∑ x, upperWeight hR.isHermitian.eigenvalues x * (2 * hR.isHermitian.eigenvalues x)) =
       2 * ∑ x, upperWeight hR.isHermitian.eigenvalues x * hR.isHermitian.eigenvalues x := by
@@ -117,6 +121,7 @@ theorem upperFixedComparison_eq_zero_of_subsingleton [Subsingleton ι]
     simp [Matrix.diagonal]
   rw [hz, hdz, mul_zero, zero_mul]
 
+omit [Fintype ι] [DecidableEq ι] [Nonempty ι] in
 /-- Harmonic-mean supporting inequality on any finite collection. This is
 Cauchy--Schwarz, the concavity calculation for `1/S_j` in the printed proof. -/
 theorem resolvent_harmonic_tangent (s : Finset ι) {r : ι → ℝ}
@@ -196,6 +201,7 @@ theorem upper_eigenvalue_tangent_of_harmonic {r s t S h : ℝ}
   rw [← htangent]
   linarith
 
+omit [Nonempty ι] in
 /-- The concavity tangent for every individual eigenvalue, including dimension one. -/
 theorem upper_fixed_eigenvalue_bound {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     {h : ℝ} (hh : 0 ≤ h) (i : ι) :
@@ -288,6 +294,7 @@ theorem upperSquareWeight_posDef {R : Matrix ι ι ℝ} (hR : R.PosDef) :
   exact unitary_conjugate_posDef _ _
     (Matrix.PosDef.diagonal (upper_weight_properties hR.eigenvalues_pos).1)
 
+omit [Nonempty ι] in
 theorem upperTailMatrix_zero {R : Matrix ι ι ℝ} (hR : R.PosDef) :
     upperTailMatrix R 0 = upperSquareWeight R := by
   have hres : upperResolvent R 0 = R := by

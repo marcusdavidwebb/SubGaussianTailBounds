@@ -93,6 +93,7 @@ theorem quadratic_log_mgf_le_sum (hsg : SubGaussianMGF μ X K)
   rwa [det_one_sub_smul_eq_prod B hB.isHermitian (2 * K ^ 2 * lam),
     Real.log_prod (fun i _ => (hf i).ne')] at h
 
+omit [DecidableEq ι] in
 /-- Gaussian averaging gives the stronger diagonal quadratic moment bound,
 which retains the sum of squared eigenvalues needed at the endpoint. -/
 theorem diagonal_quadratic_second_of_directional_fourth (hsg : SubGaussianMGF μ X K)

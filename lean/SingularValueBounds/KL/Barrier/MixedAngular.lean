@@ -56,7 +56,7 @@ theorem mixedAngularExpression_hasDerivAt {h : ℝ → ℝ} (hc : Continuous h) 
   convert! (((Real.hasDerivAt_sin φ).const_mul (h 1)).add
     (((Real.hasDerivAt_cos φ).const_mul 2).mul (mixedAngularA_hasDerivAt hc φ))).sub
     (((Real.hasDerivAt_sin φ).const_mul 2).mul (mixedAngularB_hasDerivAt hc φ)) using 1 <;>
-    (try dsimp [mixedAngularExpression]) <;> ring
+    ring
 
 theorem mixedAngularB_zero {h : ℝ → ℝ} (hc : Continuous h) :
     mixedAngularB h 0 = ∫ k in (0:ℝ)..1, h k := by

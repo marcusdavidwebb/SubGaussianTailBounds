@@ -47,12 +47,9 @@ theorem endpointLogratioCertificateConditions : EndpointLogratioCertificateCondi
       padeDQ, padeNQ, Polynomial.eval₂_finset_sum,
       Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
       Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-      Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum,
-      Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
-      Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
+      Polynomial.eval₂_monomial, Polynomial.coe_evalRingHom, Polynomial.eval_finset_sum, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointLogratioCoefficients, endpointLogratioBox,
-      Fin.sum_univ_succ, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ]
     ring
   dsimp only
   rw [hpoly]

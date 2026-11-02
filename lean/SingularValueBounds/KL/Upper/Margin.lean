@@ -3,7 +3,7 @@ open MeasureTheory ProbabilityTheory Set
 open scoped Matrix BigOperators
 namespace SingularValueBounds.KL
 noncomputable section
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [Nonempty ι]
 
 /-- The first-factor logarithmic excess, used also for rates above two. -/
 def upperFactorF (q x : ℝ) : ℝ :=
@@ -118,6 +118,7 @@ theorem upper_tail_spectral_shape_of_factors {r : ι → ℝ} (hr : ∀ i,0 < r 
 def upperTailSecondArgument (r : ι → ℝ) (h q : ℝ) (i : ι) : ℝ :=
   (q/(1-(q-1)*h*r i))*upperTailWeight r h i
 
+omit [Nonempty ι] in
 /-- Exact factorization, independent of the eventual tail rate. -/
 theorem upper_tail_factorization {r : ι → ℝ} (hr : ∀ i,0 < r i)
     {h q : ℝ} (hh : 0 ≤ h) (hden : ∀ i,0 < 1-(q-1)*h*r i) (i : ι) :
@@ -134,6 +135,7 @@ theorem upper_tail_factorization {r : ι → ℝ} (hr : ∀ i,0 < r i)
   field_simp [hdr]
   ring
 
+omit [Nonempty ι] in
 /-- Separate first-factor and second-factor costs add in the log determinant.
 This analytic identity is shared by the joint and extended-rate estimates. -/
 theorem upper_tail_logdet_of_costs {r : ι → ℝ} (hr : ∀ i,0 < r i)
@@ -275,6 +277,8 @@ theorem upperTailWeight_le_normalized {r : ι → ℝ} (hr : ∀ i,0 < r i)
   rw [← hnorm] at ht
   have he : (k*eta)^2/eta^2 = k^2 := by field_simp [heta.ne']
   rwa [he] at ht
+
+variable [DecidableEq ι]
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
 

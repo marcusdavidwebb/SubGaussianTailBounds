@@ -8,7 +8,7 @@ namespace SingularValueBounds.KL
 noncomputable section
 set_option maxHeartbeats 1200000
 
-variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable {ι : Type*} [Fintype ι]
 
 /-- Normalizing denominator for the upper-tail spectral weights. -/
 def shiftedWeightNormalizer (ρ : ι → ℝ) (H : ℝ) : ℝ :=
@@ -155,7 +155,7 @@ theorem normalizedShiftWeight_power_sum {ρ : ι → ℝ} {H κ : ℝ}
 /-- Every subset consisting of largest spectral coordinates has no larger
 shifted mass than original mass. In particular this applies to every initial
 partial sum after decreasing rearrangement. -/
-theorem normalizedShiftWeight_top_sum {ρ : ι → ℝ} {H κ : ℝ}
+theorem normalizedShiftWeight_top_sum [DecidableEq ι] {ρ : ι → ℝ} {H κ : ℝ}
     (hρ : ∀ i, 0 ≤ ρ i) (hSum : (∑ i, ρ i^2) = 1)
     (hH : 0 ≤ H) (hκ : 0 ≤ κ) (hBound : ∀ i, ρ i ≤ κ)
     (S : Finset ι) (hTop : ∀ i ∈ S, ∀ j ∉ S, ρ j ≤ ρ i) :
@@ -241,7 +241,6 @@ private theorem shape_power_term_identity {q κ a : ℝ} (hκ : κ ≠ 0) (m : �
     _ = _ := by
       rw [mul_pow, ← pow_mul]
       field_simp
-      <;> ring
 
 /-- The joint determinant prefactor from the complete convergent logarithmic
 series, with all higher spectral moments controlled by the third moment. -/
@@ -284,7 +283,7 @@ theorem normalizedShiftWeight_log_prefactor_of_le {ρ v : ι → ℝ} {H κ q : 
     (hρ : ∀ i, 0 ≤ ρ i) (hSum : (∑ i, ρ i^2) = 1)
     (hH : 0 ≤ H) (hκ : 0 < κ) (hBound : ∀ i, ρ i ≤ κ)
     (hq : 0 ≤ q) (hqκ : q*κ^2 < 1)
-    (hv : ∀ i, 0 ≤ v i) (hvp : ∀ i, v i ≤ q*normalizedShiftWeight ρ H i) :
+    (hvp : ∀ i, v i ≤ q*normalizedShiftWeight ρ H i) :
     -(∑ i, Real.log (1-v i)) ≤
       q+((∑ i, ρ i^3)/κ^3)*(-Real.log (1-q*κ^2)-q*κ^2) := by
   apply le_trans _ (normalizedShiftWeight_log_prefactor hρ hSum hH hκ hBound hq hqκ)

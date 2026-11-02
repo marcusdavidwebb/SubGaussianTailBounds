@@ -10,13 +10,14 @@ one-dimensional zero case.
 open scoped Matrix BigOperators
 namespace SingularValueBounds.KL
 noncomputable section
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 def normalizedUpperMean (x : ι → ℝ) : ℝ := ∑ i, x i ^ 3
 
 def normalizedUpperEigenvalue (x : ι → ℝ) (i : ι) : ℝ :=
   x i + normalizedUpperMean x * x i ^ 2 - 2 * x i ^ 3
 
+omit [DecidableEq ι] in
 lemma normalized_upper_coordinate_le_one {x : ι → ℝ}
     (hx : ∀ i, 0 ≤ x i) (h2 : ∑ i, x i ^ 2 = 1) (i : ι) : x i ≤ 1 := by
   have hs := Finset.single_le_sum (s := Finset.univ) (fun j _ => sq_nonneg (x j))
@@ -24,6 +25,7 @@ lemma normalized_upper_coordinate_le_one {x : ι → ℝ}
   rw [h2] at hs
   exact (sq_le_sq₀ (hx i) zero_le_one).mp (by simpa only [one_pow] using hs)
 
+omit [DecidableEq ι] in
 lemma normalized_upper_mean_bounds {x : ι → ℝ} (hx : ∀ i, 0 ≤ x i)
     (h2 : ∑ i, x i ^ 2 = 1) :
     0 ≤ normalizedUpperMean x ∧ normalizedUpperMean x ≤ 1 := by

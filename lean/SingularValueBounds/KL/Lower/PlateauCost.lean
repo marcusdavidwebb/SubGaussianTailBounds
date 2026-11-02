@@ -50,7 +50,7 @@ theorem plateauCostMargin_eval (i : Fin 2) (k : ℝ) :
   simp only [realEval,plateauCostMargin,Polynomial.eval₂_sub,Polynomial.eval₂_mul,Polynomial.eval₂_C]
   rw [show Polynomial.eval₂ (Rat.castHom ℝ) k (polynomialExpTaylor 24 (-C 2*plateauCostE i)) =
       expTaylor 24 (realEval (-C 2*plateauCostE i) k) from polynomialExpTaylor_eval _ _ _]
-  simp [realEval,Polynomial.eval₂_mul,Polynomial.eval₂_neg,Polynomial.eval₂_C,Polynomial.eval₂_pow]
+  simp [realEval,Polynomial.eval₂_mul,Polynomial.eval₂_neg,Polynomial.eval₂_C]
 
 /-- The final exponential-over-square-root cost follows from a finite Taylor
 polynomial lower bound. Every real-variable implication is proved here. -/
@@ -190,6 +190,7 @@ theorem plateau_retained_logdet {ι : Type*} [Fintype ι] (r : ι → ℝ) (top 
 variable {Ω ι : Type*} [MeasurableSpace Ω] [Fintype ι] [DecidableEq ι] [Nonempty ι]
 variable {μ : Measure Ω} [IsProbabilityMeasure μ]
 
+omit [Nonempty ι] in
 theorem plateau_normalized_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (hF : frobenius R=1) (A c : ℝ) :
     lowerComparison R A c = (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ)*
@@ -204,6 +205,7 @@ theorem plateau_normalized_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     ring
   · simp [Matrix.diagonal,hij]
 
+omit [Nonempty ι] in
 theorem plateau_weight_fourth_trace {R : Matrix ι ι ℝ} (hR : R.PosDef) (hF : frobenius R=1) :
     Matrix.trace ((lowerWeight R)^2)=∑ i,hR.isHermitian.eigenvalues i^4 := by
   simp only [lowerWeight,normalized_trace_square hR hF,inv_one,one_smul]
@@ -239,7 +241,7 @@ theorem normalized_plateau_log_mgf {X : Ω → ι → ℝ} {K : ℝ}
     rw [show Matrix.diagonal (fun i => plateauRealD u A c (r i)) =
         1-u • Matrix.diagonal (fun i => r i+A*r i^2-c*r i^3) by
       ext i j
-      by_cases hij : i=j <;> simp [Matrix.diagonal,plateauRealD,hij] <;> ring]
+      by_cases hij : i=j <;> simp [Matrix.diagonal,plateauRealD,hij]]
     rw [Matrix.mul_sub,Matrix.sub_mul,Matrix.mul_one,U.2.2,Matrix.mul_smul,
       smul_mul_assoc,← plateau_normalized_spectral hR hF]
   have hgap : (1-u • B).PosDef := by

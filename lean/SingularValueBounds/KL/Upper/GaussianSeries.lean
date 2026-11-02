@@ -188,7 +188,7 @@ def shiftedExponentialCoefficient (p : ℕ) (A s : ℝ) : ℝ :=
 theorem shiftedExponentialCoefficient_succ {p : ℕ} (A s : ℝ) :
     shiftedExponentialCoefficient (p+1) A s =
       s*shiftedExponentialCoefficient p A s+A^(p+1)/((p+1).factorial : ℝ) := by
-  exact tailMomentSeries_succ (by omega : 1 ≤ p+1) A s
+  exact tailMomentSeries_succ (p+1) A s
 
 theorem shiftedExponentialCoefficient_step (p : ℕ) {A s : ℝ}
     (hA : 0 ≤ A) (hs : 0 ≤ s) :

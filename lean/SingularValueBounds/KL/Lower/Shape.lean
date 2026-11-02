@@ -78,7 +78,7 @@ theorem cubic_one_crossing {A B C D k : ℝ} (hA : 0 < A) (hD : 0 < D)
     exact mul_nonpos_of_nonneg_of_nonpos (sub_nonneg.mpr hx.1)
       (hq x ⟨hr0.le.trans hx.1,hx.2⟩).le
 
-theorem lowerShapeEigenvalue_bounds {k r : ℝ} (hk : 0 ≤ k) (hk1 : k ≤ 1)
+theorem lowerShapeEigenvalue_bounds {k r : ℝ} (hk1 : k ≤ 1)
     (hr : r ∈ Icc (0:ℝ) k) : 0 ≤ lowerShapeEigenvalue k r ∧ lowerShapeEigenvalue k r ≤ k := by
   have hr1 : r ≤ 1 := hr.2.trans hk1
   have hsq : 0 ≤ 1-r^2 := by nlinarith [hr.1]
@@ -101,7 +101,7 @@ theorem lower_shape_envelope_of_cubic {u k c : ℝ} (hu : 0 < u) (hk : 0 < k)
   let d := fun x => 1-u*lowerShapeEigenvalue k x
   let F := fun x => u*x+c*x^2+Real.log (d x)
   have hd (x : ℝ) (hx : x ∈ Icc (0:ℝ) k) : 0 < d x := by
-    have h := (lowerShapeEigenvalue_bounds hk.le hk1 hx).2
+    have h := (lowerShapeEigenvalue_bounds hk1 hx).2
     dsimp [d]
     nlinarith [mul_le_mul_of_nonneg_left h hu.le]
   have hderiv (x : ℝ) (hx : x ∈ Icc (0:ℝ) k) :
@@ -111,7 +111,7 @@ theorem lower_shape_envelope_of_cubic {u k c : ℝ} (hu : 0 < u) (hk : 0 < k)
     have hb : HasDerivAt (lowerShapeEigenvalue k) (1+2*k*x-3*x^2) x := by
       convert! (hasDerivAt_id x).add (((hasDerivAt_id x).pow 2).mul
         ((hasDerivAt_const x k).sub (hasDerivAt_id x))) using 1 <;>
-        simp [lowerShapeEigenvalue] <;> ring
+        simp <;> ring
     have hdd := (hasDerivAt_const x (1:ℝ)).sub (hb.const_mul u)
     convert! (((hasDerivAt_id x).const_mul u).add
       (((hasDerivAt_id x).pow 2).const_mul c)).add (hdd.log (hd x hx).ne') using 1

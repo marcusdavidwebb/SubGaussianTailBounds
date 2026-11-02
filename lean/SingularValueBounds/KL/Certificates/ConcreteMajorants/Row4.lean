@@ -29,12 +29,10 @@ private theorem quotient_identity : majorantQuotient 4 = tensorOfFn 6 13 baseCoe
   intro a b
   simp [majorantCleared, majorantHQ, majorantAQ, majorantBQ, padeDQ, padeNQ,
     comparisonZQ, tensorOfFn, baseCoefficients, Polynomial.ofFn_eq_sum_monomial,
-    Fin.sum_univ_succ, Polynomial.eval₂_finset_sum, Polynomial.eval₂_monomial,
+    Fin.sum_univ_succ, Polynomial.eval₂_monomial,
     Polynomial.eval₂_add, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_C, Polynomial.eval₂_X,
-    Polynomial.coe_evalRingHom, Polynomial.eval_add, Polynomial.eval_sub,
-    Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X,
-    Polynomial.eval_finset_sum, Polynomial.eval_monomial]
+    Polynomial.coe_evalRingHom, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
   ring
 
 private theorem majorant_4_leaf_0 : BoxCertificate (majorantQuotient 4) 6 13

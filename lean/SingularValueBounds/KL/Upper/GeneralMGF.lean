@@ -9,9 +9,10 @@ namespace SingularValueBounds.KL
 open UpperSecond
 noncomputable section
 set_option maxHeartbeats 1800000
-variable {Ω ι : Type*} [MeasurableSpace Ω] [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {Ω ι : Type*} [MeasurableSpace Ω] [Fintype ι]
 variable {μ : Measure Ω} [IsProbabilityMeasure μ]
 
+omit [IsProbabilityMeasure μ] in
 theorem directional_fourth_of_unit {X : Ω → ι → ℝ} {m4 : ℝ}
     (hunit : ∀ v : ι → ℝ,v ⬝ᵥ v=1 → (∫ ω,(v ⬝ᵥ X ω)^4 ∂μ) ≤ m4)
     (u : ι → ℝ) : (∫ ω,(u ⬝ᵥ X ω)^4 ∂μ) ≤ m4*(u ⬝ᵥ u)^2 := by
@@ -45,7 +46,7 @@ theorem general_second_uniform_fourth
   have hK0 : 0 < K := by linarith
   have hL1 := one_le_logParameter hK
   have hL0 : 0 < logParameter K := by linarith
-  rcases general_second_range_coverage hL1 with hs|⟨j,hj⟩|hl
+  rcases general_second_range_coverage (logParameter K) with hs|⟨j,hj⟩|hl
   · refine ⟨4,by norm_num,?_,?_⟩
     · apply directional_fourth_of_unit
       intro v hv
@@ -81,15 +82,12 @@ theorem general_rare_scalar_normalization (i : Fin 3) {K d m ey : ℝ}
       m*Real.exp (-2*d)*(1+2*(endpointRareRow i).zeta)/(6*(1+d)) := by
     rw [← hInv]
     field_simp
-    <;> ring
-    all_goals tauto
   have hn2 : ((endpointRareRow i).probability*Real.exp (-((69/25:ℝ)*d))*K^4*
         tailMomentSeries 3 ((endpointRareRow i).cutoff+6*d) (50/23))/(K^2*(1+d)) = generalRareR i d := by
     calc
       _ = (endpointRareRow i).probability*(Real.exp (-((69/25:ℝ)*d))*K^2)*
         tailMomentSeries 3 ((endpointRareRow i).cutoff+6*d) (50/23)/(1+d) := by
           field_simp [hK.ne']
-          <;> ring
       _ = _ := by
         rw [hExp]
         norm_num [generalRareR,tailMomentSeries,Finset.sum_range_succ]
@@ -97,13 +95,14 @@ theorem general_rare_scalar_normalization (i : Fin 3) {K d m ey : ℝ}
   have hn3 : 1/(2*K^2*(1+d))=Real.exp (-2*d)/(2*(1+d)) := by
     rw [← hInv]
     field_simp
-    <;> ring
   have hh := sub_le_sub_right (div_le_div_of_nonneg_right hbound
     (show 0 ≤ K^2*(1+d) by positivity)) (1/(2*K^2*(1+d)))
   rw [add_div,hn1,hn2,hn3] at hh
   dsimp [generalSecondScalar]
   rw [hn3]
-  convert! hh using 1 <;> field_simp [hK.ne',hd1] <;> ring
+  convert! hh using 1 <;> field_simp [hK.ne',hd1]
+
+variable [DecidableEq ι] [Nonempty ι]
 
 theorem upperShift_tail_nine_tenths {X : Ω → ι → ℝ} {K b : ℝ}
     (hsg : SubGaussianMGF μ X K) (hm : Measurable X) (hK : 0 < K)

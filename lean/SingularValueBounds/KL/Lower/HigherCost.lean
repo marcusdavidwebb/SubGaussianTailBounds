@@ -89,7 +89,6 @@ theorem normalized_lower_higher_mixed {X : Ω → ι → ℝ} {K p u C : ℝ}
     nlinarith [congrArg (fun z : ℝ => z*logParameter K) huC]
   apply (mul_le_mul_iff_left₀ hden).1
   rw [add_mul,hscale]
-  change _ ≤ _
   change _ ≤ _ at hcondition
   dsimp [T,M,B,k] at *
   nlinarith
@@ -117,7 +116,6 @@ theorem normalized_lower_mixed_on_cell {X : Ω → ι → ℝ} {K : ℝ}
   have hp1 : (p:ℝ)-1 ≠ 0 := by linarith
   have hprof : generalLowerProfile (spectralMaximum R hR.isHermitian) ≠ 0 := by linarith
   field_simp [hp1,hprof]
-  <;> ring
 
 end
 end SingularValueBounds.KL

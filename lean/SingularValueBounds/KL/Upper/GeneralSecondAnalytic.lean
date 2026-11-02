@@ -102,7 +102,7 @@ theorem upperComparison_general_log_mgf (hcert : EndpointLogratioCertificateCond
   rw [hidentity] at hsum
   rw [htrace]
   dsimp [endpointLogMGFCost,endpointLogExcess] at hsum ⊢
-  have hscale : ((6/5 : ℝ)/(K^2*η))*K^2*(η*∑j,c j)=(6/5 : ℝ)*∑j,c j := by field_simp [hη.ne',hK.ne'] <;> ring
+  have hscale : ((6/5 : ℝ)/(K^2*η))*K^2*(η*∑j,c j)=(6/5 : ℝ)*∑j,c j := by field_simp [hη.ne',hK.ne']
   rw [hscale]
   linarith [hn.1,hn.2]
 

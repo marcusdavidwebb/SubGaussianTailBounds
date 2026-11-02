@@ -41,7 +41,7 @@ theorem endpointLowerProfile_pos {k : ℝ} (hk : 0 < k) : 0 < endpointLowerProfi
 theorem generalLowerProfile_pos (k : ℝ) : 0 < generalLowerProfile k :=
   lt_of_lt_of_le (by norm_num) (generalLowerProfile_bounds k).1
 
-theorem profileAngularCost_nonneg {h : ℝ → ℝ} (hc : Continuous h)
+theorem profileAngularCost_nonneg {h : ℝ → ℝ}
     (hp : ∀ k ∈ Icc (0:ℝ) 1, 0 ≤ h k) : 0 ≤ profileAngularCost h := by
   apply intervalIntegral.integral_nonneg Real.pi_div_two_pos.le
   intro θ hθ
@@ -306,7 +306,7 @@ theorem profile_sqrt_integral {k : ℝ} (hk : k ∈ Icc (0:ℝ) 1) :
     ring
   change (∫ x in (0:ℝ)..t, Real.sqrt (1-Real.sin x^2)*Real.cos x) = _ at hsub
   rw [← hsub,hfun,integral_cos_sq]
-  simp only [Real.sin_zero,Real.cos_zero,zero_mul,mul_zero,sub_zero,add_zero]
+  simp only [Real.sin_zero,Real.cos_zero,mul_zero,sub_zero]
   rw [heq]
   simp only [t,Real.cos_arcsin]
   ring

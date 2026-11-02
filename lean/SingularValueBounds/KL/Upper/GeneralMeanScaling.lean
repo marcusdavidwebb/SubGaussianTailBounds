@@ -36,8 +36,8 @@ theorem generalMean_entropy_exponential_integral {a v β : ℝ}
   let F : ℝ → ℝ := fun u => entropyKernel a u*Real.exp (-(β*u))
   let g : ℝ → ℝ := fun u => Real.exp (-(β*u))/u-β*F u
   have hFint : IntegrableOn F (Ioi v) := by
-    have hi := entropy_tail_integrable (r := β) (T := fun u => Real.exp (-(β*u)))
-      ha (by norm_num : (0:ℝ)≤1) hβ
+    have hi := entropy_tail_integrable (C := 1) (r := β) (T := fun u => Real.exp (-(β*u)))
+      ha hβ
       (Real.measurable_exp.comp ((measurable_const.mul measurable_id).neg))
       (fun u => Real.exp_nonneg _) (fun u hu => by simp)
     exact hi.mono_set (Ioi_subset_Ioi hav)
@@ -63,7 +63,7 @@ theorem generalMean_entropy_exponential_integral {a v β : ℝ}
     have he := ((hasDerivAt_id u).const_mul (-β)).exp
     convert! ((hasDerivAt_const u 1).add hlog).mul he using 1 <;>
       (try funext z) <;> dsimp [F,g,entropyKernel] <;>
-      (try simp only [id_eq,zero_add,Pi.add_apply,Pi.mul_apply,Pi.div_apply]) <;> field_simp <;> ring
+      (try simp only [zero_add]) <;> field_simp <;> ring
   have hlim : Tendsto F atTop (nhds 0) := by
     have h0 := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (0:ℝ) β hβ
     have h1 := tendsto_rpow_mul_exp_neg_mul_atTop_nhds_zero (1:ℝ) β hβ
@@ -132,11 +132,11 @@ theorem generalMean_base_integral_scale {A K L q c : ℝ}
     A*generalMeanExponentialPrimitive (c*K^2*L) (c*K^2*L) (q/(2*K^2))=
       generalMeanRemainder A q c L := by
   have ha : c*K^2*L≠0 := by positivity
-  have harg : q/(2*K^2)*(c*K^2*L)=q*c*L/2 := by field_simp <;> ring
+  have harg : q/(2*K^2)*(c*K^2*L)=q*c*L/2 := by field_simp
   unfold generalMeanExponentialPrimitive generalMeanRemainder
   rw [harg,div_self ha,Real.log_one,add_zero]
   have hdiv : Real.exp (-(q*c*L/2))/(q/(2*K^2))=
-      (2/q)*(K^2*Real.exp (-(q*c)*L/2)) := by simp only [div_div,div_eq_mul_inv,inv_inv,mul_inv_rev];ring
+      (2/q)*(K^2*Real.exp (-(q*c)*L/2)) := by simp only [div_eq_mul_inv,inv_inv,mul_inv_rev];ring
   rw [hdiv,generalMean_exp_scale_factor hK hKL]
   ring
 
@@ -149,13 +149,13 @@ theorem generalMean_continuation_integral_scale {A K L q c s : ℝ}
       generalMeanContinuation A q c s L := by
   have hs : 0<s := hc.trans_le hcs
   have hq0 : 0<q := by linarith
-  have hratio : s*K^2*L/(c*K^2*L)=s/c := by field_simp <;> ring
-  have harg1 : 1/(2*K^2)*(s*K^2*L)=s*L/2 := by field_simp <;> ring
-  have hargq : q/(2*K^2)*(s*K^2*L)=q*s*L/2 := by field_simp <;> ring
+  have hratio : s*K^2*L/(c*K^2*L)=s/c := by field_simp
+  have harg1 : 1/(2*K^2)*(s*K^2*L)=s*L/2 := by field_simp
+  have hargq : q/(2*K^2)*(s*K^2*L)=q*s*L/2 := by field_simp
   unfold generalMeanExponentialPrimitive generalMeanContinuation
   rw [hratio,harg1,hargq]
-  have hd1 : Real.exp (-(s*L/2))/(1/(2*K^2))=2*K^2*Real.exp (-s*L/2) := by simp only [div_div,div_eq_mul_inv,inv_inv,mul_inv_rev];ring
-  have hdq : Real.exp (-(q*s*L/2))/(q/(2*K^2))=(2/q)*K^2*Real.exp (-(q*s)*L/2) := by simp only [div_div,div_eq_mul_inv,inv_inv,mul_inv_rev];ring
+  have hd1 : Real.exp (-(s*L/2))/(1/(2*K^2))=2*K^2*Real.exp (-s*L/2) := by simp only [div_eq_mul_inv,inv_inv,mul_inv_rev];ring
+  have hdq : Real.exp (-(q*s*L/2))/(q/(2*K^2))=(2/q)*K^2*Real.exp (-(q*s)*L/2) := by simp only [div_eq_mul_inv,inv_inv,mul_inv_rev];ring
   rw [hd1,hdq]
   have he : Real.exp (-(q-1)*s*L/2)*Real.exp (-s*L/2)=Real.exp (-(q*s)*L/2) := by
     rw [← Real.exp_add]

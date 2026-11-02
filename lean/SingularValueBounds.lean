@@ -108,7 +108,6 @@ import SingularValueBounds.KL.Certificates.ConcreteEndpointMeanRates
 import SingularValueBounds.KL.Certificates.ConcreteEndpointPrefactors
 import SingularValueBounds.KL.Certificates.ConcreteEndpointSmallEntropy
 import SingularValueBounds.KL.Certificates.ConcreteEndpointTable
-import SingularValueBounds.KL.Certificates.ConcreteFinal
 import SingularValueBounds.KL.Certificates.ConcreteGeneralLower
 import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanCells
 import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanDomains
@@ -255,7 +254,6 @@ import SingularValueBounds.KL.Certificates.EndpointEntropyLogRows.Block30
 import SingularValueBounds.KL.Certificates.EndpointEntropyLogRows.Block31
 import SingularValueBounds.KL.Certificates.EndpointEntropyRounding
 import SingularValueBounds.KL.Certificates.EndpointEntropyRuns
-import SingularValueBounds.KL.Certificates.EndpointEntropySum
 import SingularValueBounds.KL.Certificates.EndpointEntropyTables
 import SingularValueBounds.KL.Certificates.EndpointMeanEntropyAssembly
 import SingularValueBounds.KL.Certificates.EndpointMeanEntropyRows.Row00
@@ -330,7 +328,6 @@ import SingularValueBounds.KL.Certificates.EndpointSmallEntropyRows.Block03
 import SingularValueBounds.KL.Certificates.EndpointSmallEntropyRows.Block04
 import SingularValueBounds.KL.Certificates.EndpointSmallSelection
 import SingularValueBounds.KL.Certificates.ExactMomentEvaluation
-import SingularValueBounds.KL.Certificates.Final
 import SingularValueBounds.KL.Certificates.GeneralMeanCriticalLogs
 import SingularValueBounds.KL.Certificates.GeneralMeanCriticalLogs.Block00
 import SingularValueBounds.KL.Certificates.GeneralMeanCriticalLogs.Block01
@@ -410,7 +407,6 @@ import SingularValueBounds.KL.Certificates.MomentCellSideConditions
 import SingularValueBounds.KL.Certificates.PlateauPolynomialIdentity
 import SingularValueBounds.KL.Certificates.PlateauScalarIdentity
 import SingularValueBounds.KL.Certificates.Polynomial
-import SingularValueBounds.KL.Certificates.PolynomialAnalysis
 import SingularValueBounds.KL.Certificates.RoundedLogCache
 import SingularValueBounds.KL.Certificates.RoundedLogTwo
 import SingularValueBounds.KL.Certificates.TensorAffineIdentity
@@ -452,13 +448,11 @@ import SingularValueBounds.KL.Lower.PlateauCostData
 import SingularValueBounds.KL.Lower.PlateauGeometry
 import SingularValueBounds.KL.Lower.ProfileCells
 import SingularValueBounds.KL.Lower.ProfileIntegral
-import SingularValueBounds.KL.Lower.ProfileIntegralRegularity
 import SingularValueBounds.KL.Lower.RealMoments
 import SingularValueBounds.KL.Lower.RowEstimates
 import SingularValueBounds.KL.Lower.Shape
 import SingularValueBounds.KL.Lower.ShapeSeries
 import SingularValueBounds.KL.Statement
-import SingularValueBounds.KL.Theorem
 import SingularValueBounds.KL.Transfer
 import SingularValueBounds.KL.Upper.CappedWeights
 import SingularValueBounds.KL.Upper.CertificateBridges

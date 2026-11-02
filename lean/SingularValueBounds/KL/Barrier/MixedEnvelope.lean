@@ -65,7 +65,7 @@ theorem mixedShapeEnvelope_monotone {n : ℕ} (hn : 0<n) :
             (Real.sqrt (1-1/(n:ℝ))))
     change HasDerivAt (mixedShapeEnvelope n) _ x at hd
     convert! hd using 1
-    simp only [Pi.pow_apply,id_eq,Nat.cast_ofNat,pow_one,zero_mul,sub_zero,one_mul,mul_one,zero_sub]
+    simp only [Pi.pow_apply,id_eq,Nat.cast_ofNat,zero_mul,one_mul,mul_one,zero_sub]
     generalize Real.sqrt (1-1/(n:ℝ))=c
     generalize hr : Real.sqrt (1-1/((n:ℝ)*x^2))=r
     have hr0 : r≠0 := by rw [←hr];exact (Real.sqrt_pos.mpr hg).ne'

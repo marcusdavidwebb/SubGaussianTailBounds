@@ -28,7 +28,7 @@ theorem scalar_one_le_fourth_moment [IsProbabilityMeasure μ] {Y : Ω → ℝ}
   rw [integral_add (f := fun ω => Y ω ^ 4 - 2 * Y ω ^ 2)
     (h4.sub (h2.const_mul 2)) (integrable_const 1),
     integral_sub h4 (h2.const_mul 2), integral_const_mul, hmean] at hi
-  simp only [integral_const, probReal_univ, smul_eq_mul, one_mul, mul_one] at hi
+  simp only [integral_const, probReal_univ, smul_eq_mul, mul_one] at hi
   linarith
 
 /-- A polynomial tangent inequality obtained from Bernoulli's inequality. -/
@@ -210,7 +210,7 @@ theorem fourth_implicit_bound {m K : ℝ} (hK : 1 ≤ K) (hm : 0 < m)
   have hbase : Real.log (2 * C) < C / (2 * K ^ 2) := by
     have heq : C / (2 * K ^ 2) = (5 / 2 : ℝ) * L := by
       dsimp [C]
-      field_simp [hK0.ne'] <;> ring
+      field_simp [hK0.ne']
     rw [heq]
     simpa only [C, show 2 * (5 * K ^ 2 * L) = 10 * K ^ 2 * L by ring] using hlog
   by_contra hmc
@@ -222,7 +222,7 @@ theorem fourth_implicit_bound {m K : ℝ} (hK : 1 ≤ K) (hm : 0 < m)
     apply (le_div_iff₀ (by positivity : 0 < 2 * K ^ 2)).2
     dsimp [C]
     nlinarith [mul_nonneg (sq_nonneg K) (sub_nonneg.mpr hL1)]
-  have hprod : 2 * m = (2 * C) * r := by dsimp [r]; field_simp [hC.ne'] <;> ring
+  have hprod : 2 * m = (2 * C) * r := by dsimp [r]; field_simp [hC.ne']
   have hl : Real.log (2 * m) < m / (2 * K ^ 2) := by
     calc
       Real.log (2 * m) = Real.log (2 * C) + Real.log r := by

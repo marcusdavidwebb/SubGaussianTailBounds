@@ -56,7 +56,7 @@ theorem upperShift_tail_general_mean_row
     (hcompatible : r.rateCompatible) (hrate : RateCertificateConditions) :
     GeneralMeanTailProfile
       (fun u=>μ.real {ω|u<(1-b)*upperShift R hR (X ω)})
-      r.prefactor r.q r.c r.cutoff K L := by
+      r.prefactor r.q r.cutoff K L := by
   have hk : (0:ℝ)<r.khi := by exact_mod_cast hnum.shape
   have hq : (0:ℝ)<r.q := by exact_mod_cast hnum.rate
   have hvk : (r.q:ℝ)*(r.khi:ℝ)^2<1 := by exact_mod_cast hnum.gap

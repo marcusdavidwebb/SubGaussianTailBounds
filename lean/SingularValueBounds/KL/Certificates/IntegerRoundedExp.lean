@@ -147,7 +147,7 @@ private theorem fixedQ_sum {ι : Type*} (s : Finset ι) (f : ι → ℤ) :
 theorem expLowerSumQ_fixedQ (b : ℤ) :
     expLowerSumQ (fixedQ b) = fixedQ (expIntegerFold false b 80 0 fixedScaleNat fixedScaleNat).2 := by
   have h := congrArg Prod.snd (expIntegerFold_correct false b 80 0)
-  simp only [Finset.sum_range_one, Nat.zero_add, Prod.snd] at h
+  simp only [Finset.sum_range_one, Nat.zero_add] at h
   have hz : expIntegerTerm false b 0 = fixedScaleNat := rfl
   rw [hz] at h
   unfold expLowerSumQ

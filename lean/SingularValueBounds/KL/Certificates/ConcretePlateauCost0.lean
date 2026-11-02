@@ -305,7 +305,7 @@ private theorem plateauCost_0_2 :
       Polynomial.eval_C, polynomialExpTaylor_eval_rat, plateauCostD, plateauCostE,
       plateauCostA, plateauCostV, plateauCostU, plateauCostW, plateauCostC,
       Polynomial.eval_add, Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_one,
-      Polynomial.eval_neg, ite_true, ite_false]
+      Polynomial.eval_neg, ite_true]
     simp only [NumericalCertificateConditions.expTaylorQ_eq_integer]
     decide +kernel
   have hpoly : (plateauCostMargin 0).comp (affine (71/100) ((147/200)-(71/100))) =

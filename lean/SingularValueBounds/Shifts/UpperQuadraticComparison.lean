@@ -130,7 +130,7 @@ theorem upper_resolvent_jensen [Nonempty ι] {r : ι → ℝ} (hr : ∀ i, 0 < r
     intro i _
     dsimp [upperWeight]
     have hd : 0 < 1 + h * r i := by nlinarith [mul_nonneg hh (hr i).le]
-    field_simp [hS.ne', hd.ne'] <;> ring
+    field_simp [hS.ne', hd.ne']
 
 private theorem upper_scalar_comparison {x b w : ℝ}
     (hx : 0 ≤ x) (hb : 0 ≤ b) (hw : 0 ≤ w) (hw1 : w ≤ 1) :
@@ -142,7 +142,7 @@ private theorem upper_scalar_comparison {x b w : ℝ}
   have hsecond : x / (1 + x) + (1 + b) / (1 + x) ^ 2 ≤ 1 + b := by
     have heq : x / (1 + x) + (1 + b) / (1 + x) ^ 2 =
         (x * (1 + x) + (1 + b)) / (1 + x) ^ 2 := by
-      field_simp <;> ring
+      field_simp
     rw [heq]
     apply (div_le_iff₀ (sq_pos_of_pos hd)).2
     nlinarith [mul_nonneg hb hx, mul_nonneg hb (sq_nonneg x)]
@@ -169,7 +169,7 @@ theorem upper_resolvent_eigenvalue_bound [Nonempty ι] {r : ι → ℝ}
     _ = (h * r i) / (1 + h * r i) +
         upperWeight r i * (1 + h * upperWeightedMean r) / (1 + h * r i) ^ 2 := by
       dsimp [upperWeight]
-      field_simp <;> ring
+      field_simp
     _ ≤ (1 - upperWeight r i) * (h * r i) +
         upperWeight r i * (1 + h * upperWeightedMean r) :=
       upper_scalar_comparison (mul_nonneg hh (hr i).le) (mul_nonneg hh ha.le) (hw i).le (hw1 i)
@@ -290,7 +290,7 @@ theorem upperResolvent_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
   funext i
   have hd : 0 < 1 + h * r i := by nlinarith [mul_nonneg hh (hr i).le]
   change ((r i)⁻¹ + h)⁻¹ = r i / (1 + h * r i)
-  field_simp [ne_of_gt (hr i), hd.ne'] <;> ring
+  field_simp [ne_of_gt (hr i), hd.ne']
 
 theorem upperResolvent_trace_drop {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {h : ℝ} (hh : 0 ≤ h) :
@@ -365,7 +365,7 @@ theorem upper_quadratic_comparison [Nonempty ι] {R : Matrix ι ι ℝ} (hR : R.
     rw [← Finset.mul_sum]
     have hdi : 0 < 1 + h * hR.isHermitian.eigenvalues i :=
       add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh.le (hR.eigenvalues_pos i).le)
-    field_simp [hh.ne', hd.ne', hdi.ne'] <;> ring
+    field_simp [hh.ne', hd.ne', hdi.ne']
   · dsimp [y, r, upperWeight]
     ring
 

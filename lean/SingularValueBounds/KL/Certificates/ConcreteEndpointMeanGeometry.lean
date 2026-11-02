@@ -153,12 +153,10 @@ theorem endpointMean_jointCutoff (ki : Fin 60) (ai : Fin 42)
     0 < endpointMeanCutoff ki ai ∧ endpointMeanCutoff ki ai ≤ 8000 := by
   exact (endpointJointPrimary_all ki ai h).1
 
-theorem endpointMean_jointBoxes (ki : Fin 60) (ai : Fin 42)
-    (h : endpointMeanActive ki ai) :
+theorem endpointMean_jointBoxes (ki : Fin 60) (ai : Fin 42) :
     0 ≤ (endpointMeanBox ki ai).left ∧ 0 < (endpointMeanBox ki ai).bottom ∧
     (endpointMeanBox ki ai).bottom < (endpointMeanBox ki ai).top ∧
     (endpointMeanBox ki ai).top ≤ 1 := by
-  clear h
   have hi : (ki.val : ℚ) ≤ 59 := by exact_mod_cast (show ki.val ≤ 59 by omega)
   dsimp only [endpointMeanBox]
   exact ⟨le_trans (by positivity) (le_max_right _ _), by positivity, by linarith, by linarith⟩

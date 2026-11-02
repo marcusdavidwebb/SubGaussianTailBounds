@@ -8,6 +8,7 @@ namespace SingularValueBounds.KL
 noncomputable section
 variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
 
+omit [DecidableEq ι] [Nonempty ι] in
 theorem lower_posDef_smul {R : Matrix ι ι ℝ} (hR : R.PosDef) {s : ℝ} (hs : 0<s) :
     (s • R).PosDef := by
   apply Matrix.posDef_iff_dotProduct_mulVec.mpr
@@ -17,6 +18,7 @@ theorem lower_posDef_smul {R : Matrix ι ι ℝ} (hR : R.PosDef) {s : ℝ} (hs :
   · intro x hx
     simpa only [Matrix.smul_mulVec,dotProduct_smul,smul_eq_mul] using mul_pos hs (hR.dotProduct_mulVec_pos hx)
 
+omit [DecidableEq ι] [Nonempty ι] in
 theorem lower_frobenius_smul (R : Matrix ι ι ℝ) {s : ℝ} (hs : 0≤s) :
     frobenius (s • R)=s*frobenius R := by
   have hsum : (∑i,∑j,((s • R) i j)^2)=s^2*(∑i,∑j,R i j^2) := by
@@ -111,6 +113,7 @@ theorem normalized_general_lower_parameters {X : Ω→ι→ℝ} {K : ℝ}
         exact plateau_far_scalar hdata.2.1 ⟨hr.1,hr.2.trans hk1⟩
       · exact plateau_far_cost hdata.2.2 ⟨le_of_not_ge hnear,hk1⟩
 
+omit [MeasurableSpace Ω] [DecidableEq ι] [Nonempty ι] in
 theorem lower_quadratic_smul (B : Matrix ι ι ℝ) (s : ℝ) (X : Ω→ι→ℝ) (ω : Ω) :
     quadraticForm (s • B) X ω=s*quadraticForm B X ω := by
   simp only [quadraticForm,Matrix.smul_mulVec,dotProduct_smul,smul_eq_mul]

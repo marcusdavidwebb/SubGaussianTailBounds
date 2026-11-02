@@ -40,10 +40,6 @@ class ContributionTests(unittest.TestCase):
     def git(self, *args):
         return subprocess.check_output(["git", "-C", str(self.root), *args], stderr=subprocess.PIPE)
 
-    def test_equal_constants_need_no_registry_or_strict_improvement(self):
-        gate.check(self.root, self.root, self.base)
-        self.assertFalse((self.root / "contributions").exists())
-
     def test_existing_proof_can_be_replaced_by_new_architecture(self):
         (self.root / "lean/SingularValueBounds/Old.lean").unlink()
         self.write("lean/SingularValueBounds/NewArchitecture/Proof.lean", "-- alternative implementation\n")
@@ -59,6 +55,8 @@ class ContributionTests(unittest.TestCase):
         gate.check(self.root, SOURCE, self.base)
 
     def test_documentation_maintenance_has_no_exemption_or_extra_registry(self):
+        gate.check(self.root, self.root, self.base)
+        self.assertFalse((self.root / "contributions").exists())
         self.write("docs/Notes.md", "Useful explanation, not a prose proof.\n")
         self.git("add", ".")
         gate.check(self.root, SOURCE, self.base)

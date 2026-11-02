@@ -45,7 +45,7 @@ theorem endpointLogExcess_monotone : MonotoneOn endpointLogExcess (Ico 0 1) := b
     rw [hd'.deriv]
     exact div_nonneg hz'.1 (by linarith [hz'.2])
 
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
 theorem endpoint_spectral_logdet (hcert : EndpointLogratioCertificateConditions)
     (i : Fin 3) {x : ι → ℝ} (hx : ∀j,0<x j) (h2 : ∑j,x j^2=1)

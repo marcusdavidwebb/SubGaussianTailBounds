@@ -9,7 +9,10 @@ The two `Previous…` propositions below retain the unbundled hypotheses and
 conclusions of the canonical source before the statement simplification of
 30 October 2026. The equivalences check that importing the row predicates and singular values
 from NLA-lib preserves both statements, for every quartet of constants
-and every sample-space universe. They assert no tail bound by themselves.
+and every sample-space universe. They also account for the shared `TailBoundAt`
+formulation: the general case quantifies over `K` first, and the unit case
+simplifies `K = 1`, including its variance proxy and `log (exp 1) = 1`.
+They assert no tail bound by themselves.
 -/
 
 open MeasureTheory ProbabilityTheory
@@ -86,15 +89,15 @@ theorem general_iff_previous (α β γ δ : ℝ) :
       fun i => isSubgaussianVector_iff_previous.mpr (hsg i)
     have hiso : ∀ i, NLAlib.IsIsotropic (fun ω => A ω i) μ :=
       fun i => isIsotropic_of_previous (hsub i) ⟨hm i, hc i, hi i⟩
-    simpa only [SingularValueTails, probability_toReal_le_exp_iff,
+    simpa only [GaussianSingularValueTails, probability_toReal_le_exp_iff,
       Previous.smallestSingularValue_eq_nla,
       Previous.largestSingularValue_eq_nla] using
-      h μ m n hn A K hnm hK hm hind hsub hiso t ht
+      h K hK μ m n A hn hnm hm hind hsub hiso t ht
   · rintro ⟨hpos, h⟩
     refine ⟨hpos, ?_⟩
-    intro Ω _ μ _ m n hn A K hnm hK hm hind hsub hiso t ht
+    intro K hK Ω _ μ _ m n A hn hnm hm hind hsub hiso t ht
     have hrows := fun i => previousIsCentredIsotropic_of_nla (hm i) (hsub i) (hiso i)
-    simpa only [SingularValueTails, probability_toReal_le_exp_iff,
+    simpa only [GaussianSingularValueTails, probability_toReal_le_exp_iff,
       Previous.smallestSingularValue_eq_nla,
       Previous.largestSingularValue_eq_nla] using
       h μ m n hn A K hnm hK hm hind (fun i => (hrows i).centred)
@@ -105,44 +108,34 @@ theorem general_iff_previous (α β γ δ : ℝ) :
 theorem unit_iff_previous (α β γ δ : ℝ) :
     UnitSingularValueTailBound.{u} α β γ δ ↔
       PreviousUnitSingularValueTailBound.{u} α β γ δ := by
-  have hproxy : (⟨(1 : ℝ) ^ 2, sq_nonneg 1⟩ : NNReal) = 1 := by
-    ext
-    norm_num
   constructor
   · rintro ⟨hpos, h⟩
     refine ⟨hpos, ?_⟩
     intro Ω _ μ _ m n hn A hnm hm hind hc hi hsg t ht
-    have hsub' : ∀ i, NLAlib.IsSubgaussianVector (fun ω => A ω i)
+    have hsub : ∀ i, NLAlib.IsSubgaussianVector (fun ω => A ω i)
         ⟨(1 : ℝ) ^ 2, sq_nonneg 1⟩ μ := by
       intro i
       apply isSubgaussianVector_iff_previous.mpr
       simpa only [PreviousIsSubgaussianVector, one_pow, one_mul] using hsg i
-    have hsub : ∀ i, NLAlib.IsSubgaussianVector (fun ω => A ω i) 1 μ := by
-      intro i
-      exact (congrArg (fun c : NNReal =>
-        NLAlib.IsSubgaussianVector (fun ω => A ω i) c μ) hproxy).mp (hsub' i)
     have hiso : ∀ i, NLAlib.IsIsotropic (fun ω => A ω i) μ :=
-      fun i => isIsotropic_of_previous (hsub' i) ⟨hm i, hc i, hi i⟩
-    simpa only [SingularValueTails, probability_toReal_le_exp_iff,
+      fun i => isIsotropic_of_previous (hsub i) ⟨hm i, hc i, hi i⟩
+    simpa only [one_mul, mul_one, Real.log_exp, Real.sqrt_one,
+      GaussianSingularValueTails, probability_toReal_le_exp_iff,
       Previous.smallestSingularValue_eq_nla,
-      Previous.largestSingularValue_eq_nla] using h μ m n hn A hnm hm hind hsub hiso t ht
+      Previous.largestSingularValue_eq_nla] using h μ m n A hn hnm hm hind hsub hiso t ht
   · rintro ⟨hpos, h⟩
     refine ⟨hpos, ?_⟩
-    intro Ω _ μ _ m n hn A hnm hm hind hsub hiso t ht
-    have hsub' : ∀ i, NLAlib.IsSubgaussianVector (fun ω => A ω i)
-        ⟨(1 : ℝ) ^ 2, sq_nonneg 1⟩ μ := by
-      intro i
-      exact (congrArg (fun c : NNReal =>
-        NLAlib.IsSubgaussianVector (fun ω => A ω i) c μ) hproxy).mpr (hsub i)
-    have hrows := fun i => previousIsCentredIsotropic_of_nla (hm i) (hsub' i) (hiso i)
+    intro Ω _ μ _ m n A hn hnm hm hind hsub hiso t ht
+    have hrows := fun i => previousIsCentredIsotropic_of_nla (hm i) (hsub i) (hiso i)
     have hsg : ∀ (i : Fin m) (v : EuclideanSpace ℝ (Fin n)) (θ : ℝ),
         Integrable (fun ω => Real.exp (θ * (∑ j, A ω i j * v j))) μ ∧
         (∫ ω, Real.exp (θ * (∑ j, A ω i j * v j)) ∂μ) ≤
           Real.exp (θ ^ 2 * ‖v‖ ^ 2 / 2) := by
       intro i
       simpa only [PreviousIsSubgaussianVector, one_pow, one_mul] using
-        isSubgaussianVector_iff_previous.mp (hsub' i)
-    simpa only [SingularValueTails, probability_toReal_le_exp_iff,
+        isSubgaussianVector_iff_previous.mp (hsub i)
+    simpa only [one_mul, mul_one, Real.log_exp, Real.sqrt_one,
+      GaussianSingularValueTails, probability_toReal_le_exp_iff,
       Previous.smallestSingularValue_eq_nla,
       Previous.largestSingularValue_eq_nla] using
       h μ m n hn A hnm hm hind (fun i => (hrows i).centred)

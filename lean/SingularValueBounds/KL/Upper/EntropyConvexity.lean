@@ -27,7 +27,7 @@ theorem upperJointCost_hasSum {q k a : ℝ} (hq : 0 ≤ q) (hk : 0 < k)
   convert! hh using 1
   · ext n
     have hn : (n+2 : ℝ) ≠ 0 := by positivity
-    have hp : k^(2*n+1)*k^3=k^(2*(n+2)) := by rw [← pow_add]; congr 1 <;> omega
+    have hp : k^(2*n+1)*k^3=k^(2*(n+2)) := by rw [← pow_add]; congr 1
     apply mul_right_cancel₀ (pow_ne_zero 3 hk.ne')
     calc
       _ = a*q^(n+2)*(k^(2*n+1)*k^3)/(n+2 : ℝ) := by ring
@@ -35,7 +35,6 @@ theorem upperJointCost_hasSum {q k a : ℝ} (hq : 0 ≤ q) (hk : 0 < k)
       _ = _ := by
         simp only [mul_pow, ← pow_mul]
         field_simp [hk.ne',hn]
-        <;> ring
   · dsimp [upperJointCost]
     ring
 

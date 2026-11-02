@@ -19,6 +19,7 @@ import json
 import os
 from pathlib import Path
 import re
+import signal
 import subprocess
 import sys
 import tempfile
@@ -271,25 +272,82 @@ class LeanProcesses:
         self.command = command
         self.active = set()
         self.lock = threading.Lock()
+        self.stopped = False
+        self.stop_done = threading.Event()
 
     def run(self, arguments: list[str]) -> str:
-        process = subprocess.Popen(self.command + arguments, text=True,
-                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         with self.lock:
+            if self.stopped:
+                raise ValueError("Trusted Lean worker launch cancelled")
+            process = subprocess.Popen(self.command + arguments, text=True,
+                                       stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                       start_new_session=True)
             self.active.add(process)
         try:
             output, _ = process.communicate()
             if process.returncode:
                 raise ValueError(f"Trusted Lean worker failed ({process.returncode}):\n{output}")
             return output
+        except BaseException:
+            # In particular, an interruption during a coordinator-side worker
+            # must not unregister its still-running process before cancellation.
+            self.stop()
+            raise
         finally:
             with self.lock:
+                # The worker can exit while a descendant has closed the pipe
+                # and remains alive. The whole group belongs to this run.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                except PermissionError:
+                    if process.poll() is None:
+                        raise
                 self.active.discard(process)
 
     def stop(self):
         with self.lock:
-            for process in self.active:
-                process.terminate()
+            if self.stopped:
+                first = False
+                active = []
+            else:
+                first = True
+                self.stopped = True
+                active = list(self.active)
+        if not first:
+            self.stop_done.wait()
+            return
+        try:
+            with self.lock:
+                for process in active:
+                    if process not in self.active:
+                        continue
+                    try:
+                        os.killpg(process.pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+                    except PermissionError:
+                        if process.poll() is None:
+                            raise
+            for process in active:
+                try:
+                    process.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    pass
+                # A removed worker already killed its group in finally.
+                with self.lock:
+                    if process in self.active:
+                        try:
+                            os.killpg(process.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                        except PermissionError:
+                            if process.poll() is None:
+                                raise
+                process.wait()
+        finally:
+            self.stop_done.set()
 
 
 def main() -> None:

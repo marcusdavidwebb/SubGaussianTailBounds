@@ -97,12 +97,10 @@ lemma endpointMarginPoly_eval (i : Fin 2) (k x : ℝ) :
         (1-(endpointOmega i : ℝ))*endpointNScalar i k x := by
   simp only [realEval₂, endpointMarginPoly, Polynomial.eval₂_sub, Polynomial.eval₂_mul,
     Polynomial.eval₂_C, Polynomial.coe_eval₂RingHom, Polynomial.eval₂_C]
-  change _ = _
   rw [show Polynomial.eval₂ (Polynomial.eval₂RingHom (Rat.castHom ℝ) k) x (endpointOPoly i) =
       endpointOScalar i k x from endpointOPoly_eval i k x,
     show Polynomial.eval₂ (Polynomial.eval₂RingHom (Rat.castHom ℝ) k) x (endpointNMajorantPoly i) =
       endpointNScalar i k x from endpointNMajorantPoly_eval i k x]
-  push_cast
   norm_num
 
 theorem endpoint_table_scalar_bound (h : EndpointTableConditions) (i : Fin 2)
@@ -231,7 +229,7 @@ lemma hasDerivAt_endpointFarJ (k : ℝ) :
   have hd := (((hasDerivAt_id k).pow 2).mul hg).add
     (((hasDerivAt_const k (1 : ℝ)).sub ((hasDerivAt_id k).pow 2)).mul_const (7/100))
   convert! hd using 1 <;>
-    simp only [Pi.pow_apply, Pi.add_apply, Pi.sub_apply, Pi.mul_apply, id_eq] <;> ring
+    simp only [Pi.pow_apply, Pi.add_apply, Pi.sub_apply, id_eq] <;> ring
 
 theorem endpoint_far_scalar_le (h : EndpointFarConditions) {x : ℝ}
     (hx : x ∈ Icc (0 : ℝ) 1) : endpointFarScalar x ≤ 7/100 := by

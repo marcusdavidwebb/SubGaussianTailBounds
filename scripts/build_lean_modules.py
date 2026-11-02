@@ -12,7 +12,9 @@ from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
+import threading
 import time
 
 
@@ -30,13 +32,14 @@ def validate_graph(graph: dict[str, set[str]]) -> None:
         pending = {name: deps - ready for name, deps in pending.items() if name not in ready}
 
 
-def build_order(graph: dict[str, set[str]], action, jobs: int) -> None:
+def build_order(graph: dict[str, set[str]], action, jobs: int, on_failure=lambda: None) -> None:
     """Execute a DAG with a hard bound on simultaneous actions."""
     if jobs < 1:
         raise ValueError("Build jobs must be positive.")
     validate_graph(graph)
     remaining, done, active = set(graph), set(), {}
-    with ThreadPoolExecutor(max_workers=jobs) as pool:
+    pool = ThreadPoolExecutor(max_workers=jobs)
+    try:
         while remaining or active:
             ready = sorted(name for name in remaining if graph[name] <= done)
             for name in ready[: jobs - len(active)]:
@@ -47,6 +50,90 @@ def build_order(graph: dict[str, set[str]], action, jobs: int) -> None:
                 name = active.pop(future)
                 future.result()
                 done.add(name)
+    except BaseException:
+        on_failure()
+        for future in active:
+            future.cancel()
+        raise
+    finally:
+        pool.shutdown(wait=True, cancel_futures=True)
+
+
+class BuildProcesses:
+    """Track only this scheduler's process groups, including concurrent launches."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.active = set()
+        self.stopped = False
+        self.stop_done = threading.Event()
+
+    def run(self, command, **kwargs):
+        with self.lock:
+            if self.stopped:
+                raise RuntimeError("Build cancelled")
+            process = subprocess.Popen(command, start_new_session=True, **kwargs)
+            self.active.add(process)
+        try:
+            return process.wait()
+        except BaseException:
+            self.stop()
+            raise
+        finally:
+            with self.lock:
+                # A launcher can exit before its descendants. Do not leave a
+                # build in the background after its group leader is reaped.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                except PermissionError:
+                    if process.poll() is None:
+                        raise
+                self.active.discard(process)
+
+    def stop(self):
+        with self.lock:
+            if self.stopped:
+                first = False
+                active = []
+            else:
+                first = True
+                self.stopped = True
+                active = list(self.active)
+        if not first:
+            self.stop_done.wait()
+            return
+        try:
+            with self.lock:
+                for process in active:
+                    if process not in self.active:
+                        continue
+                    try:
+                        os.killpg(process.pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+                    except PermissionError:
+                        if process.poll() is None:
+                            raise
+            for process in active:
+                try:
+                    process.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    pass
+                # An unregistered group was already killed by its worker.
+                with self.lock:
+                    if process in self.active:
+                        try:
+                            os.killpg(process.pid, signal.SIGKILL)
+                        except ProcessLookupError:
+                            pass
+                        except PermissionError:
+                            if process.poll() is None:
+                                raise
+                process.wait()
+        finally:
+            self.stop_done.set()
 
 
 def source_graph(root: Path, records: list[dict]) -> dict[str, set[str]]:
@@ -114,19 +201,21 @@ def main() -> None:
         print(f"LEAN_BUILD_COMPLETE {len(graph)} modules; Lake checked all source traces; no rebuild required")
         return
 
+    processes = BuildProcesses()
+
     def compile_module(name: str) -> None:
         log_path = log_dir / (name + ".log")
         started = time.monotonic()
         print(f"LEAN_BUILD_START {name}", flush=True)
         with log_path.open("w") as stream:
-            completed = subprocess.run(command + ["build", name], cwd=work,
+            returncode = processes.run(command + ["build", name], cwd=work,
                                        stdout=stream, stderr=subprocess.STDOUT)
-        if completed.returncode:
+        if returncode:
             print(log_path.read_text()[-12000:], flush=True)
             raise RuntimeError(f"Lean build failed: {name}; full log: {log_path}")
         print(f"LEAN_BUILD {name} ({time.monotonic() - started:.1f}s)", flush=True)
 
-    build_order(graph, compile_module, args.jobs)
+    build_order(graph, compile_module, args.jobs, on_failure=processes.stop)
     print(f"LEAN_BUILD_COMPLETE {len(graph)} modules; at most {args.jobs} simultaneous module builds")
 
 

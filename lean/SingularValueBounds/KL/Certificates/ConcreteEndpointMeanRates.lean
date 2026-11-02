@@ -58,7 +58,7 @@ theorem endpointMean_jointRates (ki : Fin 60) (ai : Fin 42)
     90 ≤ endpointMeanRate ki ai j ∧ endpointMeanRate ki ai j ≤ 200 ∧
     q * (endpointMeanBox ki ai).top^2 < 1 ∧
     (j : ℚ) / 200 * (endpointMeanBox ki ai).top * (q - 1) ≤ 58 / 25 := by
-  have hbox := endpointMean_jointBoxes ki ai hactive
+  have hbox := endpointMean_jointBoxes ki ai
   have hcut := endpointMean_jointCutoff ki ai hactive
   have hjpos : 0 < j := lt_of_lt_of_le hcut.1 (Finset.mem_Ico.mp hj).1
   exact clipped_rate_bounds _ _ _ (hbox.2.1.trans hbox.2.2.1)

@@ -56,7 +56,7 @@ theorem standardGaussian_integral_exp_sq (s : ℝ) (hs : 0 < 1 - 2 * s) :
       rw [integral_gaussian]
     _ = (Real.sqrt (1 - 2 * s))⁻¹ := by
       rw [show Real.pi / ((1 - 2 * s) / 2) =
-        (2 * Real.pi) / (1 - 2 * s) by field_simp <;> ring]
+        (2 * Real.pi) / (1 - 2 * s) by field_simp]
       rw [Real.sqrt_div (by positivity), div_eq_mul_inv]
       rw [← mul_assoc, inv_mul_cancel₀ (Real.sqrt_pos.2 (by positivity)).ne', one_mul]
 

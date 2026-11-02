@@ -19,6 +19,7 @@ theorem upperJointCost_nonneg {v k a : ℝ} (hv : 0 ≤ v) (hk : 0 < k)
   have hrem : 0 ≤ -Real.log (1-v*k^2)-v*k^2 := by linarith
   exact add_nonneg hv (mul_nonneg (div_nonneg ha (by positivity)) hrem)
 
+omit [DecidableEq ι] [Nonempty ι] in
 /-- Exact normalization of the spectral probability vector by the Frobenius norm. -/
 theorem upperTailWeight_normalize {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     {h eta : ℝ} (hh : 0 ≤ h) (heta : 0 < eta) (i : ι) :
@@ -27,15 +28,14 @@ theorem upperTailWeight_normalize {r : ι → ℝ} (hr : ∀ i, 0 < r i)
       (r j^2/(1+h*r j))/eta^2 := by
     intro j
     have hd : 1+h*r j ≠ 0 := ne_of_gt (by have hj := hr j; positivity)
-    have harg : 1+(h*eta)*(r j/eta) = 1+h*r j := by field_simp <;> ring
+    have harg : 1+(h*eta)*(r j/eta) = 1+h*r j := by field_simp
     rw [harg]
     field_simp [heta.ne', hd]
-    <;> ring
-    <;> simp
   unfold upperTailWeight normalizedShiftWeight shiftedWeightNormalizer
   simp_rw [hnum]
   rw [← Finset.sum_div, div_div_div_cancel_right₀ (pow_ne_zero 2 heta.ne')]
 
+omit [DecidableEq ι] in
 /-- The complete joint determinant estimate at a margin-rescaled rate. -/
 theorem upper_tail_spectral_joint {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     {h v theta k eta : ℝ} (hh : 0 ≤ h) (hv : 0 < v) (hv2 : v ≤ 2)
@@ -57,10 +57,6 @@ theorem upper_tail_spectral_joint {r : ι → ℝ} (hr : ∀ i, 0 < r i)
   have hden : ∀ i, 0 < 1-(v/theta-1)*h*r i := by
     intro i
     simpa only [mul_assoc] using (hprops i).1
-  have hvarg : ∀ i, 0 ≤ upperTailSecondArgument r h (v/theta) i := by
-    intro i
-    exact mul_nonneg (div_nonneg (div_nonneg hv.le (by linarith)) (hden i).le)
-      ((upperTailWeight_properties hr hh).1 i).le
   have harg : ∀ i, upperTailSecondArgument r h (v/theta) i ≤
       v*normalizedShiftWeight ρ (h*eta) i := by
     intro i
@@ -86,7 +82,7 @@ theorem upper_tail_spectral_joint {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     dsimp [upperFactorF]
     nlinarith
   have hsecondcost := normalizedShiftWeight_log_prefactor_of_le hρ hρsum
-    (mul_nonneg hh heta.le) hk hρmax hv.le hvk hvarg harg
+    (mul_nonneg hh heta.le) hk hρmax hv.le hvk harg
   have ht := upper_tail_logdet_of_costs hr hh hden hsecond hfirst hsecondcost
   simpa [upperJointCost, ρ] using ht
 
@@ -134,7 +130,7 @@ theorem upperShift_tail_joint_of_spectrum {X : Ω → ι → ℝ} {K b v k eta u
   convert! ht using 1
   congr 1
   dsimp [h, theta]
-  field_simp [hb0.ne', hcap1.ne', hK.ne'] <;> ring
+  field_simp [hb0.ne', hcap1.ne', hK.ne']
 
 /-- Supplementary joint prefactor tail with the cap supplying the margin. -/
 theorem upperShift_tail_joint {X : Ω → ι → ℝ} {K L w b v k eta u : ℝ}

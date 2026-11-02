@@ -47,7 +47,7 @@ This deterministic rare-event split does not claim moment domination of
 the original sub-Gaussian quadratic form. -/
 theorem mgf_rare_event_split [IsProbabilityMeasure μ] {Y T : Ω → ℝ}
     {E : Set Ω} {t : ℝ} (hE : MeasurableSet E) (ht : 0≤t)
-    (hY0 : ∀ ω, 0≤Y ω) (hT0 : ∀ ω, 0≤T ω)
+    (hY0 : ∀ ω, 0≤Y ω)
     (hYi : Integrable Y μ) (hTi : Integrable T μ)
     (hYE : Integrable (fun ω => Real.exp (t*Y ω)) μ)
     (hTE : Integrable (fun ω => Real.exp (t*T ω)) μ)
@@ -80,7 +80,7 @@ theorem mgf_rare_event_split [IsProbabilityMeasure μ] {Y T : Ω → ℝ}
 
 /-- Combining an event bound and an unrestricted exponential tail. -/
 theorem restricted_tail_bounds [IsFiniteMeasure μ] {Y : Ω → ℝ} {E : Set Ω}
-    {p C r : ℝ} (hY : Measurable Y) (hE : MeasurableSet E)
+    {p C r : ℝ} (hE : MeasurableSet E)
     (hp : μ.real E ≤ p)
     (htail : ∀ u, 0 ≤ u → μ.real {ω | u < Y ω} ≤ C*Real.exp (-(r*u)))
     {u : ℝ} (hu : 0 ≤ u) :
@@ -97,7 +97,7 @@ the dominating survival function. -/
 theorem finite_measure_cutoff_moment [IsFiniteMeasure μ]
     {Y : Ω → ℝ} {p C r A : ℝ}
     (hY : AEMeasurable Y μ) (hY0 : ∀ ω, 0 ≤ Y ω)
-    (hp : 0 ≤ p) (hC : 0 ≤ C) (hr : 0 < r) (hA : 0 ≤ A)
+    (hC : 0 ≤ C) (hr : 0 < r) (hA : 0 ≤ A)
     (hmass : μ.real univ ≤ p)
     (htail : ∀ u, 0 ≤ u → μ.real {ω | u < Y ω} ≤ C*Real.exp (-(r*u)))
     (hcut : C*Real.exp (-(r*A)) ≤ p) (n : ℕ) :
@@ -167,16 +167,16 @@ theorem finite_measure_cutoff_moment [IsFiniteMeasure μ]
 independence statement about `E` and `Y`. -/
 theorem rare_event_moment [IsFiniteMeasure μ] {Y : Ω → ℝ} {E : Set Ω}
     {p C r A : ℝ} (hY : Measurable Y) (hY0 : ∀ ω, 0 ≤ Y ω)
-    (hE : MeasurableSet E) (hp : 0 ≤ p) (hC : 0 ≤ C)
+    (hE : MeasurableSet E) (hC : 0 ≤ C)
     (hr : 0 < r) (hA : 0 ≤ A) (hprob : μ.real E ≤ p)
     (htail : ∀ u, 0 ≤ u → μ.real {ω | u < Y ω} ≤ C*Real.exp (-(r*u)))
     (hcut : C*Real.exp (-(r*A)) ≤ p) (n : ℕ) :
     IntegrableOn (fun ω => Y ω^n) E μ ∧
       (∫ ω in E, Y ω^n ∂μ)/(n.factorial : ℝ) ≤ p*tailMomentSeries (n+1) A (1/r) := by
-  apply finite_measure_cutoff_moment hY.aemeasurable hY0 hp hC hr hA
+  apply finite_measure_cutoff_moment hY.aemeasurable hY0 hC hr hA
     (by simpa using hprob) _ hcut n
   intro u hu
-  exact (restricted_tail_bounds hY hE hprob htail hu).2
+  exact (restricted_tail_bounds hE hprob htail hu).2
 
 end
 end SingularValueBounds.KL

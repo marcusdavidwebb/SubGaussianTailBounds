@@ -119,7 +119,7 @@ theorem upper_mean_of_entropy [IsProbabilityMeasure μ]
   have hid : (∫ ω, Y ω * Q ω ∂μ) = m * (∫ ω, W ω * Q ω ∂μ) := by
     rw [← integral_const_mul]
     apply integral_congr_ae
-    exact Filter.Eventually.of_forall fun ω => by dsimp [W]; field_simp <;> ring
+    exact Filter.Eventually.of_forall fun ω => by dsimp [W]; field_simp
   rw [hid] at hFixed
   have hprod := mul_le_mul_of_nonneg_left hWQ hm.le
   change m ≤ 1-b+m*(∫ ω, W ω * Q ω ∂μ) at hFixed
@@ -173,7 +173,7 @@ theorem entropy_tail_integral [IsProbabilityMeasure μ] {W : Ω → ℝ} {c : �
     have hct : c+t ≠ 0 := ne_of_gt (by linarith)
     have hlin := (hasDerivAt_const t c).add (hasDerivAt_id t)
     convert! hlin.mul (hlin.log hct |>.sub_const (Real.log c)) using 1 <;>
-      dsimp [F, g] <;> simp only [zero_add, id_eq, one_div] <;> field_simp <;> ring
+      dsimp [F, g] <;> simp only [zero_add, one_div] <;> field_simp <;> ring
   have hFi : ∀ t : ℝ, 0 ≤ t → (∫ u in (0 : ℝ)..t, g u) = F t := by
     intro t ht
     have hi := intervalIntegral.integral_eq_sub_of_hasDerivAt
@@ -223,7 +223,7 @@ theorem entropy_tail_integral [IsProbabilityMeasure μ] {W : Ω → ℝ} {c : �
     intro u hu
     ext ω
     dsimp [U]
-    simp only [Set.mem_setOf_eq, lt_max_iff]
+    simp only [lt_max_iff]
     constructor
     · rintro (h | h)
       · linarith

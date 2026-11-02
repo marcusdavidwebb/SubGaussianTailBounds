@@ -40,7 +40,7 @@ theorem endpointLogratioCleared_eval (A x : ℝ) :
     endpointLogratioZDerivativeQ,padeDQ,padeNQ,Polynomial.eval₂_mul,
     Polynomial.eval₂_add,Polynomial.eval₂_sub,Polynomial.eval₂_C,
     Polynomial.eval₂_X,Polynomial.eval₂_pow,Polynomial.eval₂_one,
-    Polynomial.eval₂_natCast,Polynomial.coe_eval₂RingHom]
+    Polynomial.coe_eval₂RingHom]
   norm_num [endpointLogratioZ,upperPadeD,upperPadeN]
 
 /-- The normalized comparison cubic is increasing throughout the small-coordinate interval. -/

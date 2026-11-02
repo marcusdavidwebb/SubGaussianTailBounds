@@ -33,7 +33,7 @@ theorem spectral_upper_optimal_cost {A N D s : ℝ}
 
 /-- Exact normalization for a lower barrier; the admissible case is `s > D`. -/
 theorem spectral_lower_optimal_normalization {A D s : ℝ}
-    (hA : 0 < A) (_hD : 0 < D) (hs : D < s) :
+    (hA : 0 < A) (hs : D < s) :
     1 + A * (D / (A * (s - D))) = s / (s - D) := by
   have hdiff : 0 < s - D := sub_pos.mpr hs
   field_simp
@@ -44,7 +44,7 @@ theorem spectral_lower_optimal_cost {A N D s : ℝ}
     (hA : 0 < A) (hD : 0 < D) (hs : D < s) (hD2 : D ^ 2 = A * N) :
     s ^ 2 / (1 + A * (D / (A * (s - D)))) - N / (D / (A * (s - D))) =
       (s - D) ^ 2 := by
-  rw [spectral_lower_optimal_normalization hA hD hs]
+  rw [spectral_lower_optimal_normalization hA hs]
   have hdiff : 0 < s - D := sub_pos.mpr hs
   have hs0 : 0 < s := hD.trans hs
   field_simp

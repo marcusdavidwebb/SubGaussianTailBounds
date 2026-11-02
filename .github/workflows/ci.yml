@@ -88,6 +88,8 @@ jobs:
           args=(--root "$GITHUB_WORKSPACE/candidate" --trusted-root "$GITHUB_WORKSPACE/trusted")
           if [[ -n "$BASE_REF" ]]; then args+=(--base-ref "$BASE_REF"); fi
           python3 trusted/scripts/check_contributions.py "${args[@]}"
+      - name: Check theorem TeX matches the README with trusted generator
+        run: python3 trusted/scripts/generate_theorem_tex.py --root "$GITHUB_WORKSPACE/candidate" --check
       - name: Test trusted administrative rejection cases
         env:
           SVB_LEAN_TEST_WORK_DIR: ''

@@ -107,7 +107,7 @@ theorem upperFactorF_rate_identity {v theta : ℝ} (hv : 1 < v) (ht : 1 ≤ thet
     field_simp [ht0.ne',hv0.ne',hbase.ne']
   rw [hratio]
   congr 1
-  field_simp [ht0.ne',hv0.ne'] <;> ring
+  field_simp [ht0.ne',hv0.ne']
 
 /-- Positivity and rate control for the second factors need no upper bound
 of two on the target rate. -/
@@ -135,7 +135,7 @@ theorem upper_rate_rescaling_denominator {v theta H : ℝ} (hv : 1 < v)
     have hd : 0 < 1-(q-1)*H := by linarith
     refine ⟨hd,(div_le_iff₀ hd).2 ?_⟩
     have hmul := mul_le_mul_of_nonneg_left hm (show 0 ≤ v by linarith)
-    have he : v*((theta-1)/theta) = v-q := by dsimp [q];field_simp [ht0.ne'] <;> ring
+    have he : v*((theta-1)/theta) = v-q := by dsimp [q];field_simp [ht0.ne']
     rw [he] at hmul
     linarith
 

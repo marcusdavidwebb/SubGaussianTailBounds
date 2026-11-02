@@ -31,7 +31,7 @@ theorem endpointMeanRate_constant_on_run (ki : Fin 60) (ai : Fin 42)
     endpointMeanRate ki ai j = r.rate := by
   obtain ⟨hstart, hstop, hl, hh⟩ := h
   obtain ⟨hjlo, hjhi⟩ := Finset.mem_Ico.mp hj
-  obtain ⟨ha0, hk0, hkk, hk1⟩ := endpointMean_jointBoxes ki ai hactive
+  obtain ⟨ha0, hk0, hkk, hk1⟩ := endpointMean_jointBoxes ki ai
   have haa : (endpointMeanBox ki ai).left < (endpointMeanBox ki ai).right := hactive.1
   apply endpointRate_constant_on_interval
     (((endpointMeanBox ki ai).bottom+(endpointMeanBox ki ai).top)/2)

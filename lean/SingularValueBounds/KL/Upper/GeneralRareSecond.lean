@@ -9,8 +9,9 @@ set_option maxHeartbeats 1500000
 variable {Ω ι : Type*} [MeasurableSpace Ω] [Fintype ι] [DecidableEq ι] [Nonempty ι]
 variable {μ : Measure Ω} [IsProbabilityMeasure μ]
 
+omit [IsProbabilityMeasure μ] in
 theorem second_moment_good_event {Y T : Ω → ℝ} {E : Set Ω}
-    (hE : MeasurableSet E) (hY0 : ∀ ω,0 ≤ Y ω) (hT0 : ∀ ω,0 ≤ T ω)
+    (hE : MeasurableSet E) (hY0 : ∀ ω,0 ≤ Y ω)
     (hY2 : Integrable (fun ω=>Y ω^2) μ) (hT2 : Integrable (fun ω=>T ω^2) μ)
     (hgood : ∀ ω,ω∉E → Y ω ≤ T ω) :
     (∫ ω,Y ω^2 ∂μ) ≤ (∫ ω,T ω^2 ∂μ)+(∫ ω in E,Y ω^2 ∂μ) := by
@@ -49,8 +50,7 @@ theorem upperSquareWeight_endpoint_fourth {X : Ω → ι → ℝ} {K m4 : ℝ}
   have h := quadratic_second_of_directional_fourth hsg hm hm4 hfourth
     (upperSquareWeight R) (upperSquareWeight_posDef hR).posSemidef
   rw [upperSquareWeight_trace hR,upperSquareWeight_trace_square hR] at h
-  have hmass := endpoint_spectral_fourth_mass i (upperNormalizedSpectrum_properties hR).1
-    (upperNormalizedSpectrum_properties hR).2 top hκ
+  have hmass := endpoint_spectral_fourth_mass i (upperNormalizedSpectrum_properties hR).2 top hκ
   nlinarith [mul_nonneg hm4 (sub_nonneg.mpr hmass)]
 
 theorem upperShift_general_rare_second
@@ -77,7 +77,6 @@ theorem upperShift_general_rare_second
   have hQ : Measurable Q := by have hmX:=hiso.measurable; unfold Q quadraticForm dotProduct Matrix.mulVec; fun_prop
   have hE : MeasurableSet E := measurableSet_lt measurable_const hQ
   have hY0 (ω : Ω) : 0 ≤ Y ω := mul_nonneg (sub_pos.mpr hb).le (upperShift_nonneg hR _)
-  have hT0 := quadraticForm_nonneg (upperSquareWeight_posDef hR).posSemidef X
   have htrace : K^2*Matrix.trace R ≤ b := by
     have hw0 : 0 ≤ w := by linarith
     nlinarith [mul_nonneg (mul_nonneg (mul_nonneg hw0 (sq_nonneg K)) (by linarith : 0 ≤ 1+d)) (frobenius_pos hR).le]
@@ -95,7 +94,6 @@ theorem upperShift_general_rare_second
   have hY2 := (exponential_tail_moment hY.aemeasurable hY0 (by norm_num : (0:ℝ)≤177/50)
     (by positivity : 0 < 23/(50*K^2)) hTail 1).1
   have hprob := upperComparison_general_rare_probability hcert hsg hK hd hiso.measurable hR i top hw hcap hκ
-  have hp0 : 0 ≤ (endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
   have hA0 : 0 ≤ (endpointRareRow i).cutoff+6*d := by
     have hh : 0 ≤ (endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
     linarith
@@ -108,7 +106,7 @@ theorem upperShift_general_rare_second
     field_simp
     <;> ring
   obtain ⟨hRare,hRareBound⟩ := rare_event_moment hY hY0 hE
-    (mul_nonneg hp0 (Real.exp_nonneg _)) (by norm_num : (0:ℝ)≤177/50)
+    (by norm_num : (0:ℝ)≤177/50)
     (by positivity : 0<23/(50*K^2)) (mul_nonneg (sq_nonneg K) hA0) hprob hTail hcut 2
   have hgood (ω : Ω) (hω : ω∉E) : Y ω ≤ T ω := by
     have hqb : Q ω ≤ b := le_of_not_gt hω
@@ -116,7 +114,7 @@ theorem upperShift_general_rare_second
     have hδ := upperShift_nonneg hR (X ω)
     dsimp [Y,T,Q,quadraticForm] at *
     nlinarith [mul_le_mul_of_nonneg_left hqb hδ]
-  have hsplit := second_moment_good_event hE hY0 hT0 hY2
+  have hsplit := second_moment_good_event hE hY0 hY2
     (hsg.quadratic_memLp_two (upperSquareWeight R)).integrable_sq hgood
   have hTbound := upperSquareWeight_endpoint_fourth hsg hiso.measurable hm4 hfourth hR i top hκ
   have hscale : tailMomentSeries 3 (K^2*((endpointRareRow i).cutoff+6*d)) (1/(23/(50*K^2))) =

@@ -104,7 +104,6 @@ theorem lowerJ_upperQ {q : ℚ} (hq0 : 0 ≤ q) (hq : q < 1) :
   have hid : Real.log ((1/(1-q):ℚ):ℝ) = -Real.log (1-(q:ℝ)) := by simp [Real.log_inv]
   rw [hid] at h
   dsimp [lowerJ]
-  push_cast
   linarith
 
 theorem epsilon_upper {p : ℚ} (hp : (19:ℚ)/4 ≤ p) :

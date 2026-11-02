@@ -38,17 +38,17 @@ theorem scalar_tail_coefficient {K : ℝ} (hK : 1 ≤ K) :
     rw [heq]
     exact (Real.exp_le_exp.mpr (by linarith)).trans hneg
   have hcancel : (1 / (3 * K ^ 2)) * (8 * K ^ 2 * logParameter K) =
-      (8 / 3 : ℝ) * logParameter K := by field_simp [hK0.ne'] <;> ring
+      (8 / 3 : ℝ) * logParameter K := by field_simp [hK0.ne']
   rw [hcancel]
   have hi : Real.sqrt 3 * Real.exp (-((8 / 3 : ℝ) * logParameter K)) / (1 / (3 * K ^ 2)) =
       3 * Real.sqrt 3 * (K ^ 2 * Real.exp (-((8 / 3 : ℝ) * logParameter K))) := by
-    field_simp <;> ring
+    field_simp
   rw [hi]
   have hm := mul_le_mul_of_nonneg_left he (show 0 ≤ 3 * Real.sqrt 3 by positivity)
   nlinarith
 
 
-theorem scalar_second_truncation {y a : ℝ} (hy : 0 ≤ y) (_ha : 0 ≤ a) :
+theorem scalar_second_truncation {y a : ℝ} (hy : 0 ≤ y) :
     y ^ 2 ≤ a * y + a * max (y - a) 0 + max (y - a) 0 ^ 2 := by
   by_cases h : a ≤ y
   · rw [max_eq_left (sub_nonneg.mpr h)]
@@ -77,7 +77,7 @@ theorem exponential_tail_second_le {Y : Ω → ℝ} {C r a : ℝ}
   have hau := h1.1.const_mul a
   have hB : Integrable (fun ω => a * Y ω + a * max (Y ω - a) 0) μ := hay.add hau
   have hi := integral_mono hy2.1 (hB.add h2.1)
-    (fun ω => scalar_second_truncation (hY0 ω) ha)
+    (fun ω => scalar_second_truncation (hY0 ω))
   simp only [Pi.add_apply] at hi
   rw [integral_add hB h2.1, integral_add hay hau] at hi
   simp only [integral_const_mul] at hi

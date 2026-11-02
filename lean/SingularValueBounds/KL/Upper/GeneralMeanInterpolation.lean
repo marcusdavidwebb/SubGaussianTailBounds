@@ -53,7 +53,7 @@ theorem generalMeanCritical_minimum {r c lo hi x : ℝ}
           dsimp only [z,generalMeanCritical]
           rw [max_eq_right (le_of_not_ge hleft), min_eq_right (le_of_not_ge hright)]
         rw [hz]
-        simp [hr.ne']
+        simp
   have he : (r-1/z)*(x-z) = r*(x-z)-(x-z)/z := by ring
   rw [he] at hs
   linarith

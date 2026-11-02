@@ -32,7 +32,7 @@ theorem lowerShift_general_laplace_of_certificates {X : Ω→ι→ℝ} {K : ℝ}
     (hiso : CentredIsotropic μ X) (hK : 1≤K) {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {b ℓ : ℝ}
     (hcap : K^2*Matrix.trace R+K^2*logParameter K*frobenius R*
-      generalLowerProfile (spectralRatio R hR)≤b) (_hb : 0<b) (hℓ : 0≤ℓ) :
+      generalLowerProfile (spectralRatio R hR)≤b) (hℓ : 0≤ℓ) :
     Integrable (fun ω=>Real.exp (-ℓ*(1+b)*lowerShift R hR (X ω))) μ ∧
       (∫ω,Real.exp (-ℓ*(1+b)*lowerShift R hR (X ω)) ∂μ)≤
         Real.exp (-ℓ/(1+((499/100:ℝ)*K^2*logParameter K)*ℓ)) := by
@@ -51,7 +51,7 @@ theorem lowerShift_endpoint_laplace_of_certificates {X : Ω→ι→ℝ}
     (hsg : SubGaussianMGF μ X 1) (hiso : CentredIsotropic μ X)
     {R : Matrix ι ι ℝ} (hR : R.PosDef) {b ℓ : ℝ}
     (hcap : Matrix.trace R+frobenius R*min (2*spectralRatio R hR) (73/50)≤b)
-    (_hb : 0<b) (hℓ : 0≤ℓ) :
+    (hℓ : 0≤ℓ) :
     Integrable (fun ω=>Real.exp (-ℓ*(1+b)*lowerShift R hR (X ω))) μ ∧
       (∫ω,Real.exp (-ℓ*(1+b)*lowerShift R hR (X ω)) ∂μ)≤
         Real.exp (-ℓ/(1+(5/2:ℝ)*ℓ)) := by

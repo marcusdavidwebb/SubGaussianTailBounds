@@ -44,7 +44,6 @@ theorem endpointLowCoefficient_higher {p : ℕ} (hp : 3 ≤ p) :
         nth_rw 1 [show n=(n-1)+1 by omega]
         rw [pow_succ]
         field_simp
-        <;> ring
       rw [he]
       apply mul_le_mul_of_nonneg_right _ (by positivity)
       apply (div_le_iff₀ (by positivity : (0 : ℝ)<n+1)).2

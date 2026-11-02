@@ -14,11 +14,11 @@ proofs of the canonical propositions.
   him. The preceding human mathematical work and tool roles are recorded below
   and in [PROVENANCE.md](docs/PROVENANCE.md).
 - **Results:** the initial general quartet `(96/25,79/50,47/20,3/2)` for every
-  `K ≥ 1`, and unit quartet `(33/25,28/25,58/25,Real.sqrt 2)` for `K = 1`.
+  `K ≥ 1`, together with tail bounds for the unit regime `K = 1`.
   The legacy identifiers `baseline-general` and `baseline-one` refer to these
   two regimes of this one contribution, not separate contributions.
 - **Historical evidence:** [the historical supplement](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/73aa7fe4db3d982d446e292d82a34b6af784238b/supplementary.tex),
-  [conditional Lean results](lean/SingularValueBounds/KL/Theorem.lean), the
+  [conditional Lean results](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/lean/SingularValueBounds/KL/Theorem.lean), the
   original exact Python checker and eleven interface runners in Git history, the
   [formalisation record](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/73aa7fe4db3d982d446e292d82a34b6af784238b/lean/FORMALISATION_PLAN.md) and
   [verification report](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/73aa7fe4db3d982d446e292d82a34b6af784238b/lean/VERIFICATION_REPORT.md).
@@ -208,6 +208,92 @@ and model credit and the unresolved assessments in
 attempts are recorded in [HISTORY.md](docs/HISTORY.md); focused checks alone
 are not complete verification. No verification policy or dependency pin is
 changed by this proof-simplification revision.
+
+## Unused-code cleanup — 2 November 2026
+
+At Marcus Webb's request, Codex and parallel agents removed unused and
+unreachable tactics, unused simplifier arguments, redundant section variables
+and unnecessary helper parameters, updating their callers. Bindings required
+by function or structure types use anonymous names where appropriate. This
+cleanup preserves both quartets, the canonical hypotheses, endpoints and
+universes, and does not edit the canonical statement, dependency pins or
+verification policy. The canonical statement and its recorded digest were
+edited separately during this work. This is source maintenance, with no new
+mathematical result or novelty claim; existing human and model attribution and
+the maintainer's acceptance decision are unchanged.
+
+Three focused checks using the unchanged kernel/axiom worker passed for
+`Scalar.UpperExponentialTools`, `KL.Certificates.Polynomial` and
+`Main.VariationalOptimization`. Final source compilation passed for all 565
+maintained modules, with no unused-code diagnostics in the proof implementation.
+The two unused `hn` names in the protected canonical source remain untouched.
+A full attempt compiled the then-current 565
+modules and elaborated 22 acceptance obligations, then detected that the
+protected canonical artifact had changed during compilation. The final full
+verification attempt stops at the canonical integrity guard: the statement's
+SHA-256 is `60817c0a497cdb99b7b22773c920f4d1ae09e6195d16a4652b5468d5902ba46b`,
+whereas the separately edited guard records
+`f92b4dcee6d8bf6460c5097ad57643eca7d7d922de43afa08477e3a39745854f`.
+Complete independent replay and canonical verification are not claimed.
+
+## Repository debloat — 2 November 2026
+
+At Marcus Webb's request, Codex and parallel agents removed unused hybrid and
+retired-theorem interfaces, two conditional canonical wrappers and three
+duplicate certificate-assembly modules. The public general/unit proofs now
+import their live row estimates explicitly. All numerical proof families,
+canonical propositions, quartets, universes, dependency pins and verification
+checks are preserved. Historical source links remain available in Git history.
+
+The repository catalogue is replaced by a short source layout; setup, templates
+and the refactor plan are shortened around existing entry points. This is
+maintenance, with no new bound or novelty claim. Existing attribution,
+unrelated proof/TeX work and the maintainer's acceptance decision remain
+unchanged. Actual checks and limitations are recorded in
+[HISTORY.md](docs/HISTORY.md#repository-debloat--2-november-2026).
+
+## Shared tail statement — 2 November 2026
+
+Marcus Webb refactored the canonical statement through the common fixed-parameter
+`TailBoundAt` proposition and requested repository synchronization. Codex and
+parallel agents preserved his source bytes, adapted the general/unit equivalence
+proofs, updated the protected digest and documentation, and regenerated the
+TeX/PDF. The general parameter moves before the sample-space arguments; the
+unit specialization simplifies `K = 1` to the preceding thresholds. The
+expanded equivalence targets, baseline quartets, hypotheses, endpoints and
+arbitrary universes remain unchanged.
+
+This is a statement-presentation and compatibility change, with no new bound,
+novelty or acceptance claim. Existing mathematical credit and unresolved
+assessments remain as recorded in [PROVENANCE.md](docs/PROVENANCE.md).
+The maintainer explicitly deferred full Lean verification; the
+[validation record](docs/HISTORY.md#shared-tail-statement--2-november-2026)
+distinguishes focused checks from the complete before-merge requirement.
+
+## Final statement synchronization — 2 November 2026
+
+Marcus Webb declared his latest root statement final and requested repository
+consistency changes. Codex and parallel agents preserved those exact bytes,
+adapted `StatementEquivalence.lean` to `GaussianSingularValueTails` and the new
+dimension-argument order, repinned the source guard, and synchronized the README,
+TeX/PDF and handoff plan. The mathematical requirements, quartets, arbitrary
+universes, dependency pins and acceptance checks are unchanged. The README table
+now displays the same exact general coefficient as `1.50`.
+
+This is maintenance of the supplied statement and its consumers, with no new
+bound, optimality or acceptance claim. Existing credit and unresolved assessments
+remain unchanged. The [validation record](docs/HISTORY.md#final-statement-synchronization--2-november-2026)
+distinguishes focused checks from the complete verifier, which was not run at
+the maintainer's request.
+
+## Refactor continuation — 2 November 2026
+
+At Marcus Webb's request, Codex and parallel agents removed three support
+modules outside the canonical results' import closure, retained their historical
+credit, consolidated ignore rules and corrected obsolete checking descriptions.
+The launcher and verification changes are proposed maintenance, not an accepted
+policy or a new mathematical result. The optional computation pilot is deferred.
+Checks and outstanding review are recorded in [HISTORY.md](docs/HISTORY.md).
 
 No later substantial contribution has been accepted. Add future accepted
 entries identifying the contributor, affected regime, jointly proved quartet

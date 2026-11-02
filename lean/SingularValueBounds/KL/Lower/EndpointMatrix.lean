@@ -21,6 +21,7 @@ lemma endpointComparisonEigen_nonneg_of_profile {k A c x : ℝ}
   dsimp [endpointComparisonEigen]
   nlinarith [mul_nonneg hx hr, mul_nonneg hx (sub_nonneg.mpr he)]
 
+omit [Nonempty ι] in
 theorem normalized_resolvent_spectrum {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (hF : frobenius R = 1) :
     spectralMoment hR.isHermitian.eigenvalues 2 = 1 := by
@@ -29,6 +30,7 @@ theorem normalized_resolvent_spectrum {R : Matrix ι ι ℝ} (hR : R.PosDef)
   rw [real_spectral_trace_square hR.isHermitian] at hf
   simpa only [one_pow, spectralMoment] using hf.symm
 
+omit [Nonempty ι] in
 theorem lowerComparison_normalized_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (hF : frobenius R = 1) (A c : ℝ) :
     lowerComparison R A c =

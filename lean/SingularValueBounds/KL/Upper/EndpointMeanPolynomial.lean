@@ -80,11 +80,11 @@ theorem endpointMeanTest_eval (ki : Fin 60) (ai : Fin 42) (a k : ℝ) :
   change e (endpointMeanTestQ ki ai)=_
   dsimp only [endpointMeanTestQ]
   split_ifs with hh
-  · simp only [map_sub,map_mul,hCC,hJ,hh,if_true]
+  · simp only [map_sub,map_mul,hCC,hJ]
     rw [he (endpointMeanBilinearQ ki ai)]
     norm_num
     ring
-  · simp only [map_sub,map_mul,map_add,hCC,hB,hH,hD,hN,hh,if_false]
+  · simp only [map_sub,map_mul,map_add,hCC,hB,hH,hD,hN]
     rw [he (endpointMeanBilinearQ ki ai)]
     norm_num
     ring
@@ -125,8 +125,7 @@ theorem endpoint_mean_polynomial_cost (h : EndpointMeanCertificateConditions)
         fin_cases j <;> norm_num [majorantBoxes]
       exact ha.2.trans (hh i)
     have hk0 := (spectralRatio_pos_le_one hR).1.le
-    have hk1 := (spectralRatio_pos_le_one hR).2
-    have hPD := upperPadeD_pos (upperComparisonZ_lt_one ha1 hk0 hk1)
+    have hPD := upperPadeD_pos (upperComparisonZ_lt_one ha1 hk0)
     have hRatio : upperPadeN (upperComparisonZ a k)/upperPadeD (upperComparisonZ a k)≤
         2*(58/25-realEval₂ (endpointMeanBilinearQ ki ai) a k)-upperMajorantB i a+upperMajorantH i a k := by
       apply (div_le_iff₀ hPD).2

@@ -36,7 +36,7 @@ theorem general_second_cells_cover_y {y : ℝ} (hy0 : (376/1000:ℝ) ≤ y)
   constructor <;> linarith
 
 /-- The cells overlap the endpoint neighbourhood and the unbounded-range cutoff. -/
-theorem general_second_range_coverage {L : ℝ} (hL : 1 ≤ L) :
+theorem general_second_range_coverage (L : ℝ) :
     L ≤ 51/50 ∨ (∃ j : Fin 334,L-1 ∈ Icc (secondCellDLo j:ℝ) (secondCellDHi j:ℝ)) ∨
       5/4 ≤ L := by
   by_cases hs : L ≤ 51/50
@@ -118,7 +118,7 @@ theorem general_second_bounded_range (h : GeneralSecondCertificateConditions) (i
     generalSecondScalar i m (L-1) ≤ 9/2 := by
   by_cases hs : L ≤ 51/50
   · exact general_second_small_bound h i (hsmall hs) ⟨by linarith,by linarith⟩
-  have hcover := general_second_range_coverage hL
+  have hcover := general_second_range_coverage L
   rcases hcover with hh|⟨j,hj⟩|hh
   · exact (hs hh).elim
   · exact general_second_cell_bound h j i (hcells j hj) hj

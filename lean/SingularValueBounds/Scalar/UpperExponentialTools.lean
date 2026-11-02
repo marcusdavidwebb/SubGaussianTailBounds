@@ -64,7 +64,7 @@ theorem exp_truncation_majorant {y v ℓ : ℝ} (hy : 0 ≤ y) (hv : 0 < v) :
 /-- The rational arithmetic behind the sharp upper Bernstein denominator. -/
 theorem truncated_exp_rational_bound {t a B : ℝ}
     (ht : 0 ≤ t) (ht1 : t < 1) (ha : 0 ≤ a) (hat : a ≤ t / 2)
-    (hB : 0 ≤ B) (hB1 : B ≤ 1 / 2) :
+    (hB1 : B ≤ 1 / 2) :
     (Real.exp t - 1) + B * (t * Real.exp t / (1 - a) - Real.exp t + 1) ≤
       t + t ^ 2 / (1 - t) := by
   have ha1 : 0 < 1 - a := by linarith
@@ -286,7 +286,7 @@ theorem upper_mgf_of_mean_tail [IsProbabilityMeasure μ] {Y : Ω → ℝ} {C r v
     (div_nonneg hℓ hr.le) (show ℓ / r ≤ ℓ * v / 2 by
       apply (div_le_iff₀ hr).2
       nlinarith [mul_nonneg hℓ (sub_nonneg.mpr hrv)])
-    (div_nonneg hD hr.le) hsmall
+    hsmall
   have hscalar : b + D * (E * ℓ / (r - ℓ) - b / r) ≤
       ℓ + v * ℓ ^ 2 / (1 - v * ℓ) := by
     apply (mul_le_mul_iff_left₀ hv).mp

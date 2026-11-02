@@ -71,7 +71,6 @@ private theorem weighted_polynomial_remainder (E P D S x : ℝ)
     E*P/x = D*(E/x) + E*S := by
   rw [hP]
   field_simp [hx]
-  <;> ring
 
 /-- The first printed positive-square remainder identity. -/
 theorem exponentialResolvent_lower_remainder {x : ℝ} (hx : 0 < x) :

@@ -108,8 +108,8 @@ theorem majorant_domain_bounds (i : Fin 6) {a x : ℝ}
 theorem upper_scalar_majorant_on_domain (h : MajorantCertificateConditions) (i : Fin 6)
     {a x : ℝ} (hax : (majorantBoxes i).contains a x) :
     -Real.log (1-upperComparisonZ a x) ≤ upperMajorantH i a x := by
-  obtain ⟨ha,hx,hx1⟩ := majorant_domain_bounds i hax
-  exact upper_scalar_majorant_of_certificates h i hax (upperComparisonZ_lt_one ha hx hx1)
+  obtain ⟨ha,hx,_⟩ := majorant_domain_bounds i hax
+  exact upper_scalar_majorant_of_certificates h i hax (upperComparisonZ_lt_one ha hx)
 
 theorem sum_bound_with_one_retained {ι : Type*} [Fintype ι] [DecidableEq ι]
     (f g : ι → ℝ) (k : ι) (retained : ℝ)
@@ -149,7 +149,7 @@ theorem upper_joint_logdet_majorants {ι : Type*} [Fintype ι] [DecidableEq ι]
     (upperPadeN (upperComparisonZ (∑ k,x k^3) (x top)) /
       upperPadeD (upperComparisonZ (∑ k,x k^3) (x top)))
     (fun j _ => upper_scalar_majorant_on_domain h i (hdomain j))
-    (neg_log_one_sub_le_upperPade (upperComparisonZ_lt_one hb.1 hb.2.1 hb.2.2))
+    (neg_log_one_sub_le_upperPade (upperComparisonZ_lt_one hb.1 hb.2.1))
   rw [upperMajorantH_sum i x hnorm] at hs
   linarith
 

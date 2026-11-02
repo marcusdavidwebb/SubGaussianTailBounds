@@ -96,7 +96,7 @@ theorem endpointSmallNumerical_le_of_runs (i : Fin 50) (rs : List EndpointRateRu
       (by simpa only [hq] using hmargin)
     simpa only [A,hc.rateOfRuns_eq hr hjr,hq] using hb
   have hbound := entropyGridBoundQ_rounding_allowance (endpointSmallCutoff i)
-    (endpointSmallBound i) A (endpointDecayQ 90 8000) hcut.1 hcut.2 hBA
+    (endpointSmallBound i) A (endpointDecayQ 90 8000) hBA
     (fun j hj => endpointEntropyKernel_bounds _ j hcut.1 hj)
   have he : entropyGridBoundQ (endpointSmallCutoff i) A (endpointDecayQ 90 8000) =
       endpointEntropyByRuns (endpointSmallCutoff i) p rs := by

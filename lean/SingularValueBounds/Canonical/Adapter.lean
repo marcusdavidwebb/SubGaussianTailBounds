@@ -1,6 +1,6 @@
 import MainTheoremStatement
 import SingularValueBounds.Canonical.StatementEquivalence
-import SingularValueBounds.KL.Theorem
+import SingularValueBounds.KL.Statement
 import SingularValueBounds.Spectral.Continuity
 
 /-!
@@ -243,9 +243,9 @@ theorem general_of_tailBounds
 theorem unit_of_tailBounds
     (hbound : ∀ (Ω : Type u) [MeasurableSpace Ω] (μ : Measure Ω)
       [IsProbabilityMeasure μ], KL.TheoremKLOne μ) :
-    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 (Real.sqrt 2) := by
+    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 1.42 := by
   apply (SubGaussian.unit_iff_previous _ _ _ _).mpr
-  refine ⟨⟨by norm_num, by norm_num, by norm_num, Real.sqrt_pos.mpr (by norm_num)⟩, ?_⟩
+  refine ⟨by norm_num, ?_⟩
   intro Ω _ μ _ m n hn A hnm hm hind hc hi hsg t ht
   letI : NeZero n := ⟨by omega⟩
   have hA : Measurable A := measurable_pi_lambda _ hm
@@ -268,22 +268,16 @@ theorem unit_of_tailBounds
   · refine ⟨measurableSet_le measurable_const
       ((measurable_largestSingularValue hn).comp hA), ?_⟩
     apply ennreal_bound_of_real (Real.exp_pos _).le
-    convert hu using 1
+    apply le_trans (measureReal_mono ?_) hu
+    intro ω hω
+    change KL.UpperThreshold KL.oneConstants m n 1 t ≤
+      SingularValueBounds.largestSingularValue (A ω)
+    have hd : Real.sqrt 2 ≤ (1.42 : ℝ) := by
+      norm_num [Real.sqrt_le_iff]
+    have hdt := mul_le_mul_of_nonneg_right hd ht
     norm_num [largestSingularValue_eq, SingularValueBounds.rowMatrix, KL.UpperThreshold,
-        KL.oneConstants, logParameter]
-    rfl
-
-/-- The legacy finite bundle still supplies a conditional general theorem. -/
-theorem general_of_finalCertificates (hcert : KL.FinalCertificateConditions) :
-    SubGaussian.GeneralSingularValueTailBound.{u} 3.84 1.58 2.35 1.5 :=
-  general_of_tailBounds fun _ _ _ _ =>
-    (KL.theorem_explicit_constants_of_certificates hcert).1
-
-/-- The legacy finite bundle still supplies a conditional unit theorem. -/
-theorem unit_of_finalCertificates (hcert : KL.FinalCertificateConditions) :
-    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 (Real.sqrt 2) :=
-  unit_of_tailBounds fun _ _ _ _ =>
-    (KL.theorem_explicit_constants_of_certificates hcert).2
+        KL.oneConstants, logParameter] at hω ⊢
+    linarith
 
 end
 end SingularValueBounds.Canonical

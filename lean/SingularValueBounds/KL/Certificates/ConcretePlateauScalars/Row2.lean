@@ -156,7 +156,7 @@ theorem plateauScalarRow2 : PlateauScalarCertificate (6/5) (74/55) (27/16) (21/2
       [(0, (1/2)), ((1/2), 1)] := by decide +kernel
     intro cell hc
     rw [hl] at hc
-    simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hc
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hc
     rcases hc with rfl | rfl
     · exact qCell0
     · exact qCell1
@@ -164,7 +164,7 @@ theorem plateauScalarRow2 : PlateauScalarCertificate (6/5) (74/55) (27/16) (21/2
       [(0, (1/2)), ((1/2), 1)] := by decide +kernel
     intro cell hc
     rw [hl] at hc
-    simp only [List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false] at hc
+    simp only [List.mem_cons, List.not_mem_nil, or_false] at hc
     rcases hc with rfl | rfl
     · exact dCell0
     · exact dCell1

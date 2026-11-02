@@ -70,7 +70,6 @@ theorem upperShift_mean_of_entropy_cost
     have hid : 2*K^2*(1/a)=2/frobenius R := by
       dsimp [a]
       field_simp
-      <;> ring
     rw [hid]
     exact upperComparisonNormalizedGap_posDef hR
   have he := quadratic_exponential_det_bound hsg hiso.measurable _ hB (1/a)
@@ -85,7 +84,6 @@ theorem upperShift_mean_of_entropy_cost
       congr 2
       dsimp [a]
       field_simp
-      <;> ring
     rw [hid] at hg
     have hg' : Real.log (∫ω,Real.exp (Q ω/a) ∂μ) ≤
         -Real.log (Matrix.det (upperComparisonNormalizedGap R))/2 := by
@@ -115,7 +113,6 @@ theorem upperShift_mean_of_entropy_cost
       dsimp [a,H] at *
       have hid : K^2*frobenius R*(Matrix.trace R/frobenius R)=K^2*Matrix.trace R := by
         field_simp
-      <;> ring
       nlinarith
     apply hwq.trans
     calc

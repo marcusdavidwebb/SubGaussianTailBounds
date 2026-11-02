@@ -100,6 +100,7 @@ theorem trace_pos {R : Matrix ι ι ℝ} (hR : R.PosDef) : 0 < Matrix.trace R :=
   rw [real_spectral_trace hR.isHermitian]
   exact Finset.sum_pos (fun i _ => hR.eigenvalues_pos i) Finset.univ_nonempty
 
+omit [Nonempty ι] in
 /-- Sherman--Morrison with the original resolvent as base. -/
 theorem rankOne_inverse {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     (R⁻¹ + Matrix.vecMulVec x x)⁻¹ =
@@ -122,6 +123,7 @@ theorem rankOne_inverse {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) 
   field_simp [hd]
   ring
 
+omit [Nonempty ι] in
 /-- The trace drop is the positive rank-one quadratic ratio. -/
 theorem rankOne_trace {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι → ℝ) :
     Matrix.trace (R⁻¹ + Matrix.vecMulVec x x)⁻¹ =

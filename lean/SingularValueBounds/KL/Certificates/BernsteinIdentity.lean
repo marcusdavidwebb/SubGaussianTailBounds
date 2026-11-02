@@ -9,7 +9,7 @@ open scoped BigOperators
 namespace SingularValueBounds.KL.Certificates
 set_option maxRecDepth 10000
 set_option maxHeartbeats 2000000
-private theorem bernstein_monomial_summand (n k j : ℕ) (hk : k ≤ n) (hj : j ≤ n-k) :
+private theorem bernstein_monomial_summand (n k j : ℕ) (hk : k ≤ n) :
     C ((Nat.choose (k+j) k : ℚ)/(Nat.choose n k : ℚ)) *
       bernsteinPolynomial ℚ n (k+j) =
     X^k * bernsteinPolynomial ℚ (n-k) j := by
@@ -59,8 +59,8 @@ theorem monomial_bernstein_identity (n k : ℕ) (hk : k ≤ n) :
         bernsteinPolynomial ℚ n (k+j) =
       ∑ j ∈ Finset.range (n-k+1), X^k * bernsteinPolynomial ℚ (n-k) j := by
     apply Finset.sum_congr rfl
-    intro j hj
-    exact bernstein_monomial_summand n k j hk (Nat.le_of_lt_succ (Finset.mem_range.mp hj))
+    intro j _
+    exact bernstein_monomial_summand n k j hk
   rw [he, ← Finset.mul_sum, bernsteinPolynomial.sum, mul_one]
 
 

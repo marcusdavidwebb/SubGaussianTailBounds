@@ -88,7 +88,7 @@ comparison, and Gaussian comparison; none is a numerical certificate. -/
 theorem endpoint_mgf_of_rare_gaussian
     {Γ : Type*} [MeasurableSpace Γ] {ν : Measure Γ} [IsProbabilityMeasure ν]
     {Y T : Ω → ℝ} {G : Γ → ℝ} {E : Set Ω} {t : ℝ} (i : Fin 3)
-    (hY : Measurable Y) (hY0 : ∀ω,0≤Y ω) (hT0 : ∀ω,0≤T ω)
+    (hY : Measurable Y) (hY0 : ∀ω,0≤Y ω)
     (hG : AEMeasurable G ν) (hG0 : ∀ω,0≤G ω)
     (hE : MeasurableSet E) (ht : 0≤t) (ht4 : 4*t<1)
     (hMeanY : (∫ω,Y ω ∂μ)≤1) (hTi : Integrable T μ)
@@ -117,9 +117,8 @@ theorem endpoint_mgf_of_rare_gaussian
     have h := hRem.1.add (integrable_const (1 : ℝ))
     exact h.congr (Filter.Eventually.of_forall fun ω => by
       simp only [Pi.add_apply,one_mul,zero_mul,sub_zero,sub_add_cancel])
-  have hr0 : 0≤(endpointRareRow i).probability := (endpointRareRow_bounds i).1.le
   have hA0 : 0≤(endpointRareRow i).cutoff := (endpointRareRow_bounds i).2.1
-  have hRare (p : ℕ) := rare_event_moment hY hY0 hE hr0
+  have hRare (p : ℕ) := rare_event_moment hY hY0 hE
     (by norm_num : (0 : ℝ)≤177/50) (by norm_num : (0 : ℝ)<23/50)
     hA0 hProb hTail hCut p
   let g : ℕ → ℝ := fun n => ((∫ω,G ω^(n+2) ∂ν)/((n+2).factorial : ℝ))*t^(n+2)
@@ -180,7 +179,7 @@ theorem endpoint_mgf_of_rare_gaussian
     rw [integral_exponentialRemainder hTi hTE,
       integral_exponentialRemainder hGInt hGE.1,hMeanT,hMeanG]
     simpa using hCompare
-  have hSplit := mgf_rare_event_split hE ht hY0 hT0 hYi hTi hYE hTE hMeanY hGood
+  have hSplit := mgf_rare_event_split hE ht hY0 hYi hTi hYE hTE hMeanY hGood
   have hSums := hBoth.tsum_le_tsum hbound hMajorTail
   rw [Summable.tsum_add hgSum hrSum] at hSums
   have hFinal := hMajor.summable.sum_add_tsum_nat_add 2

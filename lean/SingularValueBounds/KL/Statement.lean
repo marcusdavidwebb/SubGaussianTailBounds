@@ -4,11 +4,9 @@ import SingularValueBounds.KL.Certificates.Enclosures
 import SingularValueBounds.KL.Barrier.Roots
 
 /-!
-# Current theorem, constants and finite arithmetic interface (P01)
+# Internal tail statements and one-row estimates
 
-The target is supplementary Theorem S1.1, not the earlier `Theorem11`.
-The numerical premise contains only finite rational comparisons. Defining
-this target does not assert that the remaining analytic proof is complete.
+The canonical proofs supply the row estimates and all finite numerical facts.
 Matrix quantities are given explicitly in Euclidean/spectral form, avoiding
 the default norm on the function representation of a matrix.
 -/
@@ -37,35 +35,6 @@ def oneConstants : TailConstants :=
   ⟨33 / 25, 28 / 25, 58 / 25, Real.sqrt 2, by norm_num, by norm_num,
     by norm_num, Real.sqrt_pos.2 (by norm_num)⟩
 
-/-- A finite, decidable numerical comparison; no real-variable proposition
-or analytic estimate is a constructor of this type. -/
-inductive ArithmeticCheck where
-  | le (lhs rhs : ℚ)
-  | lt (lhs rhs : ℚ)
-  | eq (lhs rhs : ℚ)
-
-def ArithmeticCheck.Holds : ArithmeticCheck → Prop
-  | .le a b => a ≤ b
-  | .lt a b => a < b
-  | .eq a b => a = b
-
-/-- Labels record the certificate family; every comparison in every family
-must hold. Concrete data are to be fixed by the numerical-family modules. -/
-abbrev CertificateData := List (String × List ArithmeticCheck)
-
-def NumericalCertificateConditions (data : CertificateData) : Prop :=
-  ∀ family ∈ data, ∀ claim ∈ family.2, claim.Holds
-
-theorem numerical_conditions_append_iff (a b : CertificateData) :
-    NumericalCertificateConditions (a ++ b) ↔
-      NumericalCertificateConditions a ∧ NumericalCertificateConditions b := by
-  simp only [NumericalCertificateConditions, List.mem_append, or_imp, forall_and]
-
-theorem numerical_condition_of_mem {data : CertificateData}
-    (h : NumericalCertificateConditions data) {family : String × List ArithmeticCheck}
-    (hf : family ∈ data) {claim : ArithmeticCheck} (hc : claim ∈ family.2) :
-    claim.Holds := h family hf claim hc
-
 def LowerThreshold (c : TailConstants) (m n : ℕ) (K t : ℝ) : ℝ :=
   Real.sqrt m - K * Real.sqrt n - c.alpha * K * logParameter K -
     c.beta * K * Real.sqrt (logParameter K) * t
@@ -91,11 +60,6 @@ def TheoremKL {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
       (∀ i, SubGaussianMGF μ (X i) K) →
       ∀ t : ℝ, 0 ≤ t → TailBounds μ X c K t
 
-/-- The final Lean theorem will retain this finite numerical premise. -/
-def HybridTarget {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
-    [IsProbabilityMeasure μ] (data : CertificateData) (c : TailConstants) : Prop :=
-  NumericalCertificateConditions data → TheoremKL μ c
-
 /-- The improved quartet is asserted only for rows with `K = 1`. -/
 def TheoremKLOne {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
     [IsProbabilityMeasure μ] : Prop :=
@@ -104,10 +68,6 @@ def TheoremKLOne {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
       iIndepFun X μ → (∀ i, CentredIsotropic μ (X i)) →
       (∀ i, SubGaussianMGF μ (X i) 1) →
       ∀ t : ℝ, 0 ≤ t → TailBounds μ X oneConstants 1 t
-
-def HybridEndpointTarget {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
-    [IsProbabilityMeasure μ] (data : CertificateData) : Prop :=
-  NumericalCertificateConditions data → TheoremKLOne μ
 
 theorem lower_threshold_mono {c d : TailConstants} {m n : ℕ} {K t : ℝ}
     (hK : 1 ≤ K) (ht : 0 ≤ t) (ha : c.alpha ≤ d.alpha) (hb : c.beta ≤ d.beta) :

@@ -11,6 +11,7 @@ set_option maxHeartbeats 1200000
 variable {Ω ι : Type*} [MeasurableSpace Ω] [Fintype ι] [DecidableEq ι] [Nonempty ι]
 variable {μ : Measure Ω} [IsProbabilityMeasure μ]
 
+omit [Nonempty ι] in
 theorem normalized_trace_square {R : Matrix ι ι ℝ} (hR : R.PosDef)
     (hF : frobenius R = 1) : Matrix.trace (R^2) = 1 := by
   have h := frobenius_sq R
@@ -24,7 +25,7 @@ theorem normalized_lower_comparison_spectral {R : Matrix ι ι ℝ} (hR : R.PosD
       Matrix.diagonal (fun i => lowerShapeEigenvalue (spectralMaximum R hR.isHermitian)
         (hR.isHermitian.eigenvalues i))*star (hR.isHermitian.eigenvectorUnitary : Matrix ι ι ℝ) := by
   rw [lowerComparison0,lowerComparison_spectral hR,normalized_trace_square hR hF]
-  simp [spectralRatio,hF,lowerShapeEigenvalue]
+  simp [hF,lowerShapeEigenvalue]
 
 /-- The determinant factors are in the original resolvent eigenbasis; no
 continuous or measurable choice of ordered eigenvectors is needed. -/
@@ -39,7 +40,7 @@ theorem normalized_lower_gap {R : Matrix ι ι ℝ} (hR : R.PosDef) (hF : froben
   have hk : 0 < k := (hR.eigenvalues_pos (Classical.arbitrary ι)).trans_le (eigenvalue_le_spectralMaximum hR.isHermitian _)
   have hk1 : k ≤ 1 := by simpa [hF] using spectralMaximum_le_frobenius hR.posSemidef
   have hb (i : ι) : 0 < 1-u*b i := by
-    have h := (lowerShapeEigenvalue_bounds hk.le hk1
+    have h := (lowerShapeEigenvalue_bounds hk1
       ⟨(hR.eigenvalues_pos i).le,eigenvalue_le_spectralMaximum hR.isHermitian i⟩).2
     dsimp [b,k] at *
     nlinarith [mul_le_mul_of_nonneg_left h hu]
@@ -81,7 +82,7 @@ theorem normalized_lower_log_mgf {X : Ω → ι → ℝ} {K : ℝ}
   have hl := quadratic_log_mgf_le_logdet hsg hm B hB lam hpos hgap
   rw [hscale,hf.2] at hl
   have hfactor (i : ι) : 0 < 1-u*lowerShapeEigenvalue k (hR.isHermitian.eigenvalues i) := by
-    have h := (lowerShapeEigenvalue_bounds hk.le hk1
+    have h := (lowerShapeEigenvalue_bounds hk1
       ⟨(hR.eigenvalues_pos i).le,eigenvalue_le_spectralMaximum hR.isHermitian i⟩).2
     nlinarith [mul_le_mul_of_nonneg_left h hu.le]
   rw [Real.log_prod (fun i _ => (hfactor i).ne')] at hl

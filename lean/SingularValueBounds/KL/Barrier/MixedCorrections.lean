@@ -11,11 +11,13 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
 instance positiveResolventBorelSpace : BorelSpace (PositiveResolvent ι) :=
   inferInstanceAs (BorelSpace ({R : Matrix ι ι ℝ | R.PosDef} : Set (Matrix ι ι ℝ)))
 
+omit [Nonempty ι] in
 lemma continuous_outwardState (R : PositiveResolvent ι) : Continuous (outwardState R) := by
   apply Continuous.subtype_mk
   exact (continuousOn_outwardResolvent R.2).comp_continuous
     (continuous_id.max continuous_const) (fun ω => (show max ω 0 ∈ Ici (0 : ℝ) from le_max_right ω 0))
 
+omit [Nonempty ι] in
 lemma measurable_outwardState :
     Measurable (fun z : PositiveResolvent ι × ℝ => outwardState z.1 z.2) := by
   apply Measurable.subtype_mk

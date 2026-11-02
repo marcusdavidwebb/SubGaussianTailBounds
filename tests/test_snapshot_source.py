@@ -21,7 +21,7 @@ class SnapshotSourceTests(unittest.TestCase):
         cls.elan = os.environ.get("SVB_ELAN_BIN", str(Path.home() / ".elan/bin/elan"))
         cls.toolchain = (SOURCE / "lean/lean-toolchain").read_text().strip()
         installed = subprocess.check_output([cls.elan, "toolchain", "list"], text=True)
-        if cls.toolchain not in installed:
+        if cls.toolchain not in [line.split()[0] for line in installed.splitlines() if line]:
             raise ValueError("Pinned Lean must already be installed; no download attempted.")
         cls.lean_path = subprocess.check_output([cls.elan, "run", cls.toolchain,
             "lake", "env", "printenv", "LEAN_PATH"], cwd=cls.work, text=True).strip()

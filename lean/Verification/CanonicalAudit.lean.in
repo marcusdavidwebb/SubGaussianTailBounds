@@ -102,7 +102,10 @@ def main (args : List String) : IO Unit := do
       ["CanonicalAcceptanceCI.checked_", "SubGaussian.Current."] else ["CanonicalAcceptanceCI.checked_"]
     for namePrefix in prefixes do
       let name := (namePrefix ++ suffix).toName
-      let some info := env.find? name | throw <| IO.userError s!"Missing acceptance target: {name}"
+      -- Kernel replay returns an environment whose new declarations are in
+      -- the checked kernel map, not necessarily in Environment.find?'s view.
+      let some info := env.checked.get.find? name |
+        throw <| IO.userError s!"Missing acceptance target: {name}"
       unless info.isTheorem do
         throw <| IO.userError s!"Acceptance target must be a theorem declaration: {name}"
       unless info.levelParams.length == universes do

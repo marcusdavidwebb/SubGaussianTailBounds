@@ -11,6 +11,7 @@ variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
 def scalarResolvent (u : ℝ) (hu : 0 < u) : PositiveResolvent ι :=
   ⟨Matrix.diagonal (fun _ => u⁻¹), Matrix.PosDef.diagonal (fun _ => inv_pos.mpr hu)⟩
 
+omit [Nonempty ι] in
 lemma scalarResolvent_inv (u : ℝ) (hu : 0 < u) :
     (scalarResolvent (ι := ι) u hu).1⁻¹ = u • (1 : Matrix ι ι ℝ) := by
   rw [scalarResolvent, positive_diagonal_inverse _ (fun _ => inv_pos.mpr hu)]
@@ -18,10 +19,12 @@ lemma scalarResolvent_inv (u : ℝ) (hu : 0 < u) :
   ext i j
   by_cases hij : i=j <;> simp [Matrix.diagonal, hij]
 
+omit [Nonempty ι] in
 lemma scalarResolvent_trace (u : ℝ) (hu : 0 < u) :
     Matrix.trace (scalarResolvent (ι := ι) u hu).1 = Fintype.card ι / u := by
   simp [scalarResolvent, Matrix.trace_diagonal, div_eq_mul_inv]
 
+omit [Nonempty ι] in
 lemma scalarResolvent_frobenius (u : ℝ) (hu : 0 < u) :
     frobenius (scalarResolvent (ι := ι) u hu).1 = Real.sqrt (Fintype.card ι) / u := by
   rw [frobenius_eq_sqrt_trace_square (scalarResolvent u hu).2.isHermitian]
@@ -48,7 +51,6 @@ lemma scalar_initial_cap (K : ℝ) {w b : ℝ} (hw : 0 < w) (hb : 0 < b) :
   have hp := initialDistance_pos (n := Fintype.card ι) Fintype.card_pos K hw hb
   unfold initialDistance at hp ⊢
   field_simp
-  <;> nlinarith [mul_pos hb hp]
 
 lemma scalar_initial_trace_lt (K : ℝ) {w b : ℝ} (hw : 0 < w) (hb : 0 < b) :
     K^2 * Matrix.trace
@@ -96,7 +98,7 @@ theorem process_upper_gap (c : CorrectionRule ι) (u : ℝ) (hu : 0 < u)
       (c.process true (scalarResolvent u hu) x m).gram).PosDef := by
   have hp := (c.process true (scalarResolvent (ι := ι) u hu) x m).positive.inv
   rw [c.process_inverse] at hp
-  simp only [Bool.true_eq, if_true, scalarResolvent_inv] at hp
+  simp only [if_true, scalarResolvent_inv] at hp
   convert! hp using 1 <;> simp only [add_smul] <;> abel
 
 /-- A generic deterministic cost budget yields the final strict lower gap. -/
@@ -108,7 +110,7 @@ theorem process_lower_gap (c : CorrectionRule ι) (u : ℝ) (hu : 0 < u)
   have hp := (c.process false (scalarResolvent (ι := ι) u hu) x m).positive.inv
   rw [c.process_inverse] at hp
   simp only [Bool.false_eq_true, if_false, scalarResolvent_inv] at hp
-  convert! hp using 1 <;> simp only [add_smul, sub_smul] <;> abel
+  convert! hp using 1 <;> simp only [sub_smul] <;> abel
 
 end
 end SingularValueBounds.KL

@@ -68,7 +68,7 @@ theorem entropy_grid_bound_real {T : ℝ → ℝ} {j0 : ℕ} {B : ℕ → ℝ} {
     have hh : (j0 : ℝ)≤8000 := by exact_mod_cast hjEnd
     dsimp [c]; linarith
   have hTm : Measurable T := hT.measurable
-  have hi := entropy_tail_integrable hc (by norm_num : (0 : ℝ)≤31623/10000)
+  have hi := entropy_tail_integrable hc
     (by norm_num : (0 : ℝ)<9/20) hTm hT0
     (fun u hu => hTail u (hc.le.trans hu.le))
   have hQuad := entropy_quadrature_sum (x := fun j : ℕ => (j : ℝ)/200)
@@ -94,7 +94,7 @@ theorem entropy_grid_bound_real {T : ℝ → ℝ} {j0 : ℕ} {B : ℕ → ℝ} {
     have hh := mul_le_mul_of_nonneg_right hK hB0
     convert! div_le_div_of_nonneg_right hh (by norm_num : (0 : ℝ)≤200) using 1 <;>
       push_cast <;> dsimp [c] <;> ring
-  have hRem := entropy_remainder_bound hc (by norm_num : (0 : ℝ)≤31623/10000)
+  have hRem := entropy_remainder_bound hc
     (by norm_num : (0 : ℝ)<9/20) hc40 hTm hT0
     (fun u hu => hTail u (hc.le.trans hu.le))
   have hRem' : (∫u in Ioi 40,entropyKernel c u*T u)≤(entropyGridTailQ j0 decay : ℝ) := by
@@ -111,7 +111,7 @@ theorem entropy_grid_bound_real {T : ℝ → ℝ} {j0 : ℕ} {B : ℕ → ℝ} {
   simp only [Nat.cast_add,Nat.cast_one] at hQuad hSum
   have hh := hQuad.trans hSum
   have hTotal := add_le_add (add_le_add hLog hh) hRem'
-  convert! hTotal using 1 <;> (try dsimp [entropyGridBoundReal,c]) <;> push_cast <;> ring
+  convert! hTotal using 1 <;> (try dsimp [entropyGridBoundReal,c]) <;> ring
 
 end
 end SingularValueBounds.KL

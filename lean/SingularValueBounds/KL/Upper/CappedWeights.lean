@@ -15,6 +15,7 @@ set_option maxHeartbeats 1200000
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
+omit [Fintype ι] [DecidableEq ι] in
 theorem one_sub_sum_le_product (s : Finset ι) {p : ι → ℝ}
     (hp : ∀ i∈s, 0≤p i) (hp1 : ∀ i∈s, p i≤1) :
     1-∑ i∈s,p i ≤ ∏ i∈s,(1-p i) := by
@@ -23,7 +24,7 @@ theorem one_sub_sum_le_product (s : Finset ι) {p : ι → ℝ}
 /-- A normalized vector with one sufficiently large coordinate obeys the
 two-weight determinant estimate without any iteration or limiting argument. -/
 theorem capped_weight_product_of_large {p : ι → ℝ} {v : ℝ}
-    (hp : ∀ i,0≤p i) (hv : 1/2≤v) (hv1 : v<1)
+    (hp : ∀ i,0≤p i) (hv1 : v<1)
     (hsum : ∑ i,p i=1) (hcap : ∀ i,p i≤v)
     {j : ι} (hj : 1-v≤p j) : v*(1-v)≤∏i,(1-p i) := by
   have hp1 : ∀ i,p i≤1 := fun i => (hcap i).trans hv1.le
@@ -48,7 +49,7 @@ theorem endpoint_capped_weight_log_bound {p : ι → ℝ}
   have hpos : ∀ i,0<1-p i := fun i => by linarith [hcap i]
   by_cases hj : ∃j,(31/256 : ℝ)≤p j
   · obtain ⟨j,hj⟩ := hj
-    have hd := capped_weight_product_of_large hp (by norm_num : (1/2 : ℝ)≤225/256)
+    have hd := capped_weight_product_of_large hp
       (by norm_num : (225/256 : ℝ)<1) hsum hcap (j := j) (by norm_num; exact hj)
     have hh := Real.log_le_log (by norm_num : (0 : ℝ)<(225/256)*(1-225/256)) hd
     rw [Real.log_prod (fun i hi => (hpos i).ne')] at hh
@@ -105,7 +106,7 @@ theorem endpoint_capped_spectral_cost {r : ι → ℝ} (hr : ∀i,0<r i)
   have hcost := upper_tail_logdet_of_costs hr hh
     (q := 1) (C := 0) (A := 2*Real.log (46/15 : ℝ))
     (by intro i; norm_num)
-    (by intro i; simp only [upperTailSecondArgument,sub_self,zero_mul,sub_zero,one_div,one_mul];
+    (by intro i; simp only [upperTailSecondArgument,sub_self,zero_mul,sub_zero,one_div];
         linarith [hcap i]) hF
     (by simpa [upperTailSecondArgument] using hlog)
   simpa using hcost

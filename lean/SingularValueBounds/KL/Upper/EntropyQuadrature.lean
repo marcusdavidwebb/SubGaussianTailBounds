@@ -98,7 +98,7 @@ theorem entropy_remainder_integral {c r H C : ℝ}
 /-- Exponential domination makes the entropy integrand integrable, including
 all finite quadrature cells and the infinite remainder. -/
 theorem entropy_tail_integrable {c C r : ℝ} {T : ℝ → ℝ}
-    (hc : 0 < c) (hC : 0 ≤ C) (hr : 0 < r)
+    (hc : 0 < c) (hr : 0 < r)
     (hTm : Measurable T) (hT0 : ∀ u, 0 ≤ T u)
     (htail : ∀ u, c < u → T u ≤ C*Real.exp (-(r*u))) :
     IntegrableOn (fun u => entropyKernel c u*T u) (Ioi c) := by
@@ -128,12 +128,12 @@ theorem entropy_tail_integrable {c C r : ℝ} {T : ℝ → ℝ}
 /-- The rigorously bounded infinite remainder, with no analytic statement
 hidden in the finite numerical premises. -/
 theorem entropy_remainder_bound {c C r H : ℝ} {T : ℝ → ℝ}
-    (hc : 0 < c) (hC : 0 ≤ C) (hr : 0 < r) (hcH : c ≤ H)
+    (hc : 0 < c) (hr : 0 < r) (hcH : c ≤ H)
     (hTm : Measurable T) (hT0 : ∀ u, 0 ≤ T u)
     (htail : ∀ u, c < u → T u ≤ C*Real.exp (-(r*u))) :
     (∫ u in Ioi H, entropyKernel c u*T u) ≤
       C*Real.exp (-(r*H))*(1/r+H/(c*r)+1/(c*r^2)) := by
-  have hi := entropy_tail_integrable hc hC hr hTm hT0 htail
+  have hi := entropy_tail_integrable hc hr hTm hT0 htail
   have hiH := hi.mono_set (Ioi_subset_Ioi hcH)
   have he (n : ℕ) : IntegrableOn (fun u : ℝ => u^n*Real.exp (-(r*u))) (Ioi H) := by
     have h := integrableOn_rpow_mul_exp_neg_mul_rpow

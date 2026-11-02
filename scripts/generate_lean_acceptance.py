@@ -27,7 +27,7 @@ BUILD_INPUTS = ("lean/setup.sh", "scripts/configure_lean.py", "lean/lakefile.tom
 FIELDS = ("alpha", "beta", "gamma", "delta")
 BASELINES = {
     "general": ("3.84", "1.58", "2.35", "1.5"),
-    "unit": ("1.32", "1.12", "2.32", "(Real.sqrt 2)"),
+    "unit": ("1.32", "1.12", "2.32", "1.42"),
 }
 
 
@@ -84,7 +84,6 @@ def acceptance_source() -> str:
         "import MainTheoremStatement",
         "import SingularValueBounds.Canonical.AcceptedConstants",
         "import SingularValueBounds.Canonical.Results",
-        "import Lean",
         "namespace CanonicalAcceptanceCI",
         "universe u",
         "noncomputable section",

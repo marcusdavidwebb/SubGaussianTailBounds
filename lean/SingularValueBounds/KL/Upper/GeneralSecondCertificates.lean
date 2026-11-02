@@ -301,7 +301,7 @@ theorem general_second_small_bound (h : GeneralSecondCertificateConditions) (i :
     have hh' := (exp_decay_ratio_antitone (by norm_num : (0:ℝ)≤2)) hd.1
       (show (0:ℝ)≤1/50 by norm_num) hd.2
     norm_num at hh'
-    convert! hh.trans hh' using 1 <;> norm_num <;> ring
+    convert! hh.trans hh' using 1 <;> norm_num
   have hd0 : 0 ≤ d := hd.1
   have hfirst := (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right hm hq)
       (show 0 ≤ Real.exp (-2*d)/(1+d) by exact div_nonneg (Real.exp_nonneg _) (by linarith))).trans

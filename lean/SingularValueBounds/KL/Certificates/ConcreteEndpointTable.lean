@@ -37,8 +37,7 @@ private theorem endpointTableBox00 :
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointTableCoefficients00, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -77,8 +76,7 @@ private theorem endpointTableBox01 :
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointTableCoefficients01, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -117,8 +115,7 @@ private theorem endpointTableBox02 :
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointTableCoefficients02, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -157,8 +154,7 @@ private theorem endpointTableBox03 :
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointTableCoefficients03, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -197,8 +193,7 @@ private theorem endpointTableBox10 :
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointTableCoefficients10, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -237,8 +232,7 @@ private theorem endpointTableBox11 :
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointTableCoefficients11, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -277,8 +271,7 @@ private theorem endpointTableBox12 :
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointTableCoefficients12, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]
@@ -317,8 +310,7 @@ private theorem endpointTableBox13 :
       Polynomial.eval_add, Polynomial.eval_sub, Polynomial.eval_mul,
       Polynomial.eval_pow, Polynomial.eval_C, Polynomial.eval_X, Polynomial.eval_monomial]
     simp [endpointTableCoefficients13, endpointBox, endpointKLo, endpointKHi,
-      Fin.sum_univ_succ, Fin.val_natCast, Fin.coe_ofNat_eq_mod, Polynomial.eval₂_pow, Polynomial.eval₂_sub,
-      Polynomial.eval₂_C, Polynomial.coe_evalRingHom]
+      Fin.sum_univ_succ, Fin.coe_ofNat_eq_mod]
     ring
   dsimp only
   rw [hpoly]

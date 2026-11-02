@@ -20,21 +20,22 @@ Preserve every hypothesis, positivity, both non-strict tail events and endpoints
 event measurability and real-valued probability bounds under a probability measure.
 All numerical obligations must be proved in Lean; no conditional certificate or analytic premise may remain.
 
-Prove all four componentwise comparisons against both the original baseline
-and the current accepted quartet of the same regime:
+Prove all four componentwise comparisons against both the baseline comparison
+ceiling and the current accepted quartet of the same regime:
 
 | Regime | Permanent baseline ceiling |
 |---|---|
 | General | `(3.84, 1.58, 2.35, 1.5)` = `(96/25, 79/50, 47/20, 3/2)` |
-| Unit | `(1.32, 1.12, 2.32, Real.sqrt 2)` = `(33/25, 28/25, 58/25, Real.sqrt 2)` |
+| Unit | `(1.32, 1.12, 2.32, 1.42)` = `(33/25, 28/25, 58/25, 71/50)` |
 
 **No current component may increase.** Equality in every component is allowed.
 Preserve the other regime and every accepted improvement. The quartet must be
 proved jointly; selecting coordinates from unrelated results is insufficient.
-Decimal literals are exact rationals, and `Real.sqrt 2` is exact.
+Decimal literals are exact rationals. These same quartets define the required
+baseline theorems.
 
-No improvement over these baselines has yet been accepted. The current ceiling
-comes from [AcceptedConstants.lean](lean/SingularValueBounds/Canonical/AcceptedConstants.lean)
+The current accepted quartets equal these baselines. The current ceiling comes from
+[AcceptedConstants.lean](lean/SingularValueBounds/Canonical/AcceptedConstants.lean)
 in the trusted accepted base. A candidate's snapshot or an older predecessor
 cannot authorize a regression. For example, after accepting `(3.70, 1.58, 2.35,
 1.5)`, the proposed `(3.75, 1.55, 2.35, 1.5)` would fail the first comparison.

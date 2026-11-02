@@ -112,7 +112,7 @@ theorem endpoint_rankone_covariance_le (hsg : SubGaussianMGF μ X 1)
     have hs := (div_le_iff₀ (mul_pos hdp haq)).mp
       (show ((a*frobenius B)^2+(d*frobenius P)^2) /
           ((d*frobenius P)*(a*frobenius B)) ≤ 6 from by
-        convert! hr using 1 <;> field_simp [hdp.ne', haq.ne'] <;> ring)
+        convert! hr using 1 <;> field_simp [hdp.ne', haq.ne'])
     nlinarith only [hs]
   rw [quadraticCovariance_rankone_expansion hsg]
   apply endpoint_rankone_scalar hp hq (by simpa using hv) hr' hy hw

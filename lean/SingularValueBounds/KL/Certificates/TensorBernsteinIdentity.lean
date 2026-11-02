@@ -83,7 +83,7 @@ lemma tensorAffine_eval (p : Polynomial (Polynomial ℚ)) (a w c h x y : ℚ) :
       Polynomial.evalRingHom (a+w*x) := by
     ext q <;>
     simp [Polynomial.coe_evalRingHom, Polynomial.coe_compRingHom, RingHom.comp_apply,
-      affine, Polynomial.eval_comp]
+      affine]
   simp only [tensorAffine, Polynomial.eval₂_comp, Polynomial.eval₂_add,
     Polynomial.eval₂_C, Polynomial.eval₂_mul, Polynomial.eval₂_X, Polynomial.eval₂_map]
   rw [he]

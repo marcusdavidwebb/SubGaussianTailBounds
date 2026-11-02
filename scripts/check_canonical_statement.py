@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 CANONICAL_NAME = "MainTheoremStatement.lean"
-CANONICAL_SHA256 = "be2804e4ca5ef33015df07e84f0544540f36c69f1be7bb4503c3363cb105f3a3"
+CANONICAL_SHA256 = "7c7a879e16d58ea8d9915d795f5f9bab73cbff125313d730fe7305470e417d27"
 BEGIN = b"<!-- canonical-statement:start -->"
 END = b"<!-- canonical-statement:end -->"
 

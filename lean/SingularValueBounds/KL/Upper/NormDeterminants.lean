@@ -28,19 +28,19 @@ theorem logdetExcess_quadratic {M c : ℝ} (hM : 0 < M) (hM1 : M < 1/2)
     have hn := (hd t ht).ne'
     have hlin := (hasDerivAt_const t (1:ℝ)).sub ((hasDerivAt_id t).const_mul 2)
     convert! ((hlin.log (hd t ht).ne').neg).sub ((hasDerivAt_id t).const_mul 2) using 1 <;>
-      (try ext x) <;> simp [logdetExcess,f1,Pi.sub_apply,Pi.neg_apply]
+      simp [f1,Pi.sub_apply]
     <;> ring
   · intro t ht
     have hn := (hd t ht).ne'
     have hlin := (hasDerivAt_const t (1:ℝ)).sub ((hasDerivAt_id t).const_mul 2)
     convert! (((hasDerivAt_const t (2:ℝ)).div hlin (hd t ht).ne').sub_const 2) using 1 <;>
-      (try ext x) <;> simp only [f1,f2,Pi.div_apply,Pi.sub_apply,id_eq]
+      simp only [f2,Pi.sub_apply,id_eq]
     <;> field_simp [hn] <;> ring
   · intro t ht
     have hn := (hd t ht).ne'
     have hlin := (hasDerivAt_const t (1:ℝ)).sub ((hasDerivAt_id t).const_mul 2)
     convert! (hasDerivAt_const t (4:ℝ)).div (hlin.pow 2) (pow_ne_zero 2 (hd t ht).ne') using 1 <;>
-      (try ext x) <;> simp only [f2,f3,Pi.div_apply,Pi.pow_apply,Pi.sub_apply,id_eq]
+      simp only [f3,Pi.pow_apply,Pi.sub_apply,id_eq]
     <;> field_simp [hn] <;> ring
   · intro t ht
     dsimp [f3]
@@ -79,8 +79,9 @@ def NormDeterminantCertificateConditions : Prop :=
     Certificates.NumericalCertificateConditions.expTaylorQ 24
       (2*(21/50)+(563/100)*(21/50)^2))
 
-variable {ι : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 
+omit [DecidableEq ι] in
 theorem normalized_upper_eigenvalue_nonneg {x : ι → ℝ} (hx : ∀ i, 0 ≤ x i)
     (i : ι) : 0 ≤ normalizedUpperEigenvalue x i := by
   have ha : x i^3 ≤ normalizedUpperMean x :=
@@ -90,6 +91,7 @@ theorem normalized_upper_eigenvalue_nonneg {x : ι → ℝ} (hx : ∀ i, 0 ≤ x
   dsimp [normalizedUpperEigenvalue]
   nlinarith
 
+omit [DecidableEq ι] in
 theorem normalized_upper_eigenvalue_sum {x : ι → ℝ} (h2 : ∑ i, x i^2 = 1) :
     ∑ i, normalizedUpperEigenvalue x i = (∑ i,x i)-normalizedUpperMean x := by
   simp only [normalizedUpperEigenvalue, Finset.sum_add_distrib, Finset.sum_sub_distrib,

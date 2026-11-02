@@ -17,6 +17,7 @@ def rowPast (X : Fin m → Ω → β) (i : ℕ) : MeasurableSpace Ω :=
 lemma rowPast_le (X : Fin m → Ω → β) (hX : ∀ j, Measurable (X j)) (i : ℕ) :
     rowPast X i ≤ mΩ := iSup_le fun j => iSup_le fun _ => (hX j).comap_le
 
+omit mΩ in
 lemma rowPast_mono (X : Fin m → Ω → β) {i j : ℕ} (hij : i ≤ j) :
     rowPast X i ≤ rowPast X j := by
   apply iSup_le
@@ -25,6 +26,7 @@ lemma rowPast_mono (X : Fin m → Ω → β) {i j : ℕ} (hij : i ≤ j) :
   intro hk
   exact le_iSup_of_le k (le_iSup_of_le (hk.trans_le hij) le_rfl)
 
+omit mΩ in
 lemma measurable_row_past (X : Fin m → Ω → β) (j : Fin m) {i : ℕ} (hj : j.val < i) :
     @Measurable Ω β (rowPast X i) _ (X j) :=
   Measurable.of_comap_le (le_iSup_of_le j (le_iSup_of_le hj le_rfl))
@@ -55,6 +57,7 @@ def adaptiveState (step : ℕ → S × β → S) (initial : S) (fallback : β)
   | i+1, ω => step i (adaptiveState step initial fallback X i ω,
       if hi : i < m then X ⟨i, hi⟩ ω else fallback)
 
+omit mΩ in
 lemma measurable_adaptiveState_past (step : ℕ → S × β → S)
     (hs : ∀ i, Measurable (step i)) (initial : S) (fallback : β)
     (X : Fin m → Ω → β) (i : ℕ) :

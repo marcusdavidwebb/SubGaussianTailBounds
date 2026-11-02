@@ -23,6 +23,7 @@ def upperTailMatrix (R : Matrix ι ι ℝ) (h : ℝ) : Matrix ι ι ℝ :=
 def upperTailWeight (r : ι → ℝ) (h : ℝ) (i : ι) : ℝ :=
   (r i ^ 2 / (1 + h * r i)) / (∑ j, r j ^ 2 / (1 + h * r j))
 
+omit [Nonempty ι] in
 theorem upperTailDenominator_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
     {h : ℝ} (hh : 0 ≤ h) :
     upperTailDenominator R h =
@@ -72,6 +73,7 @@ theorem upperShift_tail_equation {R : Matrix ι ι ℝ} (hR : R.PosDef) (x : ι 
   · rw [upperTailMatrix_eq_smul_criterion hR (upperShift_pos hR hx),
       Matrix.smul_mulVec, dotProduct_smul, upperShift_equation hR hx, smul_eq_mul, mul_one]
 
+omit [DecidableEq ι] in
 /-- Every tail weight is positive, their sum is one, and each is at most one. -/
 theorem upperTailWeight_properties {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     {h : ℝ} (hh : 0 ≤ h) :
@@ -87,6 +89,7 @@ theorem upperTailWeight_properties {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     exact Finset.single_le_sum (fun j _ => div_nonneg (sq_nonneg _) (hd j).le)
       (Finset.mem_univ i)
 
+omit [DecidableEq ι] in
 /-- Spectral-shape bound for the time-dependent weights. -/
 theorem upperTailWeight_le_shape {r : ι → ℝ} (hr : ∀ i, 0 < r i)
     {h M : ℝ} (hh : 0 ≤ h) (hM : ∀ i, r i ≤ M) (i : ι) :
@@ -133,7 +136,7 @@ def upperTailEigenvalue (r : ι → ℝ) (h : ℝ) (i : ι) : ℝ :=
 
 /-- The logarithmic chord estimate used for the spectral-shape refinement. -/
 theorem upper_log_chord {p q s : ℝ} (hp : 0 ≤ p) (hps : p ≤ s)
-    (hs : 0 < s) (hq : 0 ≤ q) (hqs : q*s < 1) :
+    (hs : 0 < s) (hqs : q*s < 1) :
     (p/s)*Real.log (1-q*s) ≤ Real.log (1-q*p) := by
   have hw : p/s ≤ 1 := (div_le_one hs).2 hps
   have hc := strictConcaveOn_log_Ioi.concaveOn.2 (show (1:ℝ) ∈ Set.Ioi 0 by norm_num)
@@ -144,6 +147,7 @@ theorem upper_log_chord {p q s : ℝ} (hp : 0 ≤ p) (hps : p ≤ s)
   congr 1
   field_simp [hs.ne'] <;> ring
 
+omit [DecidableEq ι] [Nonempty ι] in
 /-- A bound on the sum and maximum of positive weights gives a determinant
 bound. This includes the endpoint `q=1` whenever the shape is strictly below one. -/
 theorem upper_weight_product_shape {p : ι → ℝ} {q s : ℝ}
@@ -153,7 +157,7 @@ theorem upper_weight_product_shape {p : ι → ℝ} {q s : ℝ}
   have hpos : ∀ i,0 < 1-q*p i := fun i => by
     have hm := mul_le_mul_of_nonneg_left (hps i) hq
     linarith
-  have hl := Finset.sum_le_sum (s := Finset.univ) (fun i _ => upper_log_chord (hp i) (hps i) hs hq hqs)
+  have hl := Finset.sum_le_sum (s := Finset.univ) (fun i _ => upper_log_chord (hp i) (hps i) hs hqs)
   have he : (∑ i,(p i/s)*Real.log (1-q*s)) = (∑ i,p i)/s*Real.log (1-q*s) := by
     rw [← Finset.sum_mul, ← Finset.sum_div]
   rw [he] at hl
@@ -181,6 +185,7 @@ theorem upper_first_factor_exp_rate {r h q : ℝ} (hr : 0 < r)
   nlinarith
 
 
+omit [DecidableEq ι] in
 /-- Spectral determinant estimate with the full shape parameter. -/
 theorem upper_tail_spectral_shape {r : ι → ℝ} (hr : ∀ i,0 < r i)
     {h q s : ℝ} (hh : 0 ≤ h) (hq : 0 < q) (hq1 : q ≤ 1)
@@ -249,8 +254,9 @@ theorem upperTailMatrix_spectral {R : Matrix ι ι ℝ} (hR : R.PosDef)
   have hi : 1+h*hR.isHermitian.eigenvalues i ≠ 0 :=
     (add_pos_of_pos_of_nonneg zero_lt_one (mul_nonneg hh.le (hR.eigenvalues_pos i).le)).ne'
   unfold upperTailEigenvalue upperTailWeight
-  field_simp [hh.ne',hd.ne',hi] <;> ring
+  field_simp [hh.ne',hd.ne',hi]
 
+omit [DecidableEq ι] [Nonempty ι] in
 private theorem upper_prod_inv_sqrt_log {a : ι → ℝ} (ha : ∀ i,0 < a i) :
     (∏ i,(Real.sqrt (a i))⁻¹) = Real.exp (-(∑ i,Real.log (a i))/2) := by
   have he (i : ι) : (Real.sqrt (a i))⁻¹ = Real.exp (-Real.log (a i)/2) := by

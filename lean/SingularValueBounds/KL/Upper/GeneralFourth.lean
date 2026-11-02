@@ -92,7 +92,6 @@ theorem scalar_cosh_fourth_implicit_sharp {Y : Ω → ℝ} {K : ℝ}
     dsimp [t]
     rw [div_pow,Real.sq_sqrt hm.le]
     field_simp
-    <;> ring
   rw [heq] at hmul
   exact hmul
 

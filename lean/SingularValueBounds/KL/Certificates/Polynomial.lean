@@ -33,7 +33,7 @@ theorem bernsteinWeight_nonneg (n i : ℕ) {u : ℝ} (hu0 : 0 ≤ u) (hu1 : u �
   exact mul_nonneg (mul_nonneg (Nat.cast_nonneg _) (pow_nonneg hu0 _))
     (pow_nonneg (sub_nonneg.mpr hu1) _)
 
-theorem bernsteinWeight_sum (n : ℕ) {u : ℝ} (hu0 : 0 ≤ u) (hu1 : u ≤ 1) :
+theorem bernsteinWeight_sum (n : ℕ) {u : ℝ} :
     ∑ i : Fin (n + 1), bernsteinWeight n i u = 1 := by
   simpa [Finset.sum_range, bernsteinPolynomial, bernsteinWeight] using
     congrArg (Polynomial.aeval u) (bernsteinPolynomial.sum ℝ n)
@@ -47,7 +47,7 @@ theorem bernstein_sum_bounds (n : ℕ) (b : Fin (n + 1) → ℝ) {lo hi u : ℝ}
     (hb : ∀ i, lo ≤ b i ∧ b i ≤ hi) (hu0 : 0 ≤ u) (hu1 : u ≤ 1) :
     lo ≤ ∑ i, b i * bernsteinWeight n i u ∧
       ∑ i, b i * bernsteinWeight n i u ≤ hi := by
-  have hs := bernsteinWeight_sum n hu0 hu1
+  have hs := bernsteinWeight_sum n (u := u)
   constructor
   · calc lo = ∑ i : Fin (n + 1), lo * bernsteinWeight n i u := by rw [← Finset.mul_sum, hs, mul_one]
          _ ≤ _ := Finset.sum_le_sum fun i _ =>
@@ -162,7 +162,7 @@ theorem realEval₂_affine (p : Polynomial (Polynomial ℚ)) (a width c height :
       (Polynomial.compRingHom (affine a width)) =
         Polynomial.eval₂RingHom (Rat.castHom ℝ) ((a : ℝ) + width * x) := by
     ext q <;> simp [Polynomial.coe_eval₂RingHom, Polynomial.coe_compRingHom,
-      RingHom.comp_apply, affine, Polynomial.eval₂_comp]
+      RingHom.comp_apply, affine]
   simp only [realEval₂, tensorAffine, Polynomial.eval₂_comp, Polynomial.eval₂_add,
     Polynomial.eval₂_C, Polynomial.eval₂_mul, Polynomial.eval₂_X, Polynomial.eval₂_map]
   rw [he]

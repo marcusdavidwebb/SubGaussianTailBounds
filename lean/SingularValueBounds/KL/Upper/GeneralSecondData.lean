@@ -60,7 +60,7 @@ structure FourthExclusionCertificate (m E x : ℚ) : Prop where
   cosh_nonneg : 0 ≤ secondCoshLowerQ x
   exclusion : 0 < secondExclusionQ m E x
 
-/-- Exactly the finite scalar families checked in the Python companion. -/
+/-- Finite scalar conditions proved by the Lean certificate modules. -/
 def GeneralSecondCertificateConditions : Prop :=
   FourthExclusionCertificate 4 (secondExpUpperQ (1/25)) (5/2) ∧
   0 ≤ secondExpLowerQ (-1/25) ∧

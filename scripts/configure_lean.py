@@ -114,6 +114,66 @@ def check_dependencies(packages: Path, lock: dict) -> None:
                  "Review those changes before verification; nothing was reset.")
 
 
+def verification_source_snapshot(candidate: Path, trusted: Path) -> dict:
+    """Capture source and policy inputs by path and content, independent of timestamps."""
+    def walk_error(error: OSError) -> None:
+        fail(f"Cannot enumerate verification sources: {error}")
+
+    snapshots = {}
+    for label, root in (("candidate", candidate), ("trusted", trusted)):
+        entries = {}
+        paths = [root / "MainTheoremStatement.lean", root / "README.md"]
+        for directory in (root / "lean", root / "scripts"):
+            if directory.is_symlink():
+                fail(f"Source directory is a symlink: {directory}")
+            for current, directories, files in os.walk(directory, followlinks=False, onerror=walk_error):
+                # The build and replay enumerate all *.lean files under the proof
+                # tree, including hidden directories. Exclude only Python caches
+                # in scripts, which are not source inputs.
+                directories[:] = sorted(name for name in directories
+                                        if not (directory.name == "scripts" and name == "__pycache__"))
+                for name in directories:
+                    if (Path(current) / name).is_symlink():
+                        fail(f"Source directory is a symlink: {Path(current) / name}")
+                for name in sorted(files):
+                    path = Path(current) / name
+                    relative = path.relative_to(root)
+                    if (directory.name == "lean" and
+                        (name.endswith((".lean", ".lean.in", ".sh")) or
+                         relative.as_posix() in {"lean/lean-toolchain", "lean/lakefile.toml",
+                                                 "lean/lake-manifest.json"})) or (
+                        directory.name == "scripts" and name.endswith(".py")):
+                        paths.append(path)
+        for path in sorted(paths):
+            if not path.is_file():
+                fail(f"Missing verification source: {path}")
+            with path.open("rb") as source:
+                digest = hashlib.file_digest(source, "sha256").hexdigest()
+            entries[path.relative_to(root).as_posix()] = {
+                "sha256": digest,
+                "link": os.readlink(path) if path.is_symlink() else None,
+                "executable": path.stat().st_mode & 0o111,
+            }
+        snapshots[label] = entries
+    return snapshots
+
+
+def verification_snapshot_file(candidate: Path, trusted: Path, snapshot: Path, check: bool) -> None:
+    current = verification_source_snapshot(candidate, trusted)
+    if not check:
+        snapshot.write_text(json.dumps(current, sort_keys=True) + "\n")
+        return
+    previous = json.loads(snapshot.read_text())
+    if previous != current:
+        changes = []
+        for label in ("candidate", "trusted"):
+            before, after = previous[label], current[label]
+            for path in sorted(before.keys() | after.keys()):
+                if before.get(path) != after.get(path):
+                    changes.append(f"{label}: {path}")
+        fail("Verification source inputs changed during the run:\n" + "\n".join(changes))
+
+
 def write_config_file(path: Path, contents: str) -> None:
     if path.is_symlink():
         expected = SOURCE / path.name
@@ -157,7 +217,19 @@ def configure(work: Path, packages: Path, lock: dict, toolchain: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--print-work-dir", action="store_true", help="Print the selected external workspace without configuring it")
+    parser.add_argument("--snapshot-file", type=Path)
+    parser.add_argument("--snapshot-check", action="store_true")
+    parser.add_argument("--candidate-root", type=Path)
+    parser.add_argument("--trusted-root", type=Path)
     args = parser.parse_args()
+    if args.snapshot_file is not None:
+        if args.print_work_dir or args.candidate_root is None or args.trusted_root is None:
+            parser.error("snapshot requires --candidate-root and --trusted-root")
+        verification_snapshot_file(args.candidate_root, args.trusted_root,
+                                   args.snapshot_file, args.snapshot_check)
+        return
+    if args.snapshot_check or args.candidate_root is not None or args.trusted_root is not None:
+        parser.error("snapshot options require --snapshot-file")
     work = workspace()
     if args.print_work_dir:
         print(work)

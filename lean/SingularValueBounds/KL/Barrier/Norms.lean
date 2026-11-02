@@ -30,6 +30,7 @@ lemma quadratic_le_spectralMaximum {R : Matrix ι ι ℝ} (hR : R.IsHermitian)
     (sq_nonneg ((star (U : Matrix ι ι ℝ) *ᵥ x) i))]
 
 
+omit [DecidableEq ι] [Nonempty ι] in
 lemma euclidean_dot_self (x : EuclideanSpace ℝ ι) :
     (x : ι → ℝ) ⬝ᵥ (x : ι → ℝ) = ‖x‖ ^ 2 := by
   simpa only [EuclideanSpace.inner_eq_star_dotProduct, star_trivial] using
