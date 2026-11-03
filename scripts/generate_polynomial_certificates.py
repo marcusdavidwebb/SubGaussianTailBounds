@@ -230,12 +230,6 @@ def main():
     parser.add_argument('--check', action='store_true')
     args = parser.parse_args()
     files = endpoint_files() | general_files()
-    obsolete = list((CERT / 'ConcreteEndpointMeanPolynomials').glob('Row*.lean'))
-    if args.check and obsolete:
-        raise SystemExit('Obsolete endpoint row modules remain; regenerate certificates.')
-    if not args.check:
-        for path in obsolete:
-            path.unlink()
     for path, content in files.items():
         if args.check:
             if path.read_text() != content:

@@ -43,6 +43,24 @@ class TheoremTexTests(unittest.TestCase):
         self.assertIn(b"3.83", self.tex.read_bytes())
         self.assertIn(b"Additional hypothesis.", self.tex.read_bytes())
 
+    def test_canonical_source_rejects_shadows_and_stale_readme(self):
+        generator.canonical.verify(self.root)
+        shadow = self.root / "nested" / "MainTheoremStatement.lean"
+        shadow.parent.mkdir()
+        shadow.write_text("-- shadow\n")
+        with self.assertRaisesRegex(ValueError, "shadow or compiled replacement"):
+            generator.canonical.verify(self.root)
+        shadow.unlink()
+        shadow.with_suffix(".olean").touch()
+        with self.assertRaisesRegex(ValueError, "shadow or compiled replacement"):
+            generator.canonical.verify(self.root)
+        shadow.with_suffix(".olean").unlink()
+        self.canonical.write_bytes(self.canonical.read_bytes() + b"-- revised\n")
+        with self.assertRaisesRegex(ValueError, "differs from the authoritative root"):
+            generator.canonical.verify(self.root)
+        generator.canonical.verify(self.root, update_readme=True)
+        generator.canonical.verify(self.root)
+
     def test_check_is_readonly_and_detects_drift(self):
         generator.generate(self.root)
         self.compiler.reset_mock()

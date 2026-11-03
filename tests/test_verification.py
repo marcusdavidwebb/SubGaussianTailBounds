@@ -5,12 +5,14 @@ Set SVB_LEAN_TEST_WORK_DIR to the existing external pinned Lake workspace.
 """
 import importlib.util
 import os
+import sys
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
 
 SOURCE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SOURCE))
 SPEC = importlib.util.spec_from_file_location(
     "lean_acceptance", SOURCE / "scripts/generate_lean_acceptance.py")
 gate = importlib.util.module_from_spec(SPEC)
@@ -101,6 +103,9 @@ end CanonicalAcceptanceExpected
 """)
         auditor = self.root / "CanonicalAcceptanceAudit.lean"
         auditor.write_text(gate.external_audit_source(include_library=False))
+        result = self.run_lean("--run", str(auditor))
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn("Unexpected canonical audit arguments", result.stdout)
         cases = (
             ("valid", {}, None),
             ("constant", {"alpha": "3.85"}, "Wrong exact canonical type"),

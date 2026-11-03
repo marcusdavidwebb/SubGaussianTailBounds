@@ -93,7 +93,6 @@ focused audit for limited-memory machines.
 Current project artifacts can be reused after Lake checks source traces; full
 kernel replay always runs afresh. Measurements distinguish
 project-clean builds with existing dependency artifacts from incremental checks.
-See [performance](../docs/PERFORMANCE.md).
 
 ## Source layout
 

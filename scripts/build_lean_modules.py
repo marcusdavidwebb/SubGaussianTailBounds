@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from contextlib import contextmanager
 import json
 import os
 from pathlib import Path
@@ -59,30 +60,29 @@ def build_order(graph: dict[str, set[str]], action, jobs: int, on_failure=lambda
         pool.shutdown(wait=True, cancel_futures=True)
 
 
-class BuildProcesses:
-    """Track only this scheduler's process groups, including concurrent launches."""
-
+class ProcessGroups:
     def __init__(self):
         self.lock = threading.Lock()
         self.active = set()
         self.stopped = False
         self.stop_done = threading.Event()
 
-    def run(self, command, **kwargs):
+    @contextmanager
+    def launch(self, command, *, cancelled, **kwargs):
         with self.lock:
             if self.stopped:
-                raise RuntimeError("Build cancelled")
+                raise cancelled
             process = subprocess.Popen(command, start_new_session=True, **kwargs)
             self.active.add(process)
         try:
-            return process.wait()
+            yield process
         except BaseException:
             self.stop()
             raise
         finally:
             with self.lock:
-                # A launcher can exit before its descendants. Do not leave a
-                # build in the background after its group leader is reaped.
+                # A process leader may exit before its descendants. Kill only
+                # this run's group before unregistering it.
                 try:
                     os.killpg(process.pid, signal.SIGKILL)
                 except ProcessLookupError:
@@ -134,6 +134,14 @@ class BuildProcesses:
                 process.wait()
         finally:
             self.stop_done.set()
+
+
+class BuildProcesses(ProcessGroups):
+    """Track only this scheduler's process groups, including concurrent launches."""
+
+    def run(self, command, **kwargs):
+        with self.launch(command, cancelled=RuntimeError("Build cancelled"), **kwargs) as process:
+            return process.wait()
 
 
 def source_graph(root: Path, records: list[dict]) -> dict[str, set[str]]:
