@@ -18,6 +18,7 @@ import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanEntropyRows.Block1
 import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanEntropyRows.Block17
 import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanEntropyRows.Block18
 import SingularValueBounds.KL.Upper.GeneralMean
+import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanSmall
 
 /-! Complete kernel-checked entropy conditions for all 1330 general rows and the small range. -/
 namespace SingularValueBounds.KL.Certificates

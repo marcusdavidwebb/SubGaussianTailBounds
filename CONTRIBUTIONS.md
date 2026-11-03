@@ -1,6 +1,8 @@
 # Contribution history
 
-This is the single readable history of substantial contributions. It preserves
+This is the readable history of substantial contributions. Earlier entries describe
+their contemporaneous policies and verification status; current instructions
+are in CONTRIBUTING.md and the current verification/performance guides. It preserves
 credit when an implementation is replaced, without asserting priority, novelty
 or future paper authorship. Historical conditional results are not complete
 proofs of the canonical propositions.
@@ -12,7 +14,7 @@ proofs of the canonical propositions.
   historical supplementary document and takes full responsibility for it.
   Its entire proof and exposition were AI-generated without direct input from
   him. The preceding human mathematical work and tool roles are recorded below
-  and in [PROVENANCE.md](docs/PROVENANCE.md).
+  and in the [archived provenance](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/PROVENANCE.md).
 - **Results:** the initial general quartet `(96/25,79/50,47/20,3/2)` for every
   `K ≥ 1`, together with tail bounds for the unit regime `K = 1`.
   The legacy identifiers `baseline-general` and `baseline-one` refer to these
@@ -31,7 +33,7 @@ proofs of the canonical propositions.
   `SingularValueBounds.Canonical.unit_baseline` and the complete public interface
   supplied the second baseline, with all eleven finite-condition families proved
   in Lean. Python mathematical checkers and their registry were retired after
-  replacement. See [the current verification record](docs/HISTORY.md); this
+  replacement. See [the current verification record](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md); this
   evidence is not backdated to the hybrid run.
 - **Attribution:** the accompanying in-preparation paper is by Marcus Webb and
   Morgan Lynch-Davies, whose extensive preceding mathematical work yielded
@@ -44,9 +46,9 @@ proofs of the canonical propositions.
 - **History:** source inventories, assisted timings, cleanup and validation
   scope remain in the original records. The initial record supplied no public
   PR, commit or release identifier; none is invented here. The current
-  [migration map](docs/HISTORY.md) distinguishes subsequent preparation from
+  [migration map](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md) distinguishes subsequent preparation from
   the historical result. Unresolved attribution and novelty assessments remain
-  in [PROVENANCE.md](docs/PROVENANCE.md).
+  in [PROVENANCE.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/PROVENANCE.md).
 - **Efficiency revision — 26 October 2026:** the ongoing migration in
   [PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2)
   factors repeated polynomial expansions through existing proved coefficient
@@ -56,7 +58,7 @@ proofs of the canonical propositions.
   their quartets and all verification obligations. The work was implemented
   with Codex assistance; it makes no new mathematical or novelty claim.
   Measurements and completed validation are recorded separately in
-  [HISTORY.md](docs/HISTORY.md).
+  [HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md).
 
 - **Proof simplification — 26 October 2026:** a further revision in the same
   [PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2)
@@ -72,7 +74,7 @@ proofs of the canonical propositions.
   the existing Taylor, rounding and
   Bernstein arguments, with Codex assistance; it asserts no new mathematical
   result or novelty. The separate measurements and verification status
-  are recorded in [HISTORY.md](docs/HISTORY.md).
+  are recorded in [HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md).
 
 - **Further proof simplification — 27 October 2026:** the same
   [PR #2](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/2)
@@ -85,7 +87,7 @@ proofs of the canonical propositions.
   verification policy are preserved. This is an implementation revision with
   Codex assistance, using existing mathematical methods; it makes no novelty
   claim. Measurements and verification status are recorded separately in
-  [HISTORY.md](docs/HISTORY.md).
+  [HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md).
 
 - **Hosted CI scheduling — 28 October 2026:** the same PR splits cold
   compilation and independent kernel replay into dependency stages across
@@ -95,14 +97,14 @@ proofs of the canonical propositions.
   still required. The Lean proofs, canonical source, quartets and dependency
   pins are unchanged. This infrastructure revision was implemented with Codex
   assistance and makes no mathematical or novelty claim. See
-  [the failure and validation record](docs/HISTORY.md).
+  [the failure and validation record](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md).
 
 - **Manual Lean verification — 29 October 2026:** at Marcus Webb's request,
   the same PR removes automated Lean compilation and auditing from CI. He will
   run the unchanged complete `./lean/verify.sh` locally before merging each PR.
   CI retains administrative repository checks and makes no proof-success claim.
   This workflow and documentation revision has Codex assistance; it changes no
-  theorem, constant or proof. See [the policy and validation record](docs/HISTORY.md).
+  theorem, constant or proof. See [the policy and validation record](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md).
 
 - **Lean-only cleanup — 29 October 2026:** at Marcus Webb's request, the same
   PR removes the historical supplement and paper tooling, retired hosted Lean
@@ -111,7 +113,7 @@ proofs of the canonical propositions.
   source, proofs, constants and complete mathematical checks are preserved.
   Codex assisted this repository simplification; it makes no mathematical or
   novelty claim. Original documents and detailed measurements remain in Git
-  history, linked from [HISTORY.md](docs/HISTORY.md).
+  history, linked from [HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md).
 
 ## Statement presentation revision — 30 October 2026
 
@@ -149,7 +151,7 @@ equivalences compile with Lean 4.33.1. The generated canonical acceptance
 obligations also compile and pass their supplemental axiom audit. Marcus Webb
 explicitly deferred independent kernel replay, so no complete verification of
 this dependency migration is claimed. Validation is recorded in
-[HISTORY.md](docs/HISTORY.md). This presentation and compatibility revision makes
+[HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md). This presentation and compatibility revision makes
 no new bound or novelty claim and has not been accepted. It is included in
 [draft PR #4](https://github.com/marcusdavidwebb/SubGaussianTailBounds/pull/4).
 
@@ -165,7 +167,7 @@ sample-space universes are retained.
 This is an implementation and statement-presentation change, with no novelty
 claim. The earlier migration's compilation and audit record applies to its
 original source and does not by itself verify this revision; see
-[HISTORY.md](docs/HISTORY.md). Future unauthorized changes to the canonical
+[HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md). Future unauthorized changes to the canonical
 root remain prohibited.
 
 ## Canonical helper simplification — 30 October 2026
@@ -204,8 +206,8 @@ exact equalities and all finite obligations. Wolfram MCP supported limited
 algebraic exploration and supplied no accepted mathematical fact. Model review
 is not independent human review. This revision preserves the preceding human
 and model credit and the unresolved assessments in
-[PROVENANCE.md](docs/PROVENANCE.md). Iterations, measurements and verification
-attempts are recorded in [HISTORY.md](docs/HISTORY.md); focused checks alone
+[PROVENANCE.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/PROVENANCE.md). Iterations, measurements and verification
+attempts are recorded in [HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md); focused checks alone
 are not complete verification. No verification policy or dependency pin is
 changed by this proof-simplification revision.
 
@@ -250,7 +252,7 @@ and the refactor plan are shortened around existing entry points. This is
 maintenance, with no new bound or novelty claim. Existing attribution,
 unrelated proof/TeX work and the maintainer's acceptance decision remain
 unchanged. Actual checks and limitations are recorded in
-[HISTORY.md](docs/HISTORY.md#repository-debloat--2-november-2026).
+[HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md#repository-debloat--2-november-2026).
 
 ## Shared tail statement — 2 November 2026
 
@@ -265,9 +267,9 @@ arbitrary universes remain unchanged.
 
 This is a statement-presentation and compatibility change, with no new bound,
 novelty or acceptance claim. Existing mathematical credit and unresolved
-assessments remain as recorded in [PROVENANCE.md](docs/PROVENANCE.md).
+assessments remain as recorded in [PROVENANCE.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/PROVENANCE.md).
 The maintainer explicitly deferred full Lean verification; the
-[validation record](docs/HISTORY.md#shared-tail-statement--2-november-2026)
+[validation record](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md#shared-tail-statement--2-november-2026)
 distinguishes focused checks from the complete before-merge requirement.
 
 ## Final statement synchronization — 2 November 2026
@@ -282,7 +284,7 @@ now displays the same exact general coefficient as `1.50`.
 
 This is maintenance of the supplied statement and its consumers, with no new
 bound, optimality or acceptance claim. Existing credit and unresolved assessments
-remain unchanged. The [validation record](docs/HISTORY.md#final-statement-synchronization--2-november-2026)
+remain unchanged. The [validation record](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md#final-statement-synchronization--2-november-2026)
 distinguishes focused checks from the complete verifier, which was not run at
 the maintainer's request.
 
@@ -293,10 +295,126 @@ modules outside the canonical results' import closure, retained their historical
 credit, consolidated ignore rules and corrected obsolete checking descriptions.
 The launcher and verification changes are proposed maintenance, not an accepted
 policy or a new mathematical result. The optional computation pilot is deferred.
-Checks and outstanding review are recorded in [HISTORY.md](docs/HISTORY.md).
+Checks and outstanding review are recorded in [HISTORY.md](https://github.com/marcusdavidwebb/SubGaussianTailBounds/blob/480fa4b70f12c1362c88c7e05abce1a853f91bb9/docs/HISTORY.md).
 
-No later substantial contribution has been accepted. Add future accepted
-entries identifying the contributor, affected regime, jointly proved quartet
-or implementation change, explanation and attribution, supersession, and
-actual commit/PR links when available. Preserve earlier substantive credit;
-follow [CONTRIBUTING.md](CONTRIBUTING.md).
+## Proof architecture simplification — 2 November 2026
+
+At Marcus Webb's request, Codex and parallel agents reconsidered the numerical
+proof and verification workflow at the fixed general `(3.84, 1.58, 2.35, 1.50)`
+and unit `(1.32, 1.12, 2.32, 1.42)` quartets. This is a local implementation for
+his review, with no new bound, optimality, novelty or acceptance claim.
+
+The supplied root source needed two syntax repairs: remove unmatched closing
+parentheses and separate `Real.exp` from its argument. Its mathematical
+expressions, hypotheses and dimension conditions are preserved. The preceding
+statement-equivalence adapters also needed correction: match the actual isotropy/
+sub-Gaussian argument order, derive measurable events from measurable rows in the
+forward direction, and project probability bounds in the reverse direction.
+The imported definitions and dependency revisions are unchanged.
+
+The general mean proof replaces inherited uniform log-parameter subdivisions
+with sufficient adaptive convexity bounds. The endpoint mean uses exact exponential-resolvent interval integrals instead of
+8,000-point quadrature and decay-prefix tables. The unused polynomial positivity
+slack permits coarser entropy allowances at the same required coefficient. Its
+4,502 joint and 100 small-shape intervals replace 60,352 and 513, respectively.
+The polynomial witnesses use shared exact integer transforms instead of repeated intermediate matrices. The unit
+public/internal tail contract uses the rational `1.42`; the cheap square-root
+comparison is local to its upper-tail estimate. The existing barrier, Taylor,
+rounding and Bernstein methods retain their historical attribution. Exact
+Python arithmetic proposes finite witnesses; Lean proves every retained fact.
+Wolfram MCP supports scalar exploration and supplies no accepted mathematical
+fact. Model review is not independent human review.
+
+The two published quartets now have one exact rational source. Focused and full
+local checks share a two-result specification. The obsolete accepted-constants
+snapshots, trusted-checkout comparisons and 22-obligation interface are removed;
+Marcus reviews coefficient and verification-policy changes. Full independent
+kernel replay, type/universe/axiom checks, source coverage and checked-input
+identity remain required. CI is read-only lightweight administration. Actual
+measurements and completed validation are recorded in [PERFORMANCE.md](docs/PERFORMANCE.md).
+
+The preceding provenance record's unresolved assessments remain unresolved:
+the selector/Gaussian spectral-limit discussion uses established ingredients
+with elementary consequences; the sparse example was recorded as inherited from
+Jeong–Li–Plan–Yılmaz, with elementary normalization and separate-tail deductions.
+Those sharpness discussions and the paper's applications lie outside these two
+Lean propositions. Neither verification nor an unsuccessful literature search
+establishes priority or novelty. The paper remains in preparation.
+
+## Editable root statement and generated presentation — 3 November 2026
+
+Marcus Webb revised the authoritative root statement and requested synchronization
+of its proof and documentation dependencies. Codex and parallel agents removed the
+fixed source-hash gate, simplified document generation around the current Lean
+source and README theorem, and retained source identity checks during verification.
+Generation refreshes the README's Lean copy and exact constants table; its check
+mode is read-only. The root's only subsequent edits add the whitespace Lean
+requires after `Real.exp`, with no change to its mathematical expressions.
+
+The revised root omits the earlier coefficient-positivity conjunctions and explicit
+measurable-row premise. The adapters prove the required positive-coefficient
+specializations using measurable representatives of almost-everywhere measurable
+rows and invariance of the tail measures under almost-everywhere equality. The
+required quartets, arbitrary universes, normalization and endpoints are unchanged.
+No third-party dependency or toolchain version is changed. This compatibility work
+adds no bound, optimality, novelty or acceptance claim; earlier attribution and
+unresolved assessments remain unchanged.
+
+Validation passes both local Lean commands, including 339 independent kernel
+replays and both exact theorem targets; the axiom audit reports only `propext`,
+`Classical.choice` and `Quot.sound`. Both modes report checked-input SHA-256
+`a34f7c69faed51ba6247c7771f03b810473ab9b5f43020a1cb972163d9c84b32`.
+The Python suite passes 99 tests, with 22 optional Lean integration tests skipped;
+canonical presentation, TeX synchronization and all three numerical-generator
+checks also pass. Existing pinned dependency artifacts are reused; the focused
+run rebuilds 216 stale project modules and the full run reuses them. Build and
+replay concurrency are both 24 workers. Logs are retained under
+`~/Lean/SubGaussianTailBounds/0ad011255e709e4d/statement-sync-20261103/`.
+
+## Python test simplification — 3 November 2026
+
+At Marcus Webb's request, Codex and parallel agents shortened the Python tests
+around document synchronization, environment setup and verification behavior.
+The changes remove workflow/source-text assertions, duplicate document-formatting
+cases, a fake verification environment and a redundant Lake freshness fixture.
+Focused behavior tests retain synchronization, preservation of user edits,
+dependency reuse, input identity, report/source coverage and failure propagation.
+The process-race regressions and all adversarial Lean acceptance/replay cases
+remain. Workflow details and some auxiliary formatting/error paths now rely on
+review instead of dedicated regression tests.
+
+Only tests and this attribution entry change. The mathematical sources,
+production generators, verifier, toolchain and package pins are unchanged; the
+previous successful focused/full checked-input inventory still matches exactly.
+This is maintenance with no mathematical, novelty or acceptance claim, and
+preserves the earlier human/model attribution and unresolved assessments.
+
+Test sources shrink from 2,181 to 1,715 lines, with 87 test cases instead of 121.
+The ordinary run passes 66 cases and skips 21 opt-in Lean integrations. A separate
+run passes both retained Lake freshness tests and their 11 accompanying scheduler
+tests using the existing pinned central workspace. The unchanged Lean proof was
+not rebuilt or replayed again for this test-only change.
+
+## Further test reduction — 3 November 2026
+
+At Marcus Webb's request, Codex and parallel agents further reduced the tests
+to nine workflow tests in three files, totaling 339 lines. These cover document
+generation and preservation, source/artifact identity, maintained-source coverage,
+real Lake cache invalidation, and Lean acceptance/replay with valid and invalid
+examples. The invalid cases include wrong constants, restricted universes, extra
+assumptions, forbidden axioms, forged proofs and native-computation assumptions.
+Individual helper/setup tests, mock scheduler harnesses, governance checks and
+specialized race, spoofing, collision and format fixtures are removed; these
+auxiliary paths have less dedicated regression coverage.
+
+No production generator, verifier, mathematical source, dependency pin or
+toolchain changes. The earlier full verification's checked inputs still match.
+Earlier attribution and unresolved assessments remain unchanged. An intermediate
+875-line suite passed all 42 cases; its log remains `leaner-tests.log`. The final
+nine workflow tests all pass with real Lean/Lake enabled in the existing central
+workspace. Their log is
+`~/Lean/SubGaussianTailBounds/0ad011255e709e4d/statement-sync-20261103/workflow-tests.log`.
+
+Future entries should identify the contributor, affected regime or implementation,
+explanation, attribution, supersession and actual commit/PR links when available.
+Preserve earlier substantive credit and follow [CONTRIBUTING.md](CONTRIBUTING.md).

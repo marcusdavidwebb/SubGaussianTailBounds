@@ -78,7 +78,11 @@ theorem upper_tail_general_of_certificates
     ((NeZero.pos n).trans_le hnm) hK0 hw hν
     (fun i => upper_row_estimate_general_of_certificates hmajor hnorm hrate hcells hnum
       hcert hsecond (hsg i) (hiso i) hK) ht
-  simpa only [hwK, hsqrt, UpperThreshold, generalConstants] using h
+  have hgamma : SubGaussian.Constants.generalGamma = (47/20:ℝ) := by
+    norm_num [SubGaussian.Constants.generalGamma]
+  have hdelta : SubGaussian.Constants.generalDelta = (3/2:ℝ) := by
+    norm_num [SubGaussian.Constants.generalDelta]
+  simpa only [hwK, hsqrt, UpperThreshold, generalConstants, hgamma, hdelta] using h
 
 /-- The exact endpoint upper quartet. -/
 theorem upper_tail_one_of_certificates
@@ -94,8 +98,19 @@ theorem upper_tail_one_of_certificates
     ((NeZero.pos n).trans_le hnm) (K := 1) (w := 58/25) (ν := 4)
     (by norm_num) (by norm_num) (by norm_num)
     (fun i => upper_row_estimate_one_of_certificates hmean hmajor hnorm hcert (hiso i) (hsg i)) ht
-  simpa only [UpperThreshold, oneConstants, logParameter, Real.log_one, add_zero,
-    Real.sqrt_one, mul_one, one_mul, div_one, show (4:ℝ)/2=2 by norm_num] using h
+  have hdelta : Real.sqrt 2 ≤ (71/50 : ℝ) := by
+    norm_num [Real.sqrt_le_iff]
+  apply le_trans (measureReal_mono ?_) h
+  intro ω hω
+  change UpperThreshold oneConstants m n 1 t ≤ largestSingularValue (rowMatrix X ω) at hω
+  change Real.sqrt m+1*Real.sqrt n+(58/25:ℝ)/1+Real.sqrt ((4:ℝ)/2)*t ≤
+    largestSingularValue (rowMatrix X ω)
+  have hdt := mul_le_mul_of_nonneg_right hdelta ht
+  simp only [UpperThreshold, oneConstants, logParameter, Real.log_one, add_zero,
+    Real.sqrt_one, mul_one, one_mul] at hω
+  norm_num only [SubGaussian.Constants.unitGamma, SubGaussian.Constants.unitDelta] at hω
+  simp only [one_mul, div_one, show (4:ℝ)/2=2 by norm_num]
+  linarith
 
 end Tails
 end SingularValueBounds.KL

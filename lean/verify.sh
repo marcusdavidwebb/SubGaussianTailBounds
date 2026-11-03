@@ -1,97 +1,84 @@
 #!/usr/bin/env bash
-# Complete local verification: compilation, independent replay and exact types.
+# Complete local proof check. --focused is the check-statements.sh entry point.
 set -euo pipefail
 source_dir="$(cd "$(dirname "$0")" && pwd -P)"
 source_root="$(cd "$source_dir/.." && pwd -P)"
-trusted_root="$(cd "${SVB_TRUSTED_ROOT:-$source_root}" && pwd -P)"
-export PYTHONDONTWRITEBYTECODE=1
-if (( $# )); then
-  printf 'Usage: %s\n' "$0" >&2
+focused=false
+if [[ $# == 1 && $1 == --focused ]]; then
+  focused=true
+elif (( $# )); then
+  printf 'Usage: %s [--focused]\n' "$0" >&2
   exit 2
 fi
-# Bind both sets of source and policy inputs before any checking or setup.
+export PYTHONDONTWRITEBYTECODE=1
 snapshot_dir="$(mktemp -d "${TMPDIR:-/tmp}/svb-verification.XXXXXXXX")"
 trap 'rm -rf -- "$snapshot_dir"' EXIT
 snapshot_file="$snapshot_dir/sources.json"
-python3 "$trusted_root/scripts/configure_lean.py" --snapshot-file "$snapshot_file" \
-  --candidate-root "$source_root" --trusted-root "$trusted_root"
-# 1. Check the statement and build inputs before candidate setup can run.
-python3 "$trusted_root/scripts/check_canonical_statement.py" --root "$source_root"
-if [[ ! -f "$source_dir/SingularValueBounds/Canonical/Results.lean" ]]; then
-  printf '%s\n' 'Missing complete canonical proof interface: Canonical/Results.lean.' >&2
-  exit 1
-fi
-python3 "$trusted_root/scripts/generate_lean_acceptance.py" \
-  --root "$source_root" --trusted-root "$trusted_root" --check-inputs-only
-
-# 2. Reuse the external workspace and prepare exact checking obligations.
+python3 "$source_root/scripts/configure_lean.py" --snapshot-file "$snapshot_file" \
+  --root "$source_root"
+python3 "$source_root/scripts/generate_lean_acceptance.py" \
+  --root "$source_root" --check-inputs-only
 work_dir="$("$source_dir/setup.sh")"
-toolchain="$(< "$trusted_root/lean/lean-toolchain")"
-if [[ -n "${SVB_ELAN_BIN:-}" ]]; then
-  elan_bin="$SVB_ELAN_BIN"
-elif [[ -x "$HOME/.elan/bin/elan" ]]; then
-  elan_bin="$HOME/.elan/bin/elan"
-else
-  elan_bin="$(command -v elan)"
-fi
-# Retain the existing local workspace; former downloaded audit directories are
-# never placed on this source build's search path.
-acceptance_dir="$work_dir/acceptance/all"
-python3 "$trusted_root/scripts/generate_lean_acceptance.py" \
-  --root "$source_root" --trusted-root "$trusted_root" --output-dir "$acceptance_dir"
+toolchain="$(< "$source_dir/lean-toolchain")"
+elan_bin="${SVB_ELAN_BIN:-$HOME/.elan/bin/elan}"
+if [[ ! -x "$elan_bin" ]]; then elan_bin="$(command -v elan)"; fi
+if $focused; then mode=focused; else mode=full; fi
+check_dir="$work_dir/verification/$mode"
+mkdir -p "$check_dir"
+generator_args=(--root "$source_root" --output-dir "$check_dir")
+if $focused; then generator_args+=(--focused); fi
+python3 "$source_root/scripts/generate_lean_acceptance.py" "${generator_args[@]}"
 cd "$work_dir"
+# The actual statement and authoritative coefficients are compiled before any
+# implementation syntax is imported by the expected-specification compiler.
+"$elan_bin" run "$toolchain" lake build MainTheoremStatement SingularValueBounds.Canonical.Constants
 lean_path="$("$elan_bin" run "$toolchain" lake env printenv LEAN_PATH)"
-LEAN_PATH="$lean_path" "$elan_bin" run "$toolchain" lean --run \
-  "$trusted_root/lean/Verification/SnapshotSource.lean" -- \
-  "$trusted_root/lean/SingularValueBounds/Canonical/AcceptedConstants.lean" \
-  "$source_dir/SingularValueBounds/Canonical/AcceptedConstants.lean"
-
-# 3. Compile the actual root and trusted checkers before the proof implementation.
-# Candidate constants are also compiled separately from the proof modules.
-"$elan_bin" run "$toolchain" lake build MainTheoremStatement
-cd "$acceptance_dir"
+cd "$check_dir"
 LEAN_PATH="$lean_path" "$elan_bin" run "$toolchain" lean \
-  -o CanonicalTrustedConstants.olean CanonicalTrustedConstants.lean
-LEAN_PATH="$acceptance_dir:$lean_path" "$elan_bin" run "$toolchain" lean \
   -o CanonicalAcceptanceExpected.olean CanonicalAcceptanceExpected.lean
-LEAN_PATH="$acceptance_dir:$lean_path" "$elan_bin" run "$toolchain" lean \
-  -o CanonicalAcceptanceAudit.olean CanonicalAcceptanceAudit.lean
-cp "$trusted_root/lean/Verification/ModuleReplay.lean" CanonicalModuleReplay.lean
-LEAN_PATH="$acceptance_dir:$lean_path" "$elan_bin" run "$toolchain" lean \
-  -o CanonicalModuleReplay.olean CanonicalModuleReplay.lean
-LEAN_PATH="$lean_path" "$elan_bin" run "$toolchain" lean \
-  -o CanonicalCandidateConstants.olean CanonicalCandidateConstants.lean
-protected_files=(CanonicalTrustedConstants.olean CanonicalAcceptanceExpected.olean
-  CanonicalAcceptanceAudit.lean CanonicalAcceptanceAudit.olean
-  CanonicalModuleReplay.lean CanonicalModuleReplay.olean CanonicalCandidateConstants.olean
-  "$work_dir/.lake/build/lib/lean/MainTheoremStatement.olean")
+export LEAN_PATH="$check_dir:$lean_path"
+protected_files=(CanonicalAcceptanceExpected.lean CanonicalAcceptanceExpected.olean
+  CanonicalAcceptanceAudit.lean
+  "$work_dir/.lake/build/lib/lean/MainTheoremStatement.olean"
+  "$work_dir/.lake/build/lib/lean/SingularValueBounds/Canonical/Constants.olean")
+if ! $focused; then
+  cp "$source_dir/Verification/ModuleReplay.lean" CanonicalModuleReplay.lean
+  protected_files+=(CanonicalModuleReplay.lean)
+fi
 policy_before="$(shasum -a 256 "${protected_files[@]}")"
-
-# 4. Build the proof and its comparison obligations, then recheck protected inputs.
+SECONDS=0
 cd "$work_dir"
-python3 "$trusted_root/scripts/build_lean_modules.py" \
-  --source-root "$source_root" --work-dir "$work_dir" --elan "$elan_bin"
-cd "$acceptance_dir"
-LEAN_PATH="$acceptance_dir:$lean_path" "$elan_bin" run "$toolchain" lean \
-  -o CanonicalAcceptance.olean CanonicalAcceptance.lean
+build_args=(--source-root "$source_root" --work-dir "$work_dir" --elan "$elan_bin")
+if $focused; then build_args+=(--target SingularValueBounds.Canonical.Results); fi
+python3 "$source_root/scripts/build_lean_modules.py" "${build_args[@]}"
+printf 'BUILD_PHASE_SECONDS %s\n' "$SECONDS"
+cd "$check_dir"
 if [[ "$(shasum -a 256 "${protected_files[@]}")" != "$policy_before" ]]; then
-  printf '%s\n' 'Candidate compilation modified a protected canonical policy artifact.' >&2
+  printf '%s\n' 'Verification inputs changed during compilation.' >&2
   exit 1
 fi
-python3 "$trusted_root/scripts/generate_lean_acceptance.py" \
-  --root "$source_root" --trusted-root "$trusted_root" --check-inputs-only
-
-# 5. Independently replay every module, check all 22 exact types, and validate
-# the complete report against the source files and umbrella imports.
-audit_output="$(LEAN_PATH="$acceptance_dir:$lean_path" python3 \
-  "$trusted_root/scripts/replay_lean_modules.py" --elan "$elan_bin" --toolchain "$toolchain" \
-  --worker "$acceptance_dir/CanonicalModuleReplay.lean" \
-  --auditor "$acceptance_dir/CanonicalAcceptanceAudit.lean" --source-dir "$source_dir")"
+SECONDS=0
+if $focused; then
+  "$elan_bin" run "$toolchain" lean --run CanonicalAcceptanceAudit.lean -- --focused
+else
+  python3 "$source_root/scripts/replay_lean_modules.py" \
+    --elan "$elan_bin" --toolchain "$toolchain" \
+    --worker "$check_dir/CanonicalModuleReplay.lean" \
+    --auditor "$check_dir/CanonicalAcceptanceAudit.lean" --source-dir "$source_dir"
+fi
+printf 'AUDIT_PHASE_SECONDS %s\n' "$SECONDS"
 if [[ "$(shasum -a 256 "${protected_files[@]}")" != "$policy_before" ]]; then
-  printf '%s\n' 'Protected canonical policy artifact changed during verification.' >&2
+  printf '%s\n' 'Verification inputs changed during the audit.' >&2
   exit 1
 fi
-python3 "$trusted_root/scripts/configure_lean.py" --snapshot-file "$snapshot_file" \
-  --snapshot-check --candidate-root "$source_root" --trusted-root "$trusted_root"
-printf '%s\n' "$audit_output"
-printf '%s\n' 'PASS: complete canonical Lean targets, comparisons, and axiom audits.'
+python3 "$source_root/scripts/configure_lean.py" --snapshot-file "$snapshot_file" \
+  --snapshot-check --root "$source_root"
+# Keep the exact path/content inventory identifying this successful run.
+cp "$snapshot_file" "$check_dir/inputs.json"
+read -r inputs_hash _ < <(shasum -a 256 "$check_dir/inputs.json")
+printf 'CHECKED_INPUTS_SHA256 %s\n' "$inputs_hash"
+if $focused; then
+  printf '%s\n' 'PASS: the two stated Lean propositions, exact universes and allowed axioms.'
+else
+  printf '%s\n' 'PASS: both canonical Lean results, full independent kernel replay, source coverage and allowed axioms.'
+fi

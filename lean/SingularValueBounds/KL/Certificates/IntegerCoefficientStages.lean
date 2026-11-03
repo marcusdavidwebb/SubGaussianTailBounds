@@ -75,6 +75,53 @@ theorem boxCertificate_of_integerStages (n m : ℕ)
     · exact_mod_cast (mul_pos hdbx hdv).le
 
 
+/-- The three separable integer transforms. Computing these expressions keeps
+only the polynomial coefficients in each concrete certificate. -/
+noncomputable def integerStageX {n m : ℕ}
+    (a : Fin (n+1) → Fin (m+1) → ℤ) (wx : Fin (n+1) → Fin (n+1) → ℤ)
+    (i : Fin (n+1)) (l : Fin (m+1)) : ℤ := ∑ k, a k l * wx i k
+
+noncomputable def integerStageY {n m : ℕ}
+    (a : Fin (n+1) → Fin (m+1) → ℤ) (wx : Fin (n+1) → Fin (n+1) → ℤ)
+    (wy : Fin (m+1) → Fin (m+1) → ℤ) (i : Fin (n+1)) (j : Fin (m+1)) : ℤ :=
+  ∑ l, integerStageX a wx i l * wy j l
+
+noncomputable def integerStageBX {n m : ℕ}
+    (a : Fin (n+1) → Fin (m+1) → ℤ) (wx : Fin (n+1) → Fin (n+1) → ℤ)
+    (wy : Fin (m+1) → Fin (m+1) → ℤ) (ux : Fin (n+1) → Fin (n+1) → ℤ)
+    (i : Fin (n+1)) (l : Fin (m+1)) : ℤ := ∑ k, integerStageY a wx wy k l * ux i k
+
+/-- The existing integer certificate, with intermediate stages computed rather
+than stored as additional witnesses. Only the final signs remain numerical goals. -/
+theorem boxCertificate_of_computedIntegerStages (n m : ℕ)
+    (a : Fin (n+1) → Fin (m+1) → ℚ) (box : RationalBox)
+    (aa : Fin (n+1) → Fin (m+1) → ℤ)
+    (wx ux : Fin (n+1) → Fin (n+1) → ℤ)
+    (wy uy : Fin (m+1) → Fin (m+1) → ℤ)
+    (da dx dy du dv : ℤ)
+    (hda : 0 < da) (hdx : 0 < dx) (hdy : 0 < dy) (hdu : 0 < du) (hdv : 0 < dv)
+    (hx : box.left < box.right) (hy : box.bottom < box.top)
+    (ha : ∀ k l, a k l = (aa k l : ℚ) / (da : ℚ))
+    (hwx : ∀ i k,
+      box.left^(k.val-i.val)*(k.val.choose i.val : ℚ)*(box.right-box.left)^i.val =
+        (wx i k : ℚ) / (dx : ℚ))
+    (hwy : ∀ j l,
+      box.bottom^(l.val-j.val)*(l.val.choose j.val : ℚ)*(box.top-box.bottom)^j.val =
+        (wy j l : ℚ) / (dy : ℚ))
+    (hux : ∀ i k, (i.val.choose k.val : ℚ)/n.choose k.val = (ux i k : ℚ)/(du : ℚ))
+    (huy : ∀ j l, (j.val.choose l.val : ℚ)/m.choose l.val = (uy j l : ℚ)/(dv : ℚ))
+    (hs : ∀ i j, 0 ≤ ∑ l, integerStageBX aa wx wy ux i l * uy j l) :
+    BoxCertificate (tensorOfFn n m a) n m box := by
+  apply boxCertificate_of_integerStages n m a box aa (integerStageX aa wx)
+    (integerStageY aa wx wy) (integerStageBX aa wx wy ux) wx ux wy uy
+    da (da*dx) (da*dx*dy) (da*dx*dy*du) dx dy du dv
+    hda (by positivity) (by positivity) (by positivity) hdx hdy hdu hdv
+    hx hy ha hwx hwy hux huy
+  · intro i l; rfl
+  · intro i j; rfl
+  · intro i l; rfl
+  · exact hs
+
 /-- Fixed integer Bernstein weights, shared by every degree-(6,15) box. -/
 noncomputable def bernsteinIntegerWeights6 : Fin 7 → Fin 7 → ℤ :=
   fun i k => (integer_matrix![![60, 0, 0, 0, 0, 0, 0],
@@ -117,13 +164,12 @@ theorem bernsteinIntegerWeights15_exact (i k : Fin 16) :
   simp only [Nat.choose_eq_fast_choose]
   decide +kernel
 
-/-- Degree-(6,15) specialization sharing the exact Bernstein weights. -/
-theorem boxCertificate_of_integerStages_6_15
+/-- Compact degree-(6,15) certificates, sharing the checked Bernstein weights. -/
+theorem boxCertificate_of_computedIntegerStages_6_15
     (a : Fin 7 → Fin 16 → ℚ) (box : RationalBox)
-    (aa ax b bx : Fin 7 → Fin 16 → ℤ)
+    (aa : Fin 7 → Fin 16 → ℤ)
     (wx : Fin 7 → Fin 7 → ℤ) (wy : Fin 16 → Fin 16 → ℤ)
-    (da dax db dbx dx dy : ℤ) (hda : 0 < da) (hdax : 0 < dax)
-    (hdb : 0 < db) (hdbx : 0 < dbx) (hdx : 0 < dx) (hdy : 0 < dy)
+    (da dx dy : ℤ) (hda : 0 < da) (hdx : 0 < dx) (hdy : 0 < dy)
     (hx : box.left < box.right) (hy : box.bottom < box.top)
     (ha : ∀ k l, a k l = (aa k l : ℚ) / (da : ℚ))
     (hwx : ∀ i k,
@@ -132,14 +178,11 @@ theorem boxCertificate_of_integerStages_6_15
     (hwy : ∀ j l,
       box.bottom^(l.val-j.val)*(l.val.choose j.val : ℚ)*(box.top-box.bottom)^j.val =
         (wy j l : ℚ) / (dy : ℚ))
-    (hax : ∀ i l, (∑ k, aa k l * wx i k) * dax = ax i l * (da*dx))
-    (hb : ∀ i j, (∑ l, ax i l * wy j l) * db = b i j * (dax*dy))
-    (hbx : ∀ i l, (∑ k, b k l * bernsteinIntegerWeights6 i k) * dbx = bx i l * (db*60))
-    (hby : ∀ i j, 0 ≤ ∑ l, bx i l * bernsteinIntegerWeights15 j l) :
+    (hs : ∀ i j, 0 ≤ ∑ l,
+      integerStageBX aa wx wy bernsteinIntegerWeights6 i l * bernsteinIntegerWeights15 j l) :
     BoxCertificate (tensorOfFn 6 15 a) 6 15 box :=
-  boxCertificate_of_integerStages 6 15 a box aa ax b bx wx
-    bernsteinIntegerWeights6 wy bernsteinIntegerWeights15 da dax db dbx dx dy 60 45045
-    hda hdax hdb hdbx hdx hdy (by decide) (by decide) hx hy ha hwx hwy
-    bernsteinIntegerWeights6_exact bernsteinIntegerWeights15_exact hax hb hbx hby
+  boxCertificate_of_computedIntegerStages 6 15 a box aa wx bernsteinIntegerWeights6
+    wy bernsteinIntegerWeights15 da dx dy 60 45045 hda hdx hdy (by decide) (by decide)
+    hx hy ha hwx hwy bernsteinIntegerWeights6_exact bernsteinIntegerWeights15_exact hs
 
 end SingularValueBounds.KL.Certificates

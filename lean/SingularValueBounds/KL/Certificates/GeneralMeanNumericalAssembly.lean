@@ -1,9 +1,36 @@
 import SingularValueBounds.KL.Upper.GeneralMeanNumerics
-import SingularValueBounds.KL.Certificates.ConcreteGeneralMeanSmall
+import SingularValueBounds.KL.Certificates.ConcreteLog
+import SingularValueBounds.KL.Upper.GeneralMeanCellData
 
 /-! Uniform assembly of finite general upper-mean scalar margins and rounded transcripts. -/
 namespace SingularValueBounds.KL.Certificates
 set_option maxHeartbeats 0
+
+theorem generalMeanGrid_pos (j : ℕ) : 0 < generalMeanGrid j := by
+  unfold generalMeanGrid
+  positivity
+
+theorem generalMeanCriticalPoint_pos (r : GeneralMeanRow) (j k : ℕ) :
+    0 < r.criticalPoint j k := by
+  unfold GeneralMeanRow.criticalPoint
+  exact lt_min (generalMeanGrid_pos _) ((generalMeanGrid_pos _).trans_le (le_max_left _ _))
+
+/-- Consecutive index intervals cover the entire compact parameter range. -/
+def GeneralMeanPartition : ℕ → List (Fin 121 × Fin 121) → Prop
+  | start, [] => start = 120
+  | start, p :: ps => p.1.val = start ∧ p.1 < p.2 ∧ GeneralMeanPartition p.2.val ps
+
+theorem GeneralMeanPartition.covers {start : ℕ} {ps : List (Fin 121 × Fin 121)}
+    (h : GeneralMeanPartition start ps) {j : ℕ} (hlo : start ≤ j) (hhi : j < 120) :
+    ∃ p ∈ ps, p.1.val ≤ j ∧ j < p.2.val := by
+  induction ps generalizing start with
+  | nil => simp only [GeneralMeanPartition] at h; omega
+  | cons p ps ih =>
+    rcases h with ⟨he, ho, ht⟩
+    by_cases hj : j < p.2.val
+    · exact ⟨p, List.mem_cons_self, by omega, hj⟩
+    · obtain ⟨q, hq, hqlo, hqhi⟩ := ih ht (by omega)
+      exact ⟨q, List.mem_cons_of_mem _ hq, hqlo, hqhi⟩
 
 /-- The final grid node is the endpoint used by every numerical row. -/
 theorem generalMeanGrid_last : generalMeanGrid (120 : Fin 121).val = (4 : ℚ) := by
@@ -17,12 +44,15 @@ def GeneralMeanBasicDomains (r : GeneralMeanRow) : Prop :=
 
 theorem generalMeanNumericalConditions_of_margins (r : GeneralMeanRow)
     (hb : GeneralMeanBasicDomains r)
-    (hp : roundUpQ r.prefactorArgument < 82)
-    (hs : ∀ j : Fin 120, 0 < r.criticalRate j.val)
-    (hc : ∀ j : Fin 120,
-      0 ≤ 2+r.criticalRate j.val*r.criticalPoint j.val-
-        (logRoundedQ (r.c*r.criticalPoint j.val)).2-r.J/2-
-        r.error (generalMeanGrid j.val)+r.slope j.val*generalMeanGrid j.val)
+    (hp : roundUpQ r.prefactorArgument < 26)
+    (ps : List (Fin 121 × Fin 121))
+    (ho : ∀ p ∈ ps, p.1 < p.2)
+    (hpartition : GeneralMeanPartition 0 ps)
+    (hs : ∀ p ∈ ps, 0 < r.criticalRate p.1.val p.2.val)
+    (hc : ∀ p ∈ ps,
+      0 ≤ 2+r.criticalRate p.1.val p.2.val*r.criticalPoint p.1.val p.2.val-
+        (logRoundedQ (r.c*r.criticalPoint p.1.val p.2.val)).2-r.J/2-
+        r.error (generalMeanGrid p.1.val)+r.slope p.1.val p.2.val*generalMeanGrid p.1.val)
     (hf : 0 ≤ 2+4*(47/20-2)-(logRoundedQ (4*r.c)).2-r.J/2-r.error 4) :
     GeneralMeanNumericalConditions r := by
   rcases hb with ⟨hk,ha,hq,hc0,hgap,hC,hdec,hcont⟩
@@ -30,25 +60,26 @@ theorem generalMeanNumericalConditions_of_margins (r : GeneralMeanRow)
     shape := hk, third := ha, rate := hq, cutoff := hc0,
     gap := hgap, correction := hC, decay := hdec, continuation := hcont,
     prefactorLog := roundedLogConditions (by linarith),
-    prefactorExp := roundedExpConditions hp,
+    prefactorExp := hp,
     continuationLog := ?_, nodeExp := ?_, nodeContinuationExp := ?_,
-    nodeRound := fun _ => le_finalEntropyRoundQ _,
-    slopePositive := hs, criticalLog := ?_, criticalMargin := hc,
+    nodeRound := fun _ => r.rawError_le_error _,
+    intervals := ⟨ps, ?_, fun j => hpartition.covers (Nat.zero_le _) j.isLt⟩,
     finalLog := roundedLogConditions (mul_pos (by norm_num) hc0), finalMargin := hf
   }
   · intro hq1
     apply roundedLogConditions
     exact div_pos (hc0.trans_le (hcont hq1).1) hc0
   · intro j
-    apply roundedExpConditions_nonpos
+    apply generalMeanExpDomain_nonpos
     have hn := mul_nonneg (sub_nonneg.mpr hdec.le) (generalMeanGrid_pos j.val).le
     linarith
   · intro hq1 j
-    apply roundedExpConditions_nonpos
+    apply generalMeanExpDomain_nonpos
     have hn := mul_nonneg (sub_nonneg.mpr (hcont hq1).2.le) (generalMeanGrid_pos j.val).le
     linarith
-  · intro j
-    exact roundedLogConditions (mul_pos hc0 (generalMeanCriticalPoint_pos r j.val))
+  · intro p hp
+    exact ⟨ho p hp, hs p hp,
+      roundedLogConditions (mul_pos hc0 (generalMeanCriticalPoint_pos r p.1.val p.2.val)), hc p hp⟩
 
 theorem generalMeanRows_basicDomains (i : Fin 1330) : GeneralMeanBasicDomains (generalMeanRows i) := by
   unfold GeneralMeanBasicDomains

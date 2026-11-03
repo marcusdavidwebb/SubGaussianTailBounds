@@ -27,5 +27,5 @@ srcDir = "@SVB_SOURCE_DIR@"
 
 [[lean_lib]]
 name = "MainTheoremStatement"
-# Compile the actual immutable root file; never copy or shadow this module.
+# Compile the actual authoritative root file; never copy or shadow this module.
 srcDir = "@SVB_ROOT_DIR@"

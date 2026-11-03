@@ -1,3 +1,4 @@
+import SingularValueBounds.Canonical.Constants
 import SingularValueBounds.Canonical.Adapter
 import SingularValueBounds.KL.Lower.MixedApplication
 import SingularValueBounds.KL.Upper.RowEstimates
@@ -14,7 +15,9 @@ namespace SingularValueBounds.Canonical
 universe u
 
 theorem unit_baseline :
-    SubGaussian.UnitSingularValueTailBound.{u} 1.32 1.12 2.32 1.42 := by
+    SubGaussian.UnitSingularValueTailBound.{u} SubGaussian.Constants.unitAlpha
+      SubGaussian.Constants.unitBeta SubGaussian.Constants.unitGamma
+      SubGaussian.Constants.unitDelta := by
   apply unit_of_tailBounds
   intro Ω _ μ _ m n _ hnm X hindep hiso hsg t ht
   exact ⟨KL.lower_tail_one_of_certificates KL.Certificates.endpointTableConditions

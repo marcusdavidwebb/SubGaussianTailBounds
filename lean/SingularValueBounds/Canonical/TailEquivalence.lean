@@ -28,4 +28,19 @@ theorem probability_toReal_le_exp_iff {Ω : Type u} [MeasurableSpace Ω]
       μ s ≤ ENNReal.ofReal (Real.exp (-(t ^ 2) / 2)) :=
   probability_toReal_le_iff μ s (Real.exp_pos _).le
 
+/-- Changing a random matrix on a null set preserves both tail probabilities. -/
+theorem gaussianSingularValueTails_congr_ae {Ω : Type u} [MeasurableSpace Ω]
+    (μ : Measure Ω) [IsProbabilityMeasure μ] {m n : ℕ}
+    {A B : Ω → Matrix (Fin m) (Fin n) ℝ} (hAB : A =ᵐ[μ] B)
+    (lower upper t : ℝ) :
+    GaussianSingularValueTails μ A lower upper t ↔
+      GaussianSingularValueTails μ B lower upper t := by
+  have hl : μ {ω | NLAlib.singularValues (A ω) (n - 1) ≤ lower} =
+      μ {ω | NLAlib.singularValues (B ω) (n - 1) ≤ lower} :=
+    measure_congr (hAB.fun_comp fun C => NLAlib.singularValues C (n - 1) ≤ lower)
+  have hu : μ {ω | NLAlib.singularValues (A ω) 0 ≥ upper} =
+      μ {ω | NLAlib.singularValues (B ω) 0 ≥ upper} :=
+    measure_congr (hAB.fun_comp fun C => NLAlib.singularValues C 0 ≥ upper)
+  simp only [GaussianSingularValueTails, hl, hu]
+
 end SubGaussian

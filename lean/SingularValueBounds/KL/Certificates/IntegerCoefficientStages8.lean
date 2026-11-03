@@ -24,13 +24,12 @@ theorem bernsteinIntegerWeights8_exact (i k : Fin 9) :
   simp only [Nat.choose_eq_fast_choose]
   decide +kernel
 
-/-- Degree-(8,15) specialization sharing the exact Bernstein weights. -/
-theorem boxCertificate_of_integerStages_8_15
+/-- Compact degree-(8,15) certificates, sharing the checked Bernstein weights. -/
+theorem boxCertificate_of_computedIntegerStages_8_15
     (a : Fin 9 → Fin 16 → ℚ) (box : RationalBox)
-    (aa ax b bx : Fin 9 → Fin 16 → ℤ)
+    (aa : Fin 9 → Fin 16 → ℤ)
     (wx : Fin 9 → Fin 9 → ℤ) (wy : Fin 16 → Fin 16 → ℤ)
-    (da dax db dbx dx dy : ℤ) (hda : 0 < da) (hdax : 0 < dax)
-    (hdb : 0 < db) (hdbx : 0 < dbx) (hdx : 0 < dx) (hdy : 0 < dy)
+    (da dx dy : ℤ) (hda : 0 < da) (hdx : 0 < dx) (hdy : 0 < dy)
     (hx : box.left < box.right) (hy : box.bottom < box.top)
     (ha : ∀ k l, a k l = (aa k l : ℚ) / (da : ℚ))
     (hwx : ∀ i k,
@@ -39,14 +38,11 @@ theorem boxCertificate_of_integerStages_8_15
     (hwy : ∀ j l,
       box.bottom^(l.val-j.val)*(l.val.choose j.val : ℚ)*(box.top-box.bottom)^j.val =
         (wy j l : ℚ) / (dy : ℚ))
-    (hax : ∀ i l, (∑ k, aa k l * wx i k) * dax = ax i l * (da*dx))
-    (hb : ∀ i j, (∑ l, ax i l * wy j l) * db = b i j * (dax*dy))
-    (hbx : ∀ i l, (∑ k, b k l * bernsteinIntegerWeights8 i k) * dbx = bx i l * (db*280))
-    (hby : ∀ i j, 0 ≤ ∑ l, bx i l * bernsteinIntegerWeights15 j l) :
+    (hs : ∀ i j, 0 ≤ ∑ l,
+      integerStageBX aa wx wy bernsteinIntegerWeights8 i l * bernsteinIntegerWeights15 j l) :
     BoxCertificate (tensorOfFn 8 15 a) 8 15 box :=
-  boxCertificate_of_integerStages 8 15 a box aa ax b bx wx
-    bernsteinIntegerWeights8 wy bernsteinIntegerWeights15 da dax db dbx dx dy 280 45045
-    hda hdax hdb hdbx hdx hdy (by decide) (by decide) hx hy ha hwx hwy
-    bernsteinIntegerWeights8_exact bernsteinIntegerWeights15_exact hax hb hbx hby
+  boxCertificate_of_computedIntegerStages 8 15 a box aa wx bernsteinIntegerWeights8
+    wy bernsteinIntegerWeights15 da dx dy 280 45045 hda hdx hdy (by decide) (by decide)
+    hx hy ha hwx hwy bernsteinIntegerWeights8_exact bernsteinIntegerWeights15_exact hs
 
 end SingularValueBounds.KL.Certificates

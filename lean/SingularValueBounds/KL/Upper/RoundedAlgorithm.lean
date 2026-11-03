@@ -21,16 +21,6 @@ def expTermUpperQ (x : ℚ) : ℕ → ℚ
   | 0 => 1
   | j+1 => roundUpQ (expTermUpperQ x j*x/(j+1 : ℚ))
 
-def expLowerSumQ (x : ℚ) : ℚ := ∑ j ∈ Finset.range 81, expTermLowerQ x j
-
-def expPositiveUpperQ (x : ℚ) : ℚ :=
-  (∑ j ∈ Finset.range 81, expTermUpperQ x j)+
-    roundUpQ (roundUpQ (expTermUpperQ x 80*x/81)/(1-x/82))
-
-def expUpperRoundedQ (x : ℚ) : ℚ :=
-  let y := roundUpQ x
-  if y < 0 then roundUpQ (1/expLowerSumQ (-y)) else expPositiveUpperQ y
-
 def logPowerLowerQ (z z2 : ℚ) : ℕ → ℚ
   | 0 => z
   | j+1 => roundDownQ (logPowerLowerQ z z2 j*z2)
@@ -81,8 +71,6 @@ def logRoundedQ (x : ℚ) : ℚ × ℚ :=
     let pair := logPositiveRoundedQ (1/x)
     (-pair.2,-pair.1)
   else logPositiveRoundedQ x
-
-def finalEntropyRoundQ (x : ℚ) : ℚ := -(⌊-(x*10000000000)⌋ : ℚ)/10000000000
 
 end SingularValueBounds.KL.Certificates
 

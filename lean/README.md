@@ -1,99 +1,76 @@
-# Running the Lean proof
+# Checking the Lean proof
 
-To check just the two displayed statements, run from the repository root:
+From the repository root:
 
 ```sh
 ./lean/check-statements.sh
-```
-
-This builds the required proof dependency closure, checks the two exact,
-universe-polymorphic propositions and audits their proof dependencies for
-allowed axioms. It trusts imported compiled artifacts and elaborators; it does
-not independently replay every module or protect its expected types against
-hostile imported syntax. It also omits contribution-policy comparisons and
-source-coverage checks.
-
-For the complete check, run:
-
-```sh
 ./lean/verify.sh
 ```
 
-This builds the actual root statement and all maintained proofs, independently
-replays every module through Lean's kernel, and checks exact types, constants,
-universes and allowed axioms. Setup alone does not verify proofs. For PR review,
-set `SVB_TRUSTED_ROOT` to a separate accepted checkout; self-comparison is only
-preflight. [Verification and review](../docs/VERIFICATION.md) defines the complete
-contract. GitHub CI performs administrative checks only.
+Both commands perform setup internally, build the needed modules and check the
+same two exact propositions for arbitrary sample-space universes. The focused
+command audits the two results and their transitive axioms, trusting compiled
+imports. The full command also builds and independently replays every maintained
+proof module through Lean's kernel, checks source coverage and binds the report
+to unchanged source/artifact inputs. There is no separate accepted checkout or
+constants-comparison interface. Marcus reviews coefficient and policy changes.
 
-The complete local self-check passed on **2 November 2026**, including independent
-kernel replay of all 563 modules and all 22 acceptance targets, with exact-type,
-universe, source-coverage and axiom audits. This was a self-comparison; verification
-against a separate accepted base remains required before merging.
+## Existing environment and storage
 
-## Pinned environment and storage
+The pinned environment is Lean **4.33.1**, Mathlib
+`0df444a360eaa60ab8c11dca51a86af692955474`, NLA-lib
+`6491e7528c1b1e68e46301cde6a76ae153e8e834`, and the exact transitive revisions in
+[lake-manifest.json](lake-manifest.json). Check installed toolchains with
+`~/.elan/bin/elan toolchain list`; setup reuses existing installations and reports
+missing or incompatible dependencies without downloading or replacing them.
 
-Reuse Lean **4.33.1** and the exact dependency revisions in
-[lake-manifest.json](lake-manifest.json): Mathlib is pinned to
-`0df444a360eaa60ab8c11dca51a86af692955474`, and
-[NLA-lib](https://github.com/NLA-lib/NLAlib/tree/6491e7528c1b1e68e46301cde6a76ae153e8e834)
-to `6491e7528c1b1e68e46301cde6a76ae153e8e834`. Reuse the central Elan installation
-in `~/.elan`; check installed toolchains before invoking Lean:
+This checkout's default external workspace is
+`~/Lean/SubGaussianTailBounds/0ad011255e709e4d/nla-4.33.1/`. It holds resolved Lake
+configuration/manifest, `.lake/packages/`, `.lake/build/`, generated auditors and
+logs. `MATHLIB_CACHE_DIR` defaults to `~/Library/Caches/mathlib` on macOS. The
+older `~/Lean/SingularValueBounds/` Lean 4.19.0 project is separate and untouched.
+Do not place dependencies, caches or compiled outputs in this checkout or OneDrive.
 
-```sh
-"$HOME/.elan/bin/elan" toolchain list
-```
-
-The list must include `leanprover/lean4:v4.33.1`. Missing or incompatible
-dependencies are reported; routine verification never installs, clones, fetches
-or upgrades them.
-
-Each checkout owns an external workspace at
-`~/Lean/SubGaussianTailBounds/<source-path-digest>/nla-4.33.1/`
-(`0ad011255e709e4d` for this checkout). It contains the resolved Lake configuration
-and manifest, pinned `.lake/packages/mathlib/` and `.lake/packages/NLAlib/`,
-generated checking modules, logs and `.lake/build/` outputs. Use
-`~/Library/Caches/mathlib` for `MATHLIB_CACHE_DIR` on macOS.
-
-Keep dependencies, caches and compiled outputs outside this source checkout and
-OneDrive. Do not reuse `SingularValueBounds/.lake/build/` for this project or
-symlink bulky dependencies into the repository. The older Lean 4.19.0 dependency
-tree at `~/Lean/SingularValueBounds/.lake/packages/` is incompatible with these
-pins and remains untouched. Workspace ownership checks keep build outputs
-separate for different checkouts.
-
-| Environment variable | Override |
+| Variable | Purpose |
 |---|---|
-| `SVB_WORK_DIR` | Absolute external workspace belonging to this checkout |
-| `SVB_PACKAGES_DIR` | Existing directory of exact pinned dependencies |
-| `SVB_ELAN_BIN` | Existing Elan executable; defaults to central `~/.elan/bin/elan` |
-| `MATHLIB_CACHE_DIR` | External Mathlib cache |
-| `SVB_TRUSTED_ROOT` | Existing accepted-base checkout for policy and constants comparisons |
-| `SVB_BUILD_JOBS` | Maximum concurrent module builds; defaults to 1 |
-| `SVB_REPLAY_JOBS` | Maximum concurrent kernel replay workers; defaults to 1 |
+| `SVB_WORK_DIR` | Absolute external workspace owned by this checkout |
+| `SVB_PACKAGES_DIR` | Existing packages at the exact pinned revisions |
+| `SVB_ELAN_BIN` | Existing Elan executable; defaults to `~/.elan/bin/elan` |
+| `SVB_BUILD_JOBS` | Concurrent module builds; default 1 |
+| `SVB_REPLAY_JOBS` | Concurrent independent kernel workers; default 1 |
+| `MATHLIB_CACHE_DIR` | External Mathlib download cache |
 
-Cold verification can take hours, and individual proof modules can use several
-gigabytes of RAM. Increase parallelism only to fit the machine. Lake reuses
-current compiled outputs after checking source-content traces; independent
-kernel replay still runs afresh in dependency order. See
-[recorded measurements](../docs/HISTORY.md) for observed costs.
+Choose concurrency to fit available memory. Both commands use the same bounded
+build scheduler because this pinned Lake version provides no compiler-process
+concurrency limit. Current project artifacts can be reused after Lake checks
+source traces; full kernel replay always runs afresh. Measurements distinguish
+project-clean builds with existing dependency artifacts from incremental checks.
+See [performance](../docs/PERFORMANCE.md).
 
 ## Source layout
 
-| Location | Role |
-|---|---|
-| [Root statement](../MainTheoremStatement.lean) → [Canonical/Results.lean](SingularValueBounds/Canonical/Results.lean) | Authoritative propositions and complete public results; follow their imports into the proofs |
-| [Canonical/](SingularValueBounds/Canonical/) | Baseline proofs, NLA-lib equivalence bridges, adapters, monotonicity and accepted constants |
-| [KL/](SingularValueBounds/KL/) | Barrier/row analysis and exact finite proofs in `Certificates/`; row/block modules bound memory use and share computations |
-| Other [SingularValueBounds/](SingularValueBounds/) folders | Shared scalar, spectral, matrix, concentration and quadratic-form mathematics |
-| [SingularValueBounds.lean](SingularValueBounds.lean) | Umbrella importing every maintained mathematical module for verification coverage |
-| [scripts/](../scripts/) and [Verification/](Verification/) | Python setup/scheduling/administration and Lean checking programs/templates; Python supplies no mathematical oracle |
-| [tests/](../tests/) | Tool regression tests, including opt-in local Lean fixtures; separate from the complete verifier |
+Start at [Canonical/Results.lean](SingularValueBounds/Canonical/Results.lean).
+The root statement defines the propositions and
+[Constants.lean](SingularValueBounds/Canonical/Constants.lean) supplies their exact
+rational coefficients. `Canonical/` connects imported definitions to the proof;
+`KL/Lower`, `KL/Upper` and `KL/Barrier` provide the scalar estimates and matrix
+transfer. `KL/Certificates` contains exact finite data and checking lemmas.
+Other folders supply shared scalar, matrix and concentration facts.
 
-Preserve the root statement's exact bytes, name and location, including imports,
-comments and universes. Never edit, delete, rename, relocate, replace or shadow it,
-including for maintenance. Proof changes follow [CONTRIBUTING.md](../CONTRIBUTING.md).
+[SingularValueBounds.lean](SingularValueBounds.lean) imports all maintained
+mathematical modules. `Verification/` and `scripts/` implement source enumeration,
+bounded build scheduling and the independent kernel/type/axiom audits. Python
+provides no mathematical oracle. Numerical generators propose exact witnesses;
+the corresponding Lean modules establish the required bounds.
 
-[generate_theorem_tex.py](../scripts/generate_theorem_tex.py) and
-[its regression test](../tests/test_theorem_tex.py) maintain the standalone
-[TeX statement](../README.md#tex-statement) from the README and actual root source.
+For documentation, `python3 scripts/generate_theorem_tex.py` combines the README
+theorem with the actual root Lean source to generate TeX and PDF. It also refreshes
+the README's Lean block and constants table. The root source is not hash-pinned;
+`--check` detects drift without writing or compiling. See
+[CONTRIBUTING.md](../CONTRIBUTING.md) for proof and review requirements.
+
+To reproduce the generated numerical proof sources after editing their rational
+input data, run the three `scripts/generate_*.py` proof generators (general mean,
+endpoint entropy, polynomial certificates). Each supports `--check` for a read-only
+consistency check; CI runs those checks. Lean, rather than the generators,
+establishes their mathematical validity.

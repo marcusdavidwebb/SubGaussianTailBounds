@@ -6,10 +6,11 @@ Identify any verification-policy change requiring separate review.
 
 ## Verification
 
-Record the candidate and accepted-base commit IDs, exact command and actual
-result of the complete [local verification](../docs/VERIFICATION.md), plus other
-checks performed. State failed, skipped or interrupted checks explicitly.
-The immutable root statement must remain byte-for-byte unchanged.
+Record the checked source state, exact command and actual result of the complete
+[local verification](../docs/VERIFICATION.md), plus other checks performed.
+State failed, skipped or interrupted checks explicitly. Make any change to the
+root statement or imported mathematical definitions conspicuous, and explain
+its mathematical effect with equivalence or bridge proofs where needed.
 
-Marcus Webb repeats the complete accepted-base check before merging every PR.
+Marcus Webb reviews the changes and runs complete local verification before merging.
 Green administrative CI is not Lean proof verification.

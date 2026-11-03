@@ -1,13 +1,15 @@
 import SingularValueBounds.KL.Upper.EndpointMeanData
-import SingularValueBounds.KL.Upper.EndpointRoundedEval
+import SingularValueBounds.KL.Upper.EndpointEntropyRunData
+import SingularValueBounds.KL.Upper.EntropyAnalyticRunNumerics
+import SingularValueBounds.KL.Upper.EndpointAnalyticPrefactor
 import SingularValueBounds.KL.Upper.LogdetCertificates
 import SingularValueBounds.KL.Upper.ComparisonLogdet
 
 /-! # The finite endpoint upper-mean conditions
 
 All fields of the numerical predicate below are finite rational inequalities
-or polynomial coefficient identities. They refer to the actual 50 intervals,
-837 clipped rectangles, computed rounded sums and selected determinant tests.
+or polynomial coefficient identities. The endpoint entropy is integrated over
+finite rational rate intervals, with no uniform Riemann grid or decay transcript.
 -/
 open Polynomial Set
 open scoped Polynomial BigOperators
@@ -39,21 +41,21 @@ def endpointMeanCornerA (ki : Fin 60) (ai : Fin 42) (h : Fin 4) : ℚ :=
 def endpointMeanCornerK (ki : Fin 60) (ai : Fin 42) (h : Fin 4) : ℚ :=
   if h=0 ∨ h=1 then (endpointMeanBox ki ai).bottom else (endpointMeanBox ki ai).top
 
-def endpointMeanRate (ki : Fin 60) (ai : Fin 42) (j : ℕ) : ℕ :=
-  let b := endpointMeanBox ki ai
-  let k := (b.bottom+b.top)/2
-  let a := (b.left+b.right)/2
-  let u := (j : ℚ)/200
-  let opt : ℤ := ⌊100*(u-1)/(k*a+k^2*(u-1))⌋
-  let margin : ℤ := 100+⌊100*(58/25)/(u*b.top)⌋
-  let spectral : ℤ := -⌊-(100/b.top^2)⌋-1
-  (max 90 (min 200 (min opt (min margin spectral)))).toNat
+def endpointRunPointQ (j0 j : ℕ) : ℚ := ((max j0 (j-1) : ℕ):ℚ)/200
+
+def endpointRunWeightQ (j0 : ℕ) (r : EndpointRateRun) : ℚ :=
+  entropyExpWeightUpperQ ((j0 : ℚ)/200) ((r.rate : ℚ)/100)
+    (endpointRunPointQ j0 r.start) (endpointRunPointQ j0 r.stop)
+
+def endpointAnalyticTailQ (j0 : ℕ) : ℚ :=
+  roundUpQ ((31623/10000)*primitiveUpperQ ((j0 : ℚ)/200) (9/10) (endpointRunPointQ j0 8000))
 
 def endpointMeanNumericCorner (ki : Fin 60) (ai : Fin 42) (h : Fin 4) : ℚ :=
-  entropyGridBoundQ (endpointMeanCutoff ki ai)
-    (fun j => endpointJointPrefactorQ (endpointMeanCornerK ki ai h)
-      (endpointMeanCornerA ki ai h) ((endpointMeanRate ki ai j : ℚ)/100)*
-        endpointDecayQ (endpointMeanRate ki ai j) j) (endpointDecayQ 90 8000)
+  (logRoundedQ ((endpointMeanCutoff ki ai : ℚ)/200)).2+
+    endpointAnalyticTailQ (endpointMeanCutoff ki ai)+
+    ((endpointMeanRuns ki ai).map (fun r => endpointRunWeightQ (endpointMeanCutoff ki ai) r*
+      endpointJoint24Q (endpointMeanCornerK ki ai h) (endpointMeanCornerA ki ai h)
+        ((r.rate : ℚ)/100))).sum
 
 def endpointMeanBilinearQ (ki : Fin 60) (ai : Fin 42) : Polynomial (Polynomial ℚ) :=
   let b := endpointMeanBox ki ai
@@ -80,54 +82,73 @@ def endpointMeanTestQ (ki : Fin 60) (ai : Fin 42) : Polynomial (Polynomial ℚ) 
       C (C (1/2))*padeNQ comparisonZQ
 
 def endpointSmallK (i : Fin 50) : ℚ := (i.val+1 : ℚ)/200
-def endpointSmallQ (h : Fin 23) : ℕ := 90+5*h.val
-
-def endpointSmallBoundTerm (i : Fin 50) (j : ℕ) (h : Fin 23) : ℚ :=
-  let q : ℚ := (endpointSmallQ h : ℚ)/100
-  if (j : ℚ)/200*endpointSmallK i*(q-1)≤58/25 then
-    roundUpQ (endpointSmallPrefactorQ (endpointSmallK i) q*endpointDecayQ (endpointSmallQ h) j)
-  else 1
-
-def endpointSmallBound (i : Fin 50) (j : ℕ) : ℚ :=
-  min 1 (Finset.univ.inf' Finset.univ_nonempty (endpointSmallBoundTerm i j))
+def endpointSmallNumeric (i : Fin 50) : ℚ :=
+  (logRoundedQ ((endpointSmallCutoff i : ℚ)/200)).2+
+    endpointAnalyticTailQ (endpointSmallCutoff i)+
+    ((endpointSmallRuns i).map (fun r => endpointRunWeightQ (endpointSmallCutoff i) r*
+      endpointSmall24Q (endpointSmallK i) ((r.rate : ℚ)/100))).sum
 
 def endpointSmallTarget (i : Fin 50) : ℚ :=
   239/200+(9/20)*(i.val : ℚ)^2/200^2+(i.val : ℚ)^4/(2*200^4)
 
+/-- Every interval lies above the entropy cutoff and has an admissible tail rate.
+The last inequality is the cap condition at its right endpoint. -/
+def EndpointRunConditions (j0 : ℕ) (k : ℚ) (r : EndpointRateRun) : Prop :=
+  j0 ≤ r.start ∧ r.start < r.stop ∧ r.stop ≤ 8000 ∧
+  90 ≤ r.rate ∧ r.rate ≤ 200 ∧
+  ((r.rate : ℚ)/100)*k^2 < 1 ∧
+  endpointRunPointQ j0 r.stop*k*((r.rate : ℚ)/100-1) ≤ 58/25
+
+def EndpointJointNumericalConditions (ki : Fin 60) (ai : Fin 42) : Prop :=
+  EndpointRunsCover (endpointMeanCutoff ki ai) 8000 (endpointMeanRuns ki ai) ∧
+  (∀ r ∈ endpointMeanRuns ki ai, EndpointRunConditions (endpointMeanCutoff ki ai)
+    (endpointMeanBox ki ai).top r) ∧
+  (∀ h : Fin 4, ∀ r ∈ endpointMeanRuns ki ai,
+    roundUpQ (endpointJoint24Argument (endpointMeanCornerK ki ai h)
+      (endpointMeanCornerA ki ai h) ((r.rate : ℚ)/100)) < 26) ∧
+  (∀ h : Fin 4, endpointMeanNumericCorner ki ai h ≤ endpointMeanCorner ki ai h)
+
+def EndpointSmallNumericalConditions (i : Fin 50) : Prop :=
+  EndpointRunsCover (endpointSmallCutoff i) 8000 (endpointSmallRuns i) ∧
+  (∀ r ∈ endpointSmallRuns i, EndpointRunConditions (endpointSmallCutoff i) (endpointSmallK i) r) ∧
+  (∀ r ∈ endpointSmallRuns i,
+    roundUpQ (endpointSmall24Argument (endpointSmallK i) ((r.rate : ℚ)/100)) < 26) ∧
+  endpointSmallNumeric i ≤ endpointSmallTarget i
+
+theorem endpointRunPointQ_mono (j0 : ℕ) : Monotone (endpointRunPointQ j0) := by
+  intro i j hij
+  unfold endpointRunPointQ
+  apply div_le_div_of_nonneg_right _ (by norm_num : (0:ℚ)≤200)
+  exact_mod_cast max_le_max le_rfl (Nat.sub_le_sub_right hij 1)
+
+theorem endpointRunPointQ_above (j0 j : ℕ) : (j0:ℚ)/200≤endpointRunPointQ j0 j := by
+  unfold endpointRunPointQ
+  apply div_le_div_of_nonneg_right _ (by norm_num : (0:ℚ)≤200)
+  exact_mod_cast (le_max_left j0 (j-1))
+
+theorem endpointRunPointQ_cast (j0 j : ℕ) :
+    (endpointRunPointQ j0 j:ℝ)=endpointRunPoint j0 j := by
+  simp [endpointRunPointQ,endpointRunPoint]
+
+theorem endpointRunWeightQ_nonneg {j0 : ℕ} (hj0 : 0<j0) {r : EndpointRateRun}
+    (hr : r.start≤r.stop) (hq : 0<r.rate) : 0≤endpointRunWeightQ j0 r := by
+  apply entropyExpWeightUpperQ_nonneg (by positivity)
+    (endpointRunPointQ_above _ _) (endpointRunPointQ_mono _ hr) (by positivity)
+
 structure EndpointMeanCertificateConditions : Prop where
-  gridLogs : ∀j : ℕ,j∈Finset.Icc 1 8001 → RoundedLogConditions ((j : ℚ)/200)
-  decays : ∀qi∈Finset.Icc 90 200,EndpointDecayConditions qi
   aGrid : endpointMeanAPoint 0=0 ∧ endpointMeanAPoint 42=1 ∧
     ∀ai : Fin 42,endpointMeanAPoint ⟨ai.val,by omega⟩<endpointMeanAPoint ⟨ai.val+1,by omega⟩
   quarterNondegenerate : ∀ai : Fin 42,(1/4 : ℚ)^3≠endpointMeanAPoint ⟨ai.val+1,by omega⟩
   smallCutoff : ∀i : Fin 50,0<endpointSmallCutoff i ∧ endpointSmallCutoff i≤8000
-  smallPrefactors : ∀i : Fin 50,∀h : Fin 23,
-    EndpointSmallPrefactorConditions (endpointSmallK i) ((endpointSmallQ h : ℚ)/100)
-  smallRounding : ∀i : Fin 50,∀j∈Finset.Ico (endpointSmallCutoff i) 8000,∀h : Fin 23,
-    endpointSmallPrefactorQ (endpointSmallK i) ((endpointSmallQ h : ℚ)/100)*
-      endpointDecayQ (endpointSmallQ h) j≤
-        roundUpQ (endpointSmallPrefactorQ (endpointSmallK i) ((endpointSmallQ h : ℚ)/100)*
-          endpointDecayQ (endpointSmallQ h) j)
-  smallNumerical : ∀i : Fin 50,entropyGridBoundQ (endpointSmallCutoff i)
-    (endpointSmallBound i) (endpointDecayQ 90 8000)≤endpointSmallTarget i
+  smallNumerical : ∀i : Fin 50,EndpointSmallNumericalConditions i
   smallTotal : ∀i : Fin 50,endpointSmallTarget i+13/12-1/80≤58/25
   jointCutoff : ∀ki : Fin 60,∀ai : Fin 42,endpointMeanActive ki ai →
     0<endpointMeanCutoff ki ai ∧ endpointMeanCutoff ki ai≤8000
   jointBoxes : ∀ki : Fin 60,∀ai : Fin 42,endpointMeanActive ki ai →
     0≤(endpointMeanBox ki ai).left ∧ 0<(endpointMeanBox ki ai).bottom ∧
       (endpointMeanBox ki ai).bottom<(endpointMeanBox ki ai).top ∧ (endpointMeanBox ki ai).top≤1
-  jointRates : ∀ki : Fin 60,∀ai : Fin 42,endpointMeanActive ki ai →
-    ∀j∈Finset.Ico (endpointMeanCutoff ki ai) 8000,
-    let q : ℚ := (endpointMeanRate ki ai j : ℚ)/100
-    90≤endpointMeanRate ki ai j ∧ endpointMeanRate ki ai j≤200 ∧
-    q*(endpointMeanBox ki ai).top^2<1 ∧
-    (j : ℚ)/200*(endpointMeanBox ki ai).top*(q-1)≤58/25
-  jointPrefactors : ∀ki : Fin 60,∀ai : Fin 42,endpointMeanActive ki ai →
-    ∀h : Fin 4,∀j∈Finset.Ico (endpointMeanCutoff ki ai) 8000,
-    EndpointJointPrefactorConditions (endpointMeanCornerK ki ai h)
-      (endpointMeanCornerA ki ai h) ((endpointMeanRate ki ai j : ℚ)/100)
-  jointCorners : ∀ki : Fin 60,∀ai : Fin 42,endpointMeanActive ki ai →
-    ∀h : Fin 4,endpointMeanNumericCorner ki ai h≤endpointMeanCorner ki ai h
+  jointNumerical : ∀ki : Fin 60,∀ai : Fin 42,endpointMeanActive ki ai →
+    EndpointJointNumericalConditions ki ai
   chosenDomain : ∀ki : Fin 60,∀ai : Fin 42,endpointMeanActive ki ai →
     let b := endpointMeanBox ki ai
     let h := endpointMeanChoice ki ai

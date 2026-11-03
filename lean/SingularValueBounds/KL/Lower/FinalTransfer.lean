@@ -52,6 +52,7 @@ theorem lower_tail_general_from_mixed_input
   change smallestSingularValue (rowMatrix X ω) ≤
     Real.sqrt m-(K*Real.sqrt n+K*logParameter K*H)-q*t
   dsimp [LowerThreshold, generalConstants] at hω
+  norm_num only [SubGaussian.Constants.generalAlpha, SubGaussian.Constants.generalBeta] at hω
   linarith
 
 theorem lower_tail_one_from_mixed_input
@@ -87,6 +88,7 @@ theorem lower_tail_one_from_mixed_input
     Real.sqrt m-(Real.sqrt n+H)-Real.sqrt (5/4:ℝ)*t
   simp only [LowerThreshold, oneConstants, logParameter, Real.log_one, add_zero,
     Real.sqrt_one, mul_one, one_mul] at hω
+  norm_num only [SubGaussian.Constants.unitAlpha, SubGaussian.Constants.unitBeta] at hω
   linarith
 
 end

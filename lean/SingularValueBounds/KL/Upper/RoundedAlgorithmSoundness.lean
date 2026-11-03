@@ -6,26 +6,6 @@ the real exponential and logarithm. No analytic assertion is a certificate field
 namespace SingularValueBounds.KL.Certificates
 noncomputable section
 
-def RoundedExpConditions (x : ℚ) : Prop :=
-  x ≤ roundUpQ x ∧
-  if roundUpQ x < 0 then
-    ExpLowerTranscript 80 (-roundUpQ x) (expLowerSumQ (-roundUpQ x))
-      (expTermLowerQ (-roundUpQ x)) ∧
-      0 < expLowerSumQ (-roundUpQ x) ∧
-      1/expLowerSumQ (-roundUpQ x) ≤ roundUpQ (1/expLowerSumQ (-roundUpQ x))
-  else ExpUpperTranscript 80 (roundUpQ x) (expPositiveUpperQ (roundUpQ x))
-      (expTermUpperQ (roundUpQ x))
-
-theorem RoundedExpConditions.sound {x : ℚ} (h : RoundedExpConditions x) :
-    Real.exp (x : ℝ) ≤ (expUpperRoundedQ x : ℝ) := by
-  have hxy : (x : ℝ) ≤ (roundUpQ x : ℝ) := by exact_mod_cast h.1
-  apply (Real.exp_le_exp.mpr hxy).trans
-  dsimp [expUpperRoundedQ]
-  split_ifs with hy
-  · have ht := (if_pos hy ▸ h.2)
-    convert! exp_neg_upper_of_lower_transcript ht.1 ht.2.1 ht.2.2 using 1 <;> simp
-  · exact (if_neg hy ▸ h.2).sound
-
 def UnitLogConditions (x : ℚ) : Prop :=
   0 < x ∧ LogTranscript 18 (logUnitZ x) (logUnitLowerQ x) (logUnitUpperQ x)
     (logUnitPowerLower x) (logUnitPowerUpper x)

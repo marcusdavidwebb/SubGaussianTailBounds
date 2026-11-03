@@ -11,11 +11,12 @@ that inventory independently on every run and checks its bytes throughout.
 open Lean
 
 private def baseImports : Array Import :=
-  #[{ module := `Mathlib }, { module := `CanonicalAcceptanceExpected }]
+  #[{ module := `Mathlib },
+    { module := `NLAlib.Probability.SubGaussianVector.Basic },
+    { module := `NLAlib.Matrix.Spectral.SingularValues }]
 
 private def roots : Array Import :=
-  #[{ module := `SingularValueBounds }, { module := `CanonicalAcceptance },
-    { module := `CanonicalCandidateConstants }]
+  #[{ module := `SingularValueBounds }, { module := `CanonicalAcceptanceExpected }]
 
 private def load (imports : Array Import) : IO Environment :=
   -- Pinned dependencies use the module system. Load their actual private

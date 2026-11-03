@@ -1,64 +1,40 @@
-# Instructions for this Lean repository
+# Working in this repository
 
 Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md) and
 [lean/README.md](lean/README.md) before changing proofs or verification.
+The repository-local instruction inventory is this root `AGENTS.md`.
 
-## Immutable canonical statement
+`MainTheoremStatement.lean` is the authoritative root statement. Import the actual
+file; do not shadow it. Preserve the two required propositions, arbitrary
+sample-space universes, all hypotheses, normalization, singular-value conventions,
+non-strict events and endpoints. Make any proposed statement or imported-definition
+change conspicuous for Marcus's review and prove equivalence when needed.
 
-- `MainTheoremStatement.lean` is the single authoritative statement. Preserve
-  its exact root location, name and bytes, including imports, comments,
-  definitions and universe parameters. Do not edit, delete, rename, relocate,
-  replace or shadow it. There is no exception for formatting, compatibility,
-  proof development or maintenance; future instruction files must repeat
-  this prohibition without granting an exception.
-- Put proofs and adapters in other modules that import the actual root file.
-  Report mathematical or compatibility problems precisely without changing
-  the canonical source or weakening the required theorem.
-- The observed SHA-256 is
-  `7c7a879e16d58ea8d9915d795f5f9bab73cbff125313d730fe7305470e417d27`.
-  Compare bytes before and after work. A digest detects drift; it is not a
-  mathematical proof. The README copy must match the full annotated source.
-- Inventory repository-local AI instructions, including hidden/editor files,
-  when introducing or changing instructions. The current inventory consists of
-  this root `AGENTS.md`.
+The required quartets are general `(3.84, 1.58, 2.35, 1.50)` and unit
+`(1.32, 1.12, 2.32, 1.42)`. Their authoritative exact rational definitions are in
+`lean/SingularValueBounds/Canonical/Constants.lean`. Generate documentation from
+those values. Internal estimates and proof methods may change; old algorithms,
+intermediate values, symbolic bounds and APIs are not permanent requirements.
 
-## Proofs and contributions
+All numerical premises must be proved in Lean. Do not use `sorry`, additional
+axioms, native-computation assumptions or trusted floating-point evidence.
+The only permitted foundational axioms are `propext`, `Classical.choice` and
+`Quot.sound`. Preserve exact-type and universe audits, independent kernel replay
+in the full check, maintained-source coverage and accurate checked-input reports.
+Review changes to the verifier explicitly.
 
-- Preserve both canonical baseline propositions, arbitrary sample-space
-  universes, hypotheses, MGF normalization, non-strict events and endpoints.
-- Either regime may be replaced at componentwise no larger constants than both
-  its baseline and current accepted quartet. Equality is allowed; preserve the
-  other regime and all accepted improvements. Marcus Webb decides acceptance.
-- The unit baseline quartet is `(1.32, 1.12, 2.32, 1.42)`. Its theorem and
-  componentwise comparison ceilings use these same constants. Subsequent
-  contributions must not increase a baseline ceiling or an accepted improvement.
-- Contributions are complete Lean sources, comparison proofs, concise explanation
-  and attribution, and a [CONTRIBUTIONS.md](CONTRIBUTIONS.md) entry. No separate
-  prose/PDF proof or external mathematical certificate is required.
-- Never weaken exact-type, universe, kernel, source-coverage or axiom checks,
-  introduce unsupported assumptions, or accept conditional results as complete.
-  Review verification-policy changes explicitly; candidate changes cannot replace
-  the accepted policy for their own assessment.
-- Follow the research and attribution rules in [CONTRIBUTING.md](CONTRIBUTING.md).
-  Preserve the human and model roles, responsibility, historical validation and
-  unresolved assessments in [docs/PROVENANCE.md](docs/PROVENANCE.md).
+Run `./lean/check-statements.sh` during development and `./lean/verify.sh` on the
+final relevant source state. CI is lightweight administration, not proof
+verification. Record cache conditions and concurrency when reporting performance.
+Keep toolchains, dependencies, caches, logs and compiled outputs outside this
+checkout and OneDrive, in this project's external workspace under `~/Lean/`.
+Reuse compatible central Elan and pinned packages first; deliberate migrations
+need a stated reason and semantic review. Preserve other projects' environments.
 
-## Verification and storage
+Inspect the working tree before editing and preserve unrelated changes. Keep
+documentation concise, credit substantive contributions in `CONTRIBUTIONS.md`,
+and preserve licensing and the recorded human/model roles and unresolved
+attribution assessments. Do not turn implementation choices into permanent policy.
 
-- Marcus Webb runs `./lean/verify.sh` locally before merging each PR. CI performs
-  administrative checks only; green CI is not proof verification. Agents must
-  not open a PR without explicit approval for that PR, merge it or enable auto-merge.
-- Run `./lean/verify.sh` after proof or verification changes, and
-  `python3 scripts/check_canonical_statement.py` after canonical-facing
-  documentation or setup changes. Report incomplete checks honestly.
-- Preserve independent kernel replay and the axiom allowlist: `propext`,
-  `Classical.choice`, `Quot.sound`. Python and hashes establish no mathematical
-  truth; finite proof obligations must be checked in Lean.
-- Reuse installed Lean and compatible locked dependencies. Inspect the toolchain,
-  Lake configuration and manifest before setup changes. Do not install, clone,
-  upgrade or replace dependencies during routine verification.
-- Keep toolchains, dependencies, caches and build outputs outside this checkout;
-  use this project's own external workspace under `~/Lean/`. Follow the central
-  Elan/package/cache locations documented in [lean/README.md](lean/README.md).
-- Preserve [LICENSE](LICENSE), [LICENSING.md](LICENSING.md) and third-party notices.
-  Do not invent paper publication metadata, verification dates or releases.
+Prepare changes locally. Obtain explicit approval before opening a specific PR;
+never merge or enable automatic merging on Marcus's behalf.

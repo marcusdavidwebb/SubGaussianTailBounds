@@ -1,3 +1,4 @@
+import SingularValueBounds.Canonical.Constants
 import SingularValueBounds.Main.Statement
 import SingularValueBounds.KL.Weighted.Gaussian
 import SingularValueBounds.KL.Certificates.Enclosures
@@ -28,12 +29,14 @@ structure TailConstants where
   delta_pos : 0 < delta
 
 def generalConstants : TailConstants :=
-  ⟨96 / 25, 79 / 50, 47 / 20, 3 / 2, by norm_num, by norm_num,
-    by norm_num, by norm_num⟩
+  ⟨SubGaussian.Constants.generalAlpha, SubGaussian.Constants.generalBeta,
+    SubGaussian.Constants.generalGamma, SubGaussian.Constants.generalDelta,
+    by norm_num, by norm_num, by norm_num, by norm_num⟩
 
 def oneConstants : TailConstants :=
-  ⟨33 / 25, 28 / 25, 58 / 25, Real.sqrt 2, by norm_num, by norm_num,
-    by norm_num, Real.sqrt_pos.2 (by norm_num)⟩
+  ⟨SubGaussian.Constants.unitAlpha, SubGaussian.Constants.unitBeta,
+    SubGaussian.Constants.unitGamma, SubGaussian.Constants.unitDelta,
+    by norm_num, by norm_num, by norm_num, by norm_num⟩
 
 def LowerThreshold (c : TailConstants) (m n : ℕ) (K t : ℝ) : ℝ :=
   Real.sqrt m - K * Real.sqrt n - c.alpha * K * logParameter K -
@@ -68,56 +71,6 @@ def TheoremKLOne {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
       iIndepFun X μ → (∀ i, CentredIsotropic μ (X i)) →
       (∀ i, SubGaussianMGF μ (X i) 1) →
       ∀ t : ℝ, 0 ≤ t → TailBounds μ X oneConstants 1 t
-
-theorem lower_threshold_mono {c d : TailConstants} {m n : ℕ} {K t : ℝ}
-    (hK : 1 ≤ K) (ht : 0 ≤ t) (ha : c.alpha ≤ d.alpha) (hb : c.beta ≤ d.beta) :
-    LowerThreshold d m n K t ≤ LowerThreshold c m n K t := by
-  have hK0 : 0 ≤ K := zero_le_one.trans hK
-  have hL : 0 ≤ logParameter K := zero_le_one.trans (one_le_logParameter hK)
-  have h1 := mul_le_mul_of_nonneg_right ha (mul_nonneg hK0 hL)
-  have h2 := mul_le_mul_of_nonneg_right hb
-    (mul_nonneg (mul_nonneg hK0 (Real.sqrt_nonneg (logParameter K))) ht)
-  dsimp [LowerThreshold]
-  nlinarith
-
-theorem upper_threshold_mono {c d : TailConstants} {m n : ℕ} {K t : ℝ}
-    (hK : 1 ≤ K) (ht : 0 ≤ t) (hg : c.gamma ≤ d.gamma) (hd : c.delta ≤ d.delta) :
-    UpperThreshold c m n K t ≤ UpperThreshold d m n K t := by
-  have hK0 : 0 ≤ K := zero_le_one.trans hK
-  have hL : 0 ≤ logParameter K := zero_le_one.trans (one_le_logParameter hK)
-  have h1 := mul_le_mul_of_nonneg_right hg (mul_nonneg hK0 hL)
-  have h2 := mul_le_mul_of_nonneg_right hd
-    (mul_nonneg (mul_nonneg hK0 (Real.sqrt_nonneg (logParameter K))) ht)
-  dsimp [UpperThreshold]
-  nlinarith
-
-theorem tail_bounds_mono {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
-    [IsProbabilityMeasure μ] {m n : ℕ} [NeZero n]
-    {X : Fin m → Ω → Fin n → ℝ} {c d : TailConstants} {K t : ℝ}
-    (h : TailBounds μ X c K t) (hK : 1 ≤ K) (ht : 0 ≤ t)
-    (ha : c.alpha ≤ d.alpha) (hb : c.beta ≤ d.beta)
-    (hg : c.gamma ≤ d.gamma) (hd : c.delta ≤ d.delta) : TailBounds μ X d K t := by
-  constructor
-  · apply le_trans (measureReal_mono ?_) h.1
-    intro ω hω
-    exact hω.trans (lower_threshold_mono hK ht ha hb)
-  · apply le_trans (measureReal_mono ?_) h.2
-    intro ω hω
-    exact (upper_threshold_mono hK ht hg hd).trans hω
-
-theorem one_constants_dominate_general :
-    oneConstants.alpha ≤ generalConstants.alpha ∧
-      oneConstants.beta ≤ generalConstants.beta ∧
-      oneConstants.gamma ≤ generalConstants.gamma ∧
-      oneConstants.delta ≤ generalConstants.delta := by
-  norm_num [oneConstants, generalConstants, Real.sqrt_le_iff]
-
-theorem general_at_one_of_endpoint {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
-    [IsProbabilityMeasure μ] {m n : ℕ} [NeZero n]
-    {X : Fin m → Ω → Fin n → ℝ} {t : ℝ} (ht : 0 ≤ t)
-    (h : TailBounds μ X oneConstants 1 t) : TailBounds μ X generalConstants 1 t := by
-  obtain ⟨ha, hb, hg, hd⟩ := one_constants_dominate_general
-  exact tail_bounds_mono h (by norm_num) ht ha hb hg hd
 
 section MatrixQuantities
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]

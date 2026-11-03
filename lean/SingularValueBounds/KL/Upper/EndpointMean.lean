@@ -67,7 +67,6 @@ theorem upperShift_endpoint_entropy_cost (h : EndpointMeanCertificateConditions)
     intro ω hω
     exact huv.trans_lt hω
   have hT0 : ∀u,0≤T u := fun u => measureReal_nonneg
-  have hT1 : ∀u,T u≤1 := fun u => measureReal_le_one
   have hInherit (u : ℝ) : T u≤μ.real {ω | u<(1-b)*upperShift R hR (X ω)} := by
     apply measureReal_mono _ (measure_ne_top μ _)
     intro ω hω
@@ -95,40 +94,22 @@ theorem upperShift_endpoint_entropy_cost (h : EndpointMeanCertificateConditions)
     let i : Fin 50 := ⟨j,hj⟩
     have hki : k≤(endpointSmallK i : ℝ) := by
       simpa only [endpointSmallK,i,Rat.cast_div,Rat.cast_add,Rat.cast_natCast,Rat.cast_one,Rat.cast_ofNat,Nat.cast_add,Nat.cast_one] using hr
-    have hmarg : ∀j∈Finset.Ico (endpointSmallCutoff i) 8000,∀v : Fin 23,
-        let q : ℚ := (endpointSmallQ v : ℚ)/100
-        (j : ℚ)/200*endpointSmallK i*(q-1)≤58/25 →
-        T ((j : ℝ)/200)≤Real.exp (-Real.log (1-(q : ℝ)*(endpointSmallK i : ℝ)^2)/
-          (2*(endpointSmallK i : ℝ)^2)-(q : ℝ)*((j : ℝ)/200)/2) := by
-      intro j hj v
-      dsimp only
-      intro hmarg
-      have hp := h.smallPrefactors i v
-      have hq0 : (0 : ℝ)<((endpointSmallQ v : ℚ)/100 : ℚ) := by
-        dsimp [endpointSmallQ]
+    have hmarg : ∀u q:ℝ,0≤u → 0<q → q≤2 → q*(endpointSmallK i:ℝ)^2<1 →
+        u*(endpointSmallK i:ℝ)*(q-1)≤58/25 →
+        T u≤Real.exp (-Real.log (1-q*(endpointSmallK i:ℝ)^2)/(2*(endpointSmallK i:ℝ)^2)-q*u/2) := by
+      intro u q hu hq0 hq2 hgap hmargin
+      have hki0 : (0:ℝ)<endpointSmallK i := by
+        unfold endpointSmallK
         push_cast
         positivity
-      have hq2 : (((endpointSmallQ v : ℚ)/100 : ℚ) : ℝ)≤2 := by
-        have hv : (v.val : ℝ)≤22 := by exact_mod_cast (by have := v.isLt; omega : v.val≤22)
-        dsimp [endpointSmallQ]
-        push_cast
-        linarith
-      have hki0 : (0 : ℝ)<endpointSmallK i := by exact_mod_cast hp.1
-      have hgap : (((endpointSmallQ v : ℚ)/100 : ℚ) : ℝ)*(endpointSmallK i : ℝ)^2<1 := by
-        have hh : (((endpointSmallQ v : ℚ)/100*endpointSmallK i^2 : ℚ) : ℝ)<1 := by exact_mod_cast hp.2.1
-        simpa using hh
-      have hmargin : (j : ℝ)/200*(endpointSmallK i : ℝ)*((((endpointSmallQ v : ℚ)/100 : ℚ) : ℝ)-1)≤58/25 := by
-        have hh : ((((j : ℚ)/200*endpointSmallK i*((endpointSmallQ v : ℚ)/100-1)) : ℚ) : ℝ)≤((58/25 : ℚ) : ℝ) := by exact_mod_cast hmarg
-        simpa using hh
-      have hmMax (j : ι) : hR.isHermitian.eigenvalues j≤(endpointSmallK i : ℝ)*frobenius R :=
+      have hmMax (j : ι) : hR.isHermitian.eigenvalues j≤(endpointSmallK i:ℝ)*frobenius R :=
         (hMax j).trans (mul_le_mul_of_nonneg_right hki hη.le)
-      have ht := upperShift_tail_margin hsg hm (by norm_num : (0 : ℝ)<1) hR
-        (w := (58/25 : ℝ)) (L := 1) (by norm_num) (by norm_num)
-        (by simpa using hcap) hb hq0 hq2 hki0 hgap hη hnormR hmMax
-        (by positivity : (0 : ℝ)≤(j : ℝ)/200) (by simpa using hmargin)
+      have ht := upperShift_tail_margin hsg hm (by norm_num : (0:ℝ)<1) hR
+        (w := (58/25:ℝ)) (L := 1) (by norm_num) (by norm_num)
+        (by simpa using hcap) hb hq0 hq2 hki0 hgap hη hnormR hmMax hu (by simpa using hmargin)
       exact (hInherit _).trans (by simpa only [one_pow,mul_one] using ht)
     have hD := (hEntropy _ (h.smallCutoff i).1).trans
-      (endpoint_mean_small_survival h i hT hT0 hT1 hTail hmarg)
+      (endpoint_mean_small_survival h i hT hT0 hTail hmarg)
     have hJ := upperComparisonMatrixLogdet_six hmajor 4 hR
       (by
         change a∈Icc (((0/1 : ℚ) : ℝ)) (((13/20 : ℚ) : ℝ))
@@ -142,38 +123,12 @@ theorem upperShift_endpoint_entropy_cost (h : EndpointMeanCertificateConditions)
     linarith
   · obtain ⟨ki,ai,hact,hbox⟩ := endpoint_mean_joint_cover h
       (show k∈Icc (1/4 : ℝ) 1 from ⟨le_of_not_ge hSmall,hk.2⟩) ha
-    have hJoint : ∀j∈Finset.Ico (endpointMeanCutoff ki ai) 8000,
-        T ((j : ℝ)/200)≤upperJointPrefactor ((endpointMeanRate ki ai j : ℝ)/100) a k*
-          Real.exp (-(((endpointMeanRate ki ai j : ℝ)/100)*((j : ℝ)/200)/2)) := by
-      intro j hj
-      let q : ℝ := (endpointMeanRate ki ai j : ℝ)/100
-      have hr := h.jointRates ki ai hact j hj
-      have hq : 0<q := by dsimp [q]; have := hr.1; positivity
-      have hq2 : q≤2 := by
-        dsimp [q]
-        have hh : (endpointMeanRate ki ai j : ℝ)≤200 := by exact_mod_cast hr.2.1
-        linarith
-      have hk0 : (0 : ℝ)≤(endpointMeanBox ki ai).top := hk.1.le.trans hbox.2.2
-      have hgapTop : q*((endpointMeanBox ki ai).top : ℝ)^2<1 := by
-        have hh : ((((endpointMeanRate ki ai j : ℚ)/100)*(endpointMeanBox ki ai).top^2 : ℚ) : ℝ)<1 := by exact_mod_cast hr.2.2.1
-        simpa [q] using hh
-      have hgap : q*k^2<1 :=
-        (mul_le_mul_of_nonneg_left (pow_le_pow_left₀ hk.1.le hbox.2.2 2) hq.le).trans_lt hgapTop
-      have hmarginTop : (j : ℝ)/200*((endpointMeanBox ki ai).top : ℝ)*(q-1)≤58/25 := by
-        have hh : ((((j : ℚ)/200*(endpointMeanBox ki ai).top*((endpointMeanRate ki ai j : ℚ)/100-1)) : ℚ) : ℝ)≤((58/25 : ℚ) : ℝ) := by exact_mod_cast hr.2.2.2
-        simpa [q] using hh
-      have hmargin : (j : ℝ)/200*k*(q-1)≤58/25 := by
-        by_cases hq1 : 1≤q
-        · have hh := mul_le_mul_of_nonneg_left hbox.2.2
-            (mul_nonneg (by positivity : (0 : ℝ)≤(j : ℝ)/200) (sub_nonneg.mpr hq1))
-          nlinarith
-        · have hh : (j : ℝ)/200*k*(q-1)≤0 := mul_nonpos_of_nonneg_of_nonpos
-            (mul_nonneg (by positivity) hk.1.le) (by linarith)
-          linarith
-      have ht := upperShift_tail_joint hsg hm (by norm_num : (0 : ℝ)<1) hR
-        (w := (58/25 : ℝ)) (L := 1) (by norm_num) (by norm_num)
-        (by simpa using hcap) hb hq hq2 hk.1 hgap hη hnormR hMax
-        (by positivity : (0 : ℝ)≤(j : ℝ)/200) (by simpa using hmargin)
+    have hJoint : ∀u q:ℝ,0≤u → 0<q → q≤2 → q*k^2<1 → u*k*(q-1)≤58/25 →
+        T u≤upperJointPrefactor q a k*Real.exp (-q*u/2) := by
+      intro u q hu hq hq2 hgap hmargin
+      have ht := upperShift_tail_joint hsg hm (by norm_num : (0:ℝ)<1) hR
+        (w := (58/25:ℝ)) (L := 1) (by norm_num) (by norm_num)
+        (by simpa using hcap) hb hq hq2 hk.1 hgap hη hnormR hMax hu (by simpa using hmargin)
       have he : upperJointCost q k (∑j,(hR.isHermitian.eigenvalues j/frobenius R)^3)=upperJointCost q k a := rfl
       rw [he] at ht
       apply (hInherit _).trans
@@ -181,7 +136,6 @@ theorem upperShift_endpoint_entropy_cost (h : EndpointMeanCertificateConditions)
       unfold upperJointPrefactor
       rw [←Real.exp_add]
       congr 1
-      dsimp [q]
       ring
     have hD := (hEntropy _ (h.jointCutoff ki ai hact).1).trans
       (endpoint_mean_joint_survival h ki ai hact hbox hT hT0 hTail hJoint)

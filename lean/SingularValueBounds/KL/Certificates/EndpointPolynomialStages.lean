@@ -33,4 +33,32 @@ theorem boxCertificate_of_tensorStages (n m : ℕ)
     conv_rhs => arg 2; ext l; rw [← Finset.sum_mul, hbx]
     exact hby i j
 
+/-- Computed rational stages for the small degree-(4,1) branch. -/
+noncomputable def rationalStageX {n m : ℕ}
+    (a : Fin (n+1) → Fin (m+1) → ℚ) (box : RationalBox)
+    (i : Fin (n+1)) (l : Fin (m+1)) : ℚ :=
+  ∑ k, a k l * (box.left^(k.val-i.val)*(k.val.choose i.val : ℚ)*
+    (box.right-box.left)^i.val)
+
+noncomputable def rationalStageY {n m : ℕ}
+    (a : Fin (n+1) → Fin (m+1) → ℚ) (box : RationalBox)
+    (i : Fin (n+1)) (j : Fin (m+1)) : ℚ :=
+  ∑ l, rationalStageX a box i l * (box.bottom^(l.val-j.val)*(l.val.choose j.val : ℚ)*
+    (box.top-box.bottom)^j.val)
+
+noncomputable def rationalStageBX {n m : ℕ}
+    (a : Fin (n+1) → Fin (m+1) → ℚ) (box : RationalBox)
+    (i : Fin (n+1)) (l : Fin (m+1)) : ℚ :=
+  ∑ k, rationalStageY a box k l * ((i.val.choose k.val : ℚ)/n.choose k.val)
+
+theorem boxCertificate_of_computedTensorStages (n m : ℕ)
+    (a : Fin (n+1) → Fin (m+1) → ℚ) (box : RationalBox)
+    (hx : box.left < box.right) (hy : box.bottom < box.top)
+    (hs : ∀ i : Fin (n+1), ∀ j : Fin (m+1), 0 ≤
+      ∑ l, rationalStageBX a box i l * ((j.val.choose l.val : ℚ)/m.choose l.val)) :
+    BoxCertificate (tensorOfFn n m a) n m box :=
+  boxCertificate_of_tensorStages n m a (rationalStageX a box) (rationalStageY a box)
+    (rationalStageBX a box) box hx hy (fun _ _ => rfl) (fun _ _ => rfl)
+    (fun _ _ => rfl) hs
+
 end SingularValueBounds.KL.Certificates
