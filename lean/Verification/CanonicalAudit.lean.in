@@ -34,39 +34,12 @@ private def checkAxioms (env : Environment) (targets : List Name) : IO Unit := d
 
 def main (args : List String) : IO Unit := do
   let args := match args with | "--" :: rest => rest | _ => args
-  unless args.isEmpty || args == ["--focused"] || args == ["--verified-module-replay"] do
+  unless args == ["--focused"] || args == ["--verified-module-replay"] do
     throw <| IO.userError "Unexpected canonical audit arguments"
   initSearchPath (← findSysroot)
-  let imported ← importModules #[@@CANDIDATE_IMPORTS@@] {}
+  let env ← importModules #[@@CANDIDATE_IMPORTS@@] {}
     (loadExts := false) (level := .private)
   let targets := [`SubGaussian.Current.general, `SubGaussian.Current.unit]
-  let env ← if args.isEmpty then do
-      -- Standalone diagnostics replay the entire proof closure. The complete
-      -- command instead replays all maintained modules once through the DAG.
-      let trusted ← importModules #[{ module := `Mathlib }, { module := `CanonicalAcceptanceExpected }]
-        {} (loadExts := false) (level := .private)
-      let fresh := imported.constants.fold (fun acc name info =>
-        if trusted.contains name then acc else acc.insert name info)
-        ({} : Std.HashMap Name ConstantInfo)
-      for (name, info) in fresh.toList do
-        if info.isAxiom && !info.isUnsafe then
-          throw <| IO.userError s!"Forbidden axiom declared by implementation: {name}"
-      let logicalRoots := fresh.toList.filterMap fun (name, info) =>
-        if !info.isUnsafe && !info.isPartial then some name else none
-      checkAxioms imported logicalRoots
-      let mut closure : Std.HashMap Name ConstantInfo := {}
-      let mut pending := targets
-      while !pending.isEmpty do
-        let name := pending.head!
-        pending := pending.tail!
-        if !closure.contains name then
-          if let some info := fresh[name]? then
-            closure := closure.insert name info
-            pending := info.getUsedConstantsAsSet.toList ++ pending
-            if let .inductInfo inductiveInfo := info then
-              pending := inductiveInfo.all ++ pending
-      trusted.replay closure
-    else pure imported
   for suffix in ["general", "unit"] do
     let name := ("SubGaussian.Current." ++ suffix).toName
     let some info := env.checked.get.find? name |

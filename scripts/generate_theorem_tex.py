@@ -21,7 +21,7 @@ from urllib.parse import urljoin, urlsplit
 sys.dont_write_bytecode = True
 
 _spec = importlib.util.spec_from_file_location(
-    "canonical_statement", Path(__file__).resolve().with_name("check_canonical_statement.py"))
+    "canonical_statement", Path(__file__).resolve().with_name("generate_lean_acceptance.py"))
 canonical = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(canonical)
 

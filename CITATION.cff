@@ -2,9 +2,9 @@ cff-version: 1.2.0
 message: >-
   Cite the accompanying paper as in preparation, by Marcus Webb and Morgan
   Lynch-Davies, until a public version is available. When using this collection,
-  also identify the actual commit or release used and relevant contribution history.
+  also identify the actual commit or release used and relevant attribution.
 type: software
-license: MIT
+license: Apache-2.0
 title: "SubGaussianTailBounds: Lean formalization of singular-value tail bounds"
 authors:
   - family-names: Webb
@@ -17,6 +17,6 @@ abstract: >-
   for the extreme singular values of sub-Gaussian matrices, by Marcus Webb and
   Morgan Lynch-Davies.
   The paper is in preparation and no public version is currently available.
-  Attribution and assistance are recorded in the contribution history and
+  Attribution and assistance are recorded in the contributions and
   provenance documentation. Identify the repository commit or release used
   independently of the paper's publication status.

@@ -84,8 +84,7 @@ Both scripts build as needed and check exact types, universes, the axiom allowli
 and input identity. The full check also checks maintained-source coverage.
 The focused check trusts compiled imports; the full check independently replays
 maintained project modules. CI runs lightweight administration only. See
-[setup](lean/README.md), [verification](docs/VERIFICATION.md) and the
-[contribution guide](CONTRIBUTING.md).
+[setup](lean/README.md) and the [contribution guide](CONTRIBUTING.md).
 
 The proof transfers one-row lower and upper estimates through the matrix barrier
 argument. Exact finite certificates supply its remaining scalar and polynomial
@@ -93,8 +92,7 @@ bounds. The canonical adapters prove correspondence of NLA-lib's isotropy,
 variance proxy `K²` and ordered singular values with the internal formulation,
 including zero singular values. [StatementEquivalence.lean](lean/SingularValueBounds/Canonical/StatementEquivalence.lean)
 also relates the current statement to the preceding expanded formulation at
-positive coefficients. The [performance record](docs/PERFORMANCE.md)
-describes the retained calculations, simplifications and measured checking costs.
+positive coefficients.
 
 ## Formal statement
 
@@ -165,4 +163,5 @@ auxiliary files. Generating documentation does not verify the proof.
 preceding work with Morgan Lynch-Davies, human/model roles, historical verification
 and unresolved attribution assessments. The paper remains in preparation; cite
 an exact repository revision using [CITATION.cff](CITATION.cff). Original work uses
-the [MIT License](LICENSE); [LICENSING.md](LICENSING.md) records third-party terms.
+the [Apache License 2.0](LICENSE); [LICENSING.md](LICENSING.md) records prior and
+third-party terms.

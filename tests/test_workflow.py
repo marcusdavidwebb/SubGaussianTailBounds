@@ -2,12 +2,14 @@
 import importlib.util
 import json
 import os
+import sys
 from pathlib import Path
 import tempfile
 import tomllib
 import unittest
 
 SOURCE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SOURCE))
 
 
 def load_script(name):

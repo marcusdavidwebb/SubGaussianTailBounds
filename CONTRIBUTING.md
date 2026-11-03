@@ -23,7 +23,7 @@ developing and `./lean/verify.sh` on the
 final relevant sources before merging. The latter includes independent kernel
 replay, exact types and universes, axiom audits and maintained-source coverage.
 Report incomplete checks honestly. Administrative CI does not establish proof
-verification. See [Lean setup](lean/README.md) and [verification](docs/VERIFICATION.md).
+verification. See [Lean setup](lean/README.md).
 The verification scripts use an external workspace; the standard root Lake build
 uses `.lake` in the checkout. Explain any deliberate dependency migration,
 inspect changed imported definitions and supply the needed equivalence proofs.
@@ -44,6 +44,6 @@ Preserve the human and model roles, responsibility, historical validation and
 unresolved assessments recorded in the contribution history. Model review is not
 independent human review; paper authorship is a separate decision.
 
-Contributions use the [MIT License](LICENSE) unless explicitly agreed otherwise.
+Contributions use the [Apache License 2.0](LICENSE) unless explicitly agreed otherwise.
 Preserve Marcus Webb's initial contribution covering both regimes, preceding work
 with Morgan Lynch-Davies, and third-party notices in [LICENSING.md](LICENSING.md).

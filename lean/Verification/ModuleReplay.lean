@@ -230,8 +230,7 @@ def main (args : List String) : IO Unit := do
   initSearchPath (← findSysroot)
   match args with
   | ["inventory"] => exportInventory
-  | ["plan"] => plan (inventory (← load baseImports))
   | ["plan", path] => plan (← readInventory path)
   | ["check", name] => checkModule name.toName (inventory (← load baseImports)) false
   | ["check-audit", name, path] => checkModule name.toName (← readModuleInventory path) true
-  | _ => throw <| IO.userError "Usage: ModuleReplay.lean inventory | plan [INVENTORY] | check MODULE | check-audit MODULE INVENTORY"
+  | _ => throw <| IO.userError "Usage: ModuleReplay.lean inventory | plan INVENTORY | check MODULE | check-audit MODULE INVENTORY"
