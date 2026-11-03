@@ -185,8 +185,7 @@ def render_row(index: int | None, row: list[Q]) -> tuple[str, int]:
     have hn := nodeValues ({len(nodes)-1} : Fin {len(nodes)})
     have hi : (nodes ({len(nodes)-1} : Fin {len(nodes)})).val = 120 := by decide +kernel
     have hv : values ({len(nodes)-1} : Fin {len(nodes)}) = {qstr(error(120))} := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
 '''+LOG_SIMP+'  decide +kernel\n\n'
@@ -196,7 +195,6 @@ def render_row(index: int | None, row: list[Q]) -> tuple[str, int]:
         text += f'  apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains {index})\n    (generalMeanRows_prefactorDomain {index}) {intervals}\n'
     else:
         text += f'  apply generalMeanNumericalConditions_of_margins _ (by unfold GeneralMeanBasicDomains; decide +kernel)\n    (by decide +kernel) {intervals}\n'
-    text += '  · simp only [List.forall_mem_cons]\n    decide +kernel\n'
     text += '  · simp only [GeneralMeanPartition]\n    decide +kernel\n'
     for projection in ['1','2']:
         text += '  · simp only [List.forall_mem_cons]\n'

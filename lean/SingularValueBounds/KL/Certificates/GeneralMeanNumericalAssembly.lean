@@ -1,4 +1,4 @@
-import SingularValueBounds.KL.Upper.GeneralMeanNumerics
+import SingularValueBounds.KL.Upper.GeneralMeanNumericalData
 import SingularValueBounds.KL.Certificates.ConcreteLog
 import SingularValueBounds.KL.Upper.GeneralMeanCellData
 
@@ -20,6 +20,17 @@ def GeneralMeanPartition : ℕ → List (Fin 121 × Fin 121) → Prop
   | start, [] => start = 120
   | start, p :: ps => p.1.val = start ∧ p.1 < p.2 ∧ GeneralMeanPartition p.2.val ps
 
+theorem GeneralMeanPartition.ordered {start : ℕ} {ps : List (Fin 121 × Fin 121)}
+    (h : GeneralMeanPartition start ps) {p : Fin 121 × Fin 121} (hp : p ∈ ps) :
+    p.1 < p.2 := by
+  induction ps generalizing start with
+  | nil => simp at hp
+  | cons q ps ih =>
+    rcases h with ⟨_, ho, ht⟩
+    rcases List.mem_cons.mp hp with rfl | hp
+    · exact ho
+    · exact ih ht hp
+
 theorem GeneralMeanPartition.covers {start : ℕ} {ps : List (Fin 121 × Fin 121)}
     (h : GeneralMeanPartition start ps) {j : ℕ} (hlo : start ≤ j) (hhi : j < 120) :
     ∃ p ∈ ps, p.1.val ≤ j ∧ j < p.2.val := by
@@ -33,7 +44,7 @@ theorem GeneralMeanPartition.covers {start : ℕ} {ps : List (Fin 121 × Fin 121
       exact ⟨q, List.mem_cons_of_mem _ hq, hqlo, hqhi⟩
 
 /-- The final grid node is the endpoint used by every numerical row. -/
-theorem generalMeanGrid_last : generalMeanGrid (120 : Fin 121).val = (4 : ℚ) := by
+theorem generalMeanGrid_last : generalMeanGrid 120 = (4 : ℚ) := by
   norm_num [generalMeanGrid]
 
 /-- The inexpensive scalar domains needed by every numerical row. -/
@@ -46,7 +57,6 @@ theorem generalMeanNumericalConditions_of_margins (r : GeneralMeanRow)
     (hb : GeneralMeanBasicDomains r)
     (hp : roundUpQ r.prefactorArgument < 26)
     (ps : List (Fin 121 × Fin 121))
-    (ho : ∀ p ∈ ps, p.1 < p.2)
     (hpartition : GeneralMeanPartition 0 ps)
     (hs : ∀ p ∈ ps, 0 < r.criticalRate p.1.val p.2.val)
     (hc : ∀ p ∈ ps,
@@ -78,7 +88,7 @@ theorem generalMeanNumericalConditions_of_margins (r : GeneralMeanRow)
     have hn := mul_nonneg (sub_nonneg.mpr (hcont hq1).2.le) (generalMeanGrid_pos j.val).le
     linarith
   · intro p hp
-    exact ⟨ho p hp, hs p hp,
+    exact ⟨hpartition.ordered hp, hs p hp,
       roundedLogConditions (mul_pos hc0 (generalMeanCriticalPoint_pos r p.1.val p.2.val)), hc p hp⟩
 
 theorem generalMeanRows_basicDomains (i : Fin 1330) : GeneralMeanBasicDomains (generalMeanRows i) := by

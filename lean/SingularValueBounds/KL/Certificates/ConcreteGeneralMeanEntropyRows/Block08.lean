@@ -56,8 +56,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (7913/200000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -68,8 +67,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 560) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 560)
     (generalMeanRows_prefactorDomain 560) [(0,6), (6,15), (15,24), (24,33), (33,49), (49,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -122,8 +119,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (36499/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -134,8 +130,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 561) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 561)
     (generalMeanRows_prefactorDomain 561) [(0,6), (6,15), (15,24), (24,33), (33,47), (47,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -188,8 +182,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (36527/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -200,8 +193,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 562) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 562)
     (generalMeanRows_prefactorDomain 562) [(0,7), (7,17), (17,28), (28,42), (42,93), (93,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -254,8 +245,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (33699/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -266,8 +256,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 563) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 563)
     (generalMeanRows_prefactorDomain 563) [(0,7), (7,17), (17,28), (28,40), (40,74), (74,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -320,8 +308,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (28541/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -332,8 +319,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 564) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 564)
     (generalMeanRows_prefactorDomain 564) [(0,6), (6,16), (16,26), (26,35), (35,48), (48,118), (118,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -386,8 +371,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (31011/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -398,8 +382,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 565) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 565)
     (generalMeanRows_prefactorDomain 565) [(0,8), (8,20), (20,33), (33,52), (52,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -452,8 +434,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (31119/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -464,8 +445,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 566) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 566)
     (generalMeanRows_prefactorDomain 566) [(0,7), (7,18), (18,30), (30,46), (46,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -518,8 +497,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (28641/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -530,8 +508,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 567) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 567)
     (generalMeanRows_prefactorDomain 567) [(0,9), (9,22), (22,36), (36,62), (62,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -584,8 +560,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (26431/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -596,8 +571,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 568) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 568)
     (generalMeanRows_prefactorDomain 568) [(0,8), (8,20), (20,32), (32,48), (48,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -650,8 +623,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (33671/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -662,8 +634,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 569) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 569)
     (generalMeanRows_prefactorDomain 569) [(0,6), (6,15), (15,24), (24,32), (32,42), (42,77), (77,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -716,8 +686,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (16893/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -728,8 +697,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 570) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 570)
     (generalMeanRows_prefactorDomain 570) [(0,5), (5,13), (13,22), (22,30), (30,39), (39,63), (63,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -782,8 +749,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (31091/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -794,8 +760,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 571) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 571)
     (generalMeanRows_prefactorDomain 571) [(0,7), (7,17), (17,27), (27,37), (37,57), (57,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -848,8 +812,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (28687/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -860,8 +823,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 572) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 572)
     (generalMeanRows_prefactorDomain 572) [(0,7), (7,17), (17,27), (27,36), (36,50), (50,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -914,8 +875,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (31171/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -926,8 +886,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 573) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 573)
     (generalMeanRows_prefactorDomain 573) [(0,5), (5,14), (14,23), (23,30), (30,37), (37,51), (51,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -980,8 +938,7 @@ private theorem finalMargin :
     have hn := nodeValues (8 : Fin 9)
     have hi : (nodes (8 : Fin 9)).val = 120 := by decide +kernel
     have hv : values (8 : Fin 9) = (28759/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -992,8 +949,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 574) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 574)
     (generalMeanRows_prefactorDomain 574) [(0,5), (5,14), (14,23), (23,30), (30,35), (35,41), (41,60), (60,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1046,8 +1001,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (14393/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1058,8 +1012,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 575) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 575)
     (generalMeanRows_prefactorDomain 575) [(0,5), (5,14), (14,24), (24,33), (33,44), (44,84), (84,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1112,8 +1064,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (13281/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1124,8 +1075,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 576) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 576)
     (generalMeanRows_prefactorDomain 576) [(0,5), (5,14), (14,24), (24,31), (31,38), (38,50), (50,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1178,8 +1127,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (14357/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1190,8 +1138,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 577) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 577)
     (generalMeanRows_prefactorDomain 577) [(0,7), (7,18), (18,29), (29,42), (42,79), (79,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1244,8 +1190,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (26497/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1256,8 +1201,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 578) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 578)
     (generalMeanRows_prefactorDomain 578) [(0,7), (7,17), (17,28), (28,38), (38,56), (56,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1310,8 +1253,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (6631/250000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1322,8 +1264,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 579) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 579)
     (generalMeanRows_prefactorDomain 579) [(0,7), (7,18), (18,30), (30,44), (44,91), (91,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1376,8 +1316,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (24479/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1388,8 +1327,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 580) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 580)
     (generalMeanRows_prefactorDomain 580) [(0,6), (6,17), (17,28), (28,39), (39,59), (59,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1442,8 +1379,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (24453/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1454,8 +1390,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 581) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 581)
     (generalMeanRows_prefactorDomain 581) [(0,6), (6,16), (16,26), (26,34), (34,42), (42,62), (62,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1508,8 +1442,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (12269/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1520,8 +1453,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 582) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 582)
     (generalMeanRows_prefactorDomain 582) [(0,5), (5,14), (14,24), (24,32), (32,40), (40,56), (56,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1574,8 +1505,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (22593/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1586,8 +1516,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 583) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 583)
     (generalMeanRows_prefactorDomain 583) [(0,6), (6,16), (16,26), (26,34), (34,42), (42,60), (60,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1640,8 +1568,7 @@ private theorem finalMargin :
     have hn := nodeValues (10 : Fin 11)
     have hi : (nodes (10 : Fin 11)).val = 120 := by decide +kernel
     have hv : values (10 : Fin 11) = (38527/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1652,8 +1579,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 584) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 584)
     (generalMeanRows_prefactorDomain 584) [(0,5), (5,12), (12,19), (19,24), (24,28), (28,30), (30,33), (33,38), (38,55), (55,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1706,8 +1631,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (21549/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1718,8 +1642,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 585) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 585)
     (generalMeanRows_prefactorDomain 585) [(0,6), (6,17), (17,28), (28,36), (36,45), (45,71), (71,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1772,8 +1694,7 @@ private theorem finalMargin :
     have hn := nodeValues (4 : Fin 5)
     have hi : (nodes (4 : Fin 5)).val = 120 := by decide +kernel
     have hv : values (4 : Fin 5) = (369/15625:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1784,8 +1705,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 586) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 586)
     (generalMeanRows_prefactorDomain 586) [(0,12), (12,30), (30,58), (58,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1838,8 +1757,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (36813/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1850,8 +1768,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 587) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 587)
     (generalMeanRows_prefactorDomain 587) [(0,7), (7,17), (17,27), (27,38), (38,66), (66,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1904,8 +1820,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (36937/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1916,8 +1831,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 588) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 588)
     (generalMeanRows_prefactorDomain 588) [(0,9), (9,22), (22,38), (38,80), (80,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -1970,8 +1883,7 @@ private theorem finalMargin :
     have hn := nodeValues (7 : Fin 8)
     have hi : (nodes (7 : Fin 8)).val = 120 := by decide +kernel
     have hv : values (7 : Fin 8) = (31249/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -1982,8 +1894,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 589) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 589)
     (generalMeanRows_prefactorDomain 589) [(0,6), (6,16), (16,26), (26,34), (34,46), (46,103), (103,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2036,8 +1946,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (34103/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2048,8 +1957,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 590) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 590)
     (generalMeanRows_prefactorDomain 590) [(0,8), (8,20), (20,34), (34,61), (61,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2102,8 +2009,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (1973/62500:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2114,8 +2020,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 591) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 591)
     (generalMeanRows_prefactorDomain 591) [(0,9), (9,23), (23,41), (41,97), (97,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2168,8 +2072,7 @@ private theorem finalMargin :
     have hn := nodeValues (3 : Fin 4)
     have hi : (nodes (3 : Fin 4)).val = 120 := by decide +kernel
     have hv : values (3 : Fin 4) = (25883/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2180,8 +2083,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 592) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 592)
     (generalMeanRows_prefactorDomain 592) [(0,16), (16,44), (44,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2234,8 +2135,7 @@ private theorem finalMargin :
     have hn := nodeValues (3 : Fin 4)
     have hi : (nodes (3 : Fin 4)).val = 120 := by decide +kernel
     have hv : values (3 : Fin 4) = (28369/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2246,8 +2146,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 593) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 593)
     (generalMeanRows_prefactorDomain 593) [(0,21), (21,67), (67,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2300,8 +2198,7 @@ private theorem finalMargin :
     have hn := nodeValues (4 : Fin 5)
     have hi : (nodes (4 : Fin 5)).val = 120 := by decide +kernel
     have hv : values (4 : Fin 5) = (34569/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2312,8 +2209,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 594) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 594)
     (generalMeanRows_prefactorDomain 594) [(0,14), (14,37), (37,111), (111,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2366,8 +2261,7 @@ private theorem finalMargin :
     have hn := nodeValues (3 : Fin 4)
     have hi : (nodes (3 : Fin 4)).val = 120 := by decide +kernel
     have hv : values (3 : Fin 4) = (37857/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2378,8 +2272,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 595) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 595)
     (generalMeanRows_prefactorDomain 595) [(0,18), (18,54), (54,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2432,8 +2324,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (31263/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2444,8 +2335,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 596) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 596)
     (generalMeanRows_prefactorDomain 596) [(0,7), (7,17), (17,27), (27,38), (38,61), (61,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2498,8 +2387,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (7829/250000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2510,8 +2398,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 597) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 597)
     (generalMeanRows_prefactorDomain 597) [(0,8), (8,20), (20,33), (33,53), (53,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2564,8 +2450,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (3601/125000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2576,8 +2461,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 598) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 598)
     (generalMeanRows_prefactorDomain 598) [(0,7), (7,18), (18,29), (29,40), (40,66), (66,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2630,8 +2513,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (28857/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2642,8 +2524,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 599) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 599)
     (generalMeanRows_prefactorDomain 599) [(0,8), (8,20), (20,32), (32,47), (47,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2696,8 +2576,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (7239/250000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2708,8 +2587,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 600) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 600)
     (generalMeanRows_prefactorDomain 600) [(0,8), (8,20), (20,33), (33,52), (52,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2762,8 +2639,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (28871/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2774,8 +2650,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 601) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 601)
     (generalMeanRows_prefactorDomain 601) [(0,7), (7,18), (18,29), (29,42), (42,80), (80,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2828,8 +2702,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (28921/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2840,8 +2713,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 602) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 602)
     (generalMeanRows_prefactorDomain 602) [(0,6), (6,16), (16,28), (28,41), (41,76), (76,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2894,8 +2765,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (1663/62500:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2906,8 +2776,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 603) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 603)
     (generalMeanRows_prefactorDomain 603) [(0,7), (7,18), (18,29), (29,41), (41,70), (70,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -2960,8 +2828,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (13327/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -2972,8 +2839,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 604) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 604)
     (generalMeanRows_prefactorDomain 604) [(0,7), (7,18), (18,30), (30,43), (43,81), (81,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3026,8 +2891,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (6149/250000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3038,8 +2902,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 605) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 605)
     (generalMeanRows_prefactorDomain 605) [(0,7), (7,18), (18,29), (29,39), (39,57), (57,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3092,8 +2954,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (2847/125000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3104,8 +2965,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 606) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 606)
     (generalMeanRows_prefactorDomain 606) [(0,8), (8,20), (20,32), (32,44), (44,78), (78,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3158,8 +3017,7 @@ private theorem finalMargin :
     have hn := nodeValues (11 : Fin 12)
     have hi : (nodes (11 : Fin 12)).val = 120 := by decide +kernel
     have hv : values (11 : Fin 12) = (11323/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3170,8 +3028,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 607) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 607)
     (generalMeanRows_prefactorDomain 607) [(0,4), (4,13), (13,23), (23,30), (30,34), (34,36), (36,38), (38,41), (41,49), (49,94), (94,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3224,8 +3080,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (24609/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3236,8 +3091,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 608) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 608)
     (generalMeanRows_prefactorDomain 608) [(0,7), (7,18), (18,30), (30,42), (42,72), (72,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3290,8 +3143,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (6163/250000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3302,8 +3154,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 609) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 609)
     (generalMeanRows_prefactorDomain 609) [(0,8), (8,21), (21,35), (35,56), (56,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3356,8 +3206,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (4537/200000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3368,8 +3217,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 610) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 610)
     (generalMeanRows_prefactorDomain 610) [(0,7), (7,18), (18,29), (29,39), (39,56), (56,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3422,8 +3269,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (909/40000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3434,8 +3280,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 611) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 611)
     (generalMeanRows_prefactorDomain 611) [(0,8), (8,20), (20,33), (33,48), (48,111), (111,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3488,8 +3332,7 @@ private theorem finalMargin :
     have hn := nodeValues (10 : Fin 11)
     have hi : (nodes (10 : Fin 11)).val = 120 := by decide +kernel
     have hv : values (10 : Fin 11) = (1423/40000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3500,8 +3343,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 612) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 612)
     (generalMeanRows_prefactorDomain 612) [(0,5), (5,13), (13,21), (21,26), (26,29), (29,32), (32,36), (36,45), (45,94), (94,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3554,8 +3395,7 @@ private theorem finalMargin :
     have hn := nodeValues (9 : Fin 10)
     have hi : (nodes (9 : Fin 10)).val = 120 := by decide +kernel
     have hv : values (9 : Fin 10) = (2231/62500:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3566,8 +3406,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 613) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 613)
     (generalMeanRows_prefactorDomain 613) [(0,4), (4,11), (11,19), (19,25), (25,29), (29,33), (33,39), (39,59), (59,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3620,8 +3458,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (5701/250000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3632,8 +3469,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 614) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 614)
     (generalMeanRows_prefactorDomain 614) [(0,8), (8,21), (21,35), (35,55), (55,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3686,8 +3521,7 @@ private theorem finalMargin :
     have hn := nodeValues (4 : Fin 5)
     have hi : (nodes (4 : Fin 5)).val = 120 := by decide +kernel
     have hv : values (4 : Fin 5) = (5721/250000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3698,8 +3532,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 615) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 615)
     (generalMeanRows_prefactorDomain 615) [(0,11), (11,27), (27,49), (49,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3752,8 +3584,7 @@ private theorem finalMargin :
     have hn := nodeValues (6 : Fin 7)
     have hi : (nodes (6 : Fin 7)).val = 120 := by decide +kernel
     have hv : values (6 : Fin 7) = (35817/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3764,8 +3595,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 616) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 616)
     (generalMeanRows_prefactorDomain 616) [(0,6), (6,15), (15,25), (25,35), (35,55), (55,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3818,8 +3647,7 @@ private theorem finalMargin :
     have hn := nodeValues (5 : Fin 6)
     have hi : (nodes (5 : Fin 6)).val = 120 := by decide +kernel
     have hv : values (5 : Fin 6) = (17969/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3830,8 +3658,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 617) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 617)
     (generalMeanRows_prefactorDomain 617) [(0,9), (9,22), (22,38), (38,81), (81,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3884,8 +3710,7 @@ private theorem finalMargin :
     have hn := nodeValues (4 : Fin 5)
     have hi : (nodes (4 : Fin 5)).val = 120 := by decide +kernel
     have hv : values (4 : Fin 5) = (24937/1000000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3896,8 +3721,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 618) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 618)
     (generalMeanRows_prefactorDomain 618) [(0,13), (13,33), (33,71), (71,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -3950,8 +3773,7 @@ private theorem finalMargin :
     have hn := nodeValues (3 : Fin 4)
     have hi : (nodes (3 : Fin 4)).val = 120 := by decide +kernel
     have hv : values (3 : Fin 4) = (14847/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -3962,8 +3784,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 619) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 619)
     (generalMeanRows_prefactorDomain 619) [(0,17), (17,49), (49,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4016,8 +3836,7 @@ private theorem finalMargin :
     have hn := nodeValues (4 : Fin 5)
     have hi : (nodes (4 : Fin 5)).val = 120 := by decide +kernel
     have hv : values (4 : Fin 5) = (16649/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4028,8 +3847,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 620) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 620)
     (generalMeanRows_prefactorDomain 620) [(0,11), (11,27), (27,50), (50,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4082,8 +3899,7 @@ private theorem finalMargin :
     have hn := nodeValues (3 : Fin 4)
     have hi : (nodes (3 : Fin 4)).val = 120 := by decide +kernel
     have hv : values (3 : Fin 4) = (9107/250000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4094,8 +3910,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 621) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 621)
     (generalMeanRows_prefactorDomain 621) [(0,15), (15,40), (40,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4148,8 +3962,7 @@ private theorem finalMargin :
     have hn := nodeValues (3 : Fin 4)
     have hi : (nodes (3 : Fin 4)).val = 120 := by decide +kernel
     have hv : values (3 : Fin 4) = (16927/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4160,8 +3973,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 622) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 622)
     (generalMeanRows_prefactorDomain 622) [(0,25), (25,104), (104,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4214,8 +4025,7 @@ private theorem finalMargin :
     have hn := nodeValues (2 : Fin 3)
     have hi : (nodes (2 : Fin 3)).val = 120 := by decide +kernel
     have hv : values (2 : Fin 3) = (4639/125000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4226,8 +4036,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 623) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 623)
     (generalMeanRows_prefactorDomain 623) [(0,30), (30,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4280,8 +4088,7 @@ private theorem finalMargin :
     have hn := nodeValues (3 : Fin 4)
     have hi : (nodes (3 : Fin 4)).val = 120 := by decide +kernel
     have hv : values (3 : Fin 4) = (13249/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4292,8 +4099,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 624) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 624)
     (generalMeanRows_prefactorDomain 624) [(0,23), (23,85), (85,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4346,8 +4151,7 @@ private theorem finalMargin :
     have hn := nodeValues (2 : Fin 3)
     have hi : (nodes (2 : Fin 3)).val = 120 := by decide +kernel
     have hv : values (2 : Fin 3) = (5809/200000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4358,8 +4162,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 625) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 625)
     (generalMeanRows_prefactorDomain 625) [(0,28), (28,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4412,8 +4214,7 @@ private theorem finalMargin :
     have hn := nodeValues (2 : Fin 3)
     have hi : (nodes (2 : Fin 3)).val = 120 := by decide +kernel
     have hv : values (2 : Fin 3) = (5657/200000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4424,8 +4225,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 626) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 626)
     (generalMeanRows_prefactorDomain 626) [(0,35), (35,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4478,8 +4277,7 @@ private theorem finalMargin :
     have hn := nodeValues (2 : Fin 3)
     have hi : (nodes (2 : Fin 3)).val = 120 := by decide +kernel
     have hv : values (2 : Fin 3) = (16909/500000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4490,8 +4288,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 627) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 627)
     (generalMeanRows_prefactorDomain 627) [(0,40), (40,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4544,8 +4340,7 @@ private theorem finalMargin :
     have hn := nodeValues (2 : Fin 3)
     have hi : (nodes (2 : Fin 3)).val = 120 := by decide +kernel
     have hv : values (2 : Fin 3) = (1733/50000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4556,8 +4351,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 628) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 628)
     (generalMeanRows_prefactorDomain 628) [(0,33), (33,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]
@@ -4610,8 +4403,7 @@ private theorem finalMargin :
     have hn := nodeValues (2 : Fin 3)
     have hi : (nodes (2 : Fin 3)).val = 120 := by decide +kernel
     have hv : values (2 : Fin 3) = (4137/100000:ℚ) := by decide +kernel
-    have hg : generalMeanGrid 120 = (4 : ℚ) := by norm_num [generalMeanGrid]
-    rw [hi, hv, hg] at hn
+    rw [hi, hv, generalMeanGrid_last] at hn
     exact hn
   rw [he]
   simp only [logRoundedQ, logPositiveRoundedQ, logReductionQ, natLog_two_eq_logTwoFuel]
@@ -4622,8 +4414,6 @@ private theorem finalMargin :
 theorem numerical : GeneralMeanNumericalConditions (generalMeanRows 629) := by
   apply generalMeanNumericalConditions_of_margins _ (generalMeanRows_basicDomains 629)
     (generalMeanRows_prefactorDomain 629) [(0,38), (38,120)]
-  · simp only [List.forall_mem_cons]
-    decide +kernel
   · simp only [GeneralMeanPartition]
     decide +kernel
   · simp only [List.forall_mem_cons]

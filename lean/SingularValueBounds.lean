@@ -277,6 +277,7 @@ import SingularValueBounds.KL.Upper.GeneralMeanExp
 import SingularValueBounds.KL.Upper.GeneralMeanInterpolation
 import SingularValueBounds.KL.Upper.GeneralMeanJointTail
 import SingularValueBounds.KL.Upper.GeneralMeanLaplace
+import SingularValueBounds.KL.Upper.GeneralMeanNumericalData
 import SingularValueBounds.KL.Upper.GeneralMeanNumerics
 import SingularValueBounds.KL.Upper.GeneralMeanOfRow
 import SingularValueBounds.KL.Upper.GeneralMeanRowData

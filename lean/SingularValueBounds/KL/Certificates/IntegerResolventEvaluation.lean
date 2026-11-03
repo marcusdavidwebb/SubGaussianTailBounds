@@ -1,4 +1,4 @@
-import SingularValueBounds.KL.Upper.GeneralMeanNumerics
+import SingularValueBounds.KL.Upper.GeneralMeanNumericalData
 import Mathlib.RingTheory.Coprime.Lemmas
 import Mathlib.Tactic.Ring
 import Mathlib.Tactic.FieldSimp

@@ -415,6 +415,24 @@ nine workflow tests all pass with real Lean/Lake enabled in the existing central
 workspace. Their log is
 `~/Lean/SubGaussianTailBounds/0ad011255e709e4d/statement-sync-20261103/workflow-tests.log`.
 
+## Structural numerical certificates — 3 November 2026
+
+At Marcus Webb's request, Codex and parallel agents profiled the current proof
+and removed a redundant finite-domain search from every general mean numerical
+row. A shared structural lemma derives interval order from the already checked
+partition. Generated endpoint proofs reuse the existing grid-endpoint lemma.
+The rational certificate interface now has its own smaller import closure;
+its declarations are moved unchanged. All 1,331 rows, 6,267 nodes, 4,936 intervals
+and exact numerical witnesses are retained.
+
+The root statement, required quartets, imported mathematical definitions and
+dependency revisions are unchanged. This is a computational simplification of
+the inherited proof, with no new bound, optimality, novelty or acceptance claim.
+Existing human/model attribution and unresolved assessments remain unchanged;
+model review is not independent human review. The actual starting implementation,
+rejected experiments, controlled measurements and completed validation are
+recorded in [PERFORMANCE.md](docs/PERFORMANCE.md).
+
 Future entries should identify the contributor, affected regime or implementation,
 explanation, attribution, supersession and actual commit/PR links when available.
 Preserve earlier substantive credit and follow [CONTRIBUTING.md](CONTRIBUTING.md).
