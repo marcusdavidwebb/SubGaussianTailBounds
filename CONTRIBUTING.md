@@ -17,12 +17,15 @@ goal. Proposed coefficient or statement changes require conspicuous human review
 Git records previous results. There is no accepted-constants snapshot or automated
 componentwise comparison protocol.
 
-Run `./lean/check-statements.sh` while developing and `./lean/verify.sh` on the
+`lake build SingularValueBounds.CheckStatements` compiles the two displayed
+claims using the root Lake project. Run `./lean/check-statements.sh` while
+developing and `./lean/verify.sh` on the
 final relevant sources before merging. The latter includes independent kernel
 replay, exact types and universes, axiom audits and maintained-source coverage.
 Report incomplete checks honestly. Administrative CI does not establish proof
 verification. See [Lean setup](lean/README.md) and [verification](docs/VERIFICATION.md).
-Keep dependencies and build outputs external; explain any deliberate migration,
+The verification scripts use an external workspace; the standard root Lake build
+uses `.lake` in the checkout. Explain any deliberate dependency migration,
 inspect changed imported definitions and supply the needed equivalence proofs.
 
 Submit complete Lean sources, a concise explanation, validation/performance

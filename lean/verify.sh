@@ -19,7 +19,7 @@ python3 "$source_root/scripts/configure_lean.py" --snapshot-file "$snapshot_file
 python3 "$source_root/scripts/generate_lean_acceptance.py" \
   --root "$source_root" --check-inputs-only
 work_dir="$("$source_dir/setup.sh")"
-toolchain="$(< "$source_dir/lean-toolchain")"
+toolchain="$(< "$source_root/lean-toolchain")"
 elan_bin="${SVB_ELAN_BIN:-$HOME/.elan/bin/elan}"
 if [[ ! -x "$elan_bin" ]]; then elan_bin="$(command -v elan)"; fi
 if $focused; then mode=focused; else mode=full; fi

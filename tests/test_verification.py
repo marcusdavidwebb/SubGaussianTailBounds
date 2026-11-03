@@ -30,7 +30,7 @@ class VerificationTests(unittest.TestCase):
         if cls.work.is_relative_to(SOURCE):
             raise ValueError("Lean test outputs must remain outside the checkout.")
         elan = os.environ.get("SVB_ELAN_BIN", str(Path.home() / ".elan/bin/elan"))
-        toolchain = (SOURCE / "lean/lean-toolchain").read_text().strip()
+        toolchain = (SOURCE / "lean-toolchain").read_text().strip()
         installed = subprocess.check_output([elan, "toolchain", "list"], text=True)
         if toolchain not in {line.split()[0] for line in installed.splitlines() if line.split()}:
             raise ValueError("Pinned Lean is missing; tests never download it.")

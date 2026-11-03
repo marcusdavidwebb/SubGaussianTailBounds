@@ -28,6 +28,8 @@ final relevant source state. CI is lightweight administration, not proof
 verification. Record cache conditions and concurrency when reporting performance.
 Keep toolchains, dependencies, caches, logs and compiled outputs outside this
 checkout and OneDrive, in this project's external workspace under `~/Lean/`.
+The conventional root Lake project permits other users to build with `.lake`
+in their own checkouts; on Marcus's machine use the external workspace instead.
 Reuse compatible central Elan and pinned packages first; deliberate migrations
 need a stated reason and semantic review. Preserve other projects' environments.
 

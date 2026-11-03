@@ -1,8 +1,10 @@
 """Source identity and coverage checks around the Lean verifier."""
 import importlib.util
+import json
 import os
 from pathlib import Path
 import tempfile
+import tomllib
 import unittest
 
 SOURCE = Path(__file__).resolve().parents[1]
@@ -27,7 +29,8 @@ class WorkflowTests(unittest.TestCase):
         (self.root / "scripts").mkdir(parents=True)
         self.lean = self.root / "lean"
         (self.lean / "SingularValueBounds").mkdir(parents=True)
-        for name in ("MainTheoremStatement.lean", "README.md", "lean/SingularValueBounds/Proof.lean"):
+        for name in ("MainTheoremStatement.lean", "README.md", "lakefile.toml",
+                     "lake-manifest.json", "lean-toolchain", "lean/SingularValueBounds/Proof.lean"):
             (self.root / name).write_text("original\n")
         self.umbrella = self.lean / "SingularValueBounds.lean"
         self.umbrella.write_text("import SingularValueBounds.Proof\n")
@@ -43,6 +46,33 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(source.stat().st_size, before.st_size)
         with self.assertRaisesRegex(SystemExit, "inputs changed during the run"):
             configure.verification_snapshot_file(self.root, self.snapshot, True)
+
+    def test_root_lake_files_are_in_verification_snapshot(self):
+        for name in ("lakefile.toml", "lake-manifest.json", "lean-toolchain"):
+            with self.subTest(name=name):
+                configure.verification_snapshot_file(self.root, self.snapshot, False)
+                (self.root / name).write_text("modified\n")
+                with self.assertRaisesRegex(SystemExit, "inputs changed during the run"):
+                    configure.verification_snapshot_file(self.root, self.snapshot, True)
+
+    def test_external_configuration_retains_root_pins_and_sources(self):
+        work = (self.root.parent / "workspace").resolve()
+        packages = work / ".lake" / "packages"
+        lock = configure.read_lock()
+        toolchain = configure.read_toolchain()
+        configure.configure(work, packages, lock, toolchain)
+        original = tomllib.loads((SOURCE / "lakefile.toml").read_text())
+        resolved = tomllib.loads((work / "lakefile.toml").read_text())
+        self.assertEqual(resolved["require"], original["require"])
+        self.assertEqual(resolved["defaultTargets"], original["defaultTargets"])
+        self.assertEqual(resolved["buildDir"], str(work / ".lake" / "build"))
+        self.assertEqual(resolved["packagesDir"], str(packages))
+        self.assertEqual({lib["name"]: lib["srcDir"] for lib in resolved["lean_lib"]},
+                         {"SingularValueBounds": str(SOURCE / "lean"),
+                          "MainTheoremStatement": str(SOURCE)})
+        resolved_lock = json.loads((work / "lake-manifest.json").read_text())
+        self.assertEqual(resolved_lock, dict(lock, packagesDir=str(packages)))
+        self.assertEqual((work / "lean-toolchain").read_text().strip(), toolchain)
 
     def test_report_must_cover_every_maintained_source(self):
         report = """AUDIT_MODULE SingularValueBounds.Proof

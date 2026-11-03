@@ -49,18 +49,43 @@ sample-space universe `u`. The eight exact rational coefficients come from
 [Constants.lean](lean/SingularValueBounds/Canonical/Constants.lean); the table above
 and the TeX/PDF are generated presentations of those values.
 
-With the pinned Lean **4.33.1** and existing central dependencies, run:
+To compile the two displayed claims with Lake, install [Elan](https://github.com/leanprover/elan),
+then run:
+
+```sh
+git clone https://github.com/marcusdavidwebb/SubGaussianTailBounds.git
+cd SubGaussianTailBounds
+lake exe cache get
+lake build
+```
+
+Elan selects the pinned Lean **4.33.1** toolchain; Lake fetches the pinned
+dependencies and matching Mathlib artifacts. The standard workflow stores
+dependencies and build outputs in the checkout's `.lake` directory. See
+[setup](lean/README.md) for prerequisites and the external-workspace alternative.
+
+[CheckStatements.lean](lean/SingularValueBounds/CheckStatements.lean) displays
+the two exact claims and applies their proofs. Its proposition definitions are in
+the actual root statement linked above. The default Lake target is this module;
+it can also be selected explicitly with `lake build SingularValueBounds.CheckStatements`.
+Lake may reuse compiled imports and project
+artifacts; a build alone does not perform the separate audits below.
+Lake's own scheduler can use substantial memory. The focused audit below uses a
+bounded build scheduler, with its own external setup described in the setup guide.
+
+From the repository root, the stronger checks are:
 
 ```sh
 ./lean/check-statements.sh  # build and audit the two exact propositions
 ./lean/verify.sh            # also independently replay every maintained module
 ```
 
-Setup and builds are internal steps. The full check includes exact types and
-universes, the axiom allowlist, maintained-source coverage and input identity.
-The focused check trusts compiled imports; it does not replace independent
-replay. CI runs lightweight administration only. See [setup](lean/README.md),
-[verification](docs/VERIFICATION.md) and [contribution guide](CONTRIBUTING.md).
+Both scripts build as needed and check exact types, universes, the axiom allowlist
+and input identity. The full check also checks maintained-source coverage.
+The focused check trusts compiled imports; the full check independently replays
+maintained project modules. CI runs lightweight administration only. See
+[setup](lean/README.md), [verification](docs/VERIFICATION.md) and the
+[contribution guide](CONTRIBUTING.md).
 
 The proof transfers one-row lower and upper estimates through the matrix barrier
 argument. Exact finite certificates supply its remaining scalar and polynomial

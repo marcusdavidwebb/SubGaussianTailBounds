@@ -1,6 +1,6 @@
 {
   "version": "1.2.0",
-  "packagesDir": "@SVB_PACKAGES_DIR@",
+  "packagesDir": ".lake/packages",
   "packages": [
     {
       "url": "https://github.com/leanprover-community/mathlib4",

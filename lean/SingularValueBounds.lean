@@ -8,6 +8,7 @@ import SingularValueBounds.Canonical.RowBridge
 import SingularValueBounds.Canonical.StatementEquivalence
 import SingularValueBounds.Canonical.TailEquivalence
 import SingularValueBounds.Canonical.Unit
+import SingularValueBounds.CheckStatements
 import SingularValueBounds.Concentration.IndependentAveraging
 import SingularValueBounds.Core.Assumptions
 import SingularValueBounds.Core.Constants

@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import tomllib
 
 
 PUBLIC_ROOT = Path(__file__).resolve().parents[1]
@@ -74,10 +75,15 @@ def check_ownership(work: Path) -> None:
              for name in ("lakefile.toml", "lakefile.lean", "lake-manifest.json", ".lake/build")):
         fail(f"Refusing to replace an unrecognised Lean workspace: {work}\n"
              "Select an unused external SVB_WORK_DIR.")
-    for name in ("SingularValueBounds", "SingularValueBounds.lean", "lean-toolchain"):
+    for name in ("SingularValueBounds", "SingularValueBounds.lean"):
         entry = work / name
         if entry.is_symlink() and entry.resolve() != SOURCE / name:
             fail(f"Existing central source link points to another checkout: {entry}")
+    toolchain = work / "lean-toolchain"
+    if toolchain.is_symlink() and toolchain.resolve() not in {
+        SOURCE / "lean-toolchain", PUBLIC_ROOT / "lean-toolchain"
+    }:
+        fail(f"Existing central toolchain link points to another checkout: {toolchain}")
 
 
 def elan_binary() -> str:
@@ -99,19 +105,48 @@ def toolchain_ready(elan: str, toolchain: str) -> bool:
 
 def check_dependencies(packages: Path, lock: dict) -> None:
     for package in lock["packages"]:
-        path = packages / package["name"]
-        if not (path / ".git").exists():
-            fail(f"Missing existing pinned dependency: {path}\n"
-                 "Set SVB_PACKAGES_DIR to the compatible existing package directory.\n"
-                 "No installation or dependency download was attempted.")
-        actual = command(["git", "-C", str(path), "rev-parse", "HEAD"])
-        if actual != package["rev"]:
-            fail(f"Pinned dependency mismatch for {package['name']}: expected {package['rev']}, got {actual}.\n"
-                 "No checkout, update, or replacement was attempted.")
-        dirty = command(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=no"])
-        if dirty:
-            fail(f"Pinned dependency has tracked local changes: {path}\n"
-                 "Review those changes before verification; nothing was reset.")
+        check_dependency(packages, package)
+
+
+def check_dependency(packages: Path, package: dict) -> None:
+    path = packages / package["name"]
+    if not (path / ".git").exists():
+        fail(f"Missing existing pinned dependency: {path}\n"
+             "Set SVB_PACKAGES_DIR to the compatible existing package directory.\n"
+             "No installation or dependency download was attempted.")
+    actual = command(["git", "-C", str(path), "rev-parse", "HEAD"])
+    if actual != package["rev"]:
+        fail(f"Pinned dependency mismatch for {package['name']}: expected {package['rev']}, got {actual}.\n"
+             "No checkout, update, or replacement was attempted.")
+    dirty = command(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=no"])
+    if dirty:
+        fail(f"Pinned dependency has tracked local changes: {path}\n"
+             "Review those changes before verification; nothing was reset.")
+
+
+def read_lock() -> dict:
+    lock = json.loads((PUBLIC_ROOT / "lake-manifest.json").read_text())
+    if lock.get("packagesDir") != ".lake/packages":
+        fail("The source dependency lock must use Lake's default package directory.")
+    names = set()
+    for package in lock["packages"]:
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", package["name"]):
+            fail("Invalid package name in dependency lock.")
+        if package["name"] in names:
+            fail(f"Duplicate package name in dependency lock: {package['name']}.")
+        names.add(package["name"])
+        if not re.fullmatch(r"[0-9a-f]{40}", package["rev"]):
+            fail(f"Dependency {package['name']} is not locked to a full commit digest.")
+        if not package["url"].startswith("https://github.com/"):
+            fail("Only explicit HTTPS GitHub dependency URLs are supported.")
+    return lock
+
+
+def read_toolchain() -> str:
+    toolchain = (PUBLIC_ROOT / "lean-toolchain").read_text().strip()
+    if toolchain != PINNED_TOOLCHAIN:
+        fail(f"This verification setup requires the pinned toolchain {PINNED_TOOLCHAIN}.")
+    return toolchain
 
 
 def verification_source_snapshot(root: Path) -> dict:
@@ -120,7 +155,8 @@ def verification_source_snapshot(root: Path) -> dict:
         fail(f"Cannot enumerate verification sources: {error}")
 
     entries = {}
-    paths = [root / "MainTheoremStatement.lean", root / "README.md"]
+    paths = [root / name for name in ("MainTheoremStatement.lean", "README.md",
+                                      "lakefile.toml", "lake-manifest.json", "lean-toolchain")]
     for directory in (root / "lean", root / "scripts"):
         if directory.is_symlink():
             fail(f"Source directory is a symlink: {directory}")
@@ -132,11 +168,8 @@ def verification_source_snapshot(root: Path) -> dict:
                     fail(f"Source directory is a symlink: {Path(current) / name}")
             for name in sorted(files):
                 path = Path(current) / name
-                relative = path.relative_to(root)
                 if (directory.name == "lean" and
-                    (name.endswith((".lean", ".lean.in", ".sh")) or
-                     relative.as_posix() in {"lean/lean-toolchain", "lean/lakefile.toml",
-                                             "lean/lake-manifest.json"})) or (
+                    name.endswith((".lean", ".lean.in", ".sh"))) or (
                     directory.name == "scripts" and name.endswith(".py")):
                     paths.append(path)
     for path in sorted(paths):
@@ -164,8 +197,10 @@ def verification_snapshot_file(root: Path, snapshot: Path, check: bool) -> None:
 
 def write_config_file(path: Path, contents: str) -> None:
     if path.is_symlink():
-        expected = SOURCE / path.name
-        if path.resolve() != expected:
+        expected = {SOURCE / path.name}
+        if path.name == "lean-toolchain":
+            expected.add(PUBLIC_ROOT / path.name)
+        if path.resolve() not in expected:
             fail(f"Refusing to replace an unrelated configuration link: {path}")
         # Atomic replacement changes only the central link, never its source target.
     elif path.is_file() and path.read_text() == contents:
@@ -182,23 +217,22 @@ def write_config_file(path: Path, contents: str) -> None:
 def configure(work: Path, packages: Path, lock: dict, toolchain: str) -> None:
     work.mkdir(parents=True, exist_ok=True)
     build = external_path(work / ".lake" / "build", "Project build directory")
-    template = (SOURCE / "lakefile.toml").read_text()
-    for key, value in {
-        "@SVB_BUILD_DIR@": str(build),
-        "@SVB_PACKAGES_DIR@": str(packages),
-        "@SVB_SOURCE_DIR@": str(SOURCE),
-        "@SVB_ROOT_DIR@": str(PUBLIC_ROOT),
-    }.items():
-        token = json.dumps(key)
-        if template.count(token) != 1:
-            fail(f"Missing or duplicate portable Lake configuration token: {key}")
-        template = template.replace(token, json.dumps(value))
+    template = (PUBLIC_ROOT / "lakefile.toml").read_text()
+    config = tomllib.loads(template)
+    if "buildDir" in config or "packagesDir" in config:
+        fail("The source Lake project must use the default build and package directories.")
+    for source, value in (("lean", SOURCE), (".", PUBLIC_ROOT)):
+        original = f"srcDir = {json.dumps(source)}"
+        if template.count(original) != 1:
+            fail(f"Missing or duplicate Lake source directory: {original}")
+        template = template.replace(original, f"srcDir = {json.dumps(str(value))}")
+    template = (f"buildDir = {json.dumps(str(build))}\n"
+                f"packagesDir = {json.dumps(str(packages))}\n" + template)
     resolved_lock = dict(lock, packagesDir=str(packages))
     write_config_file(work / "lakefile.toml", template)
     write_config_file(work / "lake-manifest.json", json.dumps(resolved_lock, indent=2) + "\n")
     toolchain_file = work / "lean-toolchain"
-    if not toolchain_file.is_symlink():
-        write_config_file(toolchain_file, toolchain + "\n")
+    write_config_file(toolchain_file, toolchain + "\n")
     write_config_file(work / ".svb-source.json", json.dumps({"source": str(SOURCE)}, indent=2) + "\n")
 
 
@@ -226,19 +260,8 @@ def main() -> None:
                      else Path.home() / ".cache/mathlib")
     cache = external_path(os.environ.get("MATHLIB_CACHE_DIR", str(cache_default)), "MATHLIB_CACHE_DIR")
     os.environ["MATHLIB_CACHE_DIR"] = str(cache)
-    lock = json.loads((SOURCE / "lake-manifest.json").read_text())
-    if lock.get("packagesDir") != "@SVB_PACKAGES_DIR@":
-        fail("The source dependency lock must retain its portable packagesDir token.")
-    for package in lock["packages"]:
-        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", package["name"]):
-            fail("Invalid package name in dependency lock.")
-        if not re.fullmatch(r"[0-9a-f]{40}", package["rev"]):
-            fail(f"Dependency {package['name']} is not locked to a full commit digest.")
-        if not package["url"].startswith("https://github.com/"):
-            fail("Only explicit HTTPS GitHub dependency URLs are supported.")
-    toolchain = (SOURCE / "lean-toolchain").read_text().strip()
-    if toolchain != PINNED_TOOLCHAIN:
-        fail(f"This verification setup requires the pinned toolchain {PINNED_TOOLCHAIN}.")
+    lock = read_lock()
+    toolchain = read_toolchain()
     elan = elan_binary()
     if not toolchain_ready(elan, toolchain):
         fail(f"Required existing toolchain is unavailable: {toolchain}\nNo download was attempted.")

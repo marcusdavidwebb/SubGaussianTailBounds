@@ -433,6 +433,29 @@ model review is not independent human review. The actual starting implementation
 rejected experiments, controlled measurements and completed validation are
 recorded in [PERFORMANCE.md](docs/PERFORMANCE.md).
 
+## Lake statement-checking interface — 3 November 2026
+
+At Marcus Webb's request, Codex and parallel agents added a readable Lake target
+showing both exact, universe-polymorphic propositions and applying the existing
+canonical proofs. An intermediate version used an opt-in bootstrap in an external
+workspace. Its direct Lake target, focused check, full verification and 14 workflow
+tests passed with the existing pinned toolchain and dependency artifacts. The full
+run replayed 341 modules with 24 build and replay workers. That bootstrap was tested
+offline and against the existing package workspace; a fresh network installation
+was not tested.
+
+Marcus then requested a conventional root Lake project, with `lake build` defaulting
+to the visible statement target. Codex and parallel agents replaced the intermediate
+bootstrap with root Lake configuration and retained the reuse-only external setup
+for local verification. The root statement, constants, imported definitions and
+dependency pins are unchanged. This is an accessibility change, with no new
+mathematical result; earlier human/model roles and unresolved attribution
+assessments remain unchanged. At Marcus's request, the current source state has not
+been fully built or independently replayed; the intermediate checks above do not
+verify this later configuration. A no-build Lake check and the focused type,
+universe and axiom audit passed using existing project and dependency artifacts,
+with one build worker. Offline configuration and source-identity tests also passed.
+
 Future entries should identify the contributor, affected regime or implementation,
 explanation, attribution, supersession and actual commit/PR links when available.
 Preserve earlier substantive credit and follow [CONTRIBUTING.md](CONTRIBUTING.md).

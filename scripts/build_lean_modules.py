@@ -239,7 +239,7 @@ def main() -> None:
         raise SystemExit("Build outputs and logs must be outside the source checkout.")
     if args.jobs < 1:
         raise SystemExit("SVB_BUILD_JOBS must be positive.")
-    toolchain = (root / "lean/lean-toolchain").read_text().strip()
+    toolchain = (root / "lean-toolchain").read_text().strip()
     installed = subprocess.check_output([args.elan, "toolchain", "list"], text=True)
     if toolchain not in [line.split()[0] for line in installed.splitlines() if line.strip()]:
         raise SystemExit(f"Pinned toolchain is not installed: {toolchain}; no download attempted.")
